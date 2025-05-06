@@ -1,4 +1,4 @@
-# ai-copy-trading
+# NODO AI Frontend
 
 
 
