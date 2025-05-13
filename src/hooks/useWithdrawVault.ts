@@ -11,6 +11,7 @@ import { RATE_DENOMINATOR } from "@/config/vault-config";
 import { getDecimalAmount, getBalanceAmount } from "@/lib/number";
 import LpType from "@/types/lp.type";
 import DataClaimType from "@/types/data-claim.types.d";
+import BigNumber from "bignumber.js";
 
 const network = import.meta.env.VITE_SUI_NETWORK;
 
@@ -138,10 +139,33 @@ export const useWithdrawVault = () => {
     configVault: any
   ): Promise<DataClaimType> => {
     const res = await getRequestClaim(senderAddress, configLp, configVault);
-    if (res && res?.length) {
-      return res[0];
+    if (!res || !res?.length) {
+      return null;
     }
-    return null;
+    const req_availabe = res?.filter((el) => el.isClaim);
+    if (!req_availabe?.length) return res[0];
+
+    // only claim all request
+    const default_req = {
+      withdrawAmount: 0,
+      receiveAmount: 0,
+      feeAmount: 0,
+    };
+    const grouped = req_availabe.reduce((acc, item) => {
+      const _acc = { ...item, ...acc };
+      _acc.withdrawAmount = BigNumber(_acc.withdrawAmount)
+        .plus(item.withdrawAmount)
+        .toNumber();
+      _acc.receiveAmount = BigNumber(_acc.receiveAmount)
+        .plus(item.receiveAmount)
+        .toNumber();
+      _acc.feeAmount = BigNumber(_acc.feeAmount)
+        .plus(item.feeAmount)
+        .toNumber();
+
+      return _acc;
+    }, default_req) as DataClaimType;
+    return grouped;
   };
 
   /**

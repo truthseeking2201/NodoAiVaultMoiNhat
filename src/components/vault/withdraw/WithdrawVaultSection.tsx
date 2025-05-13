@@ -63,20 +63,16 @@ export default function WithdrawVaultSection() {
     }
   };
 
-  const onSuccess = useCallback(() => {
+  const onSuccess = () => {
     initDataClaim();
-    initBalance();
     refreshBalance();
-  }, []);
+  };
 
   /**
    * LIFECYCLES
    */
   useEffect(() => {
-    if (count.current !== address && address) {
-      initDataClaim();
-    }
-    count.current = address;
+    initDataClaim();
   }, [address, lpData, configVault]);
 
   useEffect(() => {
