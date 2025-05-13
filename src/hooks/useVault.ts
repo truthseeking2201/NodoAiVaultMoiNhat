@@ -37,6 +37,7 @@ export const useGetVaultManagement = () => {
   return useQuery({
     queryKey: ["vault-management-data"],
     queryFn: () => getVaultConfig(vaultId),
+    refetchInterval: 30000,
   }) as UseQueryResult<
     {
       apr: number;

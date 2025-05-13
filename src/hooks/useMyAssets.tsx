@@ -113,13 +113,13 @@ export const useMyAssets = () => {
         (asset) => asset.coin_type === coin.coinType
       );
       if (existingAsset) {
-        existingAsset.balance += roundDownBalance(balance);
+        existingAsset.balance += balance;
         existingAsset.raw_balance += rawBalance;
       } else {
         acc.push({
           coin_object_id: coin.coinObjectId,
           coin_type: coin.coinType,
-          balance: roundDownBalance(balance),
+          balance,
           raw_balance: rawBalance,
           image_url: COIN_CONFIG[coin.coinType]?.image_url,
           decimals: decimals,
@@ -132,7 +132,10 @@ export const useMyAssets = () => {
     }, [] as UserCoinAsset[]) || [];
 
   return {
-    assets,
+    assets: assets.map((asset) => ({
+      ...asset,
+      balance: roundDownBalance(asset.balance),
+    })),
     isLoading,
     refreshBalance: refetch,
   };

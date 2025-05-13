@@ -23,15 +23,15 @@ export const formatAmount = ({
   precision?: number;
   stripZero?: boolean;
 }) => {
-  let res = amount.toFixed(precision);
-
-  if (stripZero) {
-    res = res.replace(/\.?0+$/, "");
-  }
-
-  return new Intl.NumberFormat(undefined, {
+  let formatted = new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: "USD",
     minimumFractionDigits: precision,
   }).format(amount);
+
+  if (stripZero) {
+    formatted = formatted.replace(/\.?0+$/, "");
+  }
+
+  return formatted;
 };
