@@ -1,4 +1,5 @@
 import { COIN_TYPES_CONFIG } from "@/config";
+import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { UserCoinAsset } from "@/types/coin.types";
 import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
 import { SuiClient } from "@mysten/sui/client";
@@ -83,8 +84,8 @@ export const useMyAssets = () => {
     queryKey: ["coinObjects"],
     queryFn: fetchCoinObjects,
     enabled: !!account?.address,
-    staleTime: 1000 * 10 * 6, // 60 seconds
-    refetchInterval: 1000 * 10 * 6, // 60 seconds
+    staleTime: REFETCH_VAULT_DATA_INTERVAL,
+    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
   });
 
   const coinMetadata = useGetCoinsMetadata();

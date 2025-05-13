@@ -1,0 +1,1 @@
+export const REFETCH_VAULT_DATA_INTERVAL = 60000;

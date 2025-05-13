@@ -1,11 +1,12 @@
 import { getVaultConfig } from "@/apis/vault";
+import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { PROD_VAULT_ID, VAULT_CONFIG } from "@/config/vault-config";
 import { VaultConfig } from "@/types/vault-config.types";
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 
 export const useGetVaultConfig = (vaultId?: string) => {
-  const { data, isLoading } = useSuiClientQuery(
+  const { data, isLoading, refetch } = useSuiClientQuery(
     "getObject",
     {
       id: vaultId || VAULT_CONFIG.VAULT_ID,
@@ -16,7 +17,8 @@ export const useGetVaultConfig = (vaultId?: string) => {
       },
     },
     {
-      refetchInterval: 60000,
+      staleTime: REFETCH_VAULT_DATA_INTERVAL,
+      refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
     }
   );
 
@@ -26,6 +28,7 @@ export const useGetVaultConfig = (vaultId?: string) => {
   return {
     vaultConfig: content?.fields,
     isLoading,
+    refetch,
   };
 };
 
@@ -35,7 +38,8 @@ export const useGetVaultManagement = () => {
   return useQuery({
     queryKey: ["vault-management-data"],
     queryFn: () => getVaultConfig(vaultId),
-    refetchInterval: 60000,
+    staleTime: REFETCH_VAULT_DATA_INTERVAL,
+    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
   }) as UseQueryResult<
     {
       apr: number;
