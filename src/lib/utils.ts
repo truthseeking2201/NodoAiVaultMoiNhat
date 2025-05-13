@@ -24,8 +24,7 @@ export const formatAmount = ({
   stripZero?: boolean;
 }) => {
   let formatted = new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
+    style: "decimal",
     minimumFractionDigits: precision,
   }).format(amount);
 

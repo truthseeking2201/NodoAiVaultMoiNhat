@@ -5,6 +5,8 @@ type VaultConfig = {
 };
 
 export const RATE_DENOMINATOR = 1000000;
+export const PROD_VAULT_ID =
+  "0x64296a09c8babdfc9e82bbc5223211334b67ac82119393c34345ba5c336a9b05";
 
 const VAULT_CONFIG_BY_ENV = {
   dev: {
@@ -20,8 +22,7 @@ const VAULT_CONFIG_BY_ENV = {
       "0x8404e665609111801ec4231c748faf586da4e740d809c0c43ba80a5bd61f6d0a",
     VAULT_CONFIG_ID:
       "0x67cfe4a6623bd60a0908b17125cbc967975fdbfde64d81b4391bcd58680cc093",
-    VAULT_ID:
-      "0x64296a09c8babdfc9e82bbc5223211334b67ac82119393c34345ba5c336a9b05",
+    VAULT_ID: PROD_VAULT_ID,
   },
 };
 

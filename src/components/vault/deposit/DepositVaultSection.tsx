@@ -35,7 +35,8 @@ export default function DepositVaultSection() {
   const [depositSuccessData, setDepositSuccessData] =
     useState<DepositSuccessData>(null);
 
-  const { data: vaultManagement } = useGetVaultManagement();
+  const { data: vaultManagement, isLoading: isLoadingVaultManagement } =
+    useGetVaultManagement();
   const apr = vaultManagement?.apr;
   const currentAccount = useCurrentAccount();
   const isConnected = !!currentAccount?.address;
@@ -153,9 +154,9 @@ export default function DepositVaultSection() {
 
   const disabledDeposit = useMemo(() => {
     if (!isConnected) return false;
-
+    if (isLoadingVaultManagement) return true;
     return !!error || !depositAmount;
-  }, [isConnected, error, depositAmount]);
+  }, [isConnected, error, depositAmount, isLoadingVaultManagement]);
 
   return (
     <div className="p-6 bg-black rounded-b-2xl rounded-tr-2xl">
@@ -194,7 +195,7 @@ export default function DepositVaultSection() {
           <div className="flex items-center">
             <img src="/coins/ndlp.png" alt="NDLP" className="w-6 h-6 mr-1" />
             <span className="font-mono font-bold text-lg">
-              {ndlpAmountWillGet} NDLP
+              {formatAmount({ amount: +ndlpAmountWillGet || 0 })} NDLP
             </span>
           </div>
         </div>

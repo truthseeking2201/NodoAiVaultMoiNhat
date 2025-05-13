@@ -12,14 +12,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import Dashboard from "./pages/Dashboard";
 
-const Dashboard = lazy(() =>
-  // Load Dashboard component immediately without delay
-  import("./pages/Dashboard").catch((e) => {
-    console.error("Error loading Dashboard:", e);
-    return { default: () => <PageFallback /> };
-  })
-);
 const NotFound = lazy(() =>
   import("./pages/NotFound").catch((e) => {
     console.error("Error loading NotFound:", e);
