@@ -25,4 +25,4 @@ UAT-DEPLOY:
     - yarn
     - yarn build:uat
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-uat --delete
-    - aws cloudfront create-invalidation --distribution-id E2FHC9LSU3PJ2T--paths "/*"
+    - aws cloudfront create-invalidation --distribution-id E2FHC9LSU3PJ2T --paths "/*"
