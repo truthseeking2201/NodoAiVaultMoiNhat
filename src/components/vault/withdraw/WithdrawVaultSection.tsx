@@ -12,7 +12,6 @@ import {
 } from "@/hooks/useWithdrawVault";
 import { useMyAssets, useWallet, useGetCoinsMetadata } from "@/hooks";
 import { NDLP } from "@/config/lp-config";
-console.log("----NDLP", NDLP);
 
 import DataClaimType from "@/types/data-claim.types.d";
 import LpType from "@/types/lp.type";

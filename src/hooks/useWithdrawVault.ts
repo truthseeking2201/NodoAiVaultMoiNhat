@@ -84,16 +84,10 @@ export const useWithdrawVault = () => {
           value: senderAddress,
         },
       });
-      console.log("--------data", data);
       const values = data?.data?.content?.fields?.value || [];
-      console.log("--------values", values);
       const available_liquidity = getBalanceAmount(
         configVault.available_liquidity,
         configLp.token_decimals
-      );
-      console.log(
-        "--------available_liquidity",
-        available_liquidity.toNumber()
       );
 
       return values?.map((val) => {
@@ -194,7 +188,6 @@ export const useWithdrawVault = () => {
         amountLp,
         configLp.lp_decimals
       ).toFixed();
-      console.log("--------rawAmount", rawAmount);
 
       const [splitCoin] = tx.splitCoins(tx.object(mergedCoinId), [
         tx.pure.u64(rawAmount),
@@ -256,7 +249,6 @@ export const useWithdrawVault = () => {
         transaction: tx,
       });
 
-      console.log("--------result", result);
       return result;
     } catch (error) {
       console.error("Error in redeem:", error);
@@ -297,7 +289,6 @@ export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
 
   const getConfigVault = useCallback(async () => {
     try {
-      console.log("-----getConfigVault");
       const res: any = await suiClient.getObject({
         id: configLp.vault_id,
         options: {
@@ -305,7 +296,7 @@ export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
         },
       });
       const fields = res?.data?.content?.fields;
-      console.log("-----getConfigVault", fields);
+      // console.log("-----getConfigVault", fields);
       setConfigVault({
         withdraw: fields?.withdraw?.fields,
         rate: fields?.rate || "0",
