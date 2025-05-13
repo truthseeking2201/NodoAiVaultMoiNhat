@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 
@@ -276,6 +277,6 @@ export default {
         "3xl": "3rem", // 48px
       },
     },
-    plugins: [tailwindcssAnimate],
   },
+  plugins: [tailwindcssAnimate],
 } satisfies Config;
