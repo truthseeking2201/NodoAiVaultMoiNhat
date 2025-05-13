@@ -45,7 +45,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
     fee: 0,
     rateFee: 0.5,
   };
-  const min_amount = 0.1;
+  const min_amount = 0.01;
   const [summary, setSummary] = useState(summary_default);
   const [timeCoolDown, setTimeCoolDown] = useState<string>("");
   const [form, setForm] = useState<IFormInput>();
@@ -237,7 +237,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
             label="Amount"
             className="mt-2"
           >
-            {summary.amount
+            {summary?.amount
               ? `${showFormatNumber(summary.amount)} ${lpData.lp_symbol}`
               : "--"}
           </RowItem>
@@ -245,7 +245,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
             label="To Receive"
             className="mt-3"
           >
-            {summary.receive
+            {summary?.receive
               ? `${showFormatNumber(summary.receive)} ${lpData.token_symbol}`
               : "--"}
           </RowItem>
@@ -253,7 +253,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
             label="Withdraw Fee"
             className="mt-3"
           >
-            {summary.amount
+            {summary?.amount
               ? `${showFormatNumber(summary.fee)} ${lpData.token_symbol}`
               : "--"}
           </RowItem>
@@ -337,7 +337,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
               Withdrawal Request Confirmed!
             </DialogTitle>
             <DialogDescription className="m-0 text-center text-base text-gray-400">
-              Your {showFormatNumber(summary.amount)} {lpData.lp_symbol}{" "}
+              Your {showFormatNumber(summary?.amount)} {lpData.lp_symbol}{" "}
               withdrawal request from Nodo AI Vault has been confirmed. Funds
               will be available after the{" "}
               <span className="whitespace-nowrap">{timeCoolDown}</span>{" "}

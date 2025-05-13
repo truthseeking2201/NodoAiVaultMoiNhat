@@ -31,8 +31,8 @@ export default function WithdrawVaultSection() {
   const isConnected = !!currentAccount?.address;
   const address = currentAccount?.address;
   const { refreshBalance, assets } = useMyAssets();
-  const { amountEst } = useEstWithdrawVault(1, lpData);
-  const { getRequestClaim } = useWithdrawVault();
+  const { amountEst, configVault } = useEstWithdrawVault(1, lpData);
+  const { getLatestRequestClaim } = useWithdrawVault();
 
   /**
    * FUNCTION
@@ -56,7 +56,7 @@ export default function WithdrawVaultSection() {
 
   const initDataClaim = async () => {
     try {
-      const res = await getRequestClaim(address);
+      const res = await getLatestRequestClaim(address, lpData, configVault);
       setDataClaim(res);
     } catch (error) {
       setDataClaim(null);
@@ -77,7 +77,7 @@ export default function WithdrawVaultSection() {
       initDataClaim();
     }
     count.current = address;
-  }, [address]);
+  }, [address, lpData, configVault]);
 
   useEffect(() => {
     initBalance();

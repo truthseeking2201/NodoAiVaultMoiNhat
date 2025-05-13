@@ -3,7 +3,7 @@ import LpType from "@/types/lp.type";
 export default interface DataClaimType {
   id: string | number;
   timeUnlock: number;
-  status: string;
+  isClaim: boolean;
   configLp: LpType;
   withdrawAmount: number;
   withdrawSymbol: string;

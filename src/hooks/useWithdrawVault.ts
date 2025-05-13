@@ -9,12 +9,49 @@ import { Transaction } from "@mysten/sui/transactions";
 import { useMergeCoins } from "./useMergeCoins";
 import { RATE_DENOMINATOR } from "@/config/vault-config";
 import { getDecimalAmount, getBalanceAmount } from "@/lib/number";
-import { getLatestWithdrawal } from "@/apis/vault";
-import { NDLP } from "@/config/lp-config";
 import LpType from "@/types/lp.type";
 import DataClaimType from "@/types/data-claim.types.d";
 
 const network = import.meta.env.VITE_SUI_NETWORK;
+
+const _getEstWithdraw = (
+  amountLp: number,
+  configLp: LpType,
+  configVault: any
+) => {
+  try {
+    if (
+      !Number(amountLp) ||
+      Number(amountLp) <= 0 ||
+      !configLp ||
+      !configVault
+    ) {
+      return null;
+    }
+    const rawAmount = getDecimalAmount(amountLp, configLp.lp_decimals);
+    const amount = rawAmount
+      .times(configVault.rate)
+      .dividedBy(RATE_DENOMINATOR);
+
+    const fee = amount.times(configVault.withdraw.fee_bps).dividedBy(10000);
+    const receiveAmount = amount.minus(fee);
+
+    // convert amount to show
+    const _receiveAmount =
+      getBalanceAmount(receiveAmount, configLp.token_decimals)?.toNumber() || 0;
+    const _fee =
+      getBalanceAmount(fee, configLp.token_decimals)?.toNumber() || 0;
+
+    return {
+      amount: amountLp,
+      receive: _receiveAmount,
+      fee: _fee,
+      rateFee: Number(configVault.withdraw.fee_bps || 0),
+    };
+  } catch (error) {
+    return null;
+  }
+};
 
 export const useWithdrawVault = () => {
   const { mutateAsync: signAndExecuteTransaction } =
@@ -24,29 +61,96 @@ export const useWithdrawVault = () => {
 
   const { mergeCoins } = useMergeCoins();
 
-  const getRequestClaim = async (sender_address): Promise<DataClaimType> => {
+  /**
+   *
+   * @param senderAddress
+   * @param configLp
+   * @param configVault
+   * @returns
+   */
+  const getRequestClaim = async (
+    senderAddress: string,
+    configLp: LpType,
+    configVault: any
+  ): Promise<DataClaimType[]> => {
     try {
-      const res = await getLatestWithdrawal(sender_address);
-      console.log("------initDataClaim", res);
-      return null;
-      // TODO format
-      // return {
-      //   id: 1,
-      //   timeUnlock: new Date(Date.now() + 25 * 60 * 1000).valueOf(),
-      //   status: "NEW",
-      //   withdrawAmount: 200,
-      //   withdrawSymbol: NDLP.lp_symbol,
-      //   receiveAmount: 199,
-      //   receiveSymbol: NDLP.token_symbol,
-      //   feeAmount: 1,
-      //   feeSymbol: NDLP.token_symbol,
-      //   configLp: NDLP,
-      // };
+      if (!configVault?.id_pending_redeems || !senderAddress) return null;
+
+      const data = await suiClient.getDynamicFieldObject({
+        parentId: configVault?.id_pending_redeems,
+        name: {
+          type: "address",
+          value: senderAddress,
+        },
+      });
+      console.log("--------data", data);
+      const values = data?.data?.content?.fields?.value || [];
+      console.log("--------values", values);
+      const available_liquidity = getBalanceAmount(
+        configVault.available_liquidity,
+        configLp.token_decimals
+      );
+      console.log(
+        "--------available_liquidity",
+        available_liquidity.toNumber()
+      );
+
+      return values?.map((val) => {
+        const fields = val.fields;
+        const amount = getBalanceAmount(
+          fields.amount,
+          configLp.lp_decimals
+        )?.toNumber();
+        const est = _getEstWithdraw(amount, configLp, configVault);
+        const timeUnlock =
+          Number(fields?.withdraw_time) + Number(configVault.lock_duration_ms);
+        const now = Date.now().valueOf();
+        const isClaim =
+          timeUnlock < now && available_liquidity.gte(est.receive);
+        return {
+          id: 1,
+          timeUnlock: timeUnlock,
+          isClaim: isClaim,
+          withdrawAmount: amount,
+          withdrawSymbol: configLp.lp_symbol,
+          receiveAmount: est.receive,
+          receiveSymbol: configLp.token_symbol,
+          feeAmount: est.fee,
+          feeSymbol: configLp.token_symbol,
+          configLp: configLp,
+        };
+      });
     } catch (error) {
-      return null;
+      return [];
     }
   };
 
+  /**
+   *
+   * @param senderAddress
+   * @param configLp
+   * @param configVault
+   * @returns
+   */
+  const getLatestRequestClaim = async (
+    senderAddress: string,
+    configLp: LpType,
+    configVault: any
+  ): Promise<DataClaimType> => {
+    const res = await getRequestClaim(senderAddress, configLp, configVault);
+    if (res && res?.length) {
+      return res[0];
+    }
+    return null;
+  };
+
+  /**
+   *
+   * @param amountLp
+   * @param fee
+   * @param configLp
+   * @returns
+   */
   const withdraw = async (amountLp: number, fee: number, configLp: LpType) => {
     try {
       if (!account?.address) {
@@ -98,6 +202,11 @@ export const useWithdrawVault = () => {
     }
   };
 
+  /**
+   *
+   * @param configLp
+   * @returns
+   */
   const redeem = async (configLp: LpType) => {
     try {
       if (!account?.address) {
@@ -131,14 +240,22 @@ export const useWithdrawVault = () => {
     }
   };
 
-  return { getRequestClaim, withdraw, redeem };
+  return { getRequestClaim, getLatestRequestClaim, withdraw, redeem };
 };
 
+/**
+ *
+ * @param amountLp
+ * @param configLp
+ * @returns
+ */
 export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
   const configVaultDefault = {
     withdraw: { fee_bps: "0", min: "0", total_fee: "0" },
     rate: "0",
     lock_duration_ms: 0,
+    id_pending_redeems: "",
+    available_liquidity: "",
   };
 
   const amountEstDefault = {
@@ -164,10 +281,13 @@ export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
         },
       });
       const fields = res?.data?.content?.fields;
+      console.log("-----getConfigVault", fields);
       setConfigVault({
         withdraw: fields?.withdraw?.fields,
         rate: fields?.rate || "0",
         lock_duration_ms: fields?.lock_duration_ms || "0",
+        available_liquidity: fields?.available_liquidity || "0",
+        id_pending_redeems: fields?.pending_redeems?.fields?.id?.id || "0",
       });
     } catch (error) {
       setConfigVault(configVaultDefault);
@@ -176,30 +296,8 @@ export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
 
   const getEstWithdraw = useCallback(() => {
     try {
-      if (!Number(amountLp) || Number(amountLp) <= 0) {
-        return setAmountEst(amountEstDefault);
-      }
-      const rawAmount = getDecimalAmount(amountLp, configLp.lp_decimals);
-      const amount = rawAmount
-        .times(configVault.rate)
-        .dividedBy(RATE_DENOMINATOR);
-
-      const fee = amount.times(configVault.withdraw.fee_bps).dividedBy(10000);
-      const receiveAmount = amount.minus(fee);
-
-      // convert amount to show
-      const _receiveAmount =
-        getBalanceAmount(receiveAmount, configLp.token_decimals)?.toNumber() ||
-        0;
-      const _fee =
-        getBalanceAmount(fee, configLp.token_decimals)?.toNumber() || 0;
-
-      setAmountEst({
-        amount: amountLp,
-        receive: _receiveAmount,
-        fee: _fee,
-        rateFee: Number(configVault.withdraw.fee_bps || 0),
-      });
+      const est = _getEstWithdraw(Number(amountLp), configLp, configVault);
+      setAmountEst(est);
     } catch (error) {
       setAmountEst(amountEstDefault);
     }

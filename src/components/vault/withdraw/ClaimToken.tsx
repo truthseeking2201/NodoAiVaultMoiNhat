@@ -78,7 +78,7 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
    * LIFECYCLES
    */
   useEffect(() => {
-    setIsClaim(true);
+    setIsClaim(data.isClaim);
   }, [data]);
 
   /**
