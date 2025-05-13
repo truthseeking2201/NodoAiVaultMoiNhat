@@ -72,9 +72,7 @@ const RightContent = () => {
         <h3 className="font-heading-md text-100 mb-4">Introducing</h3>
 
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-yellow-300 flex items-center justify-center mr-2">
-            <div className="w-4 h-4 bg-black rounded-full"></div>
-          </div>
+          <img src="/coins/ndlp.png" alt="NDLP" className="w-10" />
           <span className="font-heading-md text-100">$NDLP</span>
         </div>
 

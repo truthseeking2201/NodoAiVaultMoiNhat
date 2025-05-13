@@ -1,7 +1,7 @@
 import { COIN_TYPES_CONFIG } from "@/config";
 import { UserCoinAsset } from "@/types/coin.types";
 import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
-import { CoinStruct, SuiClient } from "@mysten/sui/client";
+import { SuiClient } from "@mysten/sui/client";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
 
@@ -83,24 +83,11 @@ export const useMyAssets = () => {
     queryKey: ["coinObjects"],
     queryFn: fetchCoinObjects,
     enabled: !!account?.address,
-    refetchInterval: 60000, // 60 seconds
+    staleTime: 1000 * 10 * 6, // 60 seconds
+    refetchInterval: 1000 * 10 * 6, // 60 seconds
   });
 
-  const coinsMetadata = useQueries({
-    queries: ALLOW_COIN_TYPES.map((coinType) => ({
-      queryKey: ["getCoinMetadata", coinType],
-      queryFn: () => suiClient.getCoinMetadata({ coinType }),
-      enabled: !!account?.address,
-      staleTime: 1000 * 60 * 60 * 1, // 1 hour
-    })),
-  });
-
-  const coinMetadata = coinsMetadata.reduce((acc, result, index) => {
-    if (result.data) {
-      acc[ALLOW_COIN_TYPES[index]] = result.data;
-    }
-    return acc;
-  }, {} as Record<string, CoinMetadata>);
+  const coinMetadata = useGetCoinsMetadata();
 
   const assets: UserCoinAsset[] =
     coinObjects?.flat().reduce((acc, coin) => {
@@ -139,4 +126,24 @@ export const useMyAssets = () => {
     isLoading,
     refreshBalance: refetch,
   };
+};
+
+export const useGetCoinsMetadata = () => {
+  const suiClient = useSuiClient();
+  const coinsMetadata = useQueries({
+    queries: ALLOW_COIN_TYPES.map((coinType) => ({
+      queryKey: ["getCoinMetadata", coinType],
+      queryFn: () => suiClient.getCoinMetadata({ coinType }),
+      staleTime: 1000 * 60 * 60 * 1, // 1 hour
+    })),
+  });
+
+  const coinMetadata = coinsMetadata.reduce((acc, result, index) => {
+    if (result.data) {
+      acc[ALLOW_COIN_TYPES[index]] = result.data;
+    }
+    return acc;
+  }, {} as Record<string, CoinMetadata>);
+
+  return coinMetadata;
 };
