@@ -37,12 +37,47 @@ export interface UserInvestment {
 }
 
 export interface TransactionHistory {
-  id: string;
-  tx_type: "swap" | "add" | "remove";
-  timestamp: string;
-  value: number;
-  address: string;
-  tokenId: string;
-  txHash: string;
-  // status: 'completed' | 'pending' | 'failed';
+  list: Transaction[];
+  total: number;
+  page: number;
+  limit: number;
 }
+
+export interface Transaction {
+  type:
+    | "ADD_LIQUIDITY"
+    | "REMOVE_LIQUIDITY"
+    | "CLAIM_REWARDS"
+    | "SWAP"
+    | "ADD_PROFIT_UPDATE_RATE"
+    | "OPEN"
+    | "CLOSE"
+    | "ALL";
+  time: string;
+  vault_address: string;
+  tokens: {
+    token_a: Token;
+    token_b: Token;
+  };
+  txhash: string;
+  status: string;
+}
+
+export interface Token {
+  name: string;
+  symbol: string;
+  decimals: number;
+  amount: string;
+}
+
+export type Types = {
+  type:
+    | "ADD_LIQUIDITY"
+    | "REMOVE_LIQUIDITY"
+    | "CLAIM_REWARDS"
+    | "SWAP"
+    | "ADD_PROFIT_UPDATE_RATE"
+    | "OPEN"
+    | "CLOSE"
+    | "ALL";
+};

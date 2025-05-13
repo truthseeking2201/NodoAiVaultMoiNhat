@@ -1,6 +1,6 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { useWallet } from "@/hooks/useWallet";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 import LeftContent from "@/components/dashboard/LeftContent";
 import RightContent from "@/components/dashboard/RightContent";
@@ -11,105 +11,9 @@ import { TxTable } from "@/components/dashboard/TxTable";
 import NodoAIVaultsMainCard from "@/components/vault/NodoAIVaultsMainCard";
 import TelegramIcon from "@/assets/icons/telegram.svg";
 import XIcon from "@/assets/icons/x.svg";
-
-const sampleTransactions = [
-  {
-    id: "1",
-    tx_type: "add" as const,
-    timestamp: "2025-05-01T10:00:00Z",
-    value: 1000,
-    address: "0x1234567890abcdef1234567890abcdef12345678",
-    tokenId: "USDC",
-    txHash:
-      "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-  },
-  {
-    id: "2",
-    tx_type: "swap" as const,
-    timestamp: "2025-05-02T12:00:00Z",
-    value: 500,
-    address: "0xabcdef1234567890abcdef1234567890abcdef1234",
-    tokenId: "USDC",
-    txHash:
-      "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-  },
-  {
-    id: "3",
-    tx_type: "add" as const,
-    timestamp: "2025-05-03T14:00:00Z",
-    value: 2000,
-    address: "0x7890abcdef1234567890abcdef1234567890abcd",
-    tokenId: "USDC",
-    txHash: "0x7890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234",
-  },
-  {
-    id: "4",
-    tx_type: "remove" as const,
-    timestamp: "2025-05-04T16:00:00Z",
-    value: 300,
-    address: "0x4567890abcdef1234567890abcdef1234567890ab",
-    tokenId: "USDC",
-    txHash: "0x4567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12",
-  },
-  {
-    id: "5",
-    tx_type: "add" as const,
-    timestamp: "2025-05-05T18:00:00Z",
-    value: 1500,
-    address: "0xabcdef1234567890abcdef1234567890abcdef1234",
-    tokenId: "USDC",
-    txHash:
-      "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-  },
-  {
-    id: "6",
-    tx_type: "add" as const,
-    timestamp: "2025-05-06T10:00:00Z",
-    value: 1200,
-    address: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-    tokenId: "USDC",
-    txHash:
-      "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd",
-  },
-  {
-    id: "7",
-    tx_type: "remove" as const,
-    timestamp: "2025-05-07T12:00:00Z",
-    value: 800,
-    address: "0x1234567890abcdef1234567890abcdef12345678",
-    tokenId: "USDC",
-    txHash:
-      "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-  },
-  {
-    id: "8",
-    tx_type: "add" as const,
-    timestamp: "2025-05-08T14:00:00Z",
-    value: 2500,
-    address: "0x7890abcdef1234567890abcdef1234567890abcd",
-    tokenId: "USDC",
-    txHash: "0x7890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234",
-  },
-  {
-    id: "9",
-    tx_type: "remove" as const,
-    timestamp: "2025-05-09T16:00:00Z",
-    value: 400,
-    address: "0x4567890abcdef1234567890abcdef1234567890ab",
-    tokenId: "USDC",
-    txHash: "0x4567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef12",
-  },
-  {
-    id: "10",
-    tx_type: "add" as const,
-    timestamp: "2025-05-10T18:00:00Z",
-    value: 1800,
-    address: "0xabcdef1234567890abcdef1234567890abcdef1234",
-    tokenId: "USDC",
-    txHash:
-      "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-  },
-];
+import { TransactionHistory } from "@/types/vault";
+import { getVaultsActivities } from "@/apis/vault";
+import { transactions } from "./mockdata";
 
 export default function NodoAIVaults() {
   // Use the wallet hook for connection status
@@ -125,6 +29,11 @@ export default function NodoAIVaults() {
   const [selectedInvestment, setSelectedInvestment] =
     useState<UserInvestment | null>(null);
   const [depositWithdrawTab, setDepositWithdrawTab] = useState("deposit");
+  const [vaultActivities, setVaultActivities] =
+    useState<TransactionHistory | null>(null);
+  const [filteredVaultActivities, setFilteredVaultActivities] = useState<
+    string | null
+  >(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -188,11 +97,80 @@ export default function NodoAIVaults() {
 
   const currentYear = new Date().getFullYear();
 
+  const fetchVaultActivities = async ({
+    page = 1,
+    limit = 10,
+    action_type = "",
+  }: {
+    page?: number;
+    limit?: number;
+    action_type?: string;
+  }): Promise<void> => {
+    try {
+      const response = await getVaultsActivities({
+        page,
+        limit,
+        action_type,
+      });
+      if (response && response.data) {
+        setVaultActivities(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching vault activities:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchVaultActivities({});
+    const intervalId = setInterval(() => fetchVaultActivities({}), 30000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
+
+  const handleChangeActiveTab = (tab: any) => {
+    if (tab.includes("ALL")) {
+      fetchVaultActivities({
+        page: 1,
+        limit: 10,
+        action_type: "",
+      });
+      setFilteredVaultActivities("");
+    } else if (tab.includes("ADD_LIQUIDITY")) {
+      fetchVaultActivities({
+        page: 1,
+        limit: 10,
+        action_type: "ADD_LIQUIDITY",
+      });
+      setFilteredVaultActivities("ADD_LIQUIDITY");
+    } else if (tab.includes("REMOVE_LIQUIDITY")) {
+      fetchVaultActivities({
+        page: 1,
+        limit: 10,
+        action_type: "REMOVE_LIQUIDITY",
+      });
+      setFilteredVaultActivities("REMOVE_LIQUIDITY");
+    } else if (tab.includes("SWAP")) {
+      fetchVaultActivities({
+        page: 1,
+        limit: 10,
+        action_type: "SWAP",
+      });
+      setFilteredVaultActivities("SWAP");
+    }
+  };
+
+  const handleChangeActivityPage = (page: number) => {
+    fetchVaultActivities({
+      page,
+      limit: 10,
+      action_type: filteredVaultActivities || "",
+    });
+  };
+
   return (
-    <div
-      className="min-h-screen main-bg"
-      ref={containerRef}
-    >
+    <div className="min-h-screen main-bg" ref={containerRef}>
       <PageContainer>
         <div style={{ maxWidth: "1400px" }}>
           {/* Main Header */}
@@ -232,8 +210,12 @@ export default function NodoAIVaults() {
               {/* Vault Activities Section */}
               <div className="mb-8">
                 <TxTable
-                  transactions={sampleTransactions as any}
+                  transactions={
+                    vaultActivities as unknown as TransactionHistory
+                  }
                   onSelect={handleSelectTransaction}
+                  onChangePage={handleChangeActivityPage}
+                  onChangeFilter={handleChangeActiveTab}
                 />
               </div>
             </div>
@@ -274,11 +256,7 @@ export default function NodoAIVaults() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <img
-                  src={XIcon}
-                  alt="X"
-                  className="w-5 h-5"
-                />
+                <img src={XIcon} alt="X" className="w-5 h-5" />
               </a>
             </div>
           </div>
