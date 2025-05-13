@@ -10,16 +10,18 @@ import {
   useEstWithdrawVault,
   useWithdrawVault,
 } from "@/hooks/useWithdrawVault";
-import { useMyAssets, useWallet } from "@/hooks";
+import { useMyAssets, useWallet, useGetCoinsMetadata } from "@/hooks";
 import { NDLP } from "@/config/lp-config";
-import { getBalanceToken } from "@/use_case/withdraw_vault_use_case";
+console.log("----NDLP", NDLP);
 
 import DataClaimType from "@/types/data-claim.types.d";
+import LpType from "@/types/lp.type";
 
 export default function WithdrawVaultSection() {
   const count = useRef<string>("0");
   const [balanceLp, setBalanceLp] = useState<number>(0);
   const [dataClaim, setDataClaim] = useState<DataClaimType>();
+  const [lpData, setLpData] = useState<LpType>(NDLP);
 
   /**
    * HOOKS
@@ -28,8 +30,8 @@ export default function WithdrawVaultSection() {
   const currentAccount = useCurrentAccount();
   const isConnected = !!currentAccount?.address;
   const address = currentAccount?.address;
-  const { refreshBalance } = useMyAssets();
-  const { amountEst } = useEstWithdrawVault(1, NDLP);
+  const { refreshBalance, assets } = useMyAssets();
+  const { amountEst } = useEstWithdrawVault(1, lpData);
   const { getRequestClaim } = useWithdrawVault();
 
   /**
@@ -37,19 +39,17 @@ export default function WithdrawVaultSection() {
    */
   const initBalance = async () => {
     try {
-      if (!address) return;
-      const balance_raw = await getBalanceToken({
-        owner: address,
-        coinType: NDLP.lp_coin_type,
-      });
+      const lpasset = assets.find(
+        (asset) => asset.coin_type === lpData.lp_coin_type
+      );
+      const balance_raw = lpasset?.raw_balance || 0;
       const balance = getBalanceAmountForInput(
         balance_raw,
-        NDLP.lp_decimals,
+        lpData.lp_decimals,
         2
       );
       setBalanceLp(balance);
     } catch (error) {
-      console.log("-----error", error);
       setBalanceLp(0);
     }
   };
@@ -74,11 +74,14 @@ export default function WithdrawVaultSection() {
    */
   useEffect(() => {
     if (count.current !== address && address) {
-      initBalance();
       initDataClaim();
     }
     count.current = address;
   }, [address]);
+
+  useEffect(() => {
+    initBalance();
+  }, [assets]);
 
   /**
    * RENDER
@@ -114,7 +117,7 @@ export default function WithdrawVaultSection() {
             </div>
             <div className="flex items-center">
               <img
-                src={NDLP.lp_image}
+                src={lpData.lp_image}
                 alt="NODOAIx Token"
                 className="w-[36px] h-[36px]"
               />
@@ -123,8 +126,8 @@ export default function WithdrawVaultSection() {
               </div>
             </div>
             <div className="font-sans text-sm text-white/60 mt-3">
-              1 {NDLP.lp_symbol} ≈ {showFormatNumber(amountEst.receive)}{" "}
-              {NDLP.token_symbol}
+              1 {lpData.lp_symbol} ≈ {showFormatNumber(amountEst.receive)}{" "}
+              {lpData.token_symbol}
             </div>
           </div>
 
@@ -136,7 +139,7 @@ export default function WithdrawVaultSection() {
           ) : (
             <WithdrawForm
               balanceLp={balanceLp}
-              lpData={NDLP}
+              lpData={lpData}
               onSuccess={onSuccess}
             />
           )}

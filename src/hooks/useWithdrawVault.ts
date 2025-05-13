@@ -9,7 +9,7 @@ import { Transaction } from "@mysten/sui/transactions";
 import { useMergeCoins } from "./useMergeCoins";
 import { RATE_DENOMINATOR } from "@/config/vault-config";
 import { getDecimalAmount, getBalanceAmount } from "@/lib/number";
-import { getLatestWithdrawal, executionWithdrawal } from "@/apis/vault";
+import { getLatestWithdrawal } from "@/apis/vault";
 import { NDLP } from "@/config/lp-config";
 import LpType from "@/types/lp.type";
 import DataClaimType from "@/types/data-claim.types.d";
@@ -28,19 +28,20 @@ export const useWithdrawVault = () => {
     try {
       const res = await getLatestWithdrawal(sender_address);
       console.log("------initDataClaim", res);
+      return null;
       // TODO format
-      return {
-        id: 1,
-        timeUnlock: new Date(Date.now() + 25 * 60 * 1000).valueOf(),
-        status: "NEW",
-        withdrawAmount: 200,
-        withdrawSymbol: NDLP.lp_symbol,
-        receiveAmount: 199,
-        receiveSymbol: NDLP.token_symbol,
-        feeAmount: 1,
-        feeSymbol: NDLP.token_symbol,
-        configLp: NDLP,
-      };
+      // return {
+      //   id: 1,
+      //   timeUnlock: new Date(Date.now() + 25 * 60 * 1000).valueOf(),
+      //   status: "NEW",
+      //   withdrawAmount: 200,
+      //   withdrawSymbol: NDLP.lp_symbol,
+      //   receiveAmount: 199,
+      //   receiveSymbol: NDLP.token_symbol,
+      //   feeAmount: 1,
+      //   feeSymbol: NDLP.token_symbol,
+      //   configLp: NDLP,
+      // };
     } catch (error) {
       return null;
     }
@@ -65,6 +66,7 @@ export const useWithdrawVault = () => {
         amountLp,
         configLp.lp_decimals
       ).toFixed();
+      console.log("--------rawAmount", rawAmount);
 
       const [splitCoin] = tx.splitCoins(tx.object(mergedCoinId), [
         tx.pure.u64(rawAmount),
@@ -89,24 +91,7 @@ export const useWithdrawVault = () => {
       const result = await signAndExecuteTransaction({
         transaction: tx,
       });
-      const txhash = result?.digest;
-      // const txhash = "AuCXr9nGfAqroysWPP6DMP6pBvhfJU6xNze5Par8reH"; // for test
-
-      // save
-      const rawFee = getDecimalAmount(fee, configLp.token_decimals).toFixed();
-      const payload = {
-        "txhash": txhash,
-        "vault": configLp.vault_id,
-        "coin": configLp.lp_coin_type,
-        "withdraw_amount": rawAmount,
-        "withdraw_fee": rawFee,
-        "sender": account?.address,
-      };
-      console.log("------payload", payload);
-      await executionWithdrawal(payload);
-
-      // console.log("--------result", result);
-      // return result;
+      return result;
     } catch (error) {
       console.error("Error in withdraw:", error);
       throw error;
@@ -221,10 +206,10 @@ export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
   }, [configVault, amountLp]);
 
   useEffect(() => {
-    if (count.current !== configLp.vault_id) {
+    if (count.current !== configLp.vault_id && configLp.vault_id) {
       getConfigVault();
     }
-    count.current = configLp.vault_id;
+    count.current = configLp?.vault_id;
   }, [configLp]);
 
   useEffect(() => {
