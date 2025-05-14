@@ -253,7 +253,7 @@ export function TxTable() {
         </div>
       </div>
 
-      <div className="glass-card overflow-hidden w-[734px]">
+      <div className="glass-card overflow-hidden w-full">
         <div className="overflow-x-auto">
           <Table className="w-full">
             <TableHeader>
@@ -335,7 +335,10 @@ export function TxTable() {
                           "ADD_PROFIT_UPDATE_RATE",
                           "CLAIM_REWARDS",
                         ].includes(tx.type) && (
-                          <Plus size={16} className="inline-block mr-1" />
+                          <Plus
+                            size={16}
+                            className="inline-block mr-1"
+                          />
                         )}
                         {["REMOVE_LIQUIDITY", "CLOSE"].includes(tx.type) && (
                           <ArrowUpRight
@@ -415,7 +418,10 @@ export function TxTable() {
                           );
                         }}
                       >
-                        <ExternalLink size={16} className="text-white/60" />
+                        <ExternalLink
+                          size={16}
+                          className="text-white/60"
+                        />
                       </Button>
                     </TableCell>
                   </TableRow>
