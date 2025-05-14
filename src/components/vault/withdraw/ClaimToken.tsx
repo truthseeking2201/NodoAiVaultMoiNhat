@@ -109,7 +109,7 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
         </div>
       </div>
 
-      <div className="mb-5 p-4 border border-white/15 rounded-lg mt-5">
+      <div className=" p-4 border border-white/15 rounded-lg mt-5">
         <RowItem label="You’ll  Receive">
           {`${showFormatNumber(data.receiveAmount)} ${data.receiveSymbol}`}
         </RowItem>
@@ -121,18 +121,20 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
         </RowItem>
       </div>
 
-      <Badge
-        variant="warning"
-        className="w-full p-4 rounded-xl block"
-      >
-        <div className="flex items-center">
-          <Clock4 size={14} />{" "}
-          <span className="text-sm text-white font-medium	ml-1.5 capitalize">
-            Please wait to claim your previous withdrawal before initiating a
-            new one
-          </span>
-        </div>
-      </Badge>
+      {!data.isClaim && (
+        <Badge
+          variant="warning"
+          className="w-full p-4 rounded-xl block mt-5"
+        >
+          <div className="flex items-center">
+            <Clock4 size={14} />{" "}
+            <span className="text-sm text-white font-medium	ml-1.5 capitalize">
+              Please wait to claim your previous withdrawal before initiating a
+              new one
+            </span>
+          </div>
+        </Badge>
+      )}
 
       <Button
         variant="primary"
