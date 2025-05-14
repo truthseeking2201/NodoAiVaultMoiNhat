@@ -87,6 +87,7 @@ export function TxTable() {
       }),
     staleTime: 30000,
   });
+  console.log("🚀 ~ TxTable ~ data:", data)
 
   const listItems = (data?.list ?? []) as Transaction[];
 
