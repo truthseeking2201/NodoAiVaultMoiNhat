@@ -145,7 +145,7 @@ export default function WithdrawVaultSection() {
                   alt="NODOAIx Token"
                   className="w-[36px] h-[36px]"
                 />
-                <div className="text-white font-sans font-medium text-[40px] leading-[40px] ml-2">
+                <div className="text-white font-mono font-medium text-[40px] leading-[40px] ml-2">
                   {showFormatNumber(balanceLp)}
                 </div>
               </div>
