@@ -105,6 +105,9 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
 
   const onCloseModalSuccess = () => {
     setOpenModalSuccess(false);
+  };
+  const onDone = () => {
+    onCloseModalSuccess();
     reset();
   };
 
@@ -119,10 +122,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
   const onWithdraw = useCallback(async () => {
     setIsLoading(true);
     try {
-      // TODO
-      console.log("-------onWithdraw form", form);
       const res = await withdraw(form.amount, summary.fee, lpData);
-      console.log("-------onWithdraw", res);
       setOpenModalSuccess(true);
       onCloseModalConfirm();
       onSuccess();
@@ -354,7 +354,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
               variant="primary"
               size="lg"
               className="w-full font-semibold text-base px-2 "
-              onClick={onCloseModalSuccess}
+              onClick={onDone}
             >
               Done
             </Button>

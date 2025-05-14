@@ -4,7 +4,6 @@ import {
   useSignAndExecuteTransaction,
   useSuiClient,
 } from "@mysten/dapp-kit";
-import { getFullnodeUrl, SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import { useMergeCoins } from "./useMergeCoins";
 import { RATE_DENOMINATOR } from "@/config/vault-config";
@@ -12,8 +11,6 @@ import { getDecimalAmount, getBalanceAmount } from "@/lib/number";
 import LpType from "@/types/lp.type";
 import DataClaimType from "@/types/data-claim.types.d";
 import BigNumber from "bignumber.js";
-
-const network = import.meta.env.VITE_SUI_NETWORK;
 
 const _getEstWithdraw = (
   amountLp: number,
@@ -77,7 +74,7 @@ export const useWithdrawVault = () => {
     try {
       if (!configVault?.id_pending_redeems || !senderAddress) return null;
 
-      const data = await suiClient.getDynamicFieldObject({
+      const data: any = await suiClient.getDynamicFieldObject({
         parentId: configVault?.id_pending_redeems,
         name: {
           type: "address",
@@ -85,6 +82,7 @@ export const useWithdrawVault = () => {
         },
       });
       const values = data?.data?.content?.fields?.value || [];
+      console.log("-----getRequestClaim-values", values);
       const available_liquidity = getBalanceAmount(
         configVault.available_liquidity,
         configLp.token_decimals
@@ -116,6 +114,7 @@ export const useWithdrawVault = () => {
         };
       });
     } catch (error) {
+      console.log("-----getRequestClaim-error", error);
       return [];
     }
   };

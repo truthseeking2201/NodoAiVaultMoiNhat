@@ -57,13 +57,16 @@ export default function WithdrawVaultSection() {
     try {
       const res = await getLatestRequestClaim(address, lpData, configVault);
       setDataClaim(res);
+      return res;
     } catch (error) {
       setDataClaim(null);
     }
   };
 
   const onSuccess = () => {
-    initDataClaim();
+    setTimeout(() => {
+      initDataClaim();
+    }, 2000);
     refreshBalance();
   };
 
