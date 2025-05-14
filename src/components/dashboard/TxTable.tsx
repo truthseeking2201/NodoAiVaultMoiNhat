@@ -88,18 +88,6 @@ export function TxTable() {
     staleTime: 30000,
   });
 
-  useEffect(() => {
-    queryClient.prefetchQuery({
-      queryKey: ["activities", currentPage + 1, filter],
-      queryFn: () =>
-        fetchVaultActivities({
-          page: currentPage + 1,
-          limit: 10,
-          action_type: handleFormatFilter(filter),
-        }),
-    });
-  }, [currentPage, queryClient, filter]);
-
   const listItems = (data?.list ?? []) as Transaction[];
 
   const filteredTransactions = filter.includes("ALL")
