@@ -27,7 +27,18 @@ import { useQuery } from "@tanstack/react-query";
 export function TxTable() {
   const [filter, setFilter] = useState<Types["type"][]>(["ALL"]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [lastTotalPages, setLastTotalPages] = useState(1);
+
   const itemsPerPage = 5;
+  const ADD_LIQUIDITY_TYPES = [
+    "ADD_LIQUIDITY",
+    "OPEN",
+    "ADD_PROFIT_UPDATE_RATE",
+    "CLAIM_REWARDS",
+  ];
+
+  const REMOVE_LIQUIDITY_TYPES = ["REMOVE_LIQUIDITY", "CLOSE"];
+  const SWAP_TYPES = ["SWAP"];
 
   const fetchVaultActivities = async ({
     page = 1,
@@ -61,14 +72,12 @@ export function TxTable() {
       return "SWAP";
     }
     if (
-      ["ADD_LIQUIDITY", "OPEN", "ADD_PROFIT_UPDATE_RATE", "CLAIM_REWARDS"].some(
-        (type) => filter.includes(type as Types["type"])
-      )
+      ADD_LIQUIDITY_TYPES.some((type) => filter.includes(type as Types["type"]))
     ) {
       return "ADD_LIQUIDITY";
     }
     if (
-      ["REMOVE_LIQUIDITY", "CLOSE"].some((type) =>
+      REMOVE_LIQUIDITY_TYPES.some((type) =>
         filter.includes(type as Types["type"])
       )
     ) {
@@ -86,12 +95,9 @@ export function TxTable() {
       }),
     staleTime: 30000,
   });
-  console.log("🚀 ~ TxTable ~ data:", data)
 
   const listItems = data?.list ?? [];
   const totalItems = data?.total ?? 0;
-
-  const [lastTotalPages, setLastTotalPages] = useState(1);
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
 
   useEffect(() => {
@@ -201,43 +207,37 @@ export function TxTable() {
           <Button
             variant={filter.includes("SWAP") ? "primary" : "pagination-default"}
             size="sm"
-            onClick={() => handleFilterChange(["SWAP"])}
+            onClick={() => handleFilterChange(SWAP_TYPES as Types["type"][])}
           >
             Swap
           </Button>
           <Button
             variant={
-              [
-                "ADD_LIQUIDITY",
-                "OPEN",
-                "ADD_PROFIT_UPDATE_RATE",
-                "CLAIM_REWARDS",
-              ].some((type) => filter.includes(type as Types["type"]))
-                ? "primary"
-                : "pagination-default"
-            }
-            size="sm"
-            onClick={() =>
-              handleFilterChange([
-                "ADD_LIQUIDITY",
-                "OPEN",
-                "ADD_PROFIT_UPDATE_RATE",
-                "CLAIM_REWARDS",
-              ])
-            }
-          >
-            Add Liquidity
-          </Button>
-          <Button
-            variant={
-              ["REMOVE_LIQUIDITY", "CLOSE"].some((type) =>
+              ADD_LIQUIDITY_TYPES.some((type) =>
                 filter.includes(type as Types["type"])
               )
                 ? "primary"
                 : "pagination-default"
             }
             size="sm"
-            onClick={() => handleFilterChange(["REMOVE_LIQUIDITY", "CLOSE"])}
+            onClick={() =>
+              handleFilterChange(ADD_LIQUIDITY_TYPES as Types["type"][])
+            }
+          >
+            Add Liquidity
+          </Button>
+          <Button
+            variant={
+              REMOVE_LIQUIDITY_TYPES.some((type) =>
+                filter.includes(type as Types["type"])
+              )
+                ? "primary"
+                : "pagination-default"
+            }
+            size="sm"
+            onClick={() =>
+              handleFilterChange(REMOVE_LIQUIDITY_TYPES as Types["type"][])
+            }
           >
             Remove Liquidity
           </Button>
@@ -305,30 +305,20 @@ export function TxTable() {
                     <TableCell>
                       <span
                         className={`inline-block text-xs font-medium px-2 py-1 rounded-md ${
-                          ["REMOVE_LIQUIDITY", "CLOSE"].includes(tx.type) &&
+                          REMOVE_LIQUIDITY_TYPES.includes(tx.type) &&
                           "bg-[#F97316]/30 text-[#F97316]"
                         } ${
-                          [
-                            "ADD_LIQUIDITY",
-                            "OPEN",
-                            "ADD_PROFIT_UPDATE_RATE",
-                            "CLAIM_REWARDS",
-                          ].includes(tx.type) &&
+                          ADD_LIQUIDITY_TYPES.includes(tx.type) &&
                           "bg-[#22C55E]/20 text-[#22C55E]"
                         } ${
                           tx.type === "SWAP" && "bg-[#3B82F6]/30 text-[#3B82F6]"
                         }
                         `}
                       >
-                        {[
-                          "ADD_LIQUIDITY",
-                          "OPEN",
-                          "ADD_PROFIT_UPDATE_RATE",
-                          "CLAIM_REWARDS",
-                        ].includes(tx.type) && (
+                        {ADD_LIQUIDITY_TYPES.includes(tx.type) && (
                           <Plus size={16} className="inline-block mr-1" />
                         )}
-                        {["REMOVE_LIQUIDITY", "CLOSE"].includes(tx.type) && (
+                        {REMOVE_LIQUIDITY_TYPES.includes(tx.type) && (
                           <ArrowUpRight
                             size={16}
                             className="inline-block mr-1"
@@ -423,9 +413,10 @@ export function TxTable() {
       </div>
       <div className="flex justify-between items-end mt-4">
         <div className=" text-white text-xs">
-          Showing {itemsPerPage * (currentPage - 1) + 1}-
-          {Math.min(itemsPerPage * currentPage, paginatedTransactions.length)}{" "}
-          of {paginatedTransactions.length} activities
+          Showing{" "}
+          {Math.min(itemsPerPage * currentPage, paginatedTransactions.length)}-
+          {itemsPerPage * (currentPage - 1) + 1} of{" "}
+          {paginatedTransactions.length} activities
         </div>
         <div className="flex justify-end items-center mt-4 gap-2">
           <Button
