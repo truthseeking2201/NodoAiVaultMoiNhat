@@ -33,7 +33,7 @@ const fetchVersion = async (): Promise<string | null> => {
 /**
  * Initializes the version checker
  */
-export const initVersionChecker = async (): Promise<void> => {
+export const initVersionChecker = async (showToast): Promise<void> => {
   // Skip for development environment
   if (import.meta.env.DEV) {
     console.log("Version checker disabled in development mode");
@@ -61,15 +61,7 @@ export const initVersionChecker = async (): Promise<void> => {
         console.log(
           `New version detected: ${currentVersion} → ${newVersion}. Refreshing...`
         );
-        toast.info("A new version is available. Click here to refresh.", {
-          duration: CHECK_INTERVAL / 2,
-          action: {
-            label: "Refresh",
-            onClick: () => window.location.reload(),
-          },
-          closeButton: true,
-          invert: true,
-        });
+        showToast();
       }
     }, CHECK_INTERVAL);
   } catch (error) {
