@@ -1,5 +1,6 @@
 import { ChangeEvent, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 
 interface FormattedNumberInputProps {
   value: string;
@@ -41,6 +42,11 @@ export function FormattedNumberInput({
     onBlur?.(value);
   }, [onBlur, value]);
 
+  const handleClear = useCallback(() => {
+    onChange("");
+    onValidate?.("");
+  }, [onChange, onValidate]);
+
   return (
     <div className="relative mb-2 mt-2">
       <input
@@ -49,7 +55,7 @@ export function FormattedNumberInput({
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className={cn("input-vault w-full font-heading-lg", className)}
+        className={cn("input-vault w-full font-heading-lg pr-24", className)}
         {...props}
       />
       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex rounded-full mx-auto bg-gradient-to-tr from-[#0090FF] via-[#FF6D9C] to-[#FB7E16] p-px hover:opacity-70 transition-all duration-300">

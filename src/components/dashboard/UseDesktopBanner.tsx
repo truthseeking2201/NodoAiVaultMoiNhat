@@ -20,7 +20,7 @@ const UseDesktopBanner = () => {
 
   return (
     <div className="bg-[#8ADDA5] h-11 w-full">
-      <div className="flex items-center justify-center h-full ">
+      <div className="flex items-center justify-center h-full p-2">
         <div className="pr-3">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -35,11 +35,11 @@ const UseDesktopBanner = () => {
             />
           </svg>
         </div>
-        <div className="font-sans text-sm text-black pr-2">
+        <div className="font-sans text-sm text-black pr-2 text-center">
           For a best experience, please visit on a desktop browser.
         </div>
         <button
-          className="flex items-center justify-center rounded-full p-2"
+          className="flex items-center justify-center rounded-full"
           onClick={() => setCloseBanner(true)}
         >
           <X size={20} className="text-black" />
