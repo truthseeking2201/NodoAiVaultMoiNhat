@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import debounce from "lodash/debounce";
 
 import SummaryConfirmWithraw from "./SummaryConfirmWithraw";
@@ -9,6 +9,7 @@ import { Loader } from "@/components/ui/loader";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { IconCheckSuccess } from "@/components/ui/icon-check-success";
 import { Badge } from "@/components/ui/badge";
+import { FormattedNumberInput } from "@/components/ui/formatted-number-input";
 import { Info, Clock4 } from "lucide-react";
 import {
   Dialog,
@@ -74,7 +75,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
    * HOOKS
    */
   const {
-    register,
+    control,
     watch,
     handleSubmit,
     setValue,
@@ -186,29 +187,24 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
             </span>
           </div>
         </div>
-        <div className="relative mb-2 mt-2">
-          <input
-            type="text"
-            placeholder="0.00"
-            {...register("amount", {
-              required: true,
-              min: min_amount,
-              max: balanceLp,
-              pattern: /^\d*\.?\d{0,2}$/,
-            })}
-            className="input-vault w-full font-heading-lg"
-          />
-
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex rounded-full mx-auto bg-gradient-to-tr from-[#0090FF] via-[#FF6D9C] to-[#FB7E16] p-px hover:opacity-70 transition-all duration-300">
-            <button
-              type="button"
-              onClick={handleMaxAmount}
-              className="bg-[#202124] border border-[#1A1A1A] text-white hover:text-white px-4 py-1 rounded-[16px] text-sm font-medium"
-            >
-              MAX
-            </button>
-          </div>
-        </div>
+        <Controller
+          name="amount"
+          control={control}
+          rules={{
+            required: true,
+            min: min_amount,
+            max: balanceLp,
+            pattern: /^\d*\.?\d{0,2}$/,
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <FormattedNumberInput
+              value={value ? `${value}` : ""}
+              onChange={onChange}
+              onBlur={onBlur}
+              onMaxAmount={handleMaxAmount}
+            />
+          )}
+        />
         {errors.amount?.type && (
           <div className="text-red-error text-sm mt-1 flex items-center">
             <Info

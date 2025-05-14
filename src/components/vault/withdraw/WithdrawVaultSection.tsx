@@ -67,13 +67,6 @@ export default function WithdrawVaultSection() {
     }
   };
 
-  const onSuccess = () => {
-    setTimeout(() => {
-      initDataClaim();
-    }, 2000);
-    refreshBalance();
-  };
-
   const onSuccessWithdraw = async () => {
     setLoading(true);
     refreshBalance();
