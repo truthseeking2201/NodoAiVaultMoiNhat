@@ -37,10 +37,10 @@ export interface UserInvestment {
 }
 
 export interface TransactionHistory {
-  list: Transaction[];
-  total: number;
-  page: number;
-  limit: number;
+  list?: Transaction[];
+  total?: number;
+  page?: number;
+  limit?: number;
 }
 
 export interface Transaction {
@@ -55,19 +55,24 @@ export interface Transaction {
     | "ALL";
   time: string;
   vault_address: string;
-  tokens: {
-    token_a: Token;
-    token_b: Token;
-  };
+  tokens: Token[];
   txhash: string;
   status: string;
+  id: string;
+  value: string;
 }
 
 export interface Token {
-  name: string;
-  symbol: string;
-  decimals: number;
-  amount: string;
+  token_id: number;
+  token_name: string;
+  token_symbol: string;
+  token_address: string;
+  decimal: number;
+  amount: number;
+  price: string;
+  url: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type Types = {

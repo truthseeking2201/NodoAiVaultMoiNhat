@@ -22,38 +22,37 @@ import SwapIcon from "@/assets/icons/swap.svg";
 import USDCIcon from "@/assets/images/usdc.png";
 import SUIIcon from "@/assets/images/sui-wallet.png";
 import { getVaultsActivities } from "@/apis/vault";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export function TxTable() {
   const [filter, setFilter] = useState<Types["type"][]>(["ALL"]);
   const [currentPage, setCurrentPage] = useState(1);
-  const queryClient = useQueryClient();
   const itemsPerPage = 5;
 
   const fetchVaultActivities = async ({
     page = 1,
-    limit = 10,
+    limit = 5,
     action_type = "",
   }: {
     page?: number;
     limit?: number;
     action_type?: string;
-  }): Promise<TransactionHistory | undefined> => {
+  }): Promise<TransactionHistory> => {
     try {
       const response = await getVaultsActivities({
         page,
         limit,
         action_type,
       });
-      if (response && response.data) {
-        return response.data;
+
+      if (response) {
+        return response as TransactionHistory;
       }
     } catch (error) {
       console.error("Error fetching vault activities:", error);
     }
-    return undefined;
+    return { list: [], total: 0, page: 1 } as TransactionHistory;
   };
-
   const handleFormatFilter = (filter: Types["type"][]) => {
     if (filter.includes("ALL")) {
       return "";
@@ -77,33 +76,32 @@ export function TxTable() {
     }
   };
 
-  const { data, isFetching } = useQuery({
+  const { data, isFetching, isFetched } = useQuery({
     queryKey: ["activities", currentPage, filter],
     queryFn: () =>
       fetchVaultActivities({
         page: currentPage,
-        limit: 10,
+        limit: itemsPerPage,
         action_type: handleFormatFilter(filter),
       }),
     staleTime: 30000,
   });
   console.log("🚀 ~ TxTable ~ data:", data)
 
-  const listItems = (data?.list ?? []) as Transaction[];
+  const listItems = data?.list ?? [];
+  const totalItems = data?.total ?? 0;
 
-  const filteredTransactions = filter.includes("ALL")
-    ? listItems
-    : listItems.filter((tx) => filter.includes(tx.type));
+  const [lastTotalPages, setLastTotalPages] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredTransactions.length / itemsPerPage)
-  );
+  useEffect(() => {
+    if (!isFetching && totalPages !== lastTotalPages) {
+      setLastTotalPages(totalPages);
+    }
+  }, [isFetching, totalPages]);
 
-  const paginatedTransactions = filteredTransactions.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const displayTotalPages = isFetching ? lastTotalPages : totalPages;
+  const paginatedTransactions = listItems;
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -118,20 +116,31 @@ export function TxTable() {
     ) {
       setCurrentPage(1);
       setFilter(newFilter);
+      fetchVaultActivities({
+        page: 1,
+        limit: itemsPerPage,
+        action_type: handleFormatFilter(newFilter),
+      });
     }
   };
 
-  const handleSelectTransaction = (tx: Transaction) => {
-    console.log("Selected transaction:", tx);
+  const directToTx = (txhash: string) => {
+    window.open(`https://suiscan.xyz/mainnet/tx/${txhash}`, "_blank");
   };
 
-  const formatCurrency = (value: number | string) => {
+  const handleSelectTransaction = (transaction: Transaction) => {
+    directToTx(transaction.txhash);
+  };
+
+  const formatCurrency = (value: number | string, decimal: number | string) => {
+    const decimalNum = Number(decimal ?? 0);
+    const currencyValue = Number(value) / Math.pow(10, decimalNum);
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
-      minimumFractionDigits: 2,
+      minimumFractionDigits: 0,
       maximumFractionDigits: 2,
-    }).format(Number(value));
+    }).format(currencyValue);
   };
 
   const formatDate = (dateString: string) => {
@@ -148,15 +157,8 @@ export function TxTable() {
   };
 
   const shortenHash = (hash: string) => {
-    const mockHash = "0x7d83c975da6e3b5ff8259436d4f7da6d75";
-    return `${mockHash.slice(0, 6)}...${mockHash.slice(-4)}`;
+    return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
   };
-
-  // const handleCopyHash = (hash: string) => {
-  //   navigator.clipboard.writeText(hash).then(() => {
-  //     console.log("Hash copied to clipboard");
-  //   });
-  // };
 
   const renamingType = (type: string) => {
     switch (type) {
@@ -293,7 +295,7 @@ export function TxTable() {
                       </TableCell>
                     </TableRow>
                   ))
-              ) : paginatedTransactions.length > 0 ? (
+              ) : isFetched && paginatedTransactions.length > 0 ? (
                 paginatedTransactions.map((tx, index) => (
                   <TableRow
                     key={`transaction-${index}`}
@@ -324,10 +326,7 @@ export function TxTable() {
                           "ADD_PROFIT_UPDATE_RATE",
                           "CLAIM_REWARDS",
                         ].includes(tx.type) && (
-                          <Plus
-                            size={16}
-                            className="inline-block mr-1"
-                          />
+                          <Plus size={16} className="inline-block mr-1" />
                         )}
                         {["REMOVE_LIQUIDITY", "CLOSE"].includes(tx.type) && (
                           <ArrowUpRight
@@ -349,50 +348,49 @@ export function TxTable() {
                     <TableCell className="font-mono text-xs text-white/70 px-2">
                       {formatDate(tx.time)}
                     </TableCell>
-                    <TableCell
-                      className="font-mono text-xs text-white/70 flex items-center px-2"
-                      // onClick={(e) => {
-                      //   e.stopPropagation();
-                      //   handleCopyHash(tx.txhash);
-                      // }}
-                    >
+                    <TableCell className="font-mono text-xs text-white/70 flex items-center px-2">
                       <span className="hover:text-white transition-colors mt-1">
-                        {shortenHash(tx.txhash)}
+                        {shortenHash(tx.vault_address)}
                       </span>
                     </TableCell>
                     <TableCell className="px-2">
                       <div className="flex items-center justify-start gap-1">
                         <img
-                          src={tokenImgs[tx.tokens?.token_a?.name]}
-                          alt={tx.tokens?.token_a?.name}
+                          src={tokenImgs[tx.tokens?.[0]?.token_symbol]}
+                          alt={tx.tokens?.[0]?.token_name}
                           className="w-4 h-4"
                         />
                         <div className="font-mono text-sm text-white">
-                          {formatCurrency(tx.tokens?.token_a?.amount)}{" "}
+                          {formatCurrency(
+                            tx.tokens?.[0]?.amount || 0,
+                            tx.tokens?.[0]?.decimal
+                          )}{" "}
                         </div>
                         <div className="font-mono text-xs text-white/70">
-                          {tx.tokens?.token_a?.name}
+                          {tx.tokens?.[0]?.token_symbol}
                         </div>
                       </div>
-                      <div className="flex items-center justify-start gap-1 mt-1">
-                        <img
-                          src={tokenImgs[tx.tokens?.token_b?.name]}
-                          alt={tx.tokens?.token_b?.name}
-                          className="w-4 h-4"
-                        />
-                        <div className="font-mono text-sm text-white">
-                          {formatCurrency(tx.tokens?.token_b?.amount)}{" "}
+                      {tx.tokens?.[1]?.amount !== 0 && (
+                        <div className="flex items-center justify-start gap-1 mt-1">
+                          <img
+                            src={tokenImgs[tx.tokens?.[1]?.token_symbol]}
+                            alt={tx.tokens?.[1]?.token_name}
+                            className="w-4 h-4"
+                          />
+                          <div className="font-mono text-sm text-white">
+                            {formatCurrency(
+                              tx.tokens?.[1]?.amount || 0,
+                              tx.tokens?.[1]?.decimal
+                            )}{" "}
+                          </div>
+                          <div className="font-mono text-xs text-white/70">
+                            {tx.tokens?.[1]?.token_symbol}
+                          </div>
                         </div>
-                        <div className="font-mono text-xs text-white/70">
-                          {tx.tokens?.token_b?.name}
-                        </div>
-                      </div>
+                      )}
                     </TableCell>
                     <TableCell className="font-mono font-medium text-white px-2 flex">
-                      {formatCurrency(
-                        Number(tx.tokens?.token_a?.amount || 0) +
-                          Number(tx.tokens?.token_b?.amount || 0)
-                      )}
+                      {formatCurrency(tx.value, 0)}
                     </TableCell>
                     <TableCell className="text-right font-mono font-medium">
                       <Button
@@ -401,16 +399,10 @@ export function TxTable() {
                         className="h-6 w-6 p-0"
                         onClick={(e) => {
                           e.stopPropagation();
-                          window.open(
-                            `https://explorer.sui.io/txblock/${tx.txhash}`,
-                            "_blank"
-                          );
+                          directToTx(tx.txhash);
                         }}
                       >
-                        <ExternalLink
-                          size={16}
-                          className="text-white/60"
-                        />
+                        <ExternalLink size={16} className="text-white/60" />
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -432,8 +424,8 @@ export function TxTable() {
       <div className="flex justify-between items-end mt-4">
         <div className=" text-white text-xs">
           Showing {itemsPerPage * (currentPage - 1) + 1}-
-          {Math.min(itemsPerPage * currentPage, filteredTransactions.length)} of{" "}
-          {filteredTransactions.length} activities
+          {Math.min(itemsPerPage * currentPage, paginatedTransactions.length)}{" "}
+          of {paginatedTransactions.length} activities
         </div>
         <div className="flex justify-end items-center mt-4 gap-2">
           <Button
@@ -453,7 +445,7 @@ export function TxTable() {
             <ChevronLeft size={12} />
           </Button>
           <div className="flex space-x-2">
-            {totalPages === 0 ? (
+            {displayTotalPages === 0 ? (
               <Button
                 key={1}
                 onClick={() => handlePageChange(1)}
@@ -462,8 +454,8 @@ export function TxTable() {
               >
                 1
               </Button>
-            ) : totalPages <= 5 ? (
-              Array.from({ length: totalPages }, (_, i) => (
+            ) : displayTotalPages <= 5 ? (
+              Array.from({ length: displayTotalPages }, (_, i) => (
                 <Button
                   key={i + 1}
                   onClick={() => handlePageChange(i + 1)}
@@ -479,51 +471,9 @@ export function TxTable() {
               <>
                 {currentPage <= 3 ? (
                   <>
-                    {[1, 2, 3, 4, 5].map((page) => (
-                      <Button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        variant={
-                          currentPage === page
-                            ? "primary"
-                            : "pagination-default"
-                        }
-                        size="pagination"
-                      >
-                        {page}
-                      </Button>
-                    ))}
-                    <span className="px-2 text-white/60 select-none">...</span>
-                  </>
-                ) : currentPage >= totalPages - 2 ? (
-                  <>
-                    <span className="px-2 text-white/60 select-none">...</span>
-                    {[
-                      totalPages - 4,
-                      totalPages - 3,
-                      totalPages - 2,
-                      totalPages - 1,
-                      totalPages,
-                    ].map((page) => (
-                      <Button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        variant={
-                          currentPage === page
-                            ? "primary"
-                            : "pagination-default"
-                        }
-                        size="pagination"
-                      >
-                        {page}
-                      </Button>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    <span className="px-2 text-white/60 select-none">...</span>
-                    {[currentPage - 1, currentPage, currentPage + 1].map(
-                      (page) => (
+                    {[1, 2, 3, 4, 5]
+                      .filter((page) => page <= displayTotalPages)
+                      .map((page) => (
                         <Button
                           key={page}
                           onClick={() => handlePageChange(page)}
@@ -536,8 +486,55 @@ export function TxTable() {
                         >
                           {page}
                         </Button>
-                      )
+                      ))}
+                    {displayTotalPages > 5 && (
+                      <span className="px-2 text-white/60 select-none">
+                        ...
+                      </span>
                     )}
+                  </>
+                ) : currentPage >= displayTotalPages - 2 ? (
+                  <>
+                    <span className="px-2 text-white/60 select-none">...</span>
+                    {Array.from(
+                      { length: 5 },
+                      (_, i) => displayTotalPages - 4 + i
+                    )
+                      .filter((page) => page >= 1 && page <= displayTotalPages)
+                      .map((page) => (
+                        <Button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          variant={
+                            currentPage === page
+                              ? "primary"
+                              : "pagination-default"
+                          }
+                          size="pagination"
+                        >
+                          {page}
+                        </Button>
+                      ))}
+                  </>
+                ) : (
+                  <>
+                    <span className="px-2 text-white/60 select-none">...</span>
+                    {[currentPage - 1, currentPage, currentPage + 1]
+                      .filter((page) => page >= 1 && page <= displayTotalPages)
+                      .map((page) => (
+                        <Button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          variant={
+                            currentPage === page
+                              ? "primary"
+                              : "pagination-default"
+                          }
+                          size="pagination"
+                        >
+                          {page}
+                        </Button>
+                      ))}
                     <span className="px-2 text-white/60 select-none">...</span>
                   </>
                 )}
@@ -546,15 +543,15 @@ export function TxTable() {
           </div>
           <Button
             onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === displayTotalPages}
             variant="pagination-default"
             size="pagination"
           >
             <ChevronRight size={12} />
           </Button>
           <Button
-            onClick={() => handlePageChange(totalPages)}
-            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(displayTotalPages)}
+            disabled={currentPage === displayTotalPages}
             variant="pagination-default"
             size="pagination"
           >
