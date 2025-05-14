@@ -196,7 +196,7 @@ export default function NodoAIVaults() {
           </header>
 
           {/* 3-Column Layout */}
-          <div className="flex gap-[64px] justify-between w-full">
+          <div className="flex gap-[64px] justify-between w-full flex-col md:flex-row">
             {/* Left Rail */}
             <LeftContent />
 
