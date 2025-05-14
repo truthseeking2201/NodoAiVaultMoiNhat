@@ -133,7 +133,6 @@ export default function DepositVaultSection() {
         duration: 5000,
         icon: <IconErrorToast />,
       });
-      setDepositAmount("");
       console.error(error);
       setLoading(false);
     }
