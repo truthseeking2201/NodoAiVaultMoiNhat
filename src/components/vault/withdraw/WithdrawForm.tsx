@@ -178,7 +178,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
             Withdraw Amount ({lpData.lp_symbol})
           </div>
           <div className="font-body text-gray-400">
-            Avaialble:{" "}
+            Available:{" "}
             <span className="font-mono text-white">
               {balanceLp} {lpData.lp_symbol}
             </span>
