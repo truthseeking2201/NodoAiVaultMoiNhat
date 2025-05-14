@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TransactionHistory, Types, Transaction } from "@/types/vault";
 import {
   Table,
@@ -21,27 +21,86 @@ import {
 import SwapIcon from "@/assets/icons/swap.svg";
 import USDCIcon from "@/assets/images/usdc.png";
 import SUIIcon from "@/assets/images/sui-wallet.png";
+import { getVaultsActivities } from "@/apis/vault";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-interface TxTableProps {
-  transactions?: TransactionHistory;
-  isLoading?: boolean;
-  onSelect: (tx: Transaction) => void;
-  onChangePage?: (page: number) => void;
-  onChangeFilter?: (filter: Types["type"][]) => void;
-}
-
-export function TxTable({
-  transactions,
-  isLoading = false,
-  onSelect,
-  onChangePage,
-  onChangeFilter,
-}: TxTableProps) {
+export function TxTable() {
   const [filter, setFilter] = useState<Types["type"][]>(["ALL"]);
   const [currentPage, setCurrentPage] = useState(1);
+  const queryClient = useQueryClient();
   const itemsPerPage = 5;
 
-  const listItems = (transactions?.list ?? []) as Transaction[];
+  const fetchVaultActivities = async ({
+    page = 1,
+    limit = 10,
+    action_type = "",
+  }: {
+    page?: number;
+    limit?: number;
+    action_type?: string;
+  }): Promise<TransactionHistory | undefined> => {
+    try {
+      const response = await getVaultsActivities({
+        page,
+        limit,
+        action_type,
+      });
+      if (response && response.data) {
+        return response.data;
+      }
+    } catch (error) {
+      console.error("Error fetching vault activities:", error);
+    }
+    return undefined;
+  };
+
+  const handleFormatFilter = (filter: Types["type"][]) => {
+    if (filter.includes("ALL")) {
+      return "";
+    }
+    if (filter.includes("SWAP")) {
+      return "SWAP";
+    }
+    if (
+      ["ADD_LIQUIDITY", "OPEN", "ADD_PROFIT_UPDATE_RATE", "CLAIM_REWARDS"].some(
+        (type) => filter.includes(type as Types["type"])
+      )
+    ) {
+      return "ADD_LIQUIDITY";
+    }
+    if (
+      ["REMOVE_LIQUIDITY", "CLOSE"].some((type) =>
+        filter.includes(type as Types["type"])
+      )
+    ) {
+      return "REMOVE_LIQUIDITY";
+    }
+  };
+
+  const { data, isFetching } = useQuery({
+    queryKey: ["activities", currentPage, filter],
+    queryFn: () =>
+      fetchVaultActivities({
+        page: currentPage,
+        limit: 10,
+        action_type: handleFormatFilter(filter),
+      }),
+    staleTime: 30000,
+  });
+
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: ["activities", currentPage + 1, filter],
+      queryFn: () =>
+        fetchVaultActivities({
+          page: currentPage + 1,
+          limit: 10,
+          action_type: handleFormatFilter(filter),
+        }),
+    });
+  }, [currentPage, queryClient, filter]);
+
+  const listItems = (data?.list ?? []) as Transaction[];
 
   const filteredTransactions = filter.includes("ALL")
     ? listItems
@@ -60,22 +119,21 @@ export function TxTable({
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      if (onChangePage) {
-        onChangePage(page);
-      }
     }
   };
 
   const handleFilterChange = (newFilter: Types["type"][]) => {
     if (
-      onChangeFilter &&
-      (newFilter.length !== filter.length ||
-        !newFilter.every((f, i) => f === filter[i]))
+      newFilter.length !== filter.length ||
+      !newFilter.every((f, i) => f === filter[i])
     ) {
       setCurrentPage(1);
       setFilter(newFilter);
-      onChangeFilter(newFilter);
     }
+  };
+
+  const handleSelectTransaction = (tx: Transaction) => {
+    console.log("Selected transaction:", tx);
   };
 
   const formatCurrency = (value: number | string) => {
@@ -101,17 +159,15 @@ export function TxTable({
   };
 
   const shortenHash = (hash: string) => {
-    // Mock hash for demo purposes
     const mockHash = "0x7d83c975da6e3b5ff8259436d4f7da6d75";
     return `${mockHash.slice(0, 6)}...${mockHash.slice(-4)}`;
   };
 
-  const handleCopyHash = (hash: string) => {
-    navigator.clipboard.writeText(hash).then(() => {
-      // In a real app, you'd show a toast notification
-      console.log("Hash copied to clipboard");
-    });
-  };
+  // const handleCopyHash = (hash: string) => {
+  //   navigator.clipboard.writeText(hash).then(() => {
+  //     console.log("Hash copied to clipboard");
+  //   });
+  // };
 
   const renamingType = (type: string) => {
     switch (type) {
@@ -223,7 +279,7 @@ export function TxTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading ? (
+              {isFetching ? (
                 Array(itemsPerPage)
                   .fill(0)
                   .map((_, i) => (
@@ -253,7 +309,7 @@ export function TxTable({
                   <TableRow
                     key={`transaction-${index}`}
                     className="border-b border-white/5 hover:bg-white/5 cursor-pointer even:bg-white/[0.02]"
-                    onClick={() => onSelect(tx)}
+                    onClick={() => handleSelectTransaction(tx)}
                   >
                     <TableCell>
                       <span
@@ -303,10 +359,10 @@ export function TxTable({
                     </TableCell>
                     <TableCell
                       className="font-mono text-xs text-white/70 flex items-center px-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopyHash(tx.txhash);
-                      }}
+                      // onClick={(e) => {
+                      //   e.stopPropagation();
+                      //   handleCopyHash(tx.txhash);
+                      // }}
                     >
                       <span className="hover:text-white transition-colors mt-1">
                         {shortenHash(tx.txhash)}
