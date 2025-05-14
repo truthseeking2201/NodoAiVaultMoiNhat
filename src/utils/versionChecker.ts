@@ -68,6 +68,7 @@ export const initVersionChecker = async (): Promise<void> => {
             onClick: () => window.location.reload(),
           },
           closeButton: true,
+          invert: true,
         });
       }
     }, CHECK_INTERVAL);
