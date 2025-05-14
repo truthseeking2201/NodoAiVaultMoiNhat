@@ -5,7 +5,7 @@ import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { useToast } from "@/components/ui/use-toast";
 import DepositModal from "@/components/vault/deposit/DepositModal";
 import { COIN_TYPES_CONFIG } from "@/config/coin-config";
-import { useGetVaultManagement } from "@/hooks";
+import { useGetVaultConfig, useGetVaultManagement } from "@/hooks";
 import {
   useCalculateNDLPReturn,
   useDepositVault,
@@ -37,6 +37,8 @@ export default function DepositVaultSection() {
 
   const { data: vaultManagement, isLoading: isLoadingVaultManagement } =
     useGetVaultManagement();
+  const { refetch: refetchVaultConfig } = useGetVaultConfig();
+
   const apr = vaultManagement?.apr;
   const currentAccount = useCurrentAccount();
   const isConnected = !!currentAccount?.address;
@@ -137,14 +139,18 @@ export default function DepositVaultSection() {
     }
   }, [depositAmount]);
 
-  const handleDepositSuccessCallback = useCallback((data) => {
-    setTimeout(() => {
-      setDepositSuccessData(data);
-      refreshBalance();
-      setLoading(false);
-      setDepositStep(2);
-    }, 2000);
-  }, []);
+  const handleDepositSuccessCallback = useCallback(
+    (data) => {
+      setTimeout(async () => {
+        refetchVaultConfig();
+        setDepositSuccessData(data);
+        refreshBalance();
+        setLoading(false);
+        setDepositStep(2);
+      }, 2000);
+    },
+    [refetchVaultConfig, refreshBalance]
+  );
 
   const handleDone = useCallback(() => {
     setIsDepositModalOpen(false);
