@@ -106,10 +106,8 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
 
   const onCloseModalSuccess = () => {
     setOpenModalSuccess(false);
-  };
-  const onDone = () => {
-    onCloseModalSuccess();
     reset();
+    onSuccess();
   };
 
   const handleMaxAmount = useCallback(() => {
@@ -126,7 +124,6 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
       const res = await withdraw(form.amount, summary.fee, lpData);
       setOpenModalSuccess(true);
       onCloseModalConfirm();
-      onSuccess();
     } catch (error) {
       console.log(error);
       toast({
@@ -350,7 +347,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
               variant="primary"
               size="lg"
               className="w-full font-semibold text-base px-2 "
-              onClick={onDone}
+              onClick={onCloseModalSuccess}
             >
               Done
             </Button>
