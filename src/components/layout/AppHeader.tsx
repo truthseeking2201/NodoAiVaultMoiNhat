@@ -10,7 +10,6 @@ import {
 import { ConnectWalletButton } from "@/components/wallet/ConnectWalletButton";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  BarChart3,
   Bell,
   Brain,
   Cpu,
@@ -38,14 +37,6 @@ export function AppHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const location = useLocation();
-
-  // Preload the Dashboard component on header mount to ensure it's ready for navigation
-  useEffect(() => {
-    // Preload Dashboard component in the background
-    import("@/pages/Dashboard").catch((error) => {
-      console.error("Failed to preload Dashboard:", error);
-    });
-  }, []);
 
   // Reset mobile menu when location changes
   useEffect(() => {
@@ -348,36 +339,6 @@ export function AppHeader() {
                     className={location.pathname === "/" ? "text-nova" : ""}
                   />
                   <span className="font-medium">Vaults</span>
-                </Link>
-                <Link
-                  to="/dashboard"
-                  className={`flex items-center gap-2 p-3 rounded-lg ${
-                    location.pathname === "/dashboard"
-                      ? "bg-white/10 text-white"
-                      : "text-white/70 hover:bg-white/5 hover:text-white"
-                  }`}
-                  onClick={(e) => {
-                    if (location.pathname === "/dashboard") {
-                      e.preventDefault();
-                    } else {
-                      // Preload Dashboard component on mobile click
-                      import("@/pages/Dashboard").catch((err) =>
-                        console.error(
-                          "Failed to preload Dashboard on mobile:",
-                          err
-                        )
-                      );
-                    }
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  <BarChart3
-                    size={16}
-                    className={
-                      location.pathname === "/dashboard" ? "text-nova" : ""
-                    }
-                  />
-                  <span className="font-medium">Dashboard</span>
                 </Link>
               </nav>
 
