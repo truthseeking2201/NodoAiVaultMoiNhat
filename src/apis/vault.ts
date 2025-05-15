@@ -22,3 +22,16 @@ export const executionWithdrawal = (payload) => {
 export const getVaultConfig = (vault_address) => {
   return httpNodo.get(`${NODO_URL}/data-management/vaults/${vault_address}`);
 };
+
+export const getVaultsActivities = (payload: any) => {
+  const { page, limit, action_type } = payload;
+  if (action_type !== "") {
+    return httpNodo.get(
+      `/execution/position-requests?page=${page}&limit=${limit}&action_type=${action_type}`
+    );
+  } else {
+    return httpNodo.get(
+      `/execution/position-requests?page=${page}&limit=${limit}`
+    );
+  }
+};

@@ -34,3 +34,7 @@ export const formatAmount = ({
 
   return formatted;
 };
+
+export const sleep = (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};

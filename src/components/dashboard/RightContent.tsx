@@ -15,6 +15,7 @@ import { useGetVaultConfig, useGetVaultManagement } from "@/hooks";
 import { getBalanceAmount } from "@/lib/number";
 import { formatAmount } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
+import { Info } from "lucide-react";
 
 const RightContent = () => {
   const currentAccount = useCurrentAccount();
@@ -41,12 +42,10 @@ const RightContent = () => {
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger className="cursor-pointer">
-                  <div className="w-4 h-4 rounded-full border border-gray-600 flex items-center justify-center text-xs ml-1">
-                    !
-                  </div>
+                  <Info className="w-4 h-4 text-white/40" />
                 </TooltipTrigger>
                 <TooltipContent className="bg-black/80 text-white p-2 rounded-lg">
-                  <p className="text-sm">Annual Percentage Rate</p>
+                  Annual Percentage Rate
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

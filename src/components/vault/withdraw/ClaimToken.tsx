@@ -21,7 +21,6 @@ type Props = {
 };
 
 const ClaimToken = ({ data, onSuccess }: Props) => {
-  const [isClaim, setIsClaim] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   /**
    * HOOKS
@@ -77,9 +76,6 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
   /**
    * LIFECYCLES
    */
-  useEffect(() => {
-    setIsClaim(true);
-  }, [data]);
 
   /**
    * RENDER
@@ -88,7 +84,7 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
     <div className="">
       <div className="flex items-center justify-between">
         <div className="font-body text-gray-400 !font-medium">
-          {isClaim
+          {data.isClaim
             ? "Your withdrawal is ready to claim:"
             : "Withdrawal in progress"}
         </div>
@@ -96,7 +92,7 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
           <div className="font-mono font-bold text-2xl text-white">
             {showFormatNumber(data.withdrawAmount)} {data.withdrawSymbol}
           </div>
-          {!isClaim && (
+          {!data.isClaim && (
             <div className="ml-6 flex items-center bg-amber-600/10 p-2.5 rounded-full">
               <img
                 src={AvgPaceIcon}
@@ -113,7 +109,7 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
         </div>
       </div>
 
-      <div className="mb-5 p-4 border border-white/15 rounded-lg mt-5">
+      <div className=" p-4 border border-white/15 rounded-lg mt-5">
         <RowItem label="You’ll  Receive">
           {`${showFormatNumber(data.receiveAmount)} ${data.receiveSymbol}`}
         </RowItem>
@@ -125,25 +121,27 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
         </RowItem>
       </div>
 
-      <Badge
-        variant="warning"
-        className="w-full p-4 rounded-xl block"
-      >
-        <div className="flex items-center">
-          <Clock4 size={14} />{" "}
-          <span className="text-sm text-white font-medium	ml-1.5 capitalize">
-            Please wait to claim your previous withdrawal before initiating a
-            new one
-          </span>
-        </div>
-      </Badge>
+      {!data.isClaim && (
+        <Badge
+          variant="warning"
+          className="w-full p-4 rounded-xl block mt-5"
+        >
+          <div className="flex items-center">
+            <Clock4 size={14} />{" "}
+            <span className="text-sm text-white font-medium	ml-1.5 capitalize">
+              Please wait to claim your previous withdrawal before initiating a
+              new one
+            </span>
+          </div>
+        </Badge>
+      )}
 
       <Button
         variant="primary"
         size="xl"
         className="w-full font-semibold text-lg mt-5"
         onClick={onClaim}
-        disabled={isLoading || !isClaim}
+        disabled={isLoading || !data.isClaim}
       >
         {isLoading && <Loader />} {isLoading ? "Waiting" : "Claim"}
       </Button>

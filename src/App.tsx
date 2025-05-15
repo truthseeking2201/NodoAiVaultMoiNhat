@@ -13,6 +13,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import Dashboard from "./pages/Dashboard";
+import VersionChecker from "./components/shared/VersionChecker";
 
 const NotFound = lazy(() =>
   import("./pages/NotFound").catch((e) => {
@@ -51,6 +52,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <VersionChecker />
             <BrowserRouter>
               <Routes>
                 <Route

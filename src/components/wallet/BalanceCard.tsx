@@ -27,11 +27,9 @@ export function BalanceCard({ className = "" }: BalanceCardProps) {
       <div className="flex items-center gap-4">
         <img src="/coins/ndlp.png" alt="NDLP" className="w-10" />
         <div>
-          <div>
-            <div className="text-white/70 text-sm">You have</div>
-            <div className="text-white text-xl font-bold">
-              {formatAmount({ amount: ndlpAmount })} NDLP
-            </div>
+          <div className="text-white/70 text-sm">You have</div>
+          <div className="text-white text-xl font-bold">
+            {formatAmount({ amount: ndlpAmount })} NDLP
           </div>
           <div className="text-white/70 text-xs">
             1 NDLP = {conversionRate} USDC

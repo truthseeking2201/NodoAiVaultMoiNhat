@@ -30,16 +30,16 @@ http.interceptors.request.use(
 
     const rawString = `${method}${fullPath}${bodyString}${timestamp}`;
     const signature = CryptoJS.HmacSHA256(rawString, apiSecret).toString();
-    console.log("==payload", {
-      method,
-      fullPath,
-      timestamp,
-      bodyString,
-      body: config.data,
-      apiKey,
-      apiSecret,
-      signature,
-    });
+    // console.log("==payload", {
+    //   method,
+    //   fullPath,
+    //   timestamp,
+    //   bodyString,
+    //   body: config.data,
+    //   apiKey,
+    //   apiSecret,
+    //   signature,
+    // });
     // add headers
     config.headers["x-api-key"] = apiKey;
     config.headers["x-timestamp"] = timestamp;

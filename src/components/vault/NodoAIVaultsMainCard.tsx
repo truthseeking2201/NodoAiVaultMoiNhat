@@ -33,10 +33,7 @@ export default function NodoAIVaultsMainCard() {
             aria-label="Deposit tab - press Command+1 to access"
           >
             <div className="flex items-center">
-              <Plus
-                size={24}
-                className="mr-2"
-              />
+              <Plus size={24} className="mr-2" />
               <span className="font-mono">Deposit</span>
             </div>
           </button>
@@ -48,10 +45,7 @@ export default function NodoAIVaultsMainCard() {
             aria-label="Withdraw tab - press Command+2 to access"
           >
             <div className="flex items-center">
-              <ArrowUpRight
-                size={24}
-                className="mr-2"
-              />
+              <ArrowUpRight size={24} className="mr-2" />
               <span className="font-mono">Withdraw</span>
             </div>
           </button>
@@ -59,10 +53,18 @@ export default function NodoAIVaultsMainCard() {
       </div>
 
       {/* Deposit Tab Content */}
-      {depositWithdrawTab === "deposit" && <DepositVaultSection />}
+      <div
+        className={`${depositWithdrawTab === "deposit" ? "block" : "hidden"}`}
+      >
+        <DepositVaultSection />
+      </div>
 
       {/* Withdraw Tab Content */}
-      {depositWithdrawTab === "withdraw" && <WithdrawVaultSection />}
+      <div
+        className={`${depositWithdrawTab === "withdraw" ? "block" : "hidden"}`}
+      >
+        <WithdrawVaultSection />
+      </div>
     </div>
   );
 }

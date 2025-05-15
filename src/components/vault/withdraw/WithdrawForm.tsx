@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import debounce from "lodash/debounce";
 
 import SummaryConfirmWithraw from "./SummaryConfirmWithraw";
@@ -9,6 +9,7 @@ import { Loader } from "@/components/ui/loader";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { IconCheckSuccess } from "@/components/ui/icon-check-success";
 import { Badge } from "@/components/ui/badge";
+import { FormattedNumberInput } from "@/components/ui/formatted-number-input";
 import { Info, Clock4 } from "lucide-react";
 import {
   Dialog,
@@ -45,7 +46,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
     fee: 0,
     rateFee: 0.5,
   };
-  const min_amount = 0.1;
+  const min_amount = 0.01;
   const [summary, setSummary] = useState(summary_default);
   const [timeCoolDown, setTimeCoolDown] = useState<string>("");
   const [form, setForm] = useState<IFormInput>();
@@ -74,7 +75,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
    * HOOKS
    */
   const {
-    register,
+    control,
     watch,
     handleSubmit,
     setValue,
@@ -106,6 +107,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
   const onCloseModalSuccess = () => {
     setOpenModalSuccess(false);
     reset();
+    onSuccess();
   };
 
   const handleMaxAmount = useCallback(() => {
@@ -119,13 +121,9 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
   const onWithdraw = useCallback(async () => {
     setIsLoading(true);
     try {
-      // TODO
-      console.log("-------onWithdraw form", form);
       const res = await withdraw(form.amount, summary.fee, lpData);
-      console.log("-------onWithdraw", res);
       setOpenModalSuccess(true);
       onCloseModalConfirm();
-      onSuccess();
     } catch (error) {
       console.log(error);
       toast({
@@ -180,35 +178,30 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
             Withdraw Amount ({lpData.lp_symbol})
           </div>
           <div className="font-body text-gray-400">
-            Avaialble:{" "}
+            Available:{" "}
             <span className="font-mono text-white">
               {balanceLp} {lpData.lp_symbol}
             </span>
           </div>
         </div>
-        <div className="relative mb-2 mt-2">
-          <input
-            type="text"
-            placeholder="0.00"
-            {...register("amount", {
-              required: true,
-              min: min_amount,
-              max: balanceLp,
-              pattern: /^\d*\.?\d{0,2}$/,
-            })}
-            className="input-vault w-full font-heading-lg"
-          />
-
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex rounded-full mx-auto bg-gradient-to-tr from-[#0090FF] via-[#FF6D9C] to-[#FB7E16] p-px hover:opacity-70 transition-all duration-300">
-            <button
-              type="button"
-              onClick={handleMaxAmount}
-              className="bg-[#202124] border border-[#1A1A1A] text-white hover:text-white px-4 py-1 rounded-[16px] text-sm font-medium"
-            >
-              MAX
-            </button>
-          </div>
-        </div>
+        <Controller
+          name="amount"
+          control={control}
+          rules={{
+            required: true,
+            min: min_amount,
+            max: balanceLp,
+            pattern: /^\d*\.?\d{0,2}$/,
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <FormattedNumberInput
+              value={value ? `${value}` : ""}
+              onChange={onChange}
+              onBlur={onBlur}
+              onMaxAmount={handleMaxAmount}
+            />
+          )}
+        />
         {errors.amount?.type && (
           <div className="text-red-error text-sm mt-1 flex items-center">
             <Info
@@ -237,7 +230,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
             label="Amount"
             className="mt-2"
           >
-            {summary.amount
+            {summary?.amount
               ? `${showFormatNumber(summary.amount)} ${lpData.lp_symbol}`
               : "--"}
           </RowItem>
@@ -245,7 +238,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
             label="To Receive"
             className="mt-3"
           >
-            {summary.receive
+            {summary?.receive
               ? `${showFormatNumber(summary.receive)} ${lpData.token_symbol}`
               : "--"}
           </RowItem>
@@ -253,7 +246,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
             label="Withdraw Fee"
             className="mt-3"
           >
-            {summary.amount
+            {summary?.amount
               ? `${showFormatNumber(summary.fee)} ${lpData.token_symbol}`
               : "--"}
           </RowItem>
@@ -337,7 +330,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
               Withdrawal Request Confirmed!
             </DialogTitle>
             <DialogDescription className="m-0 text-center text-base text-gray-400">
-              Your {showFormatNumber(summary.amount)} {lpData.lp_symbol}{" "}
+              Your {showFormatNumber(summary?.amount)} {lpData.lp_symbol}{" "}
               withdrawal request from Nodo AI Vault has been confirmed. Funds
               will be available after the{" "}
               <span className="whitespace-nowrap">{timeCoolDown}</span>{" "}
