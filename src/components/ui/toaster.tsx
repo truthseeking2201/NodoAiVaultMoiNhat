@@ -19,13 +19,11 @@ export function Toaster() {
         description,
         action,
         icon,
+        hideClose,
         ...props
       }) {
         return (
-          <Toast
-            key={id}
-            {...props}
-          >
+          <Toast key={id} {...props}>
             {icon}
             <div className="grid gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
@@ -34,7 +32,7 @@ export function Toaster() {
               )}
             </div>
             {action}
-            <ToastClose />
+            {!hideClose && <ToastClose />}
           </Toast>
         );
       })}
