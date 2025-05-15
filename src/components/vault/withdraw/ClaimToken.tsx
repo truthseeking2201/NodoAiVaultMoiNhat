@@ -18,9 +18,10 @@ import { useWithdrawVault } from "@/hooks/useWithdrawVault";
 type Props = {
   data?: DataClaimType;
   onSuccess: () => void;
+  reloadData: () => void;
 };
 
-const ClaimToken = ({ data, onSuccess }: Props) => {
+const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   /**
    * HOOKS
@@ -102,7 +103,7 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
               <Countdown
                 date={data.timeUnlock}
                 renderer={renderer}
-                onComplete={onSuccess}
+                onComplete={reloadData}
               />
             </div>
           )}
@@ -117,7 +118,15 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
           label="Withdraw Fee"
           className="mt-3"
         >
-          {`${showFormatNumber(data.feeAmount)} ${data.feeSymbol}`}
+          <RowItem.Label>
+            Withdraw Fee
+            <span className="text-gray-200 font-mono ml-2">
+              ({data?.feeRate || 0}%)
+            </span>
+          </RowItem.Label>
+          <RowItem.Value>
+            {`${showFormatNumber(data.feeAmount)} ${data.feeSymbol}`}
+          </RowItem.Value>
         </RowItem>
       </div>
 
@@ -127,7 +136,10 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
           className="w-full p-4 rounded-xl block mt-5"
         >
           <div className="flex items-center">
-            <Clock4 size={14} />{" "}
+            <Clock4
+              size={14}
+              className="flex-shrink-0"
+            />{" "}
             <span className="text-sm text-white font-medium	ml-1.5 capitalize">
               Please wait to claim your previous withdrawal before initiating a
               new one

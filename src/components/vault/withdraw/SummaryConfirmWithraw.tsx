@@ -38,7 +38,7 @@ const ClaimToken = ({ summary, lpData, address }: Props) => {
         </div>
       </RowItem>
       <RowItem
-        label="Withdraw Fee"
+        label={`Withdraw Fee (${summary?.rateFee || 0}%)`}
         className="mt-3"
       >
         {showFormatNumber(summary?.fee || 0)} {lpData?.token_symbol}

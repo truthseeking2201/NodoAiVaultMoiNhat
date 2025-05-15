@@ -13,4 +13,5 @@ export default interface DataClaimType {
 
   feeAmount: number;
   feeSymbol: string;
+  feeRate: number;
 }
