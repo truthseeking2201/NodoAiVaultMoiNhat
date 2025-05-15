@@ -21,6 +21,7 @@ import {
 import SwapIcon from "@/assets/icons/swap.svg";
 import USDCIcon from "@/assets/images/usdc.png";
 import SUIIcon from "@/assets/images/sui-wallet.png";
+import CetusIcon from "@/assets/images/cetus.png";
 import { getVaultsActivities } from "@/apis/vault";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -142,6 +143,15 @@ export function TxTable() {
     directToTx(transaction.txhash);
   };
 
+  type DirectToAddressEvent = React.MouseEvent<HTMLSpanElement, MouseEvent>;
+  const directToAddress = (e: DirectToAddressEvent, address: string): void => {
+    e.stopPropagation();
+    window.open(
+      `https://suiscan.xyz/mainnet/object/${address}/tx-blocks`,
+      "_blank"
+    );
+  };
+
   const renamingType = (type: string) => {
     switch (type) {
       case "ADD_LIQUIDITY":
@@ -166,6 +176,7 @@ export function TxTable() {
   const tokenImgs = {
     USDC: USDCIcon,
     SUI: SUIIcon,
+    CETUS: CetusIcon,
   };
 
   return (
@@ -228,19 +239,19 @@ export function TxTable() {
                 <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[170px] ">
                   Type
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[80px] px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[88px] px-2">
                   Date
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[147px] px-2">
                   Vault address
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[136px] px-2">
                   Tokens
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[72px] px-2">
                   Value
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[90px] px-2">
                   Tx Hash
                 </TableHead>
               </TableRow>
@@ -251,20 +262,23 @@ export function TxTable() {
                   .fill(0)
                   .map((_, i) => (
                     <TableRow key={i} className="hover:bg-white/5 w-full">
-                      <TableCell>
-                        <div className="h-5 w-20 bg-white/10 animate-pulse rounded"></div>
+                      <TableCell className="h-[74.6px]">
+                        <div className="h-5 bg-white/10 animate-pulse rounded"></div>
+                      </TableCell>
+                      <TableCell className="px-2">
+                        <div className="h-5 bg-white/10 animate-pulse rounded"></div>
+                      </TableCell>
+                      <TableCell className="px-2">
+                        <div className="h-5 bg-white/10 animate-pulse rounded"></div>
+                      </TableCell>
+                      <TableCell className="px-2">
+                        <div className="h-5 bg-white/10 animate-pulse rounded"></div>
+                      </TableCell>
+                      <TableCell className="px-2">
+                        <div className="h-5 bg-white/10 animate-pulse rounded"></div>
                       </TableCell>
                       <TableCell>
-                        <div className="h-5 w-16 bg-white/10 animate-pulse rounded"></div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="h-5 w-24 bg-white/10 animate-pulse rounded"></div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="h-5 w-20 ml-auto bg-white/10 animate-pulse rounded"></div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="h-5 w-28 bg-white/10 animate-pulse rounded"></div>
+                        <div className="h-5 bg-white/10 animate-pulse rounded"></div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -310,7 +324,12 @@ export function TxTable() {
                       {formatDate12Hours(tx.time)}
                     </TableCell>
                     <TableCell className="font-mono text-xs text-white/70 flex items-center px-2">
-                      <span className="hover:text-white transition-colors mt-1">
+                      <span
+                        className="hover:text-white transition-colors mt-1 hover:cursor-pointer"
+                        onClick={(e) => {
+                          directToAddress(e, tx.vault_address);
+                        }}
+                      >
                         {truncateBetween(tx.vault_address, 4, 4)}
                       </span>
                     </TableCell>
