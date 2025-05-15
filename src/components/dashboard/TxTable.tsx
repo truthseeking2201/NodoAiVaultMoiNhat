@@ -261,8 +261,11 @@ export function TxTable() {
                 Array(itemsPerPage)
                   .fill(0)
                   .map((_, i) => (
-                    <TableRow key={i} className="hover:bg-white/5 w-full">
-                      <TableCell className="h-[74.6px]">
+                    <TableRow
+                      key={i}
+                      className="hover:bg-white/5 w-full h-[76.4px]"
+                    >
+                      <TableCell>
                         <div className="h-5 bg-white/10 animate-pulse rounded"></div>
                       </TableCell>
                       <TableCell className="px-2">
@@ -286,7 +289,7 @@ export function TxTable() {
                 paginatedTransactions.map((tx, index) => (
                   <TableRow
                     key={`transaction-${index}`}
-                    className="hover:bg-white/5 cursor-pointe"
+                    className="hover:bg-white/5 cursor-pointer h-[76.4px]"
                     onClick={() => handleSelectTransaction(tx)}
                   >
                     <TableCell>
@@ -325,7 +328,7 @@ export function TxTable() {
                     </TableCell>
                     <TableCell className="font-mono text-xs text-white/70 flex items-center px-2">
                       <span
-                        className="hover:text-white transition-colors mt-1 hover:cursor-pointer"
+                        className="hover:text-white transition-colors mt-1.5 hover:cursor-pointer"
                         onClick={(e) => {
                           directToAddress(e, tx.vault_address);
                         }}
@@ -376,7 +379,7 @@ export function TxTable() {
                       <Button
                         variant="link"
                         size="sm"
-                        className="h-6 w-6 p-0"
+                        className="h-6 w-6"
                         onClick={(e) => {
                           e.stopPropagation();
                           directToTx(tx.txhash);
