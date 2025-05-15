@@ -23,6 +23,7 @@ import USDCIcon from "@/assets/images/usdc.png";
 import SUIIcon from "@/assets/images/sui-wallet.png";
 import { getVaultsActivities } from "@/apis/vault";
 import { useQuery } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 export function TxTable() {
   const [filter, setFilter] = useState<Types["type"][]>(["ALL"]);
@@ -163,7 +164,7 @@ export function TxTable() {
   };
 
   const shortenHash = (hash: string) => {
-    return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
+    return `${hash.slice(0, 4)}...${hash.slice(-4)}`;
   };
 
   const renamingType = (type: string) => {
@@ -193,7 +194,7 @@ export function TxTable() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-[64px]">
       <div className="flex flex-wrap gap-2 md:justify-between">
         <h2 className="font-heading-lg text-100 mb-4">Vault Activities</h2>
         <div className="flex space-x-2">
@@ -274,10 +275,7 @@ export function TxTable() {
                 Array(itemsPerPage)
                   .fill(0)
                   .map((_, i) => (
-                    <TableRow
-                      key={i}
-                      className="border-b border-white/5 hover:bg-white/5 w-full"
-                    >
+                    <TableRow key={i} className="hover:bg-white/5 w-full">
                       <TableCell>
                         <div className="h-5 w-20 bg-white/10 animate-pulse rounded"></div>
                       </TableCell>
@@ -299,21 +297,19 @@ export function TxTable() {
                 paginatedTransactions.map((tx, index) => (
                   <TableRow
                     key={`transaction-${index}`}
-                    className="border-b border-white/5 hover:bg-white/5 cursor-pointer even:bg-white/[0.02]"
+                    className="hover:bg-white/5 cursor-pointe"
                     onClick={() => handleSelectTransaction(tx)}
                   >
                     <TableCell>
                       <span
-                        className={`inline-block text-xs font-medium px-2 py-1 rounded-md ${
+                        className={cn(
+                          "inline-block text-xs font-medium px-2 py-1 rounded-md",
                           REMOVE_LIQUIDITY_TYPES.includes(tx.type) &&
-                          "bg-[#F97316]/30 text-[#F97316]"
-                        } ${
+                            "bg-[#F97316]/30 text-[#F97316]",
                           ADD_LIQUIDITY_TYPES.includes(tx.type) &&
-                          "bg-[#22C55E]/20 text-[#22C55E]"
-                        } ${
+                            "bg-[#22C55E]/20 text-[#22C55E]",
                           tx.type === "SWAP" && "bg-[#3B82F6]/30 text-[#3B82F6]"
-                        }
-                        `}
+                        )}
                       >
                         {ADD_LIQUIDITY_TYPES.includes(tx.type) && (
                           <Plus size={16} className="inline-block mr-1" />

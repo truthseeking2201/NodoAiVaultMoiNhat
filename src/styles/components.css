@@ -1,18 +1,21 @@
-
 @layer components {
   /* Glass card styling - standardized */
   .glass-card {
-    @apply bg-white/5 backdrop-blur-glass border border-white/10 rounded-xl shadow-glass transition-all duration-300 hover:border-white/15;
+    @apply bg-black backdrop-blur-glass border border-black/10 rounded-xl shadow-glass transition-all duration-300 hover:border-white/15;
     position: relative;
   }
 
   .glass-card::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    background: linear-gradient(120deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+    background: linear-gradient(
+      120deg,
+      rgba(0, 0, 0, 0.08) 0%,
+      rgba(0, 0, 0, 0.03) 100%
+    );
     opacity: 0.5;
     pointer-events: none;
   }
@@ -23,7 +26,7 @@
   }
 
   .nav-link::after {
-    content: '';
+    content: "";
     @apply absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-brand rounded-sm transition-all origin-left;
     transition: width 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
@@ -78,17 +81,17 @@
     background: rgba(11, 12, 16, 0.7);
     border-radius: 12px;
     padding: 8px 12px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: "IBM Plex Mono", monospace;
     font-size: 12px;
     cursor: pointer;
     position: relative;
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   .wallet-address:hover {
-    border-color: rgba(255,255,255,0.15);
+    border-color: rgba(255, 255, 255, 0.15);
     background: rgba(11, 12, 16, 0.8);
   }
 
@@ -122,9 +125,10 @@
     border-radius: inherit;
     opacity: 0;
     transition: opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-    background: linear-gradient(to right, #FF9320, #EC6F05, #3E1672) border-box;
+    background: linear-gradient(to right, #ff9320, #ec6f05, #3e1672) border-box;
     mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box,
+      linear-gradient(#fff 0 0);
     -webkit-mask-composite: destination-out;
     mask-composite: exclude;
     pointer-events: none;
@@ -145,13 +149,18 @@
   }
 
   .activity-item::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
     opacity: 0;
     transition: opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
@@ -166,10 +175,14 @@
   }
 
   .ai-glow::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: -8px;
-    background: radial-gradient(circle closest-side, rgba(236, 111, 5, 0.18), transparent);
+    background: radial-gradient(
+      circle closest-side,
+      rgba(236, 111, 5, 0.18),
+      transparent
+    );
     z-index: -1;
     border-radius: 50%;
     filter: blur(8px);
