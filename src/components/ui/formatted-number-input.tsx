@@ -58,7 +58,7 @@ export function FormattedNumberInput({
         className={cn("input-vault w-full font-heading-lg pr-24", className)}
         {...props}
       />
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-3">
+      <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-3">
         {value && (
           <button
             onClick={handleClear}
@@ -66,7 +66,10 @@ export function FormattedNumberInput({
             type="button"
             aria-label="Clear input"
           >
-            <X size={16} color="#989898" />
+            <X
+              size={16}
+              color="#989898"
+            />
           </button>
         )}
         <div className="flex rounded-full mx-auto bg-gradient-to-tr from-[#0090FF] via-[#FF6D9C] to-[#FB7E16] p-px hover:opacity-70 transition-all duration-300">
