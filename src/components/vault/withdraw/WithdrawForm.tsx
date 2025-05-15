@@ -114,7 +114,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
   };
 
   const handleMaxAmount = useCallback(() => {
-    setValue("amount", balanceLp);
+    setValue("amount", balanceLp, { shouldValidate: true });
   }, [balanceLp]);
 
   const handleFormChange = useCallback((data: IFormInput) => {
