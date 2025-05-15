@@ -18,9 +18,10 @@ import { useWithdrawVault } from "@/hooks/useWithdrawVault";
 type Props = {
   data?: DataClaimType;
   onSuccess: () => void;
+  reloadData: () => void;
 };
 
-const ClaimToken = ({ data, onSuccess }: Props) => {
+const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   /**
    * HOOKS
@@ -102,7 +103,7 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
               <Countdown
                 date={data.timeUnlock}
                 renderer={renderer}
-                onComplete={onSuccess}
+                onComplete={reloadData}
               />
             </div>
           )}

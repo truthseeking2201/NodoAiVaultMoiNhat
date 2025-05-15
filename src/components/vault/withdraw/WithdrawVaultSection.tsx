@@ -159,6 +159,7 @@ export default function WithdrawVaultSection() {
               <ClaimToken
                 data={dataClaim}
                 onSuccess={onSuccessClaim}
+                reloadData={initDataClaim}
               />
             )}
 
