@@ -242,13 +242,18 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
               ? `${showFormatNumber(summary.receive)} ${lpData.token_symbol}`
               : "--"}
           </RowItem>
-          <RowItem
-            label="Withdraw Fee"
-            className="mt-3"
-          >
-            {summary?.amount
-              ? `${showFormatNumber(summary.fee)} ${lpData.token_symbol}`
-              : "--"}
+          <RowItem className="mt-3">
+            <RowItem.Label>
+              Withdraw Fee
+              <span className="text-gray-200 font-mono ml-2">
+                ({summary?.rateFee || 0}%)
+              </span>
+            </RowItem.Label>
+            <RowItem.Value>
+              {summary?.amount
+                ? `${showFormatNumber(summary.fee)} ${lpData.token_symbol}`
+                : "--"}
+            </RowItem.Value>
           </RowItem>
         </div>
 

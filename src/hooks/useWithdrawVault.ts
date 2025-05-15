@@ -44,7 +44,9 @@ const _getEstWithdraw = (
       amount: amountLp,
       receive: _receiveAmount,
       fee: _fee,
-      rateFee: Number(configVault.withdraw.fee_bps || 0),
+      rateFee: BigNumber(configVault.withdraw.fee_bps || 0)
+        .dividedBy(100)
+        .toNumber(),
     };
   } catch (error) {
     return null;
@@ -110,6 +112,7 @@ export const useWithdrawVault = () => {
           receiveSymbol: configLp.token_symbol,
           feeAmount: est.fee,
           feeSymbol: configLp.token_symbol,
+          feeRate: est?.rateFee,
           configLp: configLp,
         };
       });

@@ -117,7 +117,15 @@ const ClaimToken = ({ data, onSuccess }: Props) => {
           label="Withdraw Fee"
           className="mt-3"
         >
-          {`${showFormatNumber(data.feeAmount)} ${data.feeSymbol}`}
+          <RowItem.Label>
+            Withdraw Fee
+            <span className="text-gray-200 font-mono ml-2">
+              ({data?.feeRate || 0}%)
+            </span>
+          </RowItem.Label>
+          <RowItem.Value>
+            {`${showFormatNumber(data.feeAmount)} ${data.feeSymbol}`}
+          </RowItem.Value>
         </RowItem>
       </div>
 
