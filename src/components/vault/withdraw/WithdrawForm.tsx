@@ -60,7 +60,10 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
       className="w-full p-4 rounded-xl block"
     >
       <div className="flex items-center mb-1">
-        <Clock4 size={14} />{" "}
+        <Clock4
+          size={14}
+          className="flex-shrink-0"
+        />{" "}
         <span className="text-sm text-white font-medium	ml-1.5 capitalize">
           {timeCoolDown} Cooldown Period
         </span>

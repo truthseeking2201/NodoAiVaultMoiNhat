@@ -136,7 +136,10 @@ const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
           className="w-full p-4 rounded-xl block mt-5"
         >
           <div className="flex items-center">
-            <Clock4 size={14} />{" "}
+            <Clock4
+              size={14}
+              className="flex-shrink-0"
+            />{" "}
             <span className="text-sm text-white font-medium	ml-1.5 capitalize">
               Please wait to claim your previous withdrawal before initiating a
               new one
