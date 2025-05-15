@@ -11,9 +11,9 @@ import { getFullnodeUrl } from "@mysten/sui/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import VersionChecker from "./components/shared/VersionChecker";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import Dashboard from "./pages/Dashboard";
-import VersionChecker from "./components/shared/VersionChecker";
 
 const NotFound = lazy(() =>
   import("./pages/NotFound").catch((e) => {
@@ -27,14 +27,6 @@ const queryClient = new QueryClient();
 
 // Replace loading state with mock data for demo - no loading screen needed
 const PageFallback = () => null;
-
-// Preload Dashboard component immediately when app loads
-(() => {
-  // This immediate invocation will preload the Dashboard in the background
-  import("./pages/Dashboard").catch((err) =>
-    console.error("Failed to preload Dashboard on init:", err)
-  );
-})();
 
 const { networkConfig } = createNetworkConfig({
   testnet: { url: getFullnodeUrl("testnet") },
