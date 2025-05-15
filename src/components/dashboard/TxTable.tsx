@@ -24,6 +24,9 @@ import SUIIcon from "@/assets/images/sui-wallet.png";
 import { getVaultsActivities } from "@/apis/vault";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { formatDate12Hours } from "@/utils/date";
+import { formatCurrency } from "@/utils/currency";
+import { truncateBetween } from "@/utils/truncate";
 
 export function TxTable() {
   const [filter, setFilter] = useState<Types["type"][]>(["ALL"]);
@@ -137,34 +140,6 @@ export function TxTable() {
 
   const handleSelectTransaction = (transaction: Transaction) => {
     directToTx(transaction.txhash);
-  };
-
-  const formatCurrency = (value: number | string, decimal: number | string) => {
-    const decimalNum = Number(decimal ?? 0);
-    const currencyValue = Number(value) / Math.pow(10, decimalNum);
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(currencyValue);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const year = String(date.getFullYear());
-    let hour = date.getHours();
-    const minute = String(date.getMinutes()).padStart(2, "0");
-    const ampm = hour >= 12 ? "PM" : "AM";
-    hour = hour % 12;
-    hour = hour === 0 ? 12 : hour;
-    return `${month}/${day}/${year} ${hour}:${minute} ${ampm}`;
-  };
-
-  const shortenHash = (hash: string) => {
-    return `${hash.slice(0, 4)}...${hash.slice(-4)}`;
   };
 
   const renamingType = (type: string) => {
@@ -332,11 +307,11 @@ export function TxTable() {
                       </span>
                     </TableCell>
                     <TableCell className="font-mono text-xs text-white/70 px-2">
-                      {formatDate(tx.time)}
+                      {formatDate12Hours(tx.time)}
                     </TableCell>
                     <TableCell className="font-mono text-xs text-white/70 flex items-center px-2">
                       <span className="hover:text-white transition-colors mt-1">
-                        {shortenHash(tx.vault_address)}
+                        {truncateBetween(tx.vault_address, 4, 4)}
                       </span>
                     </TableCell>
                     <TableCell className="px-2">
