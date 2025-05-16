@@ -404,14 +404,14 @@ export function TxTable() {
           </Table>
         </div>
       </div>
-      <div className="flex justify-between items-end mt-4">
-        <div className=" text-white text-xs">
+      <div className="flex justify-between items-start mt-4">
+        <div className="text-white text-xs">
           Showing{" "}
           {Math.min(itemsPerPage * currentPage, paginatedTransactions.length)}-
           {itemsPerPage * (currentPage - 1) + 1} of{" "}
           {paginatedTransactions.length} activities
         </div>
-        <div className="flex justify-end items-center mt-4 gap-2">
+        <div className="flex justify-end items-center gap-2">
           <Button
             onClick={() => handlePageChange(1)}
             disabled={currentPage === 1}
