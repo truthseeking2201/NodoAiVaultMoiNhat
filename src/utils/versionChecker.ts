@@ -2,8 +2,6 @@
  * Version checker utility for auto-refreshing the app when a new deployment is detected
  */
 
-import { toast } from "sonner";
-
 // This will be set during build time
 const VERSION_FILE_PATH = "/version.json";
 const CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes in milliseconds

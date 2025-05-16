@@ -20,7 +20,7 @@ export default function NodoAIVaults() {
       <PageContainer>
         <div style={{ maxWidth: "1400px" }}>
           {/* Main Header */}
-          <header className="text-center mb-16">
+          <header className="text-center font-sans mb-16">
             <h1 className="text-[60px] leading-[48px] font-bold">
               <span>NODO </span>
               <span
@@ -36,7 +36,7 @@ export default function NodoAIVaults() {
                 AI Vaults
               </span>
             </h1>
-            <p className="font-body text-[18px]">
+            <p className="text-[18px]">
               Maximizing DeFi Yields With Autonomous Risk Management
             </p>
           </header>

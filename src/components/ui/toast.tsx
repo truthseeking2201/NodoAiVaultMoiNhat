@@ -4,7 +4,6 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { error } from "console";
 
 const ToastProvider = ToastPrimitives.Provider;
 
@@ -41,6 +40,41 @@ const toastVariants = cva(
   }
 );
 
+const ToastProgressBar = ({ duration = 5000 }: { duration?: number }) => {
+  const [width, setWidth] = React.useState(0);
+  const stepInterval = 100; // ~60fps for smooth animation
+
+  React.useEffect(() => {
+    if (!open) return;
+    setWidth(0);
+
+    // Calculate how many steps we need to reach 100% within the duration
+    const totalSteps = Math.ceil(duration / stepInterval);
+    const stepSize = 100 / totalSteps;
+
+    const interval = setInterval(() => {
+      setWidth((currentWidth) => {
+        const nextWidth = Math.min(100, currentWidth + stepSize);
+        if (nextWidth >= 100) {
+          clearInterval(interval);
+        }
+        return nextWidth;
+      });
+    }, stepInterval);
+
+    return () => clearInterval(interval);
+  }, [duration, open]);
+
+  return (
+    <div className="!ml-0 absolute left-0 bottom-0 h-1 w-full">
+      <div
+        className="h-full bg-[#10B981] transition-all ease-linear"
+        style={{ width: `${width}%` }}
+      />
+    </div>
+  );
+};
+
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
@@ -50,8 +84,14 @@ const Toast = React.forwardRef<
     <ToastPrimitives.Root
       ref={ref}
       className={cn(toastVariants({ variant }), className)}
+      draggable={false}
       {...props}
-    />
+    >
+      {props.children}
+      {props.duration && variant === "success" && (
+        <ToastProgressBar duration={props.duration} />
+      )}
+    </ToastPrimitives.Root>
   );
 });
 Toast.displayName = ToastPrimitives.Root.displayName;

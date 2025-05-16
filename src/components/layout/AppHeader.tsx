@@ -280,7 +280,7 @@ export function AppHeader() {
           {/* Connect Wallet Button */}
           <ConnectWalletButton />
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Toggle
           <Button
             variant="ghost"
             size="icon"
@@ -289,7 +289,7 @@ export function AppHeader() {
             aria-label="Toggle mobile menu"
           >
             <Menu size={14} className="text-white/70" />
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -315,24 +315,6 @@ export function AppHeader() {
                       ? "bg-white/10 text-white"
                       : "text-white/70 hover:bg-white/5 hover:text-white"
                   }`}
-                  onClick={(e) => {
-                    if (location.pathname === "/") {
-                      e.preventDefault();
-                    } else {
-                      // Clear the vault cache when navigating to vaults page from another page
-                      import("@/services/vaultService")
-                        .then((module) => {
-                          module.vaultService.clearCache();
-                        })
-                        .catch((err) =>
-                          console.error(
-                            "Failed to clear vault cache on mobile:",
-                            err
-                          )
-                        );
-                    }
-                    setIsMobileMenuOpen(false);
-                  }}
                 >
                   <Zap
                     size={16}

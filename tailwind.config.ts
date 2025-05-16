@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
 
@@ -32,34 +31,6 @@ export default {
         "text-primary": "#E5E7EB",
         "text-secondary": "#9CA3AF",
 
-        // Brand vault colors - standardized
-        nova: {
-          DEFAULT: "#EC6F05",
-          light: "#FF9320",
-          dark: "#B45004",
-          deep: "#5A2702",
-        },
-        orion: {
-          DEFAULT: "#F59E0B",
-          light: "#FCD34D",
-          dark: "#B45309",
-          "500": "#F59E0B",
-        },
-        emerald: {
-          DEFAULT: "#10B981",
-          light: "#6EE7B7",
-          dark: "#047857",
-        },
-        violet: {
-          DEFAULT: "#3E1672",
-          light: "#5C2E98",
-          dark: "#2A0E50",
-        },
-        cyan: {
-          DEFAULT: "#14E9F2",
-          light: "#7FF4FA",
-          dark: "#0CABB2",
-        },
         ai: {
           DEFAULT: "#FDEBCF",
           light: "#FDEBCF",
