@@ -346,7 +346,9 @@ export function TxTable() {
                         <div className="font-mono text-sm text-white">
                           {formatCurrency(
                             tx.tokens?.[0]?.amount || 0,
-                            tx.tokens?.[0]?.decimal
+                            tx.tokens?.[0]?.decimal,
+                            0,
+                            2
                           )}{" "}
                         </div>
                         <div className="font-mono text-xs text-white/70">
@@ -363,7 +365,9 @@ export function TxTable() {
                           <div className="font-mono text-sm text-white">
                             {formatCurrency(
                               tx.tokens?.[1]?.amount || 0,
-                              tx.tokens?.[1]?.decimal
+                              tx.tokens?.[1]?.decimal,
+                              0,
+                              4
                             )}{" "}
                           </div>
                           <div className="font-mono text-xs text-white/70">
