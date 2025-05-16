@@ -280,7 +280,7 @@ export function AppHeader() {
           {/* Connect Wallet Button */}
           <ConnectWalletButton />
 
-          {/* Mobile Menu Toggle */}
+          {/* Mobile Menu Toggle
           <Button
             variant="ghost"
             size="icon"
@@ -289,7 +289,7 @@ export function AppHeader() {
             aria-label="Toggle mobile menu"
           >
             <Menu size={14} className="text-white/70" />
-          </Button>
+          </Button> */}
         </div>
       </div>
 
