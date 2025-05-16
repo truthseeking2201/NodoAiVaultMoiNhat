@@ -18,6 +18,7 @@ import { formatAmount } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { AlertCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import SuccessfulToast from "./SuccessfulToast";
 
 type DepositSuccessData = {
   amount: number;
@@ -46,7 +47,7 @@ export default function DepositVaultSection() {
   const { openConnectWalletDialog } = useWallet();
   const { assets, refreshBalance } = useMyAssets();
   const { deposit } = useDepositVault();
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
 
   const usdcCoin = useMemo(
     () =>
@@ -146,9 +147,31 @@ export default function DepositVaultSection() {
         refreshBalance();
         setLoading(false);
         setDepositStep(2);
+
+        toast({
+          duration: 5000,
+          description: (
+            <SuccessfulToast
+              title="Deposit successful!"
+              content={`${depositAmount} USDC deposited — ${formatAmount({
+                amount: +ndlpAmountWillGet || 0,
+              })} NDLP minted to your account. Check your wallet for Tx details`}
+              closeToast={() => dismiss()}
+            />
+          ),
+          variant: "success",
+          hideClose: true,
+        });
       }, 2000);
     },
-    [refetchVaultConfig, refreshBalance]
+    [
+      refetchVaultConfig,
+      refreshBalance,
+      toast,
+      dismiss,
+      depositAmount,
+      ndlpAmountWillGet,
+    ]
   );
 
   const handleDone = useCallback(() => {
