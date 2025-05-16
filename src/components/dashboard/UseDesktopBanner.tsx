@@ -36,7 +36,8 @@ const UseDesktopBanner = () => {
           </svg>
         </div>
         <div className="font-sans text-sm text-black pr-2 text-center">
-          For a best experience, please visit on a desktop browser.
+          For a best experience, please visit on a desktop Google Chrome
+          browser.
         </div>
         <button
           className="flex items-center justify-center rounded-full"

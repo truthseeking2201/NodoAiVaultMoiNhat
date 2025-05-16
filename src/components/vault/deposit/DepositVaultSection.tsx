@@ -141,44 +141,37 @@ export default function DepositVaultSection() {
 
   const handleDepositSuccessCallback = useCallback(
     (data) => {
-      setTimeout(async () => {
+      const timeoutId = setTimeout(async () => {
         refetchVaultConfig();
         setDepositSuccessData(data);
         refreshBalance();
         setLoading(false);
         setDepositStep(2);
-
-        toast({
-          duration: 5000,
-          description: (
-            <SuccessfulToast
-              title="Deposit successful!"
-              content={`${depositAmount} USDC deposited — ${formatAmount({
-                amount: +ndlpAmountWillGet || 0,
-              })} NDLP minted to your account. Check your wallet for Tx details`}
-              closeToast={() => dismiss()}
-            />
-          ),
-          variant: "success",
-          hideClose: true,
-        });
-      }, 2000);
+        clearTimeout(timeoutId);
+      }, 1000);
     },
-    [
-      refetchVaultConfig,
-      refreshBalance,
-      toast,
-      dismiss,
-      depositAmount,
-      ndlpAmountWillGet,
-    ]
+    [refetchVaultConfig, refreshBalance]
   );
 
   const handleDone = useCallback(() => {
     setIsDepositModalOpen(false);
     setDepositStep(1);
     setDepositAmount("");
-  }, []);
+    toast({
+      duration: 5000,
+      description: (
+        <SuccessfulToast
+          title="Deposit successful!"
+          content={`${depositAmount} USDC deposited — ${formatAmount({
+            amount: +ndlpAmountWillGet || 0,
+          })} NDLP minted to your account. Check your wallet for Tx details`}
+          closeToast={() => dismiss()}
+        />
+      ),
+      variant: "success",
+      hideClose: true,
+    });
+  }, [toast, dismiss, depositAmount, ndlpAmountWillGet]);
 
   const disabledDeposit = useMemo(() => {
     if (!isConnected) return false;
