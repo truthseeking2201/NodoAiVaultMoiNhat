@@ -406,10 +406,9 @@ export function TxTable() {
       </div>
       <div className="flex justify-between items-start mt-4">
         <div className="text-white text-xs">
-          Showing{" "}
-          {Math.min(itemsPerPage * currentPage, paginatedTransactions.length)}-
-          {itemsPerPage * (currentPage - 1) + 1} of{" "}
-          {paginatedTransactions.length} activities
+          Showing {itemsPerPage * (currentPage - 1) + 1}-
+          {Math.min(itemsPerPage * currentPage, totalItems)} of {totalItems}{" "}
+          transactions
         </div>
         <div className="flex justify-end items-center gap-2">
           <Button
