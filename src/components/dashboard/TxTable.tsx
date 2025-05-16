@@ -355,7 +355,7 @@ export function TxTable() {
                           {tx.tokens?.[0]?.token_symbol}
                         </div>
                       </div>
-                      {tx.tokens?.[1]?.amount !== 0 && (
+                      {tx.tokens?.[1] && tx.tokens?.[1]?.amount !== 0 && (
                         <div className="flex items-center justify-start gap-1 mt-1">
                           <img
                             src={tokenImgs[tx.tokens?.[1]?.token_symbol]}
