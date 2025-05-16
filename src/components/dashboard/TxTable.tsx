@@ -346,14 +346,16 @@ export function TxTable() {
                         <div className="font-mono text-sm text-white">
                           {formatCurrency(
                             tx.tokens?.[0]?.amount || 0,
-                            tx.tokens?.[0]?.decimal
+                            tx.tokens?.[0]?.decimal,
+                            0,
+                            2
                           )}{" "}
                         </div>
                         <div className="font-mono text-xs text-white/70">
                           {tx.tokens?.[0]?.token_symbol}
                         </div>
                       </div>
-                      {tx.tokens?.[1]?.amount !== 0 && (
+                      {tx.tokens?.[1] && tx.tokens?.[1]?.amount !== 0 && (
                         <div className="flex items-center justify-start gap-1 mt-1">
                           <img
                             src={tokenImgs[tx.tokens?.[1]?.token_symbol]}
@@ -363,7 +365,9 @@ export function TxTable() {
                           <div className="font-mono text-sm text-white">
                             {formatCurrency(
                               tx.tokens?.[1]?.amount || 0,
-                              tx.tokens?.[1]?.decimal
+                              tx.tokens?.[1]?.decimal,
+                              0,
+                              4
                             )}{" "}
                           </div>
                           <div className="font-mono text-xs text-white/70">
@@ -404,14 +408,13 @@ export function TxTable() {
           </Table>
         </div>
       </div>
-      <div className="flex justify-between items-end mt-4">
-        <div className=" text-white text-xs">
-          Showing{" "}
-          {Math.min(itemsPerPage * currentPage, paginatedTransactions.length)}-
-          {itemsPerPage * (currentPage - 1) + 1} of{" "}
-          {paginatedTransactions.length} activities
+      <div className="flex justify-between items-start mt-4">
+        <div className="text-white text-xs">
+          Showing {itemsPerPage * (currentPage - 1) + 1}-
+          {Math.min(itemsPerPage * currentPage, totalItems)} of {totalItems}{" "}
+          transactions
         </div>
-        <div className="flex justify-end items-center mt-4 gap-2">
+        <div className="flex justify-end items-center gap-2">
           <Button
             onClick={() => handlePageChange(1)}
             disabled={currentPage === 1}
