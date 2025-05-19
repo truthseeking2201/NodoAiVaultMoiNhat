@@ -50,7 +50,9 @@ const RightContent = () => {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className="text-2xl font-mono font-bold">{apr}%</div>
+          <div className="text-2xl font-mono font-bold">
+            {formatAmount({ amount: apr })}%
+          </div>
         </div>
 
         <div className="mb-4">
