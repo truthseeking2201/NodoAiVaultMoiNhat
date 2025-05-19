@@ -240,9 +240,9 @@ export function TxTable() {
                   Type
                 </TableHead>
                 <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[88px] px-2">
-                  Date
+                  Time
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[147px] px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[120px] px-2">
                   Vault address
                 </TableHead>
                 <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[136px] px-2">
@@ -377,7 +377,7 @@ export function TxTable() {
                       )}
                     </TableCell>
                     <TableCell className="font-mono font-medium text-white px-2 flex">
-                      {formatCurrency(tx.value, 0)}
+                      {formatCurrency(tx.value, 0, 0, 2, "currency", "USD")}
                     </TableCell>
                     <TableCell className="text-right font-mono font-medium">
                       <Button
