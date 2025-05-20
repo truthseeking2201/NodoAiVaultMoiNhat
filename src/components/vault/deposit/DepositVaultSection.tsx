@@ -1,4 +1,6 @@
 import suiWallet from "@/assets/images/sui-wallet.png";
+import RegisterForWhiteListButton from "@/components/dashboard/request-whitelist-button/RegisterForWhiteListButton";
+import ConditionRenderer from "@/components/shared/ConditionRenderer";
 import { Button } from "@/components/ui/button";
 import { FormattedNumberInput } from "@/components/ui/formatted-number-input";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
@@ -13,6 +15,7 @@ import {
 } from "@/hooks/useDepositVault";
 import { useMyAssets } from "@/hooks/useMyAssets";
 import { useWallet } from "@/hooks/useWallet";
+import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { formatNumber } from "@/lib/number";
 import { formatAmount } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
@@ -26,7 +29,9 @@ type DepositSuccessData = {
   ndlp: number;
   conversionRate: number;
 };
+
 const MIN_DEPOSIT_AMOUNT = 0.1;
+
 export default function DepositVaultSection() {
   const [depositAmount, setDepositAmount] = useState("");
   const [error, setError] = useState<string>("");
@@ -48,6 +53,8 @@ export default function DepositVaultSection() {
   const { assets, refreshBalance } = useMyAssets();
   const { deposit } = useDepositVault();
   const { toast, dismiss } = useToast();
+
+  const isWhiteListed = useWhitelistWallet();
 
   const usdcCoin = useMemo(
     () =>
@@ -240,15 +247,34 @@ export default function DepositVaultSection() {
         </div>
       </div>
 
-      <Button
-        variant="primary"
-        size="xl"
-        onClick={isConnected ? handleDeposit : handleConnectWallet}
-        className="w-full font-semibold text-lg"
-        disabled={disabledDeposit}
+      <ConditionRenderer
+        when={isConnected}
+        fallback={
+          <Button
+            variant="primary"
+            size="xl"
+            onClick={handleConnectWallet}
+            className="w-full font-semibold text-lg"
+          >
+            Connect Wallet
+          </Button>
+        }
       >
-        {isConnected ? "Deposit" : "Connect Wallet"}
-      </Button>
+        <ConditionRenderer
+          when={isWhiteListed}
+          fallback={<RegisterForWhiteListButton />}
+        >
+          <Button
+            variant="primary"
+            size="xl"
+            onClick={handleDeposit}
+            disabled={disabledDeposit}
+            className="w-full font-semibold text-lg"
+          >
+            Deposit
+          </Button>
+        </ConditionRenderer>
+      </ConditionRenderer>
 
       <DepositModal
         isOpen={isDepositModalOpen}
