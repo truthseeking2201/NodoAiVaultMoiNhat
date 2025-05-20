@@ -81,7 +81,7 @@ export const useMyAssets = () => {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["coinObjects"],
+    queryKey: ["coinObjects", account?.address],
     queryFn: fetchCoinObjects,
     enabled: !!account?.address,
     staleTime: REFETCH_VAULT_DATA_INTERVAL,
