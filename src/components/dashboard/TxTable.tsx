@@ -239,10 +239,10 @@ export function TxTable() {
                 <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[170px] ">
                   Type
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[88px] px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[100px] px-4">
                   Time
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[120px] px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[130px] px-4">
                   Vault address
                 </TableHead>
                 <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[136px] px-2">
@@ -323,10 +323,10 @@ export function TxTable() {
                         {renamingType(tx.type)}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-white/70 px-2">
+                    <TableCell className="font-mono text-xs text-white/70 px-4">
                       {formatDate12Hours(tx.time)}
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-white/70 flex items-center px-2">
+                    <TableCell className="font-mono text-xs text-white/70 flex items-center px-4">
                       <span
                         className="hover:text-white transition-colors mt-1.5 hover:cursor-pointer"
                         onClick={(e) => {
