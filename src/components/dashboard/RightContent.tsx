@@ -23,8 +23,8 @@ const RightContent = () => {
   const { data: vaultManagement } = useGetVaultManagement();
   const { vaultConfig } = useGetVaultConfig();
 
-  const apr = vaultManagement?.apr;
-  const totalUsers = vaultManagement?.total_users;
+  const apr = vaultManagement?.apr || 0;
+  const totalUsers = vaultManagement?.total_users || 0;
   const tvl = getBalanceAmount(vaultConfig?.total_liquidity || 0, 9).toNumber();
 
   return (
