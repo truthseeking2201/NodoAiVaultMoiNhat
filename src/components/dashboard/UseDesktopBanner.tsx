@@ -1,23 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { X } from "lucide-react";
-
 const UseDesktopBanner = () => {
-  const [isChromeDesktop, setIsChromeDesktop] = useState(true);
-  const [closeBanner, setCloseBanner] = useState(false);
-  useEffect(() => {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isChrome = /chrome/.test(userAgent) && !/edge/.test(userAgent);
-    const isDesktop = !/mobile|android|iphone|ipad|ipod/.test(userAgent);
-    const isSlushApp = /Slush|SlushWallet/i.test(userAgent);
-    const isSupportedBrowser = (isChrome && isDesktop) || isSlushApp;
-
-    setIsChromeDesktop(isSupportedBrowser);
-  }, []);
-
-  if (isChromeDesktop || closeBanner) {
-    return null;
-  }
-
   return (
     <div className="bg-[#8ADDA5] h-11 w-full">
       <div className="flex items-center justify-center h-full p-2">
@@ -35,16 +16,15 @@ const UseDesktopBanner = () => {
             />
           </svg>
         </div>
-        <div className="font-sans text-sm text-black pr-2 text-center">
-          For a best experience, please visit on a desktop Google Chrome
-          browser.
+        <div className="font-sans text-sm text-black pr-2 font-medium text-center">
+          Use a Google Chrome Desktop for the Best Experience!
         </div>
-        <button
+        {/* <button
           className="flex items-center justify-center rounded-full"
           onClick={() => setCloseBanner(true)}
         >
           <X size={20} className="text-black" />
-        </button>
+        </button> */}
       </div>
     </div>
   );

@@ -44,6 +44,7 @@ export const useGetVaultManagement = () => {
     {
       apr: number;
       total_users: number;
+      total_value_usd: number;
     },
     Error
   >;

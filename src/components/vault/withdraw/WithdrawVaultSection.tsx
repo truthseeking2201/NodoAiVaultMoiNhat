@@ -17,6 +17,9 @@ import { sleep } from "@/lib/utils";
 
 import DataClaimType from "@/types/data-claim.types.d";
 import LpType from "@/types/lp.type";
+import ConditionRenderer from "@/components/shared/ConditionRenderer";
+import { RegisterForWhiteListButton } from "@/components/dashboard/request-whitelist-button";
+import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 
 export default function WithdrawVaultSection() {
   const count = useRef<string>("0");
@@ -30,6 +33,7 @@ export default function WithdrawVaultSection() {
    * HOOKS
    */
   const { openConnectWalletDialog } = useWallet();
+  const isWhitelisted = useWhitelistWallet();
   const currentAccount = useCurrentAccount();
   const isConnected = !!currentAccount?.address;
   const address = currentAccount?.address;
@@ -124,10 +128,7 @@ export default function WithdrawVaultSection() {
               className="w-full font-semibold text-lg"
             >
               <span>Connect Wallet</span>
-              <ArrowRight
-                size={16}
-                className="ml-2"
-              />
+              <ArrowRight size={16} className="ml-2" />
             </Button>
           </div>
         )}
@@ -135,41 +136,46 @@ export default function WithdrawVaultSection() {
         {isConnected && (
           <div>
             {/* Balance */}
-            <div className="mb-9">
-              <div className="font-sans text-base text-zinc-400 mb-3">
-                Total Balance
-              </div>
-              <div className="flex items-center">
-                <img
-                  src={lpData.lp_image}
-                  alt="NODOAIx Token"
-                  className="w-[36px] h-[36px]"
-                />
-                <div className="text-white font-mono font-medium text-[40px] leading-[40px] ml-2">
-                  {showFormatNumber(balanceLp)}
+            <ConditionRenderer
+              when={isWhitelisted && isConnected}
+              fallback={<RegisterForWhiteListButton />}
+            >
+              <div className="mb-9">
+                <div className="font-sans text-base text-zinc-400 mb-3">
+                  Total Balance
+                </div>
+                <div className="flex items-center">
+                  <img
+                    src={lpData.lp_image}
+                    alt="NODOAIx Token"
+                    className="w-[36px] h-[36px]"
+                  />
+                  <div className="text-white font-mono font-medium text-[40px] leading-[40px] ml-2">
+                    {showFormatNumber(balanceLp)}
+                  </div>
+                </div>
+                <div className="font-sans text-sm text-white/60 mt-3">
+                  1 {lpData.lp_symbol} ≈ {showFormatNumber(amountEst.receive)}{" "}
+                  {lpData.token_symbol}
                 </div>
               </div>
-              <div className="font-sans text-sm text-white/60 mt-3">
-                1 {lpData.lp_symbol} ≈ {showFormatNumber(amountEst.receive)}{" "}
-                {lpData.token_symbol}
-              </div>
-            </div>
 
-            {dataClaim && ready && (
-              <ClaimToken
-                data={dataClaim}
-                onSuccess={onSuccessClaim}
-                reloadData={initDataClaim}
-              />
-            )}
+              {dataClaim && ready && (
+                <ClaimToken
+                  data={dataClaim}
+                  onSuccess={onSuccessClaim}
+                  reloadData={initDataClaim}
+                />
+              )}
 
-            {!dataClaim && ready && (
-              <WithdrawForm
-                balanceLp={balanceLp}
-                lpData={lpData}
-                onSuccess={onSuccessWithdraw}
-              />
-            )}
+              {!dataClaim && ready && (
+                <WithdrawForm
+                  balanceLp={balanceLp}
+                  lpData={lpData}
+                  onSuccess={onSuccessWithdraw}
+                />
+              )}
+            </ConditionRenderer>
           </div>
         )}
       </div>

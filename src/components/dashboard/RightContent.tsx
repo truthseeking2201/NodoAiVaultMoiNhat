@@ -11,8 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { BalanceCard } from "@/components/wallet/BalanceCard";
-import { useGetVaultConfig, useGetVaultManagement } from "@/hooks";
-import { getBalanceAmount } from "@/lib/number";
+import { useGetVaultManagement } from "@/hooks";
 import { formatAmount } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { Info } from "lucide-react";
@@ -21,11 +20,10 @@ const RightContent = () => {
   const currentAccount = useCurrentAccount();
   const isConnected = !!currentAccount?.address;
   const { data: vaultManagement } = useGetVaultManagement();
-  const { vaultConfig } = useGetVaultConfig();
 
-  const apr = vaultManagement?.apr;
-  const totalUsers = vaultManagement?.total_users;
-  const tvl = getBalanceAmount(vaultConfig?.total_liquidity || 0, 9).toNumber();
+  const apr = vaultManagement?.apr || 0;
+  const totalUsers = vaultManagement?.total_users || 0;
+  const tvl = vaultManagement?.total_value_usd || 0;
 
   return (
     <div className="w-[252px] flex-shrink-0">

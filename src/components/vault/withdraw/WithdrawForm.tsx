@@ -55,15 +55,9 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const BadgeCoolDown = (
-    <Badge
-      variant="warning"
-      className="w-full p-4 rounded-xl block"
-    >
+    <Badge variant="warning" className="w-full p-4 rounded-xl block">
       <div className="flex items-center mb-1">
-        <Clock4
-          size={14}
-          className="flex-shrink-0"
-        />{" "}
+        <Clock4 size={14} className="flex-shrink-0" />{" "}
         <span className="text-sm text-white font-medium	ml-1.5 capitalize">
           {timeCoolDown} Cooldown Period
         </span>
@@ -207,10 +201,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
         />
         {errors.amount?.type && (
           <div className="text-red-error text-sm mt-1 flex items-center">
-            <Info
-              size={18}
-              className="mr-2"
-            />
+            <Info size={18} className="mr-2" />
             {(() => {
               if (errors.amount?.type === "required") {
                 return "Please enter withdrawal amount";
@@ -229,18 +220,12 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
         <div className="mb-5 p-4 border border-white/15 rounded-lg mt-5">
           <div className="mb-2 text-gray-200 font-medium">Withdraw Summary</div>
           <hr className="w-full border-t border-white/15" />
-          <RowItem
-            label="Amount"
-            className="mt-2"
-          >
+          <RowItem label="Amount" className="mt-2">
             {summary?.amount
               ? `${showFormatNumber(summary.amount)} ${lpData.lp_symbol}`
               : "--"}
           </RowItem>
-          <RowItem
-            label="To Receive"
-            className="mt-3"
-          >
+          <RowItem label="To Receive" className="mt-3">
             {summary?.receive
               ? `${showFormatNumber(summary.receive)} ${lpData.token_symbol}`
               : "--"}
