@@ -1,5 +1,6 @@
 import phantomWallet from "@/assets/images/phantom-wallet.png";
 import suiWallet from "@/assets/images/sui-wallet.png";
+import slushWallet from "@/assets/images/slush-wallet.png";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,10 +22,10 @@ interface ConnectWalletModalProps {
 
 const WALLETS = [
   {
-    displayName: "Sui",
+    displayName: "Slush",
     name: "Slush",
-    icon: suiWallet,
-    description: "Connect to your Sui Wallet",
+    icon: slushWallet,
+    description: "Connect to your Slush Wallet",
     extensionUrl:
       "https://chromewebstore.google.com/detail/slush-%E2%80%94-a-sui-wallet/opcgpfmipidbgpenhmajoajpbobppdil",
   },
