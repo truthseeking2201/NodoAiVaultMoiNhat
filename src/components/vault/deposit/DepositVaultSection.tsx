@@ -7,7 +7,7 @@ import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { useToast } from "@/components/ui/use-toast";
 import DepositModal from "@/components/vault/deposit/DepositModal";
 import { COIN_TYPES_CONFIG } from "@/config/coin-config";
-import { useGetVaultConfig, useGetVaultManagement } from "@/hooks";
+import { useGetVaultManagement } from "@/hooks";
 import {
   useCalculateNDLPReturn,
   useDepositVault,
