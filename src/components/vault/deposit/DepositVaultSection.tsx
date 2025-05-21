@@ -41,9 +41,11 @@ export default function DepositVaultSection() {
   const [depositSuccessData, setDepositSuccessData] =
     useState<DepositSuccessData>(null);
 
-  const { data: vaultManagement, isLoading: isLoadingVaultManagement } =
-    useGetVaultManagement();
-  const { refetch: refetchVaultConfig } = useGetVaultConfig();
+  const {
+    data: vaultManagement,
+    isLoading: isLoadingVaultManagement,
+    refetch: refetchVaultManagement,
+  } = useGetVaultManagement();
 
   const apr = vaultManagement?.apr;
   const currentAccount = useCurrentAccount();
@@ -149,7 +151,7 @@ export default function DepositVaultSection() {
   const handleDepositSuccessCallback = useCallback(
     (data) => {
       const timeoutId = setTimeout(async () => {
-        refetchVaultConfig();
+        refetchVaultManagement();
         setDepositSuccessData(data);
         refreshBalance();
         setLoading(false);
@@ -157,7 +159,7 @@ export default function DepositVaultSection() {
         clearTimeout(timeoutId);
       }, 1000);
     },
-    [refetchVaultConfig, refreshBalance]
+    [refreshBalance, refetchVaultManagement]
   );
 
   const handleDone = useCallback(() => {
