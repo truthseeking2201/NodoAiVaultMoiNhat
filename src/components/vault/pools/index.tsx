@@ -77,7 +77,9 @@ const VaultPools = ({ pools }) => {
                 <span className=" text-white/50 text-[18px] text-left">
                   APR:{" "}
                   <span className="font-bold text-[24px] text-white">
-                    {pool.ARP}%
+                    {pool.APR && pool.APR !== 0
+                      ? `${formatCurrency(pool.APR, 0, 0, 2, "decimal")}%`
+                      : "--"}
                   </span>
                 </span>
               </div>

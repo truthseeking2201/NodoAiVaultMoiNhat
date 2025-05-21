@@ -18,21 +18,21 @@ export default function NodoAIVaults() {
   const pools = [
     {
       tokens: ["DEEP", "SUI"],
-      ARP: 5.0,
+      APR: 5.0,
       holding: 100000,
       isLive: true,
       isComingSoon: false,
     },
     {
       tokens: ["CETUS", "SUI"],
-      ARP: 5.0,
-      holding: 0.5,
+      APR: 0,
+      holding: 0,
       isLive: false,
       isComingSoon: true,
     },
     {
       tokens: ["USDC", "SUI"],
-      ARP: 5.0,
+      APR: 0,
       holding: 0,
       isLive: false,
       isComingSoon: true,
