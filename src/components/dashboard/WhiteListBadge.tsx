@@ -8,7 +8,7 @@ const baseColor = "#656565";
 
 const WhiteListBadge = () => {
   const account = useCurrentAccount();
-  const isWhitelisted = useWhitelistWallet();
+  const { isWhitelisted, isLoading } = useWhitelistWallet();
   const styles = isWhitelisted
     ? {
         background: "linear-gradient(87deg, #0CF -0.54%, #00FF5E 97.84%)",
@@ -18,7 +18,7 @@ const WhiteListBadge = () => {
         background: "rgba(255, 255, 255, 0.15)",
       };
 
-  if (!account) return null;
+  if (!account || isLoading) return null;
 
   return (
     <div

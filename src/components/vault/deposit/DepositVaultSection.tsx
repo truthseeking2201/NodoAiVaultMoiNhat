@@ -56,7 +56,7 @@ export default function DepositVaultSection() {
   const { deposit } = useDepositVault();
   const { toast, dismiss } = useToast();
 
-  const isWhiteListed = useWhitelistWallet();
+  const { isWhitelisted } = useWhitelistWallet();
 
   const usdcCoin = useMemo(
     () =>
@@ -264,7 +264,7 @@ export default function DepositVaultSection() {
         }
       >
         <ConditionRenderer
-          when={isWhiteListed}
+          when={isWhitelisted}
           fallback={<RegisterForWhiteListButton />}
         >
           <Button
