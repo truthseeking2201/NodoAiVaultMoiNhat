@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { ExternalLink, X } from "lucide-react";
-
+import suiIcon from "@/assets/images/sui-wallet.png";
+import deepIcon from "@/assets/images/deep.png";
 import { formatNumber } from "@/lib/number";
 import { formatAmount } from "@/lib/utils";
 import { truncateBetween } from "@/utils/truncate";
@@ -74,11 +75,27 @@ const DepositModal = (props: DepositModalProps) => {
           {depositStep === 1 && (
             <div className="flex flex-col gap-2 p-4 border border-white/15 rounded-xl bg-white/5">
               <div className="flex justify-between">
+                <span className="text-base text-[#9CA3AF]">Vault</span>
+                <div className="flex items-center gap-2">
+                  <div className="relative flex">
+                    <img
+                      src={deepIcon}
+                      alt="deep"
+                      className="w-6 h-6 absolute right-[18px] z-0"
+                    />
+                    <img src={suiIcon} alt="deep" className="w-6 h-6 z-10" />
+                  </div>
+
+                  <span className="font-mono text-lg text-white">DEEP-SUI</span>
+                </div>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-base text-[#9CA3AF]">Amount</span>
                 <span className="font-mono text-lg text-white">
                   {formatNumber(amount || 0)} USDC
                 </span>
               </div>
+
               <div className="flex justify-between">
                 <span className="text-base text-[#9CA3AF]">APR</span>
                 <span className="font-mono text-lg text-white">
