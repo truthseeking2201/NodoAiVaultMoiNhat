@@ -22,6 +22,7 @@ import SwapIcon from "@/assets/icons/swap.svg";
 import USDCIcon from "@/assets/images/usdc.png";
 import SUIIcon from "@/assets/images/sui-wallet.png";
 import CetusIcon from "@/assets/images/cetus.png";
+import DeepIcon from "@/assets/images/deep.png";
 import { getVaultsActivities } from "@/apis/vault";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -177,6 +178,7 @@ export function TxTable() {
     USDC: USDCIcon,
     SUI: SUIIcon,
     CETUS: CetusIcon,
+    DEEP: DeepIcon,
   };
 
   return (

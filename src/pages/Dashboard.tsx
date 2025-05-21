@@ -9,11 +9,35 @@ import { TxTable } from "@/components/dashboard/TxTable";
 import NodoAIVaultsMainCard from "@/components/vault/NodoAIVaultsMainCard";
 import TelegramIcon from "@/assets/icons/telegram.svg";
 import XIcon from "@/assets/icons/x.svg";
+import VaultPools from "@/components/vault/pools";
 
 export default function NodoAIVaults() {
   const containerRef = useRef<HTMLDivElement>(null);
-
   const currentYear = new Date().getFullYear();
+
+  const pools = [
+    {
+      tokens: ["DEEP", "SUI"],
+      ARP: 5.0,
+      holding: 100000,
+      isLive: true,
+      isComingSoon: false,
+    },
+    {
+      tokens: ["CETUS", "SUI"],
+      ARP: 5.0,
+      holding: 0.5,
+      isLive: false,
+      isComingSoon: true,
+    },
+    {
+      tokens: ["USDC", "SUI"],
+      ARP: 5.0,
+      holding: 0,
+      isLive: false,
+      isComingSoon: true,
+    },
+  ];
 
   return (
     <div className="min-h-screen main-bg" ref={containerRef}>
@@ -49,6 +73,9 @@ export default function NodoAIVaults() {
             {/* Main Content (Center) */}
             <div className="w-full">
               {/* Main Vault Card */}
+              <div className="mb-8">
+                <VaultPools pools={pools} />
+              </div>
               <div className="w-full mb-8">
                 <NodoAIVaultsMainCard />
               </div>

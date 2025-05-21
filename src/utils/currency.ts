@@ -1,6 +1,6 @@
 export const formatCurrency = (
   value: number | string,
-  decimal: number | string,
+  decimal: number | string = 0,
   minimumFractionDigits: number = 0,
   maximumFractionDigits: number = 2,
   style: "currency" | "decimal" = "decimal",
