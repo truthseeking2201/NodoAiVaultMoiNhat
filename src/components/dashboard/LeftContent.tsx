@@ -51,7 +51,7 @@ const LeftContent = () => {
             />
           </p>
           <span className="text-md text-white/80 mt-2">First of its kind on</span>
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-3 mt-1 mb-3">
             <img src={SUIIcon} width={36} height={36} />
             <span className="text-xl text-white font-medium">SUI</span>
           </div>
