@@ -42,6 +42,7 @@ export const useGetVaultManagement = () => {
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
   }) as UseQueryResult<
     {
+      id?: string;
       apr: number;
       total_users: number;
       total_value_usd: number;
