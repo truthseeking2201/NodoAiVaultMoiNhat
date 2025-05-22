@@ -1,5 +1,4 @@
 import phantomWallet from "@/assets/images/phantom-wallet.png";
-import suiWallet from "@/assets/images/sui-wallet.png";
 import slushWallet from "@/assets/images/slush-wallet.png";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";

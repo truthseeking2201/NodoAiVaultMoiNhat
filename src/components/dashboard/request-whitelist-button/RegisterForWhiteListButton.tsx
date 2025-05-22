@@ -13,8 +13,8 @@ const RegisterForWhiteListButton = () => {
       <div className="flex items-center justify-center gap-1 mb-4">
         <Info className="h-4 w-4" />
         <span className="font-sans text-sm">
-          Your wallet address isn't registered yet — kindly register with your
-          Sui address to get whitelisted soon
+          Your wallet isn’t registered yet — please register your Sui address to
+          get whitelisted.
         </span>
       </div>
       <div className={styles.buttonWrapper}>
