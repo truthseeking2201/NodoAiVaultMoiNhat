@@ -3,8 +3,8 @@ import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { UserCoinAsset } from "@/types/coin.types";
 import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
 import { SuiClient } from "@mysten/sui/client";
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
 
 interface CoinMetadata {
   decimals: number;
@@ -67,6 +67,14 @@ const getCoinObjects = async (
 export const useMyAssets = () => {
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
+  const queryClient = useQueryClient();
+
+  // Clear cache when account address becomes empty
+  useEffect(() => {
+    if (!account?.address) {
+      queryClient.removeQueries({ queryKey: ["coinObjects"] });
+    }
+  }, [account?.address, queryClient]);
 
   const fetchCoinObjects = useCallback(async () => {
     return Promise.all(

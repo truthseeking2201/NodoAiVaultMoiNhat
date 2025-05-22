@@ -1,20 +1,23 @@
 import { useIsChromeDesktop } from "@/hooks";
+import useBreakpoint from "@/hooks/useBreakpoint";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
+import demoUIOfDesktop from "../../assets/demo-ui-nodo-ai-vault.png";
 import UseDesktopBanner from "../dashboard/UseDesktopBanner";
 import { AppHeader } from "./AppHeader";
-import demoUIOfDesktop from "../../assets/demo-ui-nodo-ai-vault.png";
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const { isChromeDesktop, isMobile } = useIsChromeDesktop();
+  const { isChromeDesktop } = useIsChromeDesktop();
+  const { isLg } = useBreakpoint();
+
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden main-bg">
       {!isChromeDesktop && <UseDesktopBanner />}
       {/* Main content */}
-      {isMobile && (
+      {!isLg && (
         <div className="flex flex-col items-center justify-center text-center h-[95vh] p-3">
           <img
             src={demoUIOfDesktop}
@@ -43,7 +46,7 @@ export function MainLayout({ children }: MainLayoutProps) {
         </div>
       )}
 
-      {!isMobile && (
+      {isLg && (
         <AnimatePresence mode="wait">
           <motion.div
             className="flex flex-col min-h-screen relative z-[var(--z-elevate)]"
