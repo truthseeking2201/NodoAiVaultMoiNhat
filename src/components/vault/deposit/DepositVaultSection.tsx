@@ -19,7 +19,7 @@ import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { formatNumber } from "@/lib/number";
 import { formatAmount } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowRight } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import SuccessfulToast from "./SuccessfulToast";
 
@@ -259,6 +259,7 @@ export default function DepositVaultSection() {
             className="w-full font-semibold text-lg"
           >
             Connect Wallet
+            <ArrowRight size={16} className="ml-2" />
           </Button>
         }
       >

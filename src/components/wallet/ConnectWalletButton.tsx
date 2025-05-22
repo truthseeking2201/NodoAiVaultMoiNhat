@@ -260,8 +260,9 @@ export const ConnectWalletButton = memo(() => {
                   {/* Disconnect Button */}
                   <Button
                     variant="primary"
+                    size="sm"
                     onClick={() => disconnect()}
-                    className="w-full h-[52px]"
+                    className="w-full h-[40px]"
                   >
                     <LogOut className="w-4 h-4" />
                     <span className="text-sm font-medium">Disconnect</span>
