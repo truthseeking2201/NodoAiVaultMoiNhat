@@ -218,7 +218,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
 
         {/* Summary */}
         <div className="mb-5 p-4 border border-white/15 rounded-xl mt-5">
-          <div className="mb-2 text-gray-200 font-medium">Withdraw Summary</div>
+          <div className="mb-3 text-gray-200 font-medium">Withdraw Summary</div>
           <hr className="w-full border-t border-white/15" />
           <RowItem label="Amount" className="mt-3">
             {summary?.amount
