@@ -90,7 +90,13 @@ const VaultCard = ({ pool }) => {
               )}
             >
               {pool.APR && pool.APR !== 0
-                ? `${formatCurrency(Math.abs(pool.APR), 0, 0, 2, "decimal")}%`
+                ? `${formatCurrency(
+                    pool.APR < 0 ? 0 : pool.APR,
+                    0,
+                    0,
+                    2,
+                    "decimal"
+                  )}%`
                 : "--"}
             </span>
           </span>
