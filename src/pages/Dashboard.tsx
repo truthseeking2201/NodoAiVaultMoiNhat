@@ -17,30 +17,7 @@ import { ArrowUpRight } from "lucide-react";
 export default function NodoAIVaults() {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
-  const isWhiteListed = useWhitelistWallet();
-  const pools = [
-    {
-      tokens: ["DEEP", "SUI"],
-      APR: 24.8,
-      holding: 100000,
-      isLive: true,
-      isComingSoon: false,
-    },
-    {
-      tokens: ["CETUS", "SUI"],
-      APR: 0,
-      holding: 0,
-      isLive: false,
-      isComingSoon: true,
-    },
-    {
-      tokens: ["USDC", "SUI"],
-      APR: 0,
-      holding: 0,
-      isLive: false,
-      isComingSoon: true,
-    },
-  ];
+  const { isWhitelisted } = useWhitelistWallet();
 
   return (
     <div className="min-h-screen main-bg" ref={containerRef}>
@@ -63,7 +40,7 @@ export default function NodoAIVaults() {
                 AI Vaults
               </span>
             </h1>
-            {isWhiteListed ? (
+            {isWhitelisted ? (
               <p className="text-[18px]">
                 Maximizing DeFi Yields With Autonomous Risk Management
               </p>
@@ -74,7 +51,7 @@ export default function NodoAIVaults() {
                 <span className="font-bold">whitelist access</span> only.
               </p>
             )}
-            {!isWhiteListed && (
+            {!isWhitelisted && (
               <Button
                 variant="link-orange"
                 size="lg"
