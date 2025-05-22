@@ -1,7 +1,6 @@
 import { useWhitelistWallet } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { Check } from "lucide-react";
 import ConditionRenderer from "../shared/ConditionRenderer";
 
 const baseColor = "#656565";
@@ -18,69 +17,69 @@ const WhiteListBadge = () => {
         background: "rgba(255, 255, 255, 0.15)",
       };
 
-  if (!account || isLoading) return null;
-
   return (
-    <div
-      style={{
-        borderRadius: "90px",
-        height: "28px",
-        ...styles,
-      }}
-    >
-      <div className="flex items-center justify-center gap-2 h-full">
-        <div
-          className={cn(
-            isWhitelisted ? "bg-white" : "bg-[#656565]",
-            "rounded-full w-7 h-7 flex items-center justify-center"
-          )}
-        >
-          <ConditionRenderer
-            when={!isWhitelisted}
-            fallback={
+    <ConditionRenderer when={account && !isLoading} fallback={null}>
+      <div
+        style={{
+          borderRadius: "90px",
+          height: "28px",
+          ...styles,
+        }}
+      >
+        <div className="flex items-center justify-center gap-2 h-full">
+          <div
+            className={cn(
+              isWhitelisted ? "bg-white" : "bg-[#656565]",
+              "rounded-full w-7 h-7 flex items-center justify-center"
+            )}
+          >
+            <ConditionRenderer
+              when={!isWhitelisted}
+              fallback={
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="12"
+                  viewBox="0 0 16 12"
+                  fill="none"
+                >
+                  <path
+                    d="M14.1777 2.00049L5.92773 10.0005L2.17773 6.36412"
+                    stroke="black"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              }
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
-                height="12"
-                viewBox="0 0 16 12"
+                height="4"
+                viewBox="0 0 16 4"
                 fill="none"
               >
                 <path
-                  d="M14.1777 2.00049L5.92773 10.0005L2.17773 6.36412"
-                  stroke="black"
+                  d="M2.21094 2H14.2109"
+                  stroke="#909090"
                   strokeWidth="2.5"
                   strokeLinecap="round"
-                  strokeLinejoin="round"
                 />
               </svg>
-            }
+            </ConditionRenderer>
+          </div>
+          <div
+            className={cn(
+              isWhitelisted ? "text-black" : "text-white",
+              "text-sm font-medium font-mono pr-4"
+            )}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="4"
-              viewBox="0 0 16 4"
-              fill="none"
-            >
-              <path
-                d="M2.21094 2H14.2109"
-                stroke="#909090"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-            </svg>
-          </ConditionRenderer>
-        </div>
-        <div
-          className={cn(
-            isWhitelisted ? "text-black" : "text-white",
-            "text-sm font-medium font-mono pr-4"
-          )}
-        >
-          {isWhitelisted ? "WHITELISTED" : "NON-WHITELISTED"}
+            {isWhitelisted ? "WHITELISTED" : "NON-WHITELISTED"}
+          </div>
         </div>
       </div>
-    </div>
+    </ConditionRenderer>
   );
 };
 
