@@ -55,7 +55,7 @@ const VaultCard = ({ pool }) => {
               "font-medium text-xs bg-[#44EF8B] rounded-xl",
               pool.isLive ? "bg-[#44EF8B]" : "bg-[#FFFFFF33]",
               pool.isLive ? "text-black" : "text-white",
-              is2xl ? "text-[12px] px-2 py-1" : "text-[10px] px-1.5 py-0.5"
+              is2xl ? "text-[12px] px-2 pt-1 pb-0.5" : "text-[10px] px-1.5 py-0.5"
             )}
           >
             {pool.isLive ? "Live" : "Coming Soon"}
