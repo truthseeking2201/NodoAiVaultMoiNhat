@@ -1,6 +1,9 @@
 import { useGetVaultManagement } from "@/hooks";
 import VaultCard from "./Card";
 import { useEffect, useState } from "react";
+import { useMyAssets } from "@/hooks/useMyAssets";
+import { COIN_TYPES_CONFIG } from "@/config/coin-config";
+import { useUSDCLPRate } from "@/hooks/useDepositVault";
 
 const VaultPools = () => {
   const {
@@ -8,6 +11,16 @@ const VaultPools = () => {
     isLoading: isLoadingVaultManagement,
     refetch: refetchVaultManagement,
   } = useGetVaultManagement();
+
+  const { isLoading: isLoadingNDLPCoin, assets } = useMyAssets();
+
+  const ndlpAmount = assets.find(
+    (asset) => asset.coin_type === COIN_TYPES_CONFIG.NDLP_COIN_TYPE
+  )?.balance;
+
+  const conversionRate = useUSDCLPRate(true);
+  const userHolding = ndlpAmount * conversionRate;
+
   const initialPools = [
     {
       id: 1,
@@ -37,14 +50,15 @@ const VaultPools = () => {
   const [pools, SetPools] = useState(initialPools);
 
   useEffect(() => {
-    if (!isLoadingVaultManagement) {
+    if (!isLoadingVaultManagement && !isLoadingNDLPCoin) {
       const vaultId = vaultManagement?.id || -1;
       SetPools((prevPools) => {
         const updatedPools = prevPools.map((p) => {
           if (p.id === Number(vaultId)) {
             return {
               ...p,
-              APR: vaultManagement.apr,
+              APR: vaultManagement.apr || 0,
+              holding: userHolding || 0,
             };
           }
           return p;

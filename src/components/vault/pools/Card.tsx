@@ -4,6 +4,7 @@ import CetusIcon from "@/assets/images/cetus.png";
 import DeepIcon from "@/assets/images/deep.png";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
 
 const VaultCard = ({ pool }) => {
   const tokenImgs = {
@@ -12,6 +13,7 @@ const VaultCard = ({ pool }) => {
     CETUS: CetusIcon,
     DEEP: DeepIcon,
   };
+  const { is2xl } = useBreakpoint();
   return (
     <div
       className={cn(
@@ -25,7 +27,7 @@ const VaultCard = ({ pool }) => {
       }}
     >
       <div
-        className="flex flex-col p-4 rounded-xl"
+        className="flex flex-col p-4 rounded-xl h-full"
         style={{
           background: pool.isLive
             ? "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)"
@@ -41,7 +43,8 @@ const VaultCard = ({ pool }) => {
                   src={tokenImgs[token]}
                   alt={token}
                   className={cn(
-                    "w-[36px] h-[36px] mr-2",
+                    "mr-2",
+                    is2xl ? "w-[36px] h-[36px]" : "w-[24px] h-[24px]",
                     index > 0 && "ml-[-15px]"
                   )}
                 />
@@ -49,9 +52,10 @@ const VaultCard = ({ pool }) => {
           </div>
           <div
             className={cn(
-              "font-medium text-xs bg-[#44EF8B] px-2 py-1 rounded-xl",
+              "font-medium text-xs bg-[#44EF8B] rounded-xl",
               pool.isLive ? "bg-[#44EF8B]" : "bg-[#FFFFFF33]",
-              pool.isLive ? "text-black" : "text-white"
+              pool.isLive ? "text-black" : "text-white",
+              is2xl ? "text-[12px] px-2 py-1" : "text-[10px] px-1.5 py-0.5"
             )}
           >
             {pool.isLive ? "Live" : "Coming Soon"}
@@ -59,24 +63,45 @@ const VaultCard = ({ pool }) => {
         </div>
         <div>
           {pool.tokens.map((token, index) => (
-            <span key={token} className={"text-white text-md font-bold"}>
+            <span
+              key={token}
+              className={cn(
+                "text-white  font-bold",
+                is2xl ? "text-md" : "text-sm"
+              )}
+            >
               {token}
               {index < pool.tokens.length - 1 ? " - " : ""}
             </span>
           ))}
         </div>
         <div className="mt-2.5">
-          <span className=" text-white/50 text-[18px] text-left">
+          <span
+            className={cn(
+              " text-white/50  text-left",
+              is2xl ? "text-[18px]" : "text-base"
+            )}
+          >
             APR:{" "}
-            <span className="font-bold text-[24px] text-white">
+            <span
+              className={cn(
+                "font-bold  text-white",
+                is2xl ? "text-[24px]" : "text-xl"
+              )}
+            >
               {pool.APR && pool.APR !== 0
                 ? `${formatCurrency(pool.APR, 0, 0, 2, "decimal")}%`
                 : "--"}
             </span>
           </span>
         </div>
-        <div className="mt-4 bg-[#FFFFFF26] py-[6px] px-2 rounded-[6px] w-full text-sm flex items-center justify-between">
-          <span className="text-white/50">Your holding: </span>
+        <div
+          className={cn(
+            "mt-4 bg-[#FFFFFF26] py-[6px] px-2 rounded-[6px] w-full  flex items-center justify-between",
+            is2xl ? "text-sm" : "text-xs"
+          )}
+        >
+          <span className={"text-white/50"}>Your holding: </span>
           <span className="text-white font-bold">
             {pool.holding && pool.holding !== 0
               ? `$${formatCurrency(pool.holding)}`
