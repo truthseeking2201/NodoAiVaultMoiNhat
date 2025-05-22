@@ -22,24 +22,11 @@ http.interceptors.request.use(
     const fullPath = url.pathname + (url.search ? url.search : "");
 
     const timestamp = Math.floor(Date.now() / 1000).toString();
-    // const bodyString =
-    //   ["POST", "PUT", "PATCH"].includes(method) && config.data
-    //     ? JSON.stringify(config.data)
-    //     : "";
     const bodyString = "";
 
     const rawString = `${method}${fullPath}${bodyString}${timestamp}`;
     const signature = CryptoJS.HmacSHA256(rawString, apiSecret).toString();
-    // console.log("==payload", {
-    //   method,
-    //   fullPath,
-    //   timestamp,
-    //   bodyString,
-    //   body: config.data,
-    //   apiKey,
-    //   apiSecret,
-    //   signature,
-    // });
+
     // add headers
     config.headers["x-api-key"] = apiKey;
     config.headers["x-timestamp"] = timestamp;
