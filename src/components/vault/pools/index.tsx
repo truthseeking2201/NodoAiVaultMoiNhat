@@ -1,16 +1,13 @@
-import { useGetVaultManagement } from "@/hooks";
-import VaultCard from "./Card";
-import { useEffect, useState } from "react";
-import { useMyAssets } from "@/hooks/useMyAssets";
 import { COIN_TYPES_CONFIG } from "@/config/coin-config";
+import { useGetVaultManagement } from "@/hooks";
 import { useUSDCLPRate } from "@/hooks/useDepositVault";
+import { useMyAssets } from "@/hooks/useMyAssets";
+import { useMemo } from "react";
+import VaultCard from "./Card";
 
 const VaultPools = () => {
-  const {
-    data: vaultManagement,
-    isLoading: isLoadingVaultManagement,
-    refetch: refetchVaultManagement,
-  } = useGetVaultManagement();
+  const { data: vaultManagement, isLoading: isLoadingVaultManagement } =
+    useGetVaultManagement();
 
   const { isLoading: isLoadingNDLPCoin, assets } = useMyAssets();
 
@@ -47,26 +44,29 @@ const VaultPools = () => {
       isComingSoon: true,
     },
   ];
-  const [pools, SetPools] = useState(initialPools);
 
-  useEffect(() => {
-    if (!isLoadingVaultManagement && !isLoadingNDLPCoin) {
-      const vaultId = vaultManagement?.id || -1;
-      SetPools((prevPools) => {
-        const updatedPools = prevPools.map((p) => {
-          if (p.id === Number(vaultId)) {
-            return {
-              ...p,
-              APR: vaultManagement.apr || 0,
-              holding: userHolding || 0,
-            };
-          }
-          return p;
-        });
-        return updatedPools;
-      });
+  const pools = useMemo(() => {
+    const vaultId = vaultManagement?.id || -1;
+
+    if (isLoadingVaultManagement || isLoadingNDLPCoin) {
+      return initialPools;
     }
-  }, [isLoadingVaultManagement]);
+    return initialPools.map((p) => {
+      if (p.id === Number(vaultId)) {
+        return {
+          ...p,
+          APR: vaultManagement.apr || 0,
+          holding: userHolding || 0,
+        };
+      }
+      return p;
+    });
+  }, [
+    isLoadingVaultManagement,
+    isLoadingNDLPCoin,
+    vaultManagement,
+    userHolding,
+  ]);
 
   return (
     <div>
