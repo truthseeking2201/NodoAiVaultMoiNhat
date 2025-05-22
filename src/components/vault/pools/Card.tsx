@@ -34,7 +34,7 @@ const VaultCard = ({ pool }) => {
             : "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)",
         }}
       >
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-start justify-between mb-2">
           <div className="flex items-center">
             {pool?.tokens?.length > 0 &&
               pool.tokens.map((token, index) => (
