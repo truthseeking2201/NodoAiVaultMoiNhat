@@ -104,7 +104,7 @@ const RightContent = () => {
             <div>
               <div className="font-body font-medium mb-1 text-100">Deposit</div>
               <div className="font-caption text-white/70">
-                Simply Enter NODO AI vault, then receive $NDLP as your
+                Simply Enter NODO AI Vault, then receive $NDLP as your
                 collateral token
               </div>
             </div>
@@ -119,7 +119,7 @@ const RightContent = () => {
                 AI Invest
               </div>
               <div className="font-caption text-white/70">
-                AI auto-allocates to top LP pools for max yield
+                AI auto-allocates to top LP pools for max yield.
               </div>
             </div>
           </div>
@@ -137,8 +137,7 @@ const RightContent = () => {
                 Earn & Withdraw
               </div>
               <div className="font-caption text-white/70">
-                Earn yield in real time. Withdraw $NDLP anytime <br /> (⏳7h
-                unbonding)
+                Earn yield + $NDLP. Withdraw $NDLP anytime
               </div>
             </div>
           </div>
