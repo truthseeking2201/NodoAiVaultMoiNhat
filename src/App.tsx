@@ -1,5 +1,5 @@
 import { MainLayout } from "@/components/layout/MainLayout";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
@@ -9,16 +9,22 @@ import {
 } from "@mysten/dapp-kit";
 import { getFullnodeUrl } from "@mysten/sui/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import VersionChecker from "./components/shared/VersionChecker";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import Dashboard from "./pages/Dashboard";
-import { Loader2 } from "lucide-react";
 
 const NotFound = lazy(() =>
   import("./pages/NotFound").catch((e) => {
     console.error("Error loading NotFound:", e);
+    return { default: () => <PageFallback /> };
+  })
+);
+
+const Dashboard = lazy(() =>
+  import("./pages/Dashboard").catch((e) => {
+    console.error("Error loading Dashboard:", e);
     return { default: () => <PageFallback /> };
   })
 );
@@ -41,44 +47,38 @@ const { networkConfig } = createNetworkConfig({
 });
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <SuiClientProvider
-      networks={networkConfig}
-      defaultNetwork={import.meta.env.VITE_SUI_NETWORK || "testnet"}
-    >
-      <WalletProvider autoConnect>
-        <LanguageProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <VersionChecker />
-            <BrowserRouter>
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <Suspense fallback={<PageFallback />}>
-                      <MainLayout>
-                        <Dashboard />
-                      </MainLayout>
-                    </Suspense>
-                  }
-                />
-                <Route
-                  path="*"
-                  element={
-                    <Suspense fallback={<PageFallback />}>
-                      <NotFound />
-                    </Suspense>
-                  }
-                />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </LanguageProvider>
-      </WalletProvider>
-    </SuiClientProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <Suspense fallback={<PageFallback />}>
+      <QueryClientProvider client={queryClient}>
+        <SuiClientProvider
+          networks={networkConfig}
+          defaultNetwork={import.meta.env.VITE_SUI_NETWORK || "testnet"}
+        >
+          <WalletProvider autoConnect>
+            <LanguageProvider>
+              <TooltipProvider>
+                <Toaster />
+                <VersionChecker />
+                <BrowserRouter>
+                  <Routes>
+                    <Route
+                      path="/"
+                      element={
+                        <MainLayout>
+                          <Dashboard />
+                        </MainLayout>
+                      }
+                    />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </TooltipProvider>
+            </LanguageProvider>
+          </WalletProvider>
+        </SuiClientProvider>
+      </QueryClientProvider>
+    </Suspense>
+  </ErrorBoundary>
 );
 
 export default App;
