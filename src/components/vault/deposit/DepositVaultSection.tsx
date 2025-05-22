@@ -7,6 +7,7 @@ import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { useToast } from "@/components/ui/use-toast";
 import DepositModal from "@/components/vault/deposit/DepositModal";
 import { COIN_TYPES_CONFIG } from "@/config/coin-config";
+import { RowItem } from "@/components/ui/row-item";
 import { useGetVaultManagement } from "@/hooks";
 import {
   useCalculateNDLPReturn,
@@ -221,7 +222,7 @@ export default function DepositVaultSection() {
 
       <div className="mb-6 p-4 border border-white/15 rounded-xl">
         <div className="flex justify-between items-center mb-3">
-          <div className="font-caption text-075">You will get</div>
+          <div className="text-gray-200 font-medium">You will get</div>
           <div className="flex items-center">
             <img src="/coins/ndlp.png" alt="NDLP" className="w-6 h-6 mr-1" />
             <span className="font-mono font-bold text-lg">
@@ -230,23 +231,18 @@ export default function DepositVaultSection() {
           </div>
         </div>
         <hr className="w-full border-t border-white/15" />
+        <RowItem label="Conversion Rate" className="mt-3">
+          {conversionRate
+            ? `1 USDC = ${formatAmount({ amount: conversionRate })} NDLP`
+            : "Unable to fetch conversion rate. Please try again later."}
+        </RowItem>
 
-        <div className="flex justify-between items-center mb-3 mt-3">
-          <div className="font-caption text-075">Conversion Rate</div>
-          <div className="font-mono text-white">
-            {conversionRate
-              ? `1 USDC = ${formatAmount({ amount: conversionRate })} NDLP`
-              : "Unable to fetch conversion rate. Please try again later."}
-          </div>
-        </div>
-
-        <div className="flex justify-between items-center">
-          <div className="font-caption text-075">Network</div>
+        <RowItem label="Network" className="mt-3">
           <div className="flex items-center">
             <img src={suiWallet} className="w-5 h-5 mr-2" />
             <span className="font-mono">SUI</span>
           </div>
-        </div>
+        </RowItem>
       </div>
 
       <ConditionRenderer
