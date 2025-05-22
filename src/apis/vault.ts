@@ -20,7 +20,9 @@ export const executionWithdrawal = (payload) => {
 };
 
 export const getVaultConfig = (vault_address) => {
-  return httpNodo.get(`${NODO_URL}/data-management/vaults/${vault_address}`);
+  return httpNodo.get(
+    `${NODO_URL}/data-management/vaults/${vault_address}?type=simple`
+  );
 };
 
 export const getVaultsActivities = (payload: any) => {

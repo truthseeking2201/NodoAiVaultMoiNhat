@@ -30,7 +30,7 @@ const buttonVariants = cva(
         "pagination-default":
           "bg-black text-white/70 font-semibold hover:bg-black/70",
         "link-orange":
-          "bg-gradient-to-r from-[#F2BB89] via-[#F3D2B5] to-[#F5C8A4] bg-clip-text text-transparent hover:from-[#F2BB89] hover:via-[#F3D2B5] hover:to-[#F5C8A4] hover:bg-clip-text hover:text-transparent",
+          "bg-gradient-to-r from-[#F2BB89] via-[#F3D2B5] to-[#F5C8A4] bg-clip-text text-transparent hover:opacity-80",
       },
       size: {
         default: "h-11 px-4 py-2",

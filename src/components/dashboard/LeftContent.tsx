@@ -14,7 +14,7 @@ const LeftContent = () => {
           window.open(`${import.meta.env.VITE_NODO_APP_URL}`, "_blank");
         }}
       >
-        <div className="flex-1">Explore Predicton Market</div>
+        <div className="flex-1">Explore Prediction Market</div>
         <div className="ml-2">
           <ArrowUpRight size={16} className="text-white" />
         </div>
@@ -38,7 +38,7 @@ const LeftContent = () => {
             window.open("https://forms.gle/56MMq3T33QmGukiD9", "_blank");
           }}
         >
-          <p className="font-extrabold text-[26px] text-white">
+          <p className="font-extrabold text-[26px] leading-8 text-white">
             Join{" "}
             <span className="bg-gradient-to-r from-[#F2BB89] via-[#F3D2B5] to-[#F5C8A4] bg-clip-text text-transparent">
               Whitelist Access{" "}
@@ -50,8 +50,8 @@ const LeftContent = () => {
               className="text-white inline"
             />
           </p>
-          <p className="text-md text-white/80 mt-2">First of its kind on</p>
-          <div className="flex items-center gap-3">
+          <span className="text-md text-white/80 mt-2">First of its kind on</span>
+          <div className="flex items-center gap-3 mt-1 mb-3">
             <img src={SUIIcon} width={36} height={36} />
             <span className="text-xl text-white font-medium">SUI</span>
           </div>
