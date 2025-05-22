@@ -33,7 +33,7 @@ export default function WithdrawVaultSection() {
    * HOOKS
    */
   const { openConnectWalletDialog } = useWallet();
-  const isWhitelisted = useWhitelistWallet();
+  const { isWhitelisted } = useWhitelistWallet();
   const currentAccount = useCurrentAccount();
   const isConnected = !!currentAccount?.address;
   const address = currentAccount?.address;

@@ -27,7 +27,10 @@ const buttonVariants = cva(
         "neural-orange":
           "bg-gradient-to-r from-[#FF8A00] to-[#FF6B00] text-white shadow-[0_4px_12px_-2px_rgba(255,138,0,0.3)] hover:shadow-[0_4px_16px_-2px_rgba(255,138,0,0.4)] hover:scale-[0.98] transition-all active:scale-95",
         primary: "bg-ai text-[#0A080E] font-semibold hover:bg-ai/85",
-        "pagination-default": "bg-black text-white/70 font-semibold hover:bg-black/70",
+        "pagination-default":
+          "bg-black text-white/70 font-semibold hover:bg-black/70",
+        "link-orange":
+          "bg-gradient-to-r from-[#F2BB89] via-[#F3D2B5] to-[#F5C8A4] bg-clip-text text-transparent hover:from-[#F2BB89] hover:via-[#F3D2B5] hover:to-[#F5C8A4] hover:bg-clip-text hover:text-transparent",
       },
       size: {
         default: "h-11 px-4 py-2",

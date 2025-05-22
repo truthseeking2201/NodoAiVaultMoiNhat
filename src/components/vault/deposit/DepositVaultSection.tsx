@@ -7,7 +7,7 @@ import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { useToast } from "@/components/ui/use-toast";
 import DepositModal from "@/components/vault/deposit/DepositModal";
 import { COIN_TYPES_CONFIG } from "@/config/coin-config";
-import { useGetVaultConfig, useGetVaultManagement } from "@/hooks";
+import { useGetVaultManagement } from "@/hooks";
 import {
   useCalculateNDLPReturn,
   useDepositVault,
@@ -19,7 +19,7 @@ import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { formatNumber } from "@/lib/number";
 import { formatAmount } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowRight } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import SuccessfulToast from "./SuccessfulToast";
 
@@ -56,7 +56,7 @@ export default function DepositVaultSection() {
   const { deposit } = useDepositVault();
   const { toast, dismiss } = useToast();
 
-  const isWhiteListed = useWhitelistWallet();
+  const { isWhitelisted } = useWhitelistWallet();
 
   const usdcCoin = useMemo(
     () =>
@@ -259,11 +259,12 @@ export default function DepositVaultSection() {
             className="w-full font-semibold text-lg"
           >
             Connect Wallet
+            <ArrowRight size={16} className="ml-2" />
           </Button>
         }
       >
         <ConditionRenderer
-          when={isWhiteListed}
+          when={isWhitelisted}
           fallback={<RegisterForWhiteListButton />}
         >
           <Button

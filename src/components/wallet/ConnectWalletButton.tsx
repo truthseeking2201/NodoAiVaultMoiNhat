@@ -13,17 +13,20 @@ import {
 import { COIN_TYPES_CONFIG } from "@/config";
 import { useMyAssets, useWallet } from "@/hooks";
 import { useToast } from "@/hooks/use-toast";
+import { formatNumber } from "@/lib/number";
 import { truncateStringWithSeparator } from "@/utils/helpers";
 import { useCurrentAccount, useDisconnectWallet } from "@mysten/dapp-kit";
 import { motion } from "framer-motion";
 import { Copy, LogOut, RefreshCw, Wallet } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import { ConnectWalletModal } from "./ConnectWalletModal";
-import { formatNumber } from "@/lib/number";
 
 export const ConnectWalletButton = memo(() => {
   const { toast } = useToast();
   const [showPulse, setShowPulse] = useState(false);
+  const walletConnectionInfo = JSON.parse(
+    localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
+  );
 
   const [riskAssessmentTime, setRiskAssessmentTime] = useState<string>("");
   const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
@@ -85,6 +88,23 @@ export const ConnectWalletButton = memo(() => {
     });
     refreshBalance();
   };
+
+  if (
+    !!walletConnectionInfo?.state?.lastConnectedAccountAddress &&
+    !isConnected
+  ) {
+    return (
+      <Button
+        variant="outline"
+        className="border-white/20 bg-gradient-to-r from-white/[0.07] to-white/[0.03] backdrop-blur-sm h-11 w-[252px]"
+        disabled
+      >
+        <div className="flex items-center">
+          <span className="text-white/50">Loading wallet...</span>
+        </div>
+      </Button>
+    );
+  }
 
   return (
     <>
@@ -260,8 +280,9 @@ export const ConnectWalletButton = memo(() => {
                   {/* Disconnect Button */}
                   <Button
                     variant="primary"
+                    size="sm"
                     onClick={() => disconnect()}
-                    className="w-full h-[52px]"
+                    className="w-full h-[40px]"
                   >
                     <LogOut className="w-4 h-4" />
                     <span className="text-sm font-medium">Disconnect</span>

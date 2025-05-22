@@ -48,9 +48,6 @@ export function BalanceCard({ className = "" }: BalanceCardProps) {
           <div className="text-white text-xl font-bold">
             {formatAmount({ amount: usdcEquivalent })} USDC
           </div>
-          <div className="text-white/70 text-xs">
-            ${formatAmount({ amount: usdcDollarRate })}
-          </div>
         </div>
       </div>
     </div>

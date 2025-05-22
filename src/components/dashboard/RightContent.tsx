@@ -4,26 +4,12 @@ import DepositIcon from "@/assets/images/dashboard/deposit.png";
 import EarnWithdrawIcon from "@/assets/images/dashboard/earn_withdraw.png";
 import ExclusiveBenefits from "@/assets/images/dashboard/exclusive_benefits.png";
 import LimitedSupplyIcon from "@/assets/images/dashboard/limited_supply.png";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { BalanceCard } from "@/components/wallet/BalanceCard";
-import { useGetVaultManagement } from "@/hooks";
-import { formatAmount } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { Info } from "lucide-react";
 
 const RightContent = () => {
   const currentAccount = useCurrentAccount();
   const isConnected = !!currentAccount?.address;
-  const { data: vaultManagement } = useGetVaultManagement();
-
-  const apr = vaultManagement?.apr || 0;
-  const totalUsers = vaultManagement?.total_users || 0;
-  const tvl = vaultManagement?.total_value_usd || 0;
 
   return (
     <div className="w-[252px] flex-shrink-0">
@@ -31,40 +17,6 @@ const RightContent = () => {
       {isConnected && <BalanceCard className="mb-6" />}
 
       {/* Metric Card */}
-      <div className="bg-black/80 backdrop-blur-sm rounded-xl p-6 mb-6">
-        <h3 className="font-heading-md text-100 mb-4">Metric</h3>
-
-        <div className="mb-4">
-          <div className="font-caption text-075 flex items-center gap-1">
-            APR{" "}
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger className="cursor-pointer">
-                  <Info className="w-4 h-4 text-white/40" />
-                </TooltipTrigger>
-                <TooltipContent className="bg-black/80 text-white p-2 rounded-lg">
-                  Annual Percentage Rate
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <div className="text-2xl font-mono font-bold">
-            {formatAmount({ amount: apr })}%
-          </div>
-        </div>
-
-        <div className="mb-4">
-          <div className="font-caption text-075 ">TVL</div>
-          <div className="text-2xl font-mono font-bold">
-            {formatAmount({ amount: tvl })}
-          </div>
-        </div>
-
-        <div>
-          <div className="font-caption text-075">User</div>
-          <div className="text-2xl font-mono font-bold">{totalUsers}</div>
-        </div>
-      </div>
 
       {/* Introducing NDLP Card */}
       <div className="bg-black/80 backdrop-blur-sm rounded-xl p-6 mb-6">

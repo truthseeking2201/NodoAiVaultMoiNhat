@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import WhiteListBadge from "../dashboard/WhiteListBadge";
 
 interface Notification {
   id: string;
@@ -278,6 +279,7 @@ export function AppHeader() {
         {/* Right side controls */}
         <div className="flex items-center gap-3">
           {/* Connect Wallet Button */}
+          <WhiteListBadge />
           <ConnectWalletButton />
 
           {/* Mobile Menu Toggle

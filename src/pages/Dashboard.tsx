@@ -1,5 +1,5 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-import { useRef } from "react";
+import { useRef, useCallback, useEffect } from "react";
 
 import LeftContent from "@/components/dashboard/LeftContent";
 import RightContent from "@/components/dashboard/RightContent";
@@ -10,34 +10,14 @@ import NodoAIVaultsMainCard from "@/components/vault/NodoAIVaultsMainCard";
 import TelegramIcon from "@/assets/icons/telegram.svg";
 import XIcon from "@/assets/icons/x.svg";
 import VaultPools from "@/components/vault/pools";
+import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
+import { Button } from "@/components/ui/button";
+import { ArrowUpRight } from "lucide-react";
 
 export default function NodoAIVaults() {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
-
-  const pools = [
-    {
-      tokens: ["DEEP", "SUI"],
-      ARP: 5.0,
-      holding: 100000,
-      isLive: true,
-      isComingSoon: false,
-    },
-    {
-      tokens: ["CETUS", "SUI"],
-      ARP: 5.0,
-      holding: 0.5,
-      isLive: false,
-      isComingSoon: true,
-    },
-    {
-      tokens: ["USDC", "SUI"],
-      ARP: 5.0,
-      holding: 0,
-      isLive: false,
-      isComingSoon: true,
-    },
-  ];
+  const { isWhitelisted } = useWhitelistWallet();
 
   return (
     <div className="min-h-screen main-bg" ref={containerRef}>
@@ -60,9 +40,34 @@ export default function NodoAIVaults() {
                 AI Vaults
               </span>
             </h1>
-            <p className="text-[18px]">
-              Maximizing DeFi Yields With Autonomous Risk Management
-            </p>
+            {isWhitelisted ? (
+              <p className="text-[18px]">
+                Maximizing DeFi Yields With Autonomous Risk Management
+              </p>
+            ) : (
+              <p className="text-[18px]">
+                Maximizing DeFi Yields With Autonomous Risk Management. <br />
+                Available via{" "}
+                <span className="font-bold">whitelist access</span> only.
+              </p>
+            )}
+            {!isWhitelisted && (
+              <Button
+                variant="link-orange"
+                size="lg"
+                className="font-semibold text-lg p-0 h-fit"
+                onClick={() => {
+                  window.open("https://forms.gle/56MMq3T33QmGukiD9", "_blank");
+                }}
+              >
+                Get whitelisted now
+                <ArrowUpRight
+                  size={40}
+                  strokeWidth={2}
+                  className="text-[#F5C8A4]"
+                />
+              </Button>
+            )}
           </header>
 
           {/* 3-Column Layout */}
@@ -74,7 +79,7 @@ export default function NodoAIVaults() {
             <div className="w-full">
               {/* Main Vault Card */}
               <div className="mb-8">
-                <VaultPools pools={pools} />
+                <VaultPools />
               </div>
               <div className="w-full mb-8">
                 <NodoAIVaultsMainCard />

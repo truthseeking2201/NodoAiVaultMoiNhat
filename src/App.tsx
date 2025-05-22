@@ -14,6 +14,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import VersionChecker from "./components/shared/VersionChecker";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import Dashboard from "./pages/Dashboard";
+import { Loader2 } from "lucide-react";
 
 const NotFound = lazy(() =>
   import("./pages/NotFound").catch((e) => {
@@ -26,7 +27,13 @@ const NotFound = lazy(() =>
 const queryClient = new QueryClient();
 
 // Replace loading state with mock data for demo - no loading screen needed
-const PageFallback = () => null;
+const PageFallback = () => {
+  return (
+    <div className="flex h-screen w-screen items-center justify-center">
+      <Loader2 className="h-10 w-10 animate-spin" />
+    </div>
+  );
+};
 
 const { networkConfig } = createNetworkConfig({
   testnet: { url: getFullnodeUrl("testnet") },
@@ -50,11 +57,11 @@ const App = () => (
                 <Route
                   path="/"
                   element={
-                    <MainLayout>
-                      <Suspense fallback={<PageFallback />}>
+                    <Suspense fallback={<PageFallback />}>
+                      <MainLayout>
                         <Dashboard />
-                      </Suspense>
-                    </MainLayout>
+                      </MainLayout>
+                    </Suspense>
                   }
                 />
                 <Route
