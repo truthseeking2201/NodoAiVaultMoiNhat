@@ -35,7 +35,7 @@ const LeftContent = () => {
         <div
           className="bg-gradient-to-b from-[#25252C] to-[#000] backdrop-blur-sm rounded-xl p-6 hover:bg-white/20 transition duration-300 ease-in-out cursor-pointer mt-4 relative overflow-hidden"
           onClick={() => {
-            window.open("https://forms.gle/56MMq3T33QmGukiD9", "_blank");
+            window.open(import.meta.env.VITE_WHITELIST_FORM_URL, "_blank");
           }}
         >
           <p className="font-extrabold text-[26px] leading-8 text-white">
