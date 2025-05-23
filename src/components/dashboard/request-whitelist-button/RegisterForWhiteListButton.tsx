@@ -4,8 +4,7 @@ import styles from "./RegisterForWhiteListButton.module.css";
 const RegisterForWhiteListButton = () => {
   const handleRegisterForWhiteList = () => {
     // TODO: Handle register for white list
-    const earlyAccessFormUrl =
-      "https://docs.google.com/forms/d/e/1FAIpQLSc6RNsisPxo5cDAVu8pnY-16jziJJ8vyLwe_d73-GCt0gBiGw/viewform";
+    const earlyAccessFormUrl = import.meta.env.VITE_WHITELIST_FORM_URL
     window.open(earlyAccessFormUrl, "_blank");
   };
   return (
