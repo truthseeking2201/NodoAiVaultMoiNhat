@@ -29,7 +29,7 @@ const VaultPools = () => {
     },
     {
       id: 2,
-      tokens: ["CETUS", "SUI"],
+      tokens: ["WAL", "SUI"],
       APR: 0,
       holding: 0,
       isLive: false,

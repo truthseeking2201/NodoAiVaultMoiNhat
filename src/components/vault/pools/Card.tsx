@@ -2,6 +2,7 @@ import USDCIcon from "@/assets/images/usdc.png";
 import SUIIcon from "@/assets/images/sui-wallet.png";
 import CetusIcon from "@/assets/images/cetus.png";
 import DeepIcon from "@/assets/images/deep.png";
+import WalIcon from "@/assets/images/wal.png";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
@@ -12,6 +13,7 @@ const VaultCard = ({ pool }) => {
     SUI: SUIIcon,
     CETUS: CetusIcon,
     DEEP: DeepIcon,
+    WAL: WalIcon
   };
   const { is2xl } = useBreakpoint();
   return (
@@ -43,7 +45,7 @@ const VaultCard = ({ pool }) => {
                   src={tokenImgs[token]}
                   alt={token}
                   className={cn(
-                    "mr-2",
+                    "mr-2 rounded-full",
                     is2xl ? "w-[36px] h-[36px]" : "w-[24px] h-[24px]",
                     index > 0 && "ml-[-15px]"
                   )}
