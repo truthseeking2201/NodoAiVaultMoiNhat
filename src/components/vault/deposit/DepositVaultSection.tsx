@@ -14,7 +14,7 @@ import {
   useDepositVault,
   useUSDCLPRate,
 } from "@/hooks/useDepositVault";
-import { useMyAssets } from "@/hooks/useMyAssets";
+import { useGetCoinsMetadata, useMyAssets } from "@/hooks/useMyAssets";
 import { useWallet } from "@/hooks/useWallet";
 import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { formatNumber } from "@/lib/number";
@@ -58,6 +58,7 @@ export default function DepositVaultSection() {
   const { toast, dismiss } = useToast();
 
   const { isWhitelisted } = useWhitelistWallet();
+  const coinMetadata = useGetCoinsMetadata();
 
   const usdcCoin = useMemo(
     () =>
@@ -66,19 +67,13 @@ export default function DepositVaultSection() {
       ),
     [assets]
   );
-
-  const ndlpCoin = useMemo(
-    () =>
-      assets.find(
-        (asset) => asset.coin_type === COIN_TYPES_CONFIG.NDLP_COIN_TYPE
-      ),
-    [assets]
-  );
+  const ndlpCoinMetadata = coinMetadata[COIN_TYPES_CONFIG.NDLP_COIN_TYPE];
+  const usdcCoinMetadata = coinMetadata[COIN_TYPES_CONFIG.USDC_COIN_TYPE];
 
   const ndlpAmountWillGet = useCalculateNDLPReturn(
     Number(depositAmount),
-    usdcCoin?.decimals || 9,
-    ndlpCoin?.decimals || 9
+    usdcCoinMetadata?.decimals || 9,
+    ndlpCoinMetadata?.decimals || 9
   );
 
   const conversionRate = useUSDCLPRate();
