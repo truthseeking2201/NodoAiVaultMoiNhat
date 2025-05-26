@@ -51,9 +51,6 @@ const DepositModal = (props: DepositModalProps) => {
     import.meta.env.VITE_SUI_NETWORK
   }/tx/${depositSuccessData?.digest}`;
 
-  const suiScanUrl = `https://suiscan.xyz/${
-    import.meta.env.VITE_SUI_NETWORK
-  }/tx/${depositSuccessData?.digest}`;
   const handleDeposit = () => {
     onDeposit();
   };

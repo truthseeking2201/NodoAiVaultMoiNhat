@@ -1,4 +1,4 @@
-import { useConnectWallet, useCurrentAccount } from "@mysten/dapp-kit";
+import { useCurrentAccount } from "@mysten/dapp-kit";
 import { create } from "zustand";
 interface WalletState {
   isConnectWalletDialogOpen: boolean;

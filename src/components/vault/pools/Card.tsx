@@ -1,21 +1,34 @@
-import USDCIcon from "@/assets/images/usdc.png";
-import SUIIcon from "@/assets/images/sui-wallet.png";
 import CetusIcon from "@/assets/images/cetus.png";
 import DeepIcon from "@/assets/images/deep.png";
+import SUIIcon from "@/assets/images/sui-wallet.png";
+import USDCIcon from "@/assets/images/usdc.png";
 import WalIcon from "@/assets/images/wal.png";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { useUSDCLPRate } from "@/hooks/useDepositVault";
+import { useGetCoinBalance } from "@/hooks/useMyAssets";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
-import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
+import { memo, useMemo } from "react";
+
+const tokenImgs = {
+  USDC: USDCIcon,
+  SUI: SUIIcon,
+  CETUS: CetusIcon,
+  DEEP: DeepIcon,
+  WAL: WalIcon,
+};
 
 const VaultCard = ({ pool }) => {
-  const tokenImgs = {
-    USDC: USDCIcon,
-    SUI: SUIIcon,
-    CETUS: CetusIcon,
-    DEEP: DeepIcon,
-    WAL: WalIcon
-  };
   const { is2xl } = useBreakpoint();
+  const ndlpAmount = useGetCoinBalance(
+    pool.vault_lp_token,
+    pool.vault_lp_token_decimals
+  );
+
+  const conversionRate = useUSDCLPRate(true);
+  const userHolding = ndlpAmount * conversionRate;
+
   return (
     <div
       className={cn(
@@ -57,7 +70,9 @@ const VaultCard = ({ pool }) => {
               "font-medium text-xs bg-[#44EF8B] rounded-xl",
               pool.isLive ? "bg-[#44EF8B]" : "bg-[#FFFFFF33]",
               pool.isLive ? "text-black" : "text-white",
-              is2xl ? "text-[12px] px-2 pt-1 pb-0.5" : "text-[10px] px-1.5 py-0.5"
+              is2xl
+                ? "text-[12px] px-2 pt-1 pb-0.5"
+                : "text-[10px] px-1.5 py-0.5"
             )}
           >
             {pool.isLive ? "Live" : "Coming Soon"}
@@ -111,8 +126,8 @@ const VaultCard = ({ pool }) => {
         >
           <span className={"text-white/50"}>Your holding: </span>
           <span className="text-white font-bold">
-            {pool.holding && pool.holding !== 0
-              ? `$${formatCurrency(pool.holding)}`
+            {userHolding && userHolding !== 0
+              ? `${formatCurrency(userHolding)}` // Assuming 9 decimals, adjust as needed
               : "--"}
           </span>
         </div>
@@ -121,4 +136,4 @@ const VaultCard = ({ pool }) => {
   );
 };
 
-export default VaultCard;
+export default memo(VaultCard);

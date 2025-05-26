@@ -1,5 +1,4 @@
-import { COIN_TYPES_CONFIG } from "@/config";
-import { RATE_DENOMINATOR, VAULT_CONFIG } from "@/config/vault-config";
+import { RATE_DENOMINATOR } from "@/config/vault-config";
 import { UserCoinAsset } from "@/types/coin.types";
 import {
   useCurrentAccount,
@@ -8,13 +7,14 @@ import {
 } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { useMergeCoins } from "./useMergeCoins";
-import { useGetVaultConfig } from "./useVault";
+import { useGetDepositVaultById, useGetVaultConfig } from "./useVault";
 
-export const useDepositVault = () => {
+export const useDepositVault = (vaultId: string) => {
   const { mutateAsync: signAndExecuteTransaction } =
     useSignAndExecuteTransaction();
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
+  const vaultConfig = useGetDepositVaultById(vaultId);
 
   const { mergeCoins } = useMergeCoins();
 
@@ -42,15 +42,15 @@ export const useDepositVault = () => {
       ]);
 
       tx.moveCall({
-        target: `${VAULT_CONFIG.PACKAGE_ID}::vault::deposit`,
+        target: `${vaultConfig.metadata.package_id}::vault::deposit`,
         arguments: [
-          tx.object(VAULT_CONFIG.VAULT_CONFIG_ID),
-          tx.object(VAULT_CONFIG.VAULT_ID),
+          tx.object(vaultConfig.metadata.vault_config_id),
+          tx.object(vaultConfig.vault_id),
           splitCoin,
         ],
         typeArguments: [
-          COIN_TYPES_CONFIG.USDC_COIN_TYPE,
-          COIN_TYPES_CONFIG.NDLP_COIN_TYPE,
+          vaultConfig.collateral_token,
+          vaultConfig.vault_lp_token,
         ],
       });
 

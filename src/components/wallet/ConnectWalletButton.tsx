@@ -10,8 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { COIN_TYPES_CONFIG } from "@/config";
-import { useMyAssets, useWallet } from "@/hooks";
+import { useCurrentDepositVault, useMyAssets, useWallet } from "@/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { formatNumber } from "@/lib/number";
 import { truncateStringWithSeparator } from "@/utils/helpers";
@@ -42,8 +41,10 @@ export const ConnectWalletButton = memo(() => {
   const { mutate: disconnect } = useDisconnectWallet();
   const { refreshBalance, assets } = useMyAssets();
 
+  const currentVault = useCurrentDepositVault();
+
   const usdcCoin = assets.find(
-    (asset) => asset.coin_type === COIN_TYPES_CONFIG.USDC_COIN_TYPE
+    (asset) => asset.coin_type === currentVault.collateral_token
   );
 
   useEffect(() => {

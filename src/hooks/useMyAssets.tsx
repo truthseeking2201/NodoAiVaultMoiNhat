@@ -1,10 +1,15 @@
 import { COIN_TYPES_CONFIG } from "@/config";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { UserCoinAsset } from "@/types/coin.types";
-import { useCurrentAccount, useSuiClient } from "@mysten/dapp-kit";
+import {
+  useCurrentAccount,
+  useSuiClient,
+  useSuiClientQuery,
+} from "@mysten/dapp-kit";
 import { SuiClient } from "@mysten/sui/client";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { useCurrentDepositVault } from "./useVault";
 
 interface CoinMetadata {
   decimals: number;
@@ -13,11 +18,6 @@ interface CoinMetadata {
   url?: string;
   iconUrl?: string;
 }
-
-const ALLOW_COIN_TYPES = [
-  COIN_TYPES_CONFIG.USDC_COIN_TYPE,
-  COIN_TYPES_CONFIG.NDLP_COIN_TYPE,
-] as const;
 
 const COIN_CONFIG = {
   [COIN_TYPES_CONFIG.USDC_COIN_TYPE]: {
@@ -64,10 +64,16 @@ const getCoinObjects = async (
   return allCoins;
 };
 
-export const useMyAssets = () => {
+export const useMyAssets = (vaultId?: string) => {
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
   const queryClient = useQueryClient();
+
+  const currentVault = useCurrentDepositVault();
+
+  const allowedCoinTypes = useMemo(() => {
+    return [currentVault?.vault_lp_token, currentVault.collateral_token];
+  }, [currentVault]);
 
   // Clear cache when account address becomes empty
   useEffect(() => {
@@ -78,11 +84,11 @@ export const useMyAssets = () => {
 
   const fetchCoinObjects = useCallback(async () => {
     return Promise.all(
-      ALLOW_COIN_TYPES.map((coinType) =>
+      allowedCoinTypes.map((coinType) =>
         getCoinObjects(suiClient, coinType, account?.address || "")
       )
     );
-  }, [account?.address, suiClient]);
+  }, [account?.address, suiClient, allowedCoinTypes]);
 
   const {
     data: coinObjects,
@@ -139,8 +145,14 @@ export const useMyAssets = () => {
 
 export const useGetCoinsMetadata = () => {
   const suiClient = useSuiClient();
+  const currentVault = useCurrentDepositVault();
+
+  const allowedCoinTypes = useMemo(() => {
+    return [currentVault?.vault_lp_token, currentVault.collateral_token];
+  }, [currentVault]);
+
   const coinsMetadata = useQueries({
-    queries: ALLOW_COIN_TYPES.map((coinType) => ({
+    queries: allowedCoinTypes.map((coinType) => ({
       queryKey: ["getCoinMetadata", coinType],
       queryFn: () => suiClient.getCoinMetadata({ coinType }),
       staleTime: 1000 * 60 * 60 * 1, // 1 hour
@@ -149,10 +161,38 @@ export const useGetCoinsMetadata = () => {
 
   const coinMetadata = coinsMetadata.reduce((acc, result, index) => {
     if (result.data) {
-      acc[ALLOW_COIN_TYPES[index]] = result.data;
+      acc[allowedCoinTypes[index]] = result.data;
     }
     return acc;
   }, {} as Record<string, CoinMetadata>);
 
   return coinMetadata;
+};
+
+export const useGetCoinBalance = (coinType: string, decimals: number) => {
+  const account = useCurrentAccount();
+
+  const { data: allCoins } = useSuiClientQuery(
+    "getCoins",
+    {
+      owner: account?.address,
+      coinType,
+    },
+    {
+      enabled: !!account?.address && !!coinType,
+    }
+  );
+
+  // Calculate the user's LP token balance
+  const userLPBalance = useMemo(() => {
+    if (!allCoins?.data) return 0;
+
+    const totalBalance = allCoins.data.reduce((sum, coin) => {
+      return sum + parseInt(coin.balance || "0") / Math.pow(10, decimals);
+    }, 0);
+
+    return totalBalance;
+  }, [allCoins]);
+
+  return userLPBalance;
 };

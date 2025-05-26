@@ -1,5 +1,4 @@
-import { COIN_TYPES_CONFIG } from "@/config";
-import { useMyAssets } from "@/hooks";
+import { useCurrentDepositVault, useMyAssets } from "@/hooks";
 
 import arrowDown from "@/assets/icons/arrow-down.svg";
 import { useUSDCLPRate } from "@/hooks/useDepositVault";
@@ -11,8 +10,9 @@ interface BalanceCardProps {
 
 export function BalanceCard({ className = "" }: BalanceCardProps) {
   const { assets } = useMyAssets();
+  const currentVault = useCurrentDepositVault();
   const ndlpAmount =
-    assets.find((asset) => asset.coin_type === COIN_TYPES_CONFIG.NDLP_COIN_TYPE)
+    assets.find((asset) => asset.coin_type === currentVault.vault_lp_token)
       ?.balance || 0;
 
   const conversionRate = useUSDCLPRate(true);

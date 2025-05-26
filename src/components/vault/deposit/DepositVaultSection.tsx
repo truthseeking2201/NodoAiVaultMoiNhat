@@ -4,11 +4,10 @@ import ConditionRenderer from "@/components/shared/ConditionRenderer";
 import { Button } from "@/components/ui/button";
 import { FormattedNumberInput } from "@/components/ui/formatted-number-input";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
+import { RowItem } from "@/components/ui/row-item";
 import { useToast } from "@/components/ui/use-toast";
 import DepositModal from "@/components/vault/deposit/DepositModal";
-import { COIN_TYPES_CONFIG } from "@/config/coin-config";
-import { RowItem } from "@/components/ui/row-item";
-import { useGetVaultManagement } from "@/hooks";
+import { useCurrentDepositVault } from "@/hooks";
 import {
   useCalculateNDLPReturn,
   useDepositVault,
@@ -42,19 +41,15 @@ export default function DepositVaultSection() {
   const [depositSuccessData, setDepositSuccessData] =
     useState<DepositSuccessData>(null);
 
-  const {
-    data: vaultManagement,
-    isLoading: isLoadingVaultManagement,
-    refetch: refetchVaultManagement,
-  } = useGetVaultManagement();
+  const depositVault = useCurrentDepositVault();
 
-  const apr = vaultManagement?.apr;
+  const apr = depositVault?.apr;
   const currentAccount = useCurrentAccount();
   const isConnected = !!currentAccount?.address;
 
   const { openConnectWalletDialog } = useWallet();
   const { assets, refreshBalance } = useMyAssets();
-  const { deposit } = useDepositVault();
+  const { deposit } = useDepositVault(depositVault.vault_id);
   const { toast, dismiss } = useToast();
 
   const { isWhitelisted } = useWhitelistWallet();
@@ -62,13 +57,15 @@ export default function DepositVaultSection() {
 
   const usdcCoin = useMemo(
     () =>
-      assets.find(
-        (asset) => asset.coin_type === COIN_TYPES_CONFIG.USDC_COIN_TYPE
-      ),
+      assets.find((asset) => asset.coin_type === depositVault.collateral_token),
     [assets]
   );
-  const ndlpCoinMetadata = coinMetadata[COIN_TYPES_CONFIG.NDLP_COIN_TYPE];
-  const usdcCoinMetadata = coinMetadata[COIN_TYPES_CONFIG.USDC_COIN_TYPE];
+
+  const ndlpCoin = useMemo(
+    () =>
+      assets.find((asset) => asset.coin_type === depositVault.vault_lp_token),
+    [assets]
+  );
 
   const ndlpAmountWillGet = useCalculateNDLPReturn(
     Number(depositAmount),
@@ -147,7 +144,6 @@ export default function DepositVaultSection() {
   const handleDepositSuccessCallback = useCallback(
     (data) => {
       const timeoutId = setTimeout(async () => {
-        refetchVaultManagement();
         setDepositSuccessData(data);
         refreshBalance();
         setLoading(false);
@@ -155,7 +151,7 @@ export default function DepositVaultSection() {
         clearTimeout(timeoutId);
       }, 1000);
     },
-    [refreshBalance, refetchVaultManagement]
+    [refreshBalance]
   );
 
   const handleDone = useCallback(() => {
@@ -180,9 +176,8 @@ export default function DepositVaultSection() {
 
   const disabledDeposit = useMemo(() => {
     if (!isConnected) return false;
-    if (isLoadingVaultManagement) return true;
     return !!error || !depositAmount;
-  }, [isConnected, error, depositAmount, isLoadingVaultManagement]);
+  }, [isConnected, error, depositAmount]);
 
   return (
     <div className="p-6 bg-black rounded-b-2xl rounded-tr-2xl">
