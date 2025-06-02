@@ -1,78 +1,40 @@
-import { COIN_TYPES_CONFIG } from "@/config/coin-config";
-import { useGetVaultManagement } from "@/hooks";
-import { useUSDCLPRate } from "@/hooks/useDepositVault";
-import { useMyAssets } from "@/hooks/useMyAssets";
+import { useCurrentDepositVault, useGetDepositVaults } from "@/hooks";
 import { useMemo } from "react";
 import VaultCard from "./Card";
 
+export type VaultPool = {
+  vault_id: string;
+  tokens: string[];
+  APR: number;
+  isLive: boolean;
+  vault_lp_token: string;
+  vault_lp_token_decimals: number;
+  isSelected: boolean;
+};
+
 const VaultPools = () => {
-  const { data: vaultManagement, isLoading: isLoadingVaultManagement } =
-    useGetVaultManagement();
-
-  const { isLoading: isLoadingNDLPCoin, assets } = useMyAssets();
-
-  const ndlpAmount = assets.find(
-    (asset) => asset.coin_type === COIN_TYPES_CONFIG.NDLP_COIN_TYPE
-  )?.balance;
-
-  const conversionRate = useUSDCLPRate(true);
-  const userHolding = ndlpAmount * conversionRate;
-
-  const initialPools = [
-    {
-      id: 1,
-      tokens: ["DEEP", "SUI"],
-      APR: 0,
-      holding: 0,
-      isLive: true,
-      isComingSoon: false,
-    },
-    {
-      id: 2,
-      tokens: ["WAL", "SUI"],
-      APR: 0,
-      holding: 0,
-      isLive: false,
-      isComingSoon: true,
-    },
-    {
-      id: 3,
-      tokens: ["USDC", "SUI"],
-      APR: 0,
-      holding: 0,
-      isLive: false,
-      isComingSoon: true,
-    },
-  ];
+  const { data: depositVaults } = useGetDepositVaults();
+  const currentVault = useCurrentDepositVault();
 
   const pools = useMemo(() => {
-    const vaultId = vaultManagement?.id || -1;
-
-    if (isLoadingVaultManagement || isLoadingNDLPCoin) {
-      return initialPools;
-    }
-    return initialPools.map((p) => {
-      if (p.id === Number(vaultId)) {
-        return {
-          ...p,
-          APR: vaultManagement.apr || 0,
-          holding: userHolding || 0,
-        };
-      }
-      return p;
-    });
-  }, [
-    isLoadingVaultManagement,
-    isLoadingNDLPCoin,
-    vaultManagement,
-    userHolding,
-  ]);
+    return depositVaults.map((vault) => ({
+      vault_id: vault.vault_id,
+      tokens: vault.vault_name.split(" - "),
+      APR: vault.apr,
+      isLive: vault.is_active,
+      vault_lp_token: vault.vault_lp_token,
+      vault_lp_token_decimals: vault.vault_lp_token_decimals,
+      isSelected: vault.vault_id === currentVault.vault_id,
+    }));
+  }, [depositVaults, currentVault]);
 
   return (
     <div>
       <div className="font-md font-semibold">Select a Vault</div>
       <div className="flex gap-6 mt-[10px]">
-        {pools.map((pool, index) => <VaultCard pool={pool} key={index} />)}
+        {pools.map((pool, index) => (
+          <VaultCard pool={pool} key={index} />
+        ))}
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import VersionChecker from "./components/shared/VersionChecker";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { useGetDepositVaults } from "./hooks";
 
 const NotFound = lazy(() =>
   import("./pages/NotFound").catch((e) => {
@@ -28,6 +29,19 @@ const Dashboard = lazy(() =>
     return { default: () => <PageFallback /> };
   })
 );
+
+const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
+  const { isLoading, isError } = useGetDepositVaults();
+  if (isLoading) {
+    return <PageFallback />;
+  }
+
+  if (isError) {
+    throw new Error("Failed to fetch deposit vaults");
+  }
+
+  return <>{children}</>;
+};
 
 // Create query client that still loads data but doesn't show loading states
 const queryClient = new QueryClient();
@@ -50,30 +64,29 @@ const App = () => (
   <ErrorBoundary>
     <Suspense fallback={<PageFallback />}>
       <QueryClientProvider client={queryClient}>
-        <SuiClientProvider
-          networks={networkConfig}
-          defaultNetwork={import.meta.env.VITE_SUI_NETWORK || "testnet"}
-        >
+        <SuiClientProvider networks={networkConfig} defaultNetwork={"mainnet"}>
           <WalletProvider autoConnect>
-            <LanguageProvider>
-              <TooltipProvider>
-                <Toaster />
-                <VersionChecker />
-                <BrowserRouter>
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={
-                        <MainLayout>
-                          <Dashboard />
-                        </MainLayout>
-                      }
-                    />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </BrowserRouter>
-              </TooltipProvider>
-            </LanguageProvider>
+            <ConfigWrapper>
+              <LanguageProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <VersionChecker />
+                  <BrowserRouter>
+                    <Routes>
+                      <Route
+                        path="/"
+                        element={
+                          <MainLayout>
+                            <Dashboard />
+                          </MainLayout>
+                        }
+                      />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </BrowserRouter>
+                </TooltipProvider>
+              </LanguageProvider>
+            </ConfigWrapper>
           </WalletProvider>
         </SuiClientProvider>
       </QueryClientProvider>

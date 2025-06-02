@@ -37,3 +37,7 @@ export const getVaultsActivities = (payload: any) => {
     );
   }
 };
+
+export const getDepositVaults = () => {
+  return httpNodo.get(`${NODO_URL}/data-management/vaults`);
+};

@@ -10,8 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { COIN_TYPES_CONFIG } from "@/config";
-import { useMyAssets, useWallet } from "@/hooks";
+import { useCurrentDepositVault, useMyAssets, useWallet } from "@/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { formatNumber } from "@/lib/number";
 import { truncateStringWithSeparator } from "@/utils/helpers";
@@ -42,8 +41,10 @@ export const ConnectWalletButton = memo(() => {
   const { mutate: disconnect } = useDisconnectWallet();
   const { refreshBalance, assets } = useMyAssets();
 
-  const usdcCoin = assets.find(
-    (asset) => asset.coin_type === COIN_TYPES_CONFIG.USDC_COIN_TYPE
+  const currentVault = useCurrentDepositVault();
+
+  const collateralToken = assets.find(
+    (asset) => asset.coin_type === currentVault.collateral_token
   );
 
   useEffect(() => {
@@ -171,7 +172,8 @@ export const ConnectWalletButton = memo(() => {
                     />
 
                     <span className="font-mono text-sm">
-                      {formatNumber(usdcCoin?.balance || 0)} USDC
+                      {formatNumber(collateralToken?.balance || 0)}{" "}
+                      {collateralToken?.display_name}
                     </span>
                   </div>
                 </div>

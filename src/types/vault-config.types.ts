@@ -113,6 +113,7 @@ interface TreasuryCap<T> {
   };
 }
 
+// Vault config on Sui
 export type VaultConfig = {
   available_liquidity: string;
   coin_base: TypeName;
@@ -139,4 +140,22 @@ export type VaultConfig = {
   total_liquidity: string;
   treasury_cap: TreasuryCap<string>;
   withdraw: Withdraw;
+};
+
+// Deposit vault config on Backend
+export type DepositVaultConfig = {
+  vault_id: string;
+  vault_module: string;
+  apr: number;
+  total_users: number;
+  is_active: boolean;
+  vault_lp_token: string;
+  vault_lp_token_decimals: number;
+  collateral_token: string;
+  collateral_token_decimals: number;
+  vault_name: string;
+  metadata: {
+    package_id: string;
+    vault_config_id: string;
+  };
 };
