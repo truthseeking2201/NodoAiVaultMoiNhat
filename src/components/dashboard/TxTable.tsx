@@ -19,11 +19,6 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import SwapIcon from "@/assets/icons/swap.svg";
-import USDCIcon from "@/assets/images/usdc.png";
-import SUIIcon from "@/assets/images/sui-wallet.png";
-import CetusIcon from "@/assets/images/cetus.png";
-import DeepIcon from "@/assets/images/deep.png";
-import WalIcon from "@/assets/images/wal.png";
 import { getVaultsActivities } from "@/apis/vault";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -33,11 +28,11 @@ import { truncateBetween } from "@/utils/truncate";
 
 export function TxTable() {
   const tokenImgs = {
-    USDC: USDCIcon,
-    SUI: SUIIcon,
-    CETUS: CetusIcon,
-    DEEP: DeepIcon,
-    WAL: WalIcon,
+    USDC: '/coins/usdc.png',
+    SUI: '/coins/sui-wallet.png',
+    CETUS: '/coins/cetus.png',
+    DEEP: '/coins/deep.png',
+    WAL: '/coins/wal.png',
   };
   const [filter, setFilter] = useState<Types["type"][]>(["ALL"]);
   const [currentPage, setCurrentPage] = useState(1);

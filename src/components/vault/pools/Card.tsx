@@ -1,8 +1,3 @@
-import CetusIcon from "@/assets/images/cetus.png";
-import DeepIcon from "@/assets/images/deep.png";
-import SUIIcon from "@/assets/images/sui-wallet.png";
-import USDCIcon from "@/assets/images/usdc.png";
-import WalIcon from "@/assets/images/wal.png";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useCollateralLPRate } from "@/hooks/useDepositVault";
 import { useGetCoinBalance } from "@/hooks/useMyAssets";
@@ -27,13 +22,25 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
   return (
     <div
       className={cn(
-        "bg-white rounded-xl shadow w-[calc(100%/3-0.5rem)] p-[1.5px] cursor-pointer",
-        !isSelected && "opacity-50"
+        "bg-white rounded-xl shadow w-[calc(100%/3-0.5rem)] p-[1.5px] cursor-pointer group",
+        !pool.isLive && "opacity-50",
+        !isSelected && "hover:scale-105 transition-transform duration-200  "
       )}
       style={{
         background: isSelected
           ? "linear-gradient(90deg, #FFF -3.93%, #0090FF 22.06%, #FF6D9C 48.04%, #FB7E16 74.02%, #FFF 100%)"
           : "#5C5C5C",
+      }}
+      onMouseEnter={(e) => {
+        if (pool.isLive) {
+          e.currentTarget.style.background =
+            "linear-gradient(90deg, #FFF -3.93%, #0090FF 22.06%, #FF6D9C 48.04%, #FB7E16 74.02%, #FFF 100%)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isSelected) {
+          e.currentTarget.style.background = "#5C5C5C";
+        }
       }}
       onClick={() => {
         if (pool.isLive) {

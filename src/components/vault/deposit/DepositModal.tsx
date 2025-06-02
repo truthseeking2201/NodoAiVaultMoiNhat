@@ -84,7 +84,7 @@ const DepositModal = (props: DepositModalProps) => {
                     <img
                       src={`/coins/${token1?.toLowerCase()}.png`}
                       alt="deep"
-                      className="w-6 h-6 absolute right-[18px] z-0"
+                      className=" absolute right-[18px] z-0"
                     />
                     <img
                       src={`/coins/${token2?.toLowerCase()}.png`}
