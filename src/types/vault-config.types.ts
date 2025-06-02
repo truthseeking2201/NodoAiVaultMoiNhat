@@ -158,4 +158,7 @@ export type DepositVaultConfig = {
     package_id: string;
     vault_config_id: string;
   };
+  pool: {
+    pool_name: string;
+  };
 };
