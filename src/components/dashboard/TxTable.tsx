@@ -23,6 +23,7 @@ import USDCIcon from "@/assets/images/usdc.png";
 import SUIIcon from "@/assets/images/sui-wallet.png";
 import CetusIcon from "@/assets/images/cetus.png";
 import DeepIcon from "@/assets/images/deep.png";
+import WalIcon from "@/assets/images/wal.png";
 import { getVaultsActivities } from "@/apis/vault";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,13 @@ import { formatCurrency } from "@/utils/currency";
 import { truncateBetween } from "@/utils/truncate";
 
 export function TxTable() {
+  const tokenImgs = {
+    USDC: USDCIcon,
+    SUI: SUIIcon,
+    CETUS: CetusIcon,
+    DEEP: DeepIcon,
+    WAL: WalIcon,
+  };
   const [filter, setFilter] = useState<Types["type"][]>(["ALL"]);
   const [currentPage, setCurrentPage] = useState(1);
   const [lastTotalPages, setLastTotalPages] = useState(1);
@@ -46,30 +54,27 @@ export function TxTable() {
   const REMOVE_LIQUIDITY_TYPES = ["REMOVE_LIQUIDITY", "CLOSE"];
   const SWAP_TYPES = ["SWAP"];
 
-  const fetchVaultActivities = async ({
-    page = 1,
-    limit = 5,
-    action_type = "",
-  }: {
-    page?: number;
-    limit?: number;
-    action_type?: string;
-  }): Promise<TransactionHistory> => {
-    try {
-      const response = await getVaultsActivities({
-        page,
-        limit,
-        action_type,
-      });
-
-      if (response) {
-        return response as TransactionHistory;
-      }
-    } catch (error) {
-      console.error("Error fetching vault activities:", error);
+  const renamingType = (type: string) => {
+    switch (type) {
+      case "ADD_LIQUIDITY":
+        return "Add Liquidity";
+      case "REMOVE_LIQUIDITY":
+        return "Remove Liquidity";
+      case "CLAIM_REWARDS":
+        return "Add Reward";
+      case "SWAP":
+        return "Swap";
+      case "ADD_PROFIT_UPDATE_RATE":
+        return "Add Profit";
+      case "OPEN":
+        return "Open Position";
+      case "CLOSE":
+        return "Close Position";
+      default:
+        return type;
     }
-    return { list: [], total: 0, page: 1 } as TransactionHistory;
   };
+
   const handleFormatFilter = (filter: Types["type"][]) => {
     if (filter.includes("ALL")) {
       return "";
@@ -90,30 +95,6 @@ export function TxTable() {
       return "REMOVE_LIQUIDITY";
     }
   };
-
-  const { data, isFetching, isFetched } = useQuery({
-    queryKey: ["activities", currentPage, filter],
-    queryFn: () =>
-      fetchVaultActivities({
-        page: currentPage,
-        limit: itemsPerPage,
-        action_type: handleFormatFilter(filter),
-      }),
-    staleTime: 30000,
-  });
-
-  const listItems = data?.list ?? [];
-  const totalItems = data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-
-  useEffect(() => {
-    if (!isFetching && totalPages !== lastTotalPages) {
-      setLastTotalPages(totalPages);
-    }
-  }, [isFetching, totalPages]);
-
-  const displayTotalPages = isFetching ? lastTotalPages : totalPages;
-  const paginatedTransactions = listItems;
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -153,33 +134,56 @@ export function TxTable() {
     );
   };
 
-  const renamingType = (type: string) => {
-    switch (type) {
-      case "ADD_LIQUIDITY":
-        return "Add Liquidity";
-      case "REMOVE_LIQUIDITY":
-        return "Remove Liquidity";
-      case "CLAIM_REWARDS":
-        return "Add Reward";
-      case "SWAP":
-        return "Swap";
-      case "ADD_PROFIT_UPDATE_RATE":
-        return "Add Profit";
-      case "OPEN":
-        return "Open Position";
-      case "CLOSE":
-        return "Close Position";
-      default:
-        return type;
+  const fetchVaultActivities = async ({
+    page = 1,
+    limit = 5,
+    action_type = "",
+  }: {
+    page?: number;
+    limit?: number;
+    action_type?: string;
+  }): Promise<TransactionHistory> => {
+    try {
+      const response = await getVaultsActivities({
+        page,
+        limit,
+        action_type,
+      });
+
+      if (response) {
+        return response as TransactionHistory;
+      }
+    } catch (error) {
+      console.error("Error fetching vault activities:", error);
     }
+    return { list: [], total: 0, page: 1 } as TransactionHistory;
   };
 
-  const tokenImgs = {
-    USDC: USDCIcon,
-    SUI: SUIIcon,
-    CETUS: CetusIcon,
-    DEEP: DeepIcon,
-  };
+  // Using React Query and set up pagination
+  const { data, isFetching, isFetched } = useQuery({
+    queryKey: ["activities", currentPage, filter],
+    queryFn: () =>
+      fetchVaultActivities({
+        page: currentPage,
+        limit: itemsPerPage,
+        action_type: handleFormatFilter(filter),
+      }),
+    staleTime: 30000,
+  });
+
+  const listItems = data?.list ?? [];
+  const totalItems = data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+
+  useEffect(() => {
+    if (!isFetching && totalPages !== lastTotalPages) {
+      setLastTotalPages(totalPages);
+    }
+  }, [isFetching, totalPages]);
+
+  const displayTotalPages = isFetching ? lastTotalPages : totalPages;
+  const paginatedTransactions = listItems;
+  // End of React Query setup
 
   return (
     <div className="space-y-4 mt-[64px]">
