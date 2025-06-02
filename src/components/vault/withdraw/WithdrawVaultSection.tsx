@@ -44,7 +44,7 @@ export default function WithdrawVaultSection() {
       clock: "0x6",
 
       lp_coin_type: currentDepositVault.vault_lp_token,
-      lp_symbol: currentDepositVault.vault_lp_token_symbol,
+      lp_symbol: "NDLP", // hardcode for now
       lp_decimals: currentDepositVault.vault_lp_token_decimals,
       lp_image: LP_TOKEN_CONFIG.image_url,
       is_token_only: true,

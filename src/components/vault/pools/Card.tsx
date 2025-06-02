@@ -9,7 +9,6 @@ import { useGetCoinBalance } from "@/hooks/useMyAssets";
 import { useDepositVaultStore } from "@/hooks/useStore";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
-import { memo } from "react";
 import { VaultPool } from ".";
 
 const tokenImgs = {
@@ -22,7 +21,8 @@ const tokenImgs = {
 
 const VaultCard = ({ pool }: { pool: VaultPool }) => {
   const { is2xl } = useBreakpoint();
-  const ndlpAmount = useGetCoinBalance(
+
+  const { balance: ndlpAmount } = useGetCoinBalance(
     pool.vault_lp_token,
     pool.vault_lp_token_decimals
   );
@@ -31,6 +31,7 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
   const userHolding = ndlpAmount * conversionRate;
   const isSelected = pool.isSelected && pool.isLive;
   const { setDepositVault } = useDepositVaultStore();
+
   return (
     <div
       className={cn(
@@ -141,4 +142,4 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
   );
 };
 
-export default memo(VaultCard);
+export default VaultCard;

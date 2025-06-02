@@ -53,7 +53,7 @@ const getCoinObjects = async (
   return allCoins;
 };
 
-export const useMyAssets = (vaultId?: string) => {
+export const useMyAssets = () => {
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
   const queryClient = useQueryClient();
@@ -84,7 +84,7 @@ export const useMyAssets = (vaultId?: string) => {
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["coinObjects", account?.address],
+    queryKey: ["coinObjects", account?.address, currentVault],
     queryFn: fetchCoinObjects,
     enabled: !!account?.address,
     staleTime: REFETCH_VAULT_DATA_INTERVAL,
@@ -168,7 +168,7 @@ export const useGetCoinsMetadata = () => {
 export const useGetCoinBalance = (coinType: string, decimals: number) => {
   const account = useCurrentAccount();
 
-  const { data: allCoins } = useSuiClientQuery(
+  const { data: allCoins, refetch } = useSuiClientQuery(
     "getCoins",
     {
       owner: account?.address,
@@ -190,5 +190,5 @@ export const useGetCoinBalance = (coinType: string, decimals: number) => {
     return totalBalance;
   }, [allCoins]);
 
-  return userLPBalance;
+  return { balance: userLPBalance, refetch };
 };

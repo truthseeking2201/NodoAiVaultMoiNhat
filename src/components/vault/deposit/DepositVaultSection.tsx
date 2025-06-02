@@ -13,7 +13,7 @@ import {
   useDepositVault,
   useCollateralLPRate,
 } from "@/hooks/useDepositVault";
-import { useMyAssets } from "@/hooks/useMyAssets";
+import { useGetCoinBalance, useMyAssets } from "@/hooks/useMyAssets";
 import { useWallet } from "@/hooks/useWallet";
 import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { formatNumber } from "@/lib/number";
@@ -59,6 +59,11 @@ export default function DepositVaultSection() {
     () =>
       assets.find((asset) => asset.coin_type === depositVault.collateral_token),
     [assets]
+  );
+
+  const { refetch: refetchNdlpBalance } = useGetCoinBalance(
+    depositVault.vault_lp_token,
+    depositVault.vault_lp_token_decimals
   );
 
   const ndlpAmountWillGet = useCalculateNDLPReturn(
@@ -156,6 +161,7 @@ export default function DepositVaultSection() {
     setIsDepositModalOpen(false);
     setDepositStep(1);
     setDepositAmount("");
+    refetchNdlpBalance();
     toast({
       duration: 5000,
       description: (
@@ -170,7 +176,7 @@ export default function DepositVaultSection() {
       variant: "success",
       hideClose: true,
     });
-  }, [toast, dismiss, depositAmount, ndlpAmountWillGet]);
+  }, [toast, dismiss, depositAmount, ndlpAmountWillGet, refetchNdlpBalance]);
 
   const disabledDeposit = useMemo(() => {
     if (!isConnected) return false;

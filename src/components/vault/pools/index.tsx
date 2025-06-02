@@ -1,8 +1,4 @@
-import {
-  useCurrentDepositVault,
-  useGetDepositVaults,
-  useMyAssets,
-} from "@/hooks";
+import { useCurrentDepositVault, useGetDepositVaults } from "@/hooks";
 import { useMemo } from "react";
 import VaultCard from "./Card";
 
@@ -44,7 +40,6 @@ const VaultPools = () => {
       </div>
     </div>
   );
-  return null;
 };
 
 export default VaultPools;
