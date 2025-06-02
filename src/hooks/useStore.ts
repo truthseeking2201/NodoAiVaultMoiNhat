@@ -7,7 +7,7 @@ interface DepositVaultState {
 
 const depositVaultStore = create<DepositVaultState>((set) => ({
   depositVault: null,
-  setDepositVault: (depositVault: string) => set({ depositVault }),
+  setDepositVault: (vaultId: string) => set({ depositVault: vaultId }),
 }));
 
 export const useDepositVaultStore = () => {

@@ -1,34 +1,38 @@
-import { useCurrentDepositVault, useGetDepositVaults } from "@/hooks";
-import { useUSDCLPRate } from "@/hooks/useDepositVault";
-import { useMyAssets } from "@/hooks/useMyAssets";
+import {
+  useCurrentDepositVault,
+  useGetDepositVaults,
+  useMyAssets,
+} from "@/hooks";
 import { useMemo } from "react";
 import VaultCard from "./Card";
-import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
+
+export type VaultPool = {
+  vault_id: string;
+  tokens: string[];
+  APR: number;
+  holding: number;
+  isLive: boolean;
+  vault_lp_token: string;
+  vault_lp_token_decimals: number;
+  isSelected: boolean;
+};
 
 const VaultPools = () => {
   const { data: depositVaults } = useGetDepositVaults();
   const currentVault = useCurrentDepositVault();
-  const account = useCurrentAccount();
-
-  // const ndlpAmount = assets.find(
-  //   (asset) => asset.coin_type === currentVault.vault_lp_token
-  // )?.balance;
-
-  // const conversionRate = useUSDCLPRate(true);
-  // const userHolding = ndlpAmount * conversionRate;
 
   const pools = useMemo(() => {
     return depositVaults.map((vault) => ({
-      id: vault.vault_id,
+      vault_id: vault.vault_id,
       tokens: vault.vault_name.split(" - "),
       APR: vault.apr,
       holding: 0, // todo
       isLive: vault.is_active,
-      isComingSoon: false,
       vault_lp_token: vault.vault_lp_token,
       vault_lp_token_decimals: vault.vault_lp_token_decimals,
+      isSelected: vault.vault_id === currentVault.vault_id,
     }));
-  }, [depositVaults]);
+  }, [depositVaults, currentVault]);
 
   return (
     <div>

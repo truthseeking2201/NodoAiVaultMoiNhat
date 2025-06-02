@@ -1,7 +1,7 @@
 import { useCurrentDepositVault, useMyAssets } from "@/hooks";
 
 import arrowDown from "@/assets/icons/arrow-down.svg";
-import { useUSDCLPRate } from "@/hooks/useDepositVault";
+import { useCollateralLPRate } from "@/hooks/useDepositVault";
 import { formatAmount } from "@/lib/utils";
 
 interface BalanceCardProps {
@@ -15,7 +15,7 @@ export function BalanceCard({ className = "" }: BalanceCardProps) {
     assets.find((asset) => asset.coin_type === currentVault.vault_lp_token)
       ?.balance || 0;
 
-  const conversionRate = useUSDCLPRate(true);
+  const conversionRate = useCollateralLPRate(true, currentVault.vault_id);
   const usdcEquivalent = ndlpAmount * conversionRate;
   const usdcDollarRate = usdcEquivalent * 1;
 

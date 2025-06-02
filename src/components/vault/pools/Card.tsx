@@ -4,12 +4,13 @@ import SUIIcon from "@/assets/images/sui-wallet.png";
 import USDCIcon from "@/assets/images/usdc.png";
 import WalIcon from "@/assets/images/wal.png";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { useUSDCLPRate } from "@/hooks/useDepositVault";
+import { useCollateralLPRate } from "@/hooks/useDepositVault";
 import { useGetCoinBalance } from "@/hooks/useMyAssets";
+import { useDepositVaultStore } from "@/hooks/useStore";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
-import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
-import { memo, useMemo } from "react";
+import { memo } from "react";
+import { VaultPool } from ".";
 
 const tokenImgs = {
   USDC: USDCIcon,
@@ -19,32 +20,36 @@ const tokenImgs = {
   WAL: WalIcon,
 };
 
-const VaultCard = ({ pool }) => {
+const VaultCard = ({ pool }: { pool: VaultPool }) => {
   const { is2xl } = useBreakpoint();
   const ndlpAmount = useGetCoinBalance(
     pool.vault_lp_token,
     pool.vault_lp_token_decimals
   );
 
-  const conversionRate = useUSDCLPRate(true);
+  const conversionRate = useCollateralLPRate(true, pool.vault_id);
   const userHolding = ndlpAmount * conversionRate;
-
+  const isSelected = pool.isSelected && pool.isLive;
+  const { setDepositVault } = useDepositVaultStore();
   return (
     <div
       className={cn(
-        "bg-white rounded-xl shadow w-[calc(100%/3-0.5rem)] p-[1.5px]",
-        !pool.isLive && "opacity-50"
+        "bg-white rounded-xl shadow w-[calc(100%/3-0.5rem)] p-[1.5px] cursor-pointer",
+        !isSelected && "opacity-50"
       )}
       style={{
-        background: pool.isLive
+        background: isSelected
           ? "linear-gradient(90deg, #FFF -3.93%, #0090FF 22.06%, #FF6D9C 48.04%, #FB7E16 74.02%, #FFF 100%)"
           : "#5C5C5C",
+      }}
+      onClick={() => {
+        setDepositVault(pool.vault_id);
       }}
     >
       <div
         className="flex flex-col p-4 rounded-xl h-full"
         style={{
-          background: pool.isLive
+          background: isSelected
             ? "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)"
             : "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)",
         }}

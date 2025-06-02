@@ -105,9 +105,10 @@ export const useDepositVault = (vaultId: string) => {
 export const useCalculateNDLPReturn = (
   amount: number,
   usdcDecimals: number,
-  ndlpDecimals: number
+  ndlpDecimals: number,
+  vaultId: string
 ) => {
-  const { vaultConfig } = useGetVaultConfig();
+  const { vaultConfig } = useGetVaultConfig(vaultId);
   const vaultRate = +vaultConfig?.rate || 1000000;
 
   if (!amount || !vaultConfig || !usdcDecimals || !ndlpDecimals) {
@@ -125,9 +126,9 @@ export const useCalculateNDLPReturn = (
   return Number(ndlpAmountWillGet).toFixed(2);
 };
 
-// calculate the rate of 1 USDC = ? NDLP
-export const useUSDCLPRate = (isReverse = false) => {
-  const { vaultConfig } = useGetVaultConfig();
+// calculate the rate of 1 collateral = ? NDLP
+export const useCollateralLPRate = (isReverse = false, vaultId: string) => {
+  const { vaultConfig } = useGetVaultConfig(vaultId);
 
   if (!vaultConfig) {
     return 1;

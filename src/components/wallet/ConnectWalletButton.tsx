@@ -43,7 +43,7 @@ export const ConnectWalletButton = memo(() => {
 
   const currentVault = useCurrentDepositVault();
 
-  const usdcCoin = assets.find(
+  const collateralToken = assets.find(
     (asset) => asset.coin_type === currentVault.collateral_token
   );
 
@@ -172,7 +172,8 @@ export const ConnectWalletButton = memo(() => {
                     />
 
                     <span className="font-mono text-sm">
-                      {formatNumber(usdcCoin?.balance || 0)} USDC
+                      {formatNumber(collateralToken?.balance || 0)}{" "}
+                      {collateralToken?.display_name}
                     </span>
                   </div>
                 </div>

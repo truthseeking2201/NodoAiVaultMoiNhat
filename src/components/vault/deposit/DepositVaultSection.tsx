@@ -7,13 +7,13 @@ import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { RowItem } from "@/components/ui/row-item";
 import { useToast } from "@/components/ui/use-toast";
 import DepositModal from "@/components/vault/deposit/DepositModal";
-import { useCurrentDepositVault } from "@/hooks";
+import { useCurrentDepositVault, useGetDepositVaults } from "@/hooks";
 import {
   useCalculateNDLPReturn,
   useDepositVault,
-  useUSDCLPRate,
+  useCollateralLPRate,
 } from "@/hooks/useDepositVault";
-import { useGetCoinsMetadata, useMyAssets } from "@/hooks/useMyAssets";
+import { useMyAssets } from "@/hooks/useMyAssets";
 import { useWallet } from "@/hooks/useWallet";
 import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { formatNumber } from "@/lib/number";
@@ -30,7 +30,7 @@ type DepositSuccessData = {
   conversionRate: number;
 };
 
-const MIN_DEPOSIT_AMOUNT = 0.1;
+const MIN_DEPOSIT_AMOUNT = 0.01;
 
 export default function DepositVaultSection() {
   const [depositAmount, setDepositAmount] = useState("");
@@ -42,6 +42,7 @@ export default function DepositVaultSection() {
     useState<DepositSuccessData>(null);
 
   const depositVault = useCurrentDepositVault();
+  const { refetch: refetchDepositVaults } = useGetDepositVaults();
 
   const apr = depositVault?.apr;
   const currentAccount = useCurrentAccount();
@@ -53,27 +54,21 @@ export default function DepositVaultSection() {
   const { toast, dismiss } = useToast();
 
   const { isWhitelisted } = useWhitelistWallet();
-  const coinMetadata = useGetCoinsMetadata();
 
-  const usdcCoin = useMemo(
+  const collateralToken = useMemo(
     () =>
       assets.find((asset) => asset.coin_type === depositVault.collateral_token),
     [assets]
   );
 
-  const ndlpCoin = useMemo(
-    () =>
-      assets.find((asset) => asset.coin_type === depositVault.vault_lp_token),
-    [assets]
-  );
-
   const ndlpAmountWillGet = useCalculateNDLPReturn(
     Number(depositAmount),
-    usdcCoinMetadata?.decimals || 9,
-    ndlpCoinMetadata?.decimals || 9
+    depositVault.collateral_token_decimals,
+    depositVault.vault_lp_token_decimals,
+    depositVault.vault_id
   );
 
-  const conversionRate = useUSDCLPRate();
+  const conversionRate = useCollateralLPRate(false, depositVault.vault_id);
 
   const handleValidateDepositAmount = useCallback(
     (value: string) => {
@@ -83,24 +78,26 @@ export default function DepositVaultSection() {
       }
 
       if (value && Number(value) < MIN_DEPOSIT_AMOUNT) {
-        setError(`Minimum amount is ${MIN_DEPOSIT_AMOUNT} USDC.`);
+        setError(
+          `Minimum amount is ${MIN_DEPOSIT_AMOUNT} ${collateralToken?.display_name}.`
+        );
         return;
       }
 
-      if (value && Number(value) > Number(usdcCoin?.balance)) {
+      if (value && Number(value) > Number(collateralToken?.balance)) {
         setError("Not enough balance to deposit. Please top-up your wallet.");
         return;
       }
 
       setError("");
     },
-    [usdcCoin?.balance]
+    [collateralToken?.balance]
   );
 
   const handleMaxAmount = useCallback(() => {
-    handleValidateDepositAmount(usdcCoin?.balance.toString() || "0");
-    setDepositAmount(usdcCoin?.balance.toString() || "0");
-  }, [usdcCoin?.balance, handleValidateDepositAmount]);
+    handleValidateDepositAmount(collateralToken?.balance.toString() || "0");
+    setDepositAmount(collateralToken?.balance.toString() || "0");
+  }, [collateralToken?.balance, handleValidateDepositAmount]);
 
   const handleConnectWallet = useCallback(() => {
     openConnectWalletDialog();
@@ -124,7 +121,7 @@ export default function DepositVaultSection() {
     try {
       setLoading(true);
       await deposit(
-        usdcCoin,
+        collateralToken,
         Number(depositAmount),
         handleDepositSuccessCallback
       );
@@ -148,10 +145,11 @@ export default function DepositVaultSection() {
         refreshBalance();
         setLoading(false);
         setDepositStep(2);
+        refetchDepositVaults();
         clearTimeout(timeoutId);
       }, 1000);
     },
-    [refreshBalance]
+    [refreshBalance, refetchDepositVaults]
   );
 
   const handleDone = useCallback(() => {
@@ -188,7 +186,7 @@ export default function DepositVaultSection() {
             Balance:{" "}
             <span className="font-mono text-text-primary">
               {isConnected
-                ? `${formatNumber(usdcCoin?.balance || 0)} USDC`
+                ? `${formatNumber(collateralToken?.balance || 0)} USDC`
                 : "--"}
             </span>
           </div>

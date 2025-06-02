@@ -1,4 +1,3 @@
-import { COIN_TYPES_CONFIG } from "@/config";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { UserCoinAsset } from "@/types/coin.types";
 import {
@@ -10,6 +9,7 @@ import { SuiClient } from "@mysten/sui/client";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 import { useCurrentDepositVault } from "./useVault";
+import { COIN_TYPES_CONFIG, LP_TOKEN_CONFIG } from "@/config/coin-config";
 
 interface CoinMetadata {
   decimals: number;
@@ -18,17 +18,6 @@ interface CoinMetadata {
   url?: string;
   iconUrl?: string;
 }
-
-const COIN_CONFIG = {
-  [COIN_TYPES_CONFIG.USDC_COIN_TYPE]: {
-    display_name: "USDC",
-    image_url: "/coins/usdc.png",
-  },
-  [COIN_TYPES_CONFIG.NDLP_COIN_TYPE]: {
-    display_name: "NDLP",
-    image_url: "/coins/ndlp.png",
-  },
-};
 
 const roundDownBalance = (balance: number) => {
   return Math.floor(balance * 100) / 100;
@@ -111,6 +100,9 @@ export const useMyAssets = (vaultId?: string) => {
       const rawBalance = Number(coin.balance || "0");
       const balance = rawBalance / Math.pow(10, decimals);
 
+      const isCollateralToken =
+        coin.coinType === COIN_TYPES_CONFIG.collateral_token.id;
+
       const existingAsset = acc.find(
         (asset) => asset.coin_type === coin.coinType
       );
@@ -123,9 +115,13 @@ export const useMyAssets = (vaultId?: string) => {
           coin_type: coin.coinType,
           balance,
           raw_balance: rawBalance,
-          image_url: COIN_CONFIG[coin.coinType]?.image_url,
+          image_url: isCollateralToken
+            ? COIN_TYPES_CONFIG.collateral_token.image_url
+            : LP_TOKEN_CONFIG.image_url,
           decimals: decimals,
-          display_name: COIN_CONFIG[coin.coinType]?.display_name,
+          display_name: isCollateralToken
+            ? COIN_TYPES_CONFIG.collateral_token.display_name
+            : LP_TOKEN_CONFIG.display_name,
           name: metadata?.name,
           symbol: metadata?.symbol,
         });
