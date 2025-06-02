@@ -1,15 +1,15 @@
-import { getVaultConfig } from "@/apis/vault";
+import { getDepositVaults } from "@/apis/vault";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
-import { PROD_VAULT_ID, VAULT_CONFIG } from "@/config/vault-config";
-import { VaultConfig } from "@/types/vault-config.types";
+import { DepositVaultConfig, VaultConfig } from "@/types/vault-config.types";
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { useDepositVaultStore } from "./useStore";
 
-export const useGetVaultConfig = (vaultId?: string) => {
+export const useGetVaultConfig = (vaultId: string) => {
   const { data, isLoading, refetch } = useSuiClientQuery(
     "getObject",
     {
-      id: vaultId || VAULT_CONFIG.VAULT_ID,
+      id: vaultId,
       options: {
         showType: true,
         showContent: true,
@@ -32,21 +32,34 @@ export const useGetVaultConfig = (vaultId?: string) => {
   };
 };
 
-export const useGetVaultManagement = () => {
-  const vaultId = PROD_VAULT_ID;
-
+export const useGetDepositVaults = () => {
   return useQuery({
-    queryKey: ["vault-management-data"],
-    queryFn: () => getVaultConfig(vaultId),
+    queryKey: ["deposit-vaults-data"],
+    queryFn: () => getDepositVaults(),
     staleTime: REFETCH_VAULT_DATA_INTERVAL,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
-  }) as UseQueryResult<
-    {
-      id?: string;
-      apr: number;
-      total_users: number;
-      total_value_usd: number;
-    },
-    Error
-  >;
+  }) as UseQueryResult<DepositVaultConfig[], Error>;
+};
+
+export const useGetDepositVaultById = (vaultId?: string) => {
+  const { data } = useGetDepositVaults();
+  if (!vaultId) return null;
+  return data?.find((vault) => vault.vault_id === vaultId);
+};
+
+export const useCurrentDepositVault = () => {
+  const { depositVault } = useDepositVaultStore();
+  const { data } = useGetDepositVaults();
+  const defaultVault = data?.find((vault) => vault.is_active);
+  const vault =
+    data?.find((vault) => vault.vault_id === depositVault) || defaultVault;
+
+  return {
+    ...vault,
+    collateral_token_symbol: vault?.collateral_token.split("::")[2],
+    vault_lp_token_symbol: vault?.vault_lp_token.split("::")[2],
+  } as DepositVaultConfig & {
+    collateral_token_symbol: string;
+    vault_lp_token_symbol: string;
+  };
 };

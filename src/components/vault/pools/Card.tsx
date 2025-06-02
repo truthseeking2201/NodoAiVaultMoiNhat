@@ -1,37 +1,58 @@
-import USDCIcon from "@/assets/images/usdc.png";
-import SUIIcon from "@/assets/images/sui-wallet.png";
 import CetusIcon from "@/assets/images/cetus.png";
 import DeepIcon from "@/assets/images/deep.png";
+import SUIIcon from "@/assets/images/sui-wallet.png";
+import USDCIcon from "@/assets/images/usdc.png";
 import WalIcon from "@/assets/images/wal.png";
+import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { useCollateralLPRate } from "@/hooks/useDepositVault";
+import { useGetCoinBalance } from "@/hooks/useMyAssets";
+import { useDepositVaultStore } from "@/hooks/useStore";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
-import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { VaultPool } from ".";
 
-const VaultCard = ({ pool }) => {
-  const tokenImgs = {
-    USDC: USDCIcon,
-    SUI: SUIIcon,
-    CETUS: CetusIcon,
-    DEEP: DeepIcon,
-    WAL: WalIcon
-  };
+const tokenImgs = {
+  USDC: USDCIcon,
+  SUI: SUIIcon,
+  CETUS: CetusIcon,
+  DEEP: DeepIcon,
+  WAL: WalIcon,
+};
+
+const VaultCard = ({ pool }: { pool: VaultPool }) => {
   const { is2xl } = useBreakpoint();
+
+  const { balance: ndlpAmount } = useGetCoinBalance(
+    pool.vault_lp_token,
+    pool.vault_lp_token_decimals
+  );
+
+  const conversionRate = useCollateralLPRate(true, pool.vault_id);
+  const userHolding = ndlpAmount * conversionRate;
+  const isSelected = pool.isSelected && pool.isLive;
+  const { setDepositVault } = useDepositVaultStore();
+
   return (
     <div
       className={cn(
-        "bg-white rounded-xl shadow w-[calc(100%/3-0.5rem)] p-[1.5px]",
-        !pool.isLive && "opacity-50"
+        "bg-white rounded-xl shadow w-[calc(100%/3-0.5rem)] p-[1.5px] cursor-pointer",
+        !isSelected && "opacity-50"
       )}
       style={{
-        background: pool.isLive
+        background: isSelected
           ? "linear-gradient(90deg, #FFF -3.93%, #0090FF 22.06%, #FF6D9C 48.04%, #FB7E16 74.02%, #FFF 100%)"
           : "#5C5C5C",
+      }}
+      onClick={() => {
+        if (pool.isLive) {
+          setDepositVault(pool.vault_id);
+        }
       }}
     >
       <div
         className="flex flex-col p-4 rounded-xl h-full"
         style={{
-          background: pool.isLive
+          background: isSelected
             ? "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)"
             : "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)",
         }}
@@ -57,7 +78,9 @@ const VaultCard = ({ pool }) => {
               "font-medium text-xs bg-[#44EF8B] rounded-xl",
               pool.isLive ? "bg-[#44EF8B]" : "bg-[#FFFFFF33]",
               pool.isLive ? "text-black" : "text-white",
-              is2xl ? "text-[12px] px-2 pt-1 pb-0.5" : "text-[10px] px-1.5 py-0.5"
+              is2xl
+                ? "text-[12px] px-2 pt-1 pb-0.5"
+                : "text-[10px] px-1.5 py-0.5"
             )}
           >
             {pool.isLive ? "Live" : "Coming Soon"}
@@ -111,8 +134,8 @@ const VaultCard = ({ pool }) => {
         >
           <span className={"text-white/50"}>Your holding: </span>
           <span className="text-white font-bold">
-            {pool.holding && pool.holding !== 0
-              ? `$${formatCurrency(pool.holding)}`
+            {userHolding && userHolding !== 0
+              ? `${formatCurrency(userHolding)}` // Assuming 9 decimals, adjust as needed
               : "--"}
           </span>
         </div>

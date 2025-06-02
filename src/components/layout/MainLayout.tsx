@@ -2,7 +2,7 @@ import { useIsChromeDesktop } from "@/hooks";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
-import demoUIOfDesktop from "../../assets/demo-ui-nodo-ai-vault.png";
+import demoUIOfDesktop from "../../assets/images/demo-ui-nodo-ai-vault.png";
 import UseDesktopBanner from "../dashboard/UseDesktopBanner";
 import { AppHeader } from "./AppHeader";
 interface MainLayoutProps {

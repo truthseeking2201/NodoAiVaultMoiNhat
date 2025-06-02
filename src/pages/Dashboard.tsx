@@ -57,7 +57,10 @@ export default function NodoAIVaults() {
                 size="lg"
                 className="font-semibold text-lg p-0 h-fit"
                 onClick={() => {
-                  window.open(import.meta.env.VITE_WHITELIST_FORM_URL, "_blank");
+                  window.open(
+                    import.meta.env.VITE_WHITELIST_FORM_URL,
+                    "_blank"
+                  );
                 }}
               >
                 Get whitelisted now
