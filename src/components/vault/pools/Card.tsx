@@ -44,7 +44,9 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
           : "#5C5C5C",
       }}
       onClick={() => {
-        setDepositVault(pool.vault_id);
+        if (pool.isLive) {
+          setDepositVault(pool.vault_id);
+        }
       }}
     >
       <div

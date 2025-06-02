@@ -1,3 +1,4 @@
+import { COIN_TYPES_CONFIG, LP_TOKEN_CONFIG } from "@/config/coin-config";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { UserCoinAsset } from "@/types/coin.types";
 import {
@@ -9,7 +10,6 @@ import { SuiClient } from "@mysten/sui/client";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 import { useCurrentDepositVault } from "./useVault";
-import { COIN_TYPES_CONFIG, LP_TOKEN_CONFIG } from "@/config/coin-config";
 
 interface CoinMetadata {
   decimals: number;
@@ -60,10 +60,6 @@ export const useMyAssets = () => {
 
   const currentVault = useCurrentDepositVault();
 
-  const allowedCoinTypes = useMemo(() => {
-    return [currentVault?.vault_lp_token, currentVault.collateral_token];
-  }, [currentVault]);
-
   // Clear cache when account address becomes empty
   useEffect(() => {
     if (!account?.address) {
@@ -71,71 +67,91 @@ export const useMyAssets = () => {
     }
   }, [account?.address, queryClient]);
 
-  const fetchCoinObjects = useCallback(async () => {
-    return Promise.all(
-      allowedCoinTypes.map((coinType) =>
-        getCoinObjects(suiClient, coinType, account?.address || "")
-      )
-    );
-  }, [account?.address, suiClient, allowedCoinTypes]);
-
   const {
-    data: coinObjects,
-    isLoading,
-    refetch,
+    data: lpCoinObjects,
+    isLoading: lpCoinObjectsLoading,
+    refetch: lpCoinObjectsRefetch,
   } = useQuery({
-    queryKey: ["coinObjects", account?.address, currentVault],
-    queryFn: fetchCoinObjects,
+    queryKey: ["lpCoinObjects", account?.address, currentVault.vault_id],
+    queryFn: () =>
+      getCoinObjects(
+        suiClient,
+        currentVault.vault_lp_token,
+        account?.address || ""
+      ),
     enabled: !!account?.address,
     staleTime: REFETCH_VAULT_DATA_INTERVAL,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
   });
 
+  const {
+    data: collateralCoinObjects,
+    isLoading: collateralCoinObjectsLoading,
+    refetch: collateralCoinObjectsRefetch,
+  } = useQuery({
+    queryKey: ["collateralCoinObjects", account?.address],
+    queryFn: () =>
+      getCoinObjects(
+        suiClient,
+        currentVault.collateral_token,
+        account?.address || ""
+      ),
+    enabled: !!account?.address,
+    staleTime: REFETCH_VAULT_DATA_INTERVAL,
+    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
+  });
+
+  const refreshBalance = useCallback(() => {
+    lpCoinObjectsRefetch();
+    collateralCoinObjectsRefetch();
+  }, [lpCoinObjectsRefetch, collateralCoinObjectsRefetch]);
+
   const coinMetadata = useGetCoinsMetadata();
-
   const assets: UserCoinAsset[] =
-    coinObjects?.flat().reduce((acc, coin) => {
-      const metadata = coinMetadata[coin.coinType] as CoinMetadata;
-      const decimals = metadata?.decimals || 9;
-      const rawBalance = Number(coin.balance || "0");
-      const balance = rawBalance / Math.pow(10, decimals);
+    [...(lpCoinObjects || []), ...(collateralCoinObjects || [])]
+      ?.flat()
+      .reduce((acc, coin) => {
+        const metadata = coinMetadata[coin.coinType] as CoinMetadata;
+        const decimals = metadata?.decimals || 9;
+        const rawBalance = Number(coin.balance || "0");
+        const balance = rawBalance / Math.pow(10, decimals);
 
-      const isCollateralToken =
-        coin.coinType === COIN_TYPES_CONFIG.collateral_token.id;
+        const isCollateralToken =
+          coin.coinType === COIN_TYPES_CONFIG.collateral_token.id;
 
-      const existingAsset = acc.find(
-        (asset) => asset.coin_type === coin.coinType
-      );
-      if (existingAsset) {
-        existingAsset.balance += balance;
-        existingAsset.raw_balance += rawBalance;
-      } else {
-        acc.push({
-          coin_object_id: coin.coinObjectId,
-          coin_type: coin.coinType,
-          balance,
-          raw_balance: rawBalance,
-          image_url: isCollateralToken
-            ? COIN_TYPES_CONFIG.collateral_token.image_url
-            : LP_TOKEN_CONFIG.image_url,
-          decimals: decimals,
-          display_name: isCollateralToken
-            ? COIN_TYPES_CONFIG.collateral_token.display_name
-            : LP_TOKEN_CONFIG.display_name,
-          name: metadata?.name,
-          symbol: metadata?.symbol,
-        });
-      }
-      return acc;
-    }, [] as UserCoinAsset[]) || [];
+        const existingAsset = acc.find(
+          (asset) => asset.coin_type === coin.coinType
+        );
+        if (existingAsset) {
+          existingAsset.balance += balance;
+          existingAsset.raw_balance += rawBalance;
+        } else {
+          acc.push({
+            coin_object_id: coin.coinObjectId,
+            coin_type: coin.coinType,
+            balance,
+            raw_balance: rawBalance,
+            image_url: isCollateralToken
+              ? COIN_TYPES_CONFIG.collateral_token.image_url
+              : LP_TOKEN_CONFIG.image_url,
+            decimals: decimals,
+            display_name: isCollateralToken
+              ? COIN_TYPES_CONFIG.collateral_token.display_name
+              : LP_TOKEN_CONFIG.display_name,
+            name: metadata?.name,
+            symbol: metadata?.symbol,
+          });
+        }
+        return acc;
+      }, []) || [];
 
   return {
     assets: assets.map((asset) => ({
       ...asset,
       balance: roundDownBalance(asset.balance),
     })),
-    isLoading,
-    refreshBalance: refetch,
+    isLoading: lpCoinObjectsLoading || collateralCoinObjectsLoading,
+    refreshBalance,
   };
 };
 

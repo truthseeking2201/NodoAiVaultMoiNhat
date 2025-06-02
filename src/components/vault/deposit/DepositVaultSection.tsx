@@ -10,8 +10,8 @@ import DepositModal from "@/components/vault/deposit/DepositModal";
 import { useCurrentDepositVault, useGetDepositVaults } from "@/hooks";
 import {
   useCalculateNDLPReturn,
-  useDepositVault,
   useCollateralLPRate,
+  useDepositVault,
 } from "@/hooks/useDepositVault";
 import { useGetCoinBalance, useMyAssets } from "@/hooks/useMyAssets";
 import { useWallet } from "@/hooks/useWallet";
@@ -43,7 +43,10 @@ export default function DepositVaultSection() {
 
   const depositVault = useCurrentDepositVault();
   const { refetch: refetchDepositVaults } = useGetDepositVaults();
-
+  const { refetch: refetchNdlpBalance } = useGetCoinBalance(
+    depositVault.vault_lp_token,
+    depositVault.vault_lp_token_decimals
+  );
   const apr = depositVault?.apr;
   const currentAccount = useCurrentAccount();
   const isConnected = !!currentAccount?.address;
@@ -59,11 +62,6 @@ export default function DepositVaultSection() {
     () =>
       assets.find((asset) => asset.coin_type === depositVault.collateral_token),
     [assets]
-  );
-
-  const { refetch: refetchNdlpBalance } = useGetCoinBalance(
-    depositVault.vault_lp_token,
-    depositVault.vault_lp_token_decimals
   );
 
   const ndlpAmountWillGet = useCalculateNDLPReturn(
@@ -151,17 +149,17 @@ export default function DepositVaultSection() {
         setLoading(false);
         setDepositStep(2);
         refetchDepositVaults();
+        refetchNdlpBalance();
         clearTimeout(timeoutId);
       }, 1000);
     },
-    [refreshBalance, refetchDepositVaults]
+    [refreshBalance, refetchDepositVaults, refetchNdlpBalance]
   );
 
   const handleDone = useCallback(() => {
     setIsDepositModalOpen(false);
     setDepositStep(1);
     setDepositAmount("");
-    refetchNdlpBalance();
     toast({
       duration: 5000,
       description: (
@@ -176,7 +174,7 @@ export default function DepositVaultSection() {
       variant: "success",
       hideClose: true,
     });
-  }, [toast, dismiss, depositAmount, ndlpAmountWillGet, refetchNdlpBalance]);
+  }, [toast, dismiss, depositAmount, ndlpAmountWillGet]);
 
   const disabledDeposit = useMemo(() => {
     if (!isConnected) return false;

@@ -6,7 +6,6 @@ export type VaultPool = {
   vault_id: string;
   tokens: string[];
   APR: number;
-  holding: number;
   isLive: boolean;
   vault_lp_token: string;
   vault_lp_token_decimals: number;
@@ -22,7 +21,6 @@ const VaultPools = () => {
       vault_id: vault.vault_id,
       tokens: vault.vault_name.split(" - "),
       APR: vault.apr,
-      holding: 0, // todo
       isLive: vault.is_active,
       vault_lp_token: vault.vault_lp_token,
       vault_lp_token_decimals: vault.vault_lp_token_decimals,
