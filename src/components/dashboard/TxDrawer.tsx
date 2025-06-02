@@ -1,5 +1,5 @@
 
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import { TransactionHistory } from "@/types/vault";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
