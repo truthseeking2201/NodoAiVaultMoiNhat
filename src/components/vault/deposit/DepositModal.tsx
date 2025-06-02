@@ -9,12 +9,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
-import { ExternalLink, X } from "lucide-react";
-import suiIcon from "@/assets/images/sui-wallet.png";
-import deepIcon from "@/assets/images/deep.png";
+import { useCurrentDepositVault } from "@/hooks";
 import { formatNumber } from "@/lib/number";
 import { formatAmount } from "@/lib/utils";
 import { truncateBetween } from "@/utils/truncate";
+import { ExternalLink, X } from "lucide-react";
 
 interface DepositModalProps {
   isOpen: boolean;
@@ -46,6 +45,10 @@ const DepositModal = (props: DepositModalProps) => {
   } = props;
 
   const { amount, apr, ndlp, conversionRate } = confirmData;
+  const currentVault = useCurrentDepositVault();
+  const poolName = currentVault.pool.pool_name;
+  const token1 = poolName.split("-")[0];
+  const token2 = poolName.split("-")[1];
 
   const suiScanUrl = `https://suiscan.xyz/${
     import.meta.env.VITE_SUI_NETWORK
@@ -79,14 +82,20 @@ const DepositModal = (props: DepositModalProps) => {
                 <div className="flex items-center gap-2">
                   <div className="relative flex">
                     <img
-                      src={deepIcon}
+                      src={`/coins/${token1?.toLowerCase()}.png`}
                       alt="deep"
                       className="w-6 h-6 absolute right-[18px] z-0"
                     />
-                    <img src={suiIcon} alt="deep" className="w-6 h-6 z-10" />
+                    <img
+                      src={`/coins/${token2?.toLowerCase()}.png`}
+                      alt="deep"
+                      className="w-6 h-6 z-10"
+                    />
                   </div>
 
-                  <span className="font-mono text-lg text-white">DEEP-SUI</span>
+                  <span className="font-mono text-lg text-white">
+                    {currentVault.pool.pool_name}
+                  </span>
                 </div>
               </div>
               <div className="flex justify-between">

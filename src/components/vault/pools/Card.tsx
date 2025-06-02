@@ -11,14 +11,6 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
 import { VaultPool } from ".";
 
-const tokenImgs = {
-  USDC: USDCIcon,
-  SUI: SUIIcon,
-  CETUS: CetusIcon,
-  DEEP: DeepIcon,
-  WAL: WalIcon,
-};
-
 const VaultCard = ({ pool }: { pool: VaultPool }) => {
   const { is2xl } = useBreakpoint();
 
@@ -63,7 +55,7 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
               pool.tokens.map((token, index) => (
                 <img
                   key={token}
-                  src={tokenImgs[token]}
+                  src={`/coins/${token?.toLowerCase()}.png`}
                   alt={token}
                   className={cn(
                     "mr-2 rounded-full",
