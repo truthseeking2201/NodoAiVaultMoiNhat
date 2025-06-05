@@ -1,61 +1,4 @@
 @layer components {
-  /* Glass card styling - standardized */
-  .glass-card {
-    @apply bg-black backdrop-blur-glass border border-black/10 rounded-xl shadow-glass transition-all duration-300 hover:border-white/15;
-    position: relative;
-  }
-
-  .glass-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    background: linear-gradient(
-      120deg,
-      rgba(0, 0, 0, 0.08) 0%,
-      rgba(0, 0, 0, 0.03) 100%
-    );
-    opacity: 0.5;
-    pointer-events: none;
-  }
-
-  /* Navigation links */
-  .nav-link {
-    @apply relative px-3 py-1.5 text-white/90 transition-all duration-300 rounded-lg hover:bg-white/5;
-  }
-
-  .nav-link::after {
-    content: "";
-    @apply absolute left-0 -bottom-1 h-0.5 w-0 bg-gradient-brand rounded-sm transition-all origin-left;
-    transition: width 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-  }
-
-  .nav-link:hover {
-    @apply text-white -translate-y-[1px];
-    text-shadow: 0 0 12px rgba(236, 111, 5, 0.4);
-  }
-
-  .nav-link:focus-visible {
-    @apply outline-none;
-    outline: 2px solid rgba(236, 111, 5, 0.5);
-    outline-offset: 4px;
-    border-radius: 6px;
-  }
-
-  .nav-link:active {
-    @apply scale-95;
-    text-shadow: 0 0 16px rgba(236, 111, 5, 0.6);
-  }
-
-  .nav-link.active {
-    @apply text-brand-500 bg-white/5;
-  }
-
-  .nav-link.active::after {
-    @apply w-full;
-  }
-
   /* Deposit button styling */
   .deposit-gradient-btn {
     @apply bg-gradient-brand text-white transition-all duration-300 hover:shadow-brand;
@@ -100,42 +43,6 @@
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-  }
-
-  /* Premium glass card styling */
-  .glass-card-premium {
-    @apply bg-white/[0.05] backdrop-blur-glass border border-white/[0.08] rounded-xl shadow-glass transition-all duration-300;
-    position: relative;
-  }
-
-  .glass-card-premium::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: inherit;
-    pointer-events: none;
-  }
-
-  .glass-card-premium::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border: 1px solid transparent;
-    border-radius: inherit;
-    opacity: 0;
-    transition: opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-    background: linear-gradient(to right, #ff9320, #ec6f05, #3e1672) border-box;
-    mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-    -webkit-mask: linear-gradient(#fff 0 0) padding-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: destination-out;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  .glass-card-premium:hover::after {
-    opacity: 1;
   }
 
   /* Activity section styling */
@@ -214,11 +121,11 @@
   }
 
   /* Standard focus styles - consistent across all interactive elements */
-  .focus-ring {
+  /* .focus-ring {
     @apply outline-none;
   }
 
   .focus-ring:focus-visible {
     @apply outline-none ring-2 ring-brand-500/60 ring-offset-2 ring-offset-background;
-  }
+  } */
 }
