@@ -46,15 +46,6 @@ export default {
           default: "#242C32",
         },
 
-        // Brand color aliases
-        brand: {
-          "50": "rgba(236, 111, 5, .25)",
-          "400": "#FF9320", // nova light
-          "500": "#EC6F05", // nova default
-          "600": "#B45004", // nova dark
-          "700": "#5A2702", // nova deep
-        },
-
         // shadcn UI colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -90,32 +81,8 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
       },
-      boxShadow: {
-        // Standardized shadow system
-        "neon-nova": "0 0 20px rgba(236, 111, 5, 0.18)",
-        "neon-orion": "0 0 20px rgba(245, 158, 11, 0.18)",
-        "neon-emerald": "0 0 20px rgba(16, 185, 129, 0.18)",
-        "neon-violet": "0 0 20px rgba(62, 22, 114, 0.18)",
-        brand: "0 4px 8px -2px rgba(236, 111, 5, .35)",
-        "brand-hover": "0 8px 16px -8px rgba(236, 111, 5, .25)",
-        glass: "0 8px 32px rgba(0, 0, 0, 0.12)",
-
-        // Standard elevation system
-        "elevation-1": "0 1px 3px rgba(0, 0, 0, 0.2)",
-        "elevation-2": "0 4px 6px rgba(0, 0, 0, 0.2)",
-        "elevation-3": "0 10px 15px rgba(0, 0, 0, 0.2)",
-      },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-brand":
-          "linear-gradient(90deg, #FF9320 0%, #EC6F05 50%, #B45004 100%)",
-        "gradient-brand-vertical":
-          "linear-gradient(180deg, #FF9320 0%, #EC6F05 50%, #B45004 100%)",
-        "gradient-glow":
-          "radial-gradient(circle closest-side, var(--tw-gradient-stops))",
-        "gradient-button":
-          "linear-gradient(90deg, #0090FF -29.91%, #FF6D9C 44.08%, #FB7E16 100%)",
-      },
+      boxShadow: {},
+      backgroundImage: {},
       borderRadius: {
         none: "0",
         sm: "0.25rem", // 4px
@@ -126,9 +93,7 @@ export default {
         "3xl": "2rem", // 32px
         full: "9999px",
       },
-      backdropBlur: {
-        glass: "20px",
-      },
+      backdropBlur: {},
       transitionDuration: {
         "250": "250ms",
         "300": "300ms",

@@ -61,16 +61,3 @@ body {
 .pulse-ai {
   animation: pulse-orange 2s infinite ease-in-out;
 }
-
-/* Consistent elevation levels for cards */
-.elevation-1 {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.elevation-2 {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-
-.elevation-3 {
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
-}
