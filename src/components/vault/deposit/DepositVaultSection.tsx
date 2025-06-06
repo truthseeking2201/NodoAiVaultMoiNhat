@@ -1,5 +1,5 @@
 import suiWallet from "@/assets/images/sui-wallet.png";
-import RegisterForWhiteListButton from "@/components/dashboard/request-whitelist-button/RegisterForWhiteListButton";
+import RegisterForWhiteLayout from "@/components/dashboard/request-whitelist-button/RegisterForWhiteLayout";
 import ConditionRenderer from "@/components/shared/ConditionRenderer";
 import { Button } from "@/components/ui/button";
 import { FormattedNumberInput } from "@/components/ui/formatted-number-input";
@@ -253,7 +253,7 @@ export default function DepositVaultSection() {
       >
         <ConditionRenderer
           when={isWhitelisted}
-          fallback={<RegisterForWhiteListButton />}
+          fallback={<RegisterForWhiteLayout />}
         >
           <Button
             variant="primary"
