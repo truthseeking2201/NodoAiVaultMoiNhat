@@ -159,7 +159,7 @@ const WhiteListModal = ({ open, onClose }) => {
                 className="text-[60px] leading-[64px] font-bold"
                 style={{
                   background:
-                    "linear-gradient(90deg, #FFF -3.93%, #0090FF 22.06%, #FF6D9C 48.04%, #FB7E16 74.02%, #FFF 100%)",
+                    "linear-gradient(90deg, #FFF -3.93%, #0090FF 22.06%, #FF6D9C 48.04%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -167,16 +167,14 @@ const WhiteListModal = ({ open, onClose }) => {
                   display: "inline-block",
                 }}
               >
-                The Future of DeFi is Almost Here
+                Be The First to Access
               </div>
               <div className="text-[60px] leading-[64px] font-bold">
                 NODO AI Vaults
               </div>
               <div className="text-[18px] mt-6">
-                The First Agentic DeFAI Vaults on Sui — Safe yields, on-demand
-                liquidity.
-                <br />
-                Only available via invites.
+                Unlock access to the first agentic DeFAI vaults on Sui by
+                registering for the whitelist now.
               </div>
               <div className="mt-6 relative flex justify-start gap-4">
                 <RegisterForWhiteListButton
