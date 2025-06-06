@@ -19,7 +19,7 @@ import { getBalanceAmountForInput, showFormatNumber } from "@/lib/number";
 import { sleep } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 
-import { RegisterForWhiteListButton } from "@/components/dashboard/request-whitelist-button";
+import RegisterForWhiteListButton from "@/components/dashboard/request-whitelist-button/RegisterForWhiteListButton";
 import ConditionRenderer from "@/components/shared/ConditionRenderer";
 import { COIN_TYPES_CONFIG, LP_TOKEN_CONFIG } from "@/config/coin-config";
 import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";

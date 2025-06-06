@@ -1,1 +1,2 @@
-export { default as RegisterForWhiteListButton } from "./RegisterForWhiteListButton";
+export * from "./RegisterForWhiteLayout";
+export * from "./RegisterForWhiteListButton";
