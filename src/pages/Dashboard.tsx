@@ -1,5 +1,5 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 
 import LeftContent from "@/components/dashboard/LeftContent";
 import RightContent from "@/components/dashboard/RightContent";
@@ -13,11 +13,39 @@ import VaultPools from "@/components/vault/pools";
 import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight } from "lucide-react";
+import { useCurrentAccount } from "@mysten/dapp-kit";
+import WhiteListModal from "@/components/dashboard/white-list-modal/WhiteListModal";
 
 export default function NodoAIVaults() {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
   const { isWhitelisted } = useWhitelistWallet();
+  const account = useCurrentAccount();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
+  useEffect(() => {
+    // Initialize sessionStorage if not present
+    if (window.localStorage.getItem("is-whitelist-address") === null) {
+      window.localStorage.setItem("is-whitelist-address", "false");
+    }
+    // If account changes, reset popup closed state to false
+    if (!account) {
+      window.localStorage.setItem("is-whitelist-address", "false");
+    }
+    // If popup was previously closed, don't show it again for the same account
+    if (
+      account &&
+      !isWhitelisted &&
+      window.localStorage.getItem("is-whitelist-address") === "false"
+    ) {
+      window.localStorage.setItem("is-whitelist-address", "true");
+      setIsOpen(true);
+    }
+  }, [isWhitelisted, account]);
 
   return (
     <div className="min-h-screen main-bg" ref={containerRef}>
@@ -98,6 +126,7 @@ export default function NodoAIVaults() {
             <RightContent />
           </div>
         </div>
+        <WhiteListModal open={isOpen} onClose={handleClose} />
       </PageContainer>
       {/* Footer */}
       <footer className="py-6 text-center text-100 font-caption border-t border-white/10 bg-transparent">
