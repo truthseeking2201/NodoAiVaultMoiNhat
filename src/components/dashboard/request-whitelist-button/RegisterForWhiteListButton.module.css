@@ -20,7 +20,7 @@
   border-radius: 12px;
   background: #ffffff;
   border: none;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-weight: 600;
   font-size: 18px;
   color: #000000;
@@ -42,7 +42,14 @@
   height: 59.992px;
   flex-shrink: 0;
   border-radius: 12px;
-  background: linear-gradient(90deg, #FFF -3.93%, #0090FF 22.06%, #FF6D9C 48.04%, #FB7E16 74.02%, #FFF 100%);
+  background: linear-gradient(
+    90deg,
+    #fff -3.93%,
+    #0090ff 22.06%,
+    #ff6d9c 48.04%,
+    #fb7e16 74.02%,
+    #fff 100%
+  );
   filter: blur(9px);
   z-index: 1;
   transition: all 0.3s ease;

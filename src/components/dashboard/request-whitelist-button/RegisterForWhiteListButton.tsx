@@ -1,30 +1,31 @@
-import { Info } from "lucide-react";
 import styles from "./RegisterForWhiteListButton.module.css";
+import { cn } from "@/lib/utils";
 
-const RegisterForWhiteListButton = () => {
-  const handleRegisterForWhiteList = () => {
-    // TODO: Handle register for white list
-    const earlyAccessFormUrl = import.meta.env.VITE_WHITELIST_FORM_URL
-    window.open(earlyAccessFormUrl, "_blank");
-  };
+type RegisterForWhiteListButtonProps = {
+  onClick?: () => void;
+  label?: string;
+  icon?: React.ReactNode;
+  customClassName?: string;
+};
+const RegisterForWhiteListButton = ({
+  onClick,
+  label = "Register for Whitelist",
+  icon,
+  customClassName,
+}: RegisterForWhiteListButtonProps) => {
   return (
-    <div>
-      <div className="flex items-center justify-center gap-1 mb-4">
-        <Info className="h-4 w-4" />
-        <span className="font-sans text-sm">
-          Your wallet isn’t registered yet — please register your Sui address to
-          get whitelisted.
-        </span>
-      </div>
-      <div className={styles.buttonWrapper}>
-        {/* Blur gradient layer */}
-        <div className={styles.blurEffect} />
-        {/* Button */}
-        <button
-          className={styles.whitelistButton}
-          onClick={handleRegisterForWhiteList}
-        >
-          Register for Whitelist
+    <div className={cn(customClassName, styles.buttonWrapper)}>
+      {/* Blur gradient layer */}
+      <div className={cn(customClassName, styles.blurEffect)} />
+      {/* Button */}
+      <button
+        className={cn(customClassName, styles.whitelistButton)}
+        onClick={onClick}
+      >
+        {" "}
+        {icon && icon}
+        {label}
+        {!icon && (
           <svg
             className={styles.arrowIcon}
             width="24"
@@ -48,8 +49,8 @@ const RegisterForWhiteListButton = () => {
               strokeLinejoin="round"
             />
           </svg>
-        </button>
-      </div>
+        )}
+      </button>
     </div>
   );
 };
