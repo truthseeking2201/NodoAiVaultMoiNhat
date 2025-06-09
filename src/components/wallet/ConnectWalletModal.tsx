@@ -33,6 +33,7 @@ export function ConnectWalletModal({
     email: "demo@gmail.com",
     referralCode: "NODO123",
   });
+  const referralCode = "NODO123";
 
   const handleNextStep = (chosenStep?: string) => {
     if (userType === CASES.NEW_USER_WITHOUT_REFERRAL) {
@@ -155,7 +156,10 @@ export function ConnectWalletModal({
             <SuccessReferral user={user} onNextStep={handleNextStep} />
           )}
           {step === STEPS.REFERRAL_CONFIRM && (
-            <ConfirmReferral onNextStep={handleNextStep} />
+            <ConfirmReferral
+              onNextStep={handleNextStep}
+              referralCode={referralCode}
+            />
           )}
         </DialogDescription>
       </DialogContent>
