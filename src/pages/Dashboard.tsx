@@ -14,13 +14,17 @@ import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight } from "lucide-react";
 import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useWallet } from "@/hooks/useWallet";
 import WhiteListModal from "@/components/dashboard/white-list-modal/WhiteListModal";
+import { truncateBetween } from "@/utils/truncate";
 
 export default function NodoAIVaults() {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
   const { isWhitelisted } = useWhitelistWallet();
   const account = useCurrentAccount();
+  const { isConnectWalletDialogOpen } = useWallet();
+
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClose = () => {
@@ -28,24 +32,36 @@ export default function NodoAIVaults() {
   };
 
   useEffect(() => {
-    // Initialize sessionStorage if not present
     if (window.localStorage.getItem("is-whitelist-address") === null) {
       window.localStorage.setItem("is-whitelist-address", "false");
     }
-    // If account changes, reset popup closed state to false
-    if (!account) {
-      window.localStorage.setItem("is-whitelist-address", "false");
-    }
-    // If popup was previously closed, don't show it again for the same account
-    if (
-      account &&
-      !isWhitelisted &&
-      window.localStorage.getItem("is-whitelist-address") === "false"
-    ) {
+
+    if (account && isWhitelisted) {
       window.localStorage.setItem("is-whitelist-address", "true");
-      setIsOpen(true);
     }
-  }, [isWhitelisted, account]);
+
+    const isWhitelistModalShown = window.localStorage.getItem(
+      "is-whitelist-address"
+    );
+
+    if (account && !isWhitelisted) {
+      const currentAddress = truncateBetween(account.address, 5, 5);
+      const storedAddress = window.localStorage.getItem("current-address");
+      if (currentAddress !== storedAddress) {
+        window.localStorage.setItem("is-whitelist-address", "false");
+        window.localStorage.setItem("current-address", currentAddress);
+      }
+    }
+
+    const timer = setTimeout(() => {
+      if (isWhitelistModalShown === "false" && !isConnectWalletDialogOpen) {
+        setIsOpen(true);
+        window.localStorage.setItem("is-whitelist-address", "true");
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [isWhitelisted, account, isConnectWalletDialogOpen]);
 
   return (
     <div className="min-h-screen main-bg" ref={containerRef}>

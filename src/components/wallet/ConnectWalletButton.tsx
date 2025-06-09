@@ -107,6 +107,11 @@ export const ConnectWalletButton = memo(() => {
     );
   }
 
+  const handleDisconnect = () => {
+    disconnect();
+    window.localStorage.removeItem("current-address");
+  };
+
   return (
     <>
       {!isConnected ? (
@@ -283,7 +288,7 @@ export const ConnectWalletButton = memo(() => {
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={() => disconnect()}
+                    onClick={handleDisconnect}
                     className="w-full h-[40px]"
                   >
                     <LogOut className="w-4 h-4" />
