@@ -14,6 +14,7 @@ import InputReferral from "@/components/wallet/InputReferral";
 import ExistingUser from "@/components/wallet/ExistingUser";
 import SuccessReferral from "@/components/wallet/SuccessReferral";
 import ConfirmReferral from "@/components/wallet/ConfirmReferral";
+import type { UserType } from "@/types/user";
 
 interface ConnectWalletModalProps {
   open: boolean;
@@ -26,9 +27,9 @@ export function ConnectWalletModal({
   onClose,
   onConnected,
 }: ConnectWalletModalProps) {
-  const [step, setStep] = useState(STEPS.REFERRAL_CONFIRM);
-  const [userType, setUserType] = useState(CASES.NEW_USER_WITH_REFERRAL);
-  const [user, setUser] = useState<any>({
+  const [step, setStep] = useState(STEPS.CONNECT_WALLET);
+  const [userType, setUserType] = useState(CASES.NEW_USER_WITHOUT_REFERRAL);
+  const [user, setUser] = useState<UserType>({
     name: "John Doe",
     email: "demo@gmail.com",
     referralCode: "NODO123",
@@ -36,12 +37,19 @@ export function ConnectWalletModal({
   const referralCode = "NODO123";
 
   const handleNextStep = (chosenStep?: string) => {
-    if (userType === CASES.NEW_USER_WITHOUT_REFERRAL) {
-      handleNewUserWithoutReferral(step);
-    } else if (userType === CASES.NEW_USER_WITH_REFERRAL) {
-      handleNewUserWithReferral(step);
-    } else if (userType === CASES.EXISTING_USER) {
-      handleExistingUser(step, chosenStep);
+    switch (userType) {
+      case CASES.EXISTING_USER:
+        handleExistingUser(step, chosenStep);
+        break;
+      case CASES.NEW_USER_WITHOUT_REFERRAL:
+        handleNewUserWithoutReferral(step);
+        break;
+      case CASES.NEW_USER_WITH_REFERRAL:
+        handleNewUserWithReferral(step);
+        break;
+      default:
+        console.error("Unknown user type");
+        break;
     }
   };
 
@@ -60,6 +68,7 @@ export function ConnectWalletModal({
         onClose();
         break;
       default:
+        console.warn("Unknown step:", currentStep);
         break;
     }
   };
@@ -76,6 +85,7 @@ export function ConnectWalletModal({
         onClose();
         break;
       default:
+        console.warn("Unknown step:", currentStep);
         break;
     }
   };
@@ -92,15 +102,16 @@ export function ConnectWalletModal({
         onClose();
         break;
       default:
+        console.warn("Unknown step:", currentStep);
         break;
     }
   };
 
-  useEffect(() => {
-    if (CASES.NEW_USER_WITH_REFERRAL === userType) {
-      setStep(STEPS.REFERRAL_CONFIRM);
-    }
-  }, [open]);
+  // useEffect(() => {
+  //   if (CASES.NEW_USER_WITH_REFERRAL === userType) {
+  //     setStep(STEPS.REFERRAL_CONFIRM);
+  //   }
+  // }, [userType]);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>

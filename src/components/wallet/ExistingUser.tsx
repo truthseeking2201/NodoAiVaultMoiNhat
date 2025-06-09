@@ -4,12 +4,18 @@ import DefaultAvatar from "@/assets/images/wallet/default-avatar.png";
 import { ArrowRight } from "lucide-react";
 import type { UserType } from "@/types/user";
 import { STEPS } from "@/components/wallet/constants.ts";
+import { useDisconnectWallet } from "@mysten/dapp-kit";
 
 type ExistingUserProps = {
   onNextStep: (step?: string) => void;
   user: UserType;
 };
 const ExistingUser = ({ onNextStep, user }: ExistingUserProps) => {
+  const { mutate: disconnect } = useDisconnectWallet();
+  const handleBackToConnectWallet = () => {
+    disconnect();
+    onNextStep(STEPS.CONNECT_WALLET);
+  };
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 pt-4">
       <img src={ExistingUserIcon} alt="Existing User" className="w-16 h-16" />
@@ -39,7 +45,7 @@ const ExistingUser = ({ onNextStep, user }: ExistingUserProps) => {
         <Button
           variant="ai-outline"
           size="lg"
-          onClick={() => onNextStep(STEPS.CONNECT_WALLET)}
+          onClick={handleBackToConnectWallet}
           className="w-full max-w-xs font-semibold text-sm h-[44px] rounded-lg"
         >
           Login with another wallet
