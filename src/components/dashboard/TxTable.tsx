@@ -29,7 +29,7 @@ import { truncateBetween } from "@/utils/truncate";
 export function TxTable() {
   const tokenImgs = {
     USDC: '/coins/usdc.png',
-    SUI: '/coins/sui-wallet.png',
+    SUI: '/coins/sui.png',
     CETUS: '/coins/cetus.png',
     DEEP: '/coins/deep.png',
     WAL: '/coins/wal.png',
