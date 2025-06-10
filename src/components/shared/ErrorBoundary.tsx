@@ -1,5 +1,8 @@
 import React from "react";
-import { AlertCircle } from "lucide-react";
+import { motion } from "framer-motion";
+import disconnectedImg from "../../assets/images/disconnected.png";
+import errorBg from "../../assets/images/bg-error.png";
+import RegisterForWhiteListButton from "../dashboard/request-whitelist-button/RegisterForWhiteListButton";
 
 interface Props {
   children: React.ReactNode;
@@ -28,18 +31,61 @@ export class ErrorBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex h-screen w-screen flex-col items-center justify-center gap-4 p-4 text-center">
-          <AlertCircle className="h-12 w-12 text-red-500" />
-          <h1 className="text-2xl font-bold">Something went wrong</h1>
-          <p className="text-gray-600">
-            {this.state.error?.message || "An unexpected error occurred"}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+        <div
+          className="flex h-screen w-screen flex-row items-center justify-center gap-6"
+          style={{
+            backgroundImage: `url(${errorBg})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          <motion.img 
+            src={disconnectedImg} 
+            alt="Error"
+            initial={{ x: -100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ 
+              type: "spring",
+              stiffness: 100,
+              damping: 15,
+              duration: 0.8 
+            }}
+          />
+          <motion.div 
+            className="flex flex-col items-start justify-center gap-2 p-4 text-center"
+            initial={{ x: 100, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ 
+              type: "spring",
+              stiffness: 100,
+              damping: 15,
+              duration: 0.8 
+            }}
           >
-            Reload Page
-          </button>
+            <h1 className="text-3xl font-bold text-white text-left max-w-xs">
+              Oops, something went wrong on our end.
+            </h1>
+            <p className="text-base text-white max-w-md text-left">
+              The system encountered an unexpected issue and couldn't complete
+              your request
+            </p>
+            <p className="text-base text-white max-w-md">
+              We're already working to fix it — please try again shortly.
+            </p>
+            <motion.div 
+              className="flex rounded-[12px] bg-gradient-to-tr from-[#0090FF] via-[#FF6D9C] to-[#FB7E16] p-px hover:opacity-70 transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-black text-white hover:text-white m-[1px] h-[40px] rounded-[12px] text-md font-semibold px-8"
+              >
+                Reload Page
+              </button>
+            </motion.div>
+          </motion.div>
         </div>
       );
     }
