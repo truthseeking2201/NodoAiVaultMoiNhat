@@ -30,9 +30,9 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
   return (
     <div
       className={cn(
-        "bg-white rounded-xl shadow w-[calc(100%/3-0.5rem)] p-[1.5px] cursor-pointer group transition-transform duration-300",
+        "bg-white rounded-xl shadow w-[calc(100%/3-0.5rem)] p-[2px] cursor-pointer group transition-transform duration-300",
         !pool.isLive && "opacity-50",
-        !isSelected && "hover:scale-[1.03]"
+        !isSelected && "hover:scale-[1.04]"
       )}
       style={{
         background: isSelected
@@ -59,18 +59,16 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
       <div
         className="flex flex-col p-4 rounded-xl h-full"
         style={{
-          background: isSelected
-            ? "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)"
-            : "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)",
+          background: "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)",
         }}
       >
         <div className="flex items-start justify-center mb-5 gap-2">
-          <div>
+          <div className="flex items-center justify-center">
             {pool.tokens.map((token, index) => (
               <span
                 key={token}
                 className={cn(
-                  "text-white  font-bold",
+                  "text-white font-bold",
                   is2xl ? "text-md" : "text-sm"
                 )}
               >
@@ -92,7 +90,6 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
             {pool.isLive ? "Live" : "Coming Soon"}
           </div>
         </div>
-
         <div className="flex items-center justify-center">
           {pool?.tokens?.length > 0 &&
             pool.tokens.map((token, index) => (
