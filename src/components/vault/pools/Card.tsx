@@ -6,6 +6,14 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
 import { VaultPool } from ".";
 
+const APR = ({ text }: { text: string }) => {
+  return (
+    <div className="font-sans font-bold text-[22px] bg-gradient-to-r from-[#9DEBFF] to-[#00FF5E] bg-clip-text text-transparent">
+      {text}
+    </div>
+  );
+};
+
 const VaultCard = ({ pool }: { pool: VaultPool }) => {
   const { is2xl } = useBreakpoint();
 
@@ -56,21 +64,20 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
             : "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)",
         }}
       >
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center">
-            {pool?.tokens?.length > 0 &&
-              pool.tokens.map((token, index) => (
-                <img
-                  key={token}
-                  src={`/coins/${token?.toLowerCase()}.png`}
-                  alt={token}
-                  className={cn(
-                    "mr-2 rounded-full",
-                    is2xl ? "w-[36px] h-[36px]" : "w-[24px] h-[24px]",
-                    index > 0 && "ml-[-15px]"
-                  )}
-                />
-              ))}
+        <div className="flex items-start justify-center mb-5 gap-2">
+          <div>
+            {pool.tokens.map((token, index) => (
+              <span
+                key={token}
+                className={cn(
+                  "text-white  font-bold",
+                  is2xl ? "text-md" : "text-sm"
+                )}
+              >
+                {token}
+                {index < pool.tokens.length - 1 ? " - " : ""}
+              </span>
+            ))}
           </div>
           <div
             className={cn(
@@ -85,35 +92,27 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
             {pool.isLive ? "Live" : "Coming Soon"}
           </div>
         </div>
-        <div>
-          {pool.tokens.map((token, index) => (
-            <span
-              key={token}
-              className={cn(
-                "text-white  font-bold",
-                is2xl ? "text-md" : "text-sm"
-              )}
-            >
-              {token}
-              {index < pool.tokens.length - 1 ? " - " : ""}
-            </span>
-          ))}
+
+        <div className="flex items-center justify-center">
+          {pool?.tokens?.length > 0 &&
+            pool.tokens.map((token, index) => (
+              <img
+                key={token}
+                src={`/coins/${token?.toLowerCase()}.png`}
+                alt={token}
+                className={cn(
+                  "mr-2 rounded-full",
+                  is2xl ? "w-[36px] h-[36px]" : "w-[24px] h-[24px]",
+                  index > 0 && "ml-[-15px]"
+                )}
+              />
+            ))}
         </div>
-        <div className="mt-2.5">
-          <span
-            className={cn(
-              " text-white/50  text-left",
-              is2xl ? "text-[18px]" : "text-base"
-            )}
-          >
-            APR:{" "}
-            <span
-              className={cn(
-                "font-bold  text-white",
-                is2xl ? "text-[24px]" : "text-xl"
-              )}
-            >
-              {pool.APR && pool.APR !== 0
+        <div className="mt-5 flex items-center justify-between">
+          <span className={cn(" text-white/50  text-base")}>APR:</span>
+          <APR
+            text={
+              pool.APR && pool.APR !== 0
                 ? `${formatCurrency(
                     pool.APR < 0 ? 0 : pool.APR,
                     0,
@@ -121,9 +120,16 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
                     2,
                     "decimal"
                   )}%`
-                : "--"}
-            </span>
-          </span>
+                : "--"
+            }
+          />
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <div className="text-white/50 text-base">DEX</div>
+          <div className="flex gap-1 items-center text-base">
+            <img src="/dexs/momentum.png" className="h-[16px]" />
+            <div className="font-sans font-bold">Momentum</div>
+          </div>
         </div>
         <div
           className={cn(
