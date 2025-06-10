@@ -66,7 +66,7 @@ export default function NodoAIVaults() {
   return (
     <div className="min-h-screen main-bg" ref={containerRef}>
       <PageContainer>
-        <div style={{ maxWidth: "1400px" }}>
+        <div style={{ maxWidth: "1440px" }}>
           {/* Main Header */}
           <header className="text-center font-sans mb-16">
             <h1 className="text-[60px] leading-[48px] font-bold">
