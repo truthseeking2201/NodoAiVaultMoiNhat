@@ -3,7 +3,9 @@ import { DepositVaultConfig } from "@/types/vault-config.types";
 import { QueryClient } from "@tanstack/react-query";
 
 // Cache for the loaded static data
-let staticVaultData: DepositVaultConfig[] | null = null;
+let staticVaultData: any = {
+  data: [],
+};
 
 /**
  * Load vault data from static JSON file (generated at build time)

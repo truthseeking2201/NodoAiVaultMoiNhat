@@ -79,7 +79,7 @@ export function viteSsgPlugin(): Plugin {
       this.emitFile({
         type: "asset",
         fileName: "vault-data.json",
-        source: JSON.stringify({ ...response.data }, null, 2),
+        source: JSON.stringify({ ...response }, null, 2),
       });
     },
   };
