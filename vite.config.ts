@@ -10,19 +10,7 @@ export default defineConfig(({ mode }) => {
       host: "::",
       port: 8080,
     },
-    plugins: [
-      react(),
-      // Uncomment the following to use the Vite SSG plugin approach:
-      viteSsgPlugin({
-        dataEndpoints: [
-          {
-            name: "vault-data",
-            url: `/data-management/vaults`,
-            outputPath: "vault-data.json",
-          },
-        ],
-      }),
-    ],
+    plugins: [react(), viteSsgPlugin()],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),

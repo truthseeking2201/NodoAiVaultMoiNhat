@@ -2,7 +2,11 @@ import { getDepositVaults } from "@/apis/vault";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { DepositVaultConfig, VaultConfig } from "@/types/vault-config.types";
 import { useSuiClientQuery } from "@mysten/dapp-kit";
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import { useDepositVaultStore } from "./useStore";
 import { loadVaultData } from "@/utils/staticVaultData";
 
@@ -34,9 +38,11 @@ export const useGetVaultConfig = (vaultId: string) => {
 };
 
 export const useGetDepositVaults = () => {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: ["deposit-vaults-data"],
-    queryFn: () => loadVaultData(),
+    queryFn: () => loadVaultData(queryClient),
     staleTime: REFETCH_VAULT_DATA_INTERVAL,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
   }) as UseQueryResult<DepositVaultConfig[], Error>;

@@ -12,17 +12,22 @@
           "mmt": {
             "config": "0xef35573531c2f16da0b7754b6e9a8a6d625bce8ab05cc3f4d700dd5cb273f0a6",
             "module": "mmt_executor",
-            "address": "0x59a3c603f96c725e2f7954eaf451dfb71ee7cf8ecb5947ff91a2469b78da0d12"
+            "address": "0xdb0b423b0c15bcbe3fef035ce9b14f3e719e65a6d2d8cf871397d473d9fddd50"
           },
           "cetus": {
-            "config": "0xef35573531c2f16da0b7754b6e9a8a6d625bce8ab05cc3f4d700dd5cb273f0a6",
+            "config": "0xd9f27d8e2c24d1fbca6cdcb91d8c5b41b7e8719c95b7feca62c742bc8318b2e6",
             "module": "cetus_executor",
-            "address": "0x59a3c603f96c725e2f7954eaf451dfb71ee7cf8ecb5947ff91a2469b78da0d12"
+            "address": "0x82af74a31ab28cef4e1e1c9948164850787ee2df2c7b5001420759f288c56337"
+          },
+          "bluein": {
+            "config": "0x115e7a14ee24d3302e2b03d47ac48ff9749d63f976c7b018d02b4f7fc5dda08a",
+            "module": "bluefin_executor",
+            "address": "0x558a2dddb5befed4a206e0e7cc8852c8a6e3f58ecc4a900ded9857217530285a"
           }
         },
         "lp_token": "0xed191e10574ff65cce50c85665a9c78283b37ff87a876b0848a7a2713da3447d::ndlptest::NDLPTEST",
         "vault_id": "0x3a543b979579b3bdd66880104abb3ff77d278475aafceb6acacba5de256405e2",
-        "package_id": "0x47e37d3f12d508e1fb850d7a2a8de47bd78fd95e87da38d1cd3b7e78df3adbb9",
+        "package_id": "0xe271b16b75b4e912c700967b7fd06eb868dc9d1b7184d0ff940777e5df8bb561",
         "exchange_id": 3,
         "admin_cap_id": "0x8c2ec3a7ffcd8999b65c9f57996320a81eacd87b959343d108167e573168f32f",
         "vault_module": "vault",
@@ -43,7 +48,7 @@
       "last_updated": "2025-05-22T10:22:52.214Z",
       "is_active": true,
       "total_profit": 0,
-      "apr": 0,
+      "apr": 3857.0214483745817,
       "open_position_value_usd": 0,
       "available_liquidity": 0,
       "total_users": 0,
@@ -74,17 +79,22 @@
           "mmt": {
             "config": "0xef35573531c2f16da0b7754b6e9a8a6d625bce8ab05cc3f4d700dd5cb273f0a6",
             "module": "mmt_executor",
-            "address": "0x59a3c603f96c725e2f7954eaf451dfb71ee7cf8ecb5947ff91a2469b78da0d12"
+            "address": "0xdb0b423b0c15bcbe3fef035ce9b14f3e719e65a6d2d8cf871397d473d9fddd50"
           },
           "cetus": {
-            "config": "0xef35573531c2f16da0b7754b6e9a8a6d625bce8ab05cc3f4d700dd5cb273f0a6",
+            "config": "0xd9f27d8e2c24d1fbca6cdcb91d8c5b41b7e8719c95b7feca62c742bc8318b2e6",
             "module": "cetus_executor",
-            "address": "0x59a3c603f96c725e2f7954eaf451dfb71ee7cf8ecb5947ff91a2469b78da0d12"
+            "address": "0x82af74a31ab28cef4e1e1c9948164850787ee2df2c7b5001420759f288c56337"
+          },
+          "bluefin": {
+            "config": "0x115e7a14ee24d3302e2b03d47ac48ff9749d63f976c7b018d02b4f7fc5dda08a",
+            "module": "bluefin_executor",
+            "address": "0x558a2dddb5befed4a206e0e7cc8852c8a6e3f58ecc4a900ded9857217530285a"
           }
         },
         "lp_token": "0x3ad9e65e449856b08e499d969edcd7f84d17c91456d8c8e6f997ecc7f5020f65::ndlptest::NDLPTEST",
         "vault_id": "0xbd53b340658050ac93520fd3b1fb622d0ecf5a9c524c76f77d57827324f1b90f",
-        "package_id": "0x47e37d3f12d508e1fb850d7a2a8de47bd78fd95e87da38d1cd3b7e78df3adbb9",
+        "package_id": "0xe271b16b75b4e912c700967b7fd06eb868dc9d1b7184d0ff940777e5df8bb561",
         "exchange_id": 3,
         "admin_cap_id": "0x8c2ec3a7ffcd8999b65c9f57996320a81eacd87b959343d108167e573168f32f",
         "vault_module": "vault",
@@ -105,7 +115,7 @@
       "last_updated": "2025-05-22T10:26:05.527Z",
       "is_active": true,
       "total_profit": 0,
-      "apr": 0,
+      "apr": 5676.604900606364,
       "open_position_value_usd": 0,
       "available_liquidity": 0,
       "total_users": 0,
@@ -136,17 +146,22 @@
           "mmt": {
             "config": "0xef35573531c2f16da0b7754b6e9a8a6d625bce8ab05cc3f4d700dd5cb273f0a6",
             "module": "mmt_executor",
-            "address": "0x59a3c603f96c725e2f7954eaf451dfb71ee7cf8ecb5947ff91a2469b78da0d12"
+            "address": "0xdb0b423b0c15bcbe3fef035ce9b14f3e719e65a6d2d8cf871397d473d9fddd50"
           },
           "cetus": {
-            "config": "0xef35573531c2f16da0b7754b6e9a8a6d625bce8ab05cc3f4d700dd5cb273f0a6",
+            "config": "0xd9f27d8e2c24d1fbca6cdcb91d8c5b41b7e8719c95b7feca62c742bc8318b2e6",
             "module": "cetus_executor",
-            "address": "0x59a3c603f96c725e2f7954eaf451dfb71ee7cf8ecb5947ff91a2469b78da0d12"
+            "address": "0x82af74a31ab28cef4e1e1c9948164850787ee2df2c7b5001420759f288c56337"
+          },
+          "bluefin": {
+            "config": "0x115e7a14ee24d3302e2b03d47ac48ff9749d63f976c7b018d02b4f7fc5dda08a",
+            "module": "bluefin_executor",
+            "address": "0x558a2dddb5befed4a206e0e7cc8852c8a6e3f58ecc4a900ded9857217530285a"
           }
         },
         "lp_token": "0x21de6d15f63730c7dc22a0547a5526eac43bc588b66d50e30b295e8a1c4902ba::ndlptest::NDLPTEST",
         "vault_id": "0x0fc498f2611cf792df272f34c1b82e2ab1ac49dfa44cd71878191d4b3cf1d4b1",
-        "package_id": "0x47e37d3f12d508e1fb850d7a2a8de47bd78fd95e87da38d1cd3b7e78df3adbb9",
+        "package_id": "0xe271b16b75b4e912c700967b7fd06eb868dc9d1b7184d0ff940777e5df8bb561",
         "exchange_id": 3,
         "admin_cap_id": "0x8c2ec3a7ffcd8999b65c9f57996320a81eacd87b959343d108167e573168f32f",
         "vault_module": "vault",
@@ -167,7 +182,7 @@
       "last_updated": "2025-06-02T10:30:06.764Z",
       "is_active": true,
       "total_profit": 0,
-      "apr": 0,
+      "apr": 10693.315569189865,
       "open_position_value_usd": 0,
       "available_liquidity": 0,
       "total_users": 0,
