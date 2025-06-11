@@ -31,12 +31,12 @@ const Dashboard = lazy(() =>
 );
 
 const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
-  const { isLoading, isError } = useGetDepositVaults();
+  const { isLoading, data, error } = useGetDepositVaults();
   if (isLoading) {
     return <PageFallback />;
   }
 
-  if (isError) {
+  if (error) {
     throw new Error("Failed to fetch deposit vaults");
   }
 
