@@ -161,4 +161,5 @@ export type DepositVaultConfig = {
   pool: {
     pool_name: string;
   };
+  ready?: boolean;
 };

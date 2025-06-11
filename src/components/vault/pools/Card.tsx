@@ -6,6 +6,19 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
 import { VaultPool } from ".";
 
+const APR = ({ text, is2xl }: { text: string; is2xl: boolean }) => {
+  return (
+    <div
+      className={cn(
+        "font-sans font-bold bg-gradient-to-r from-[#9DEBFF] to-[#00FF5E] bg-clip-text text-transparent",
+        is2xl ? "text-[22px]" : "text-[16px]"
+      )}
+    >
+      {text}
+    </div>
+  );
+};
+
 const VaultCard = ({ pool }: { pool: VaultPool }) => {
   const { is2xl } = useBreakpoint();
 
@@ -22,9 +35,9 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
   return (
     <div
       className={cn(
-        "bg-white rounded-xl shadow w-[calc(100%/3-0.5rem)] p-[1.5px] cursor-pointer group transition-transform duration-300",
+        "bg-white rounded-xl shadow w-[calc(100%/3-0.5rem)] p-[2px] cursor-pointer group transition-transform duration-300",
         !pool.isLive && "opacity-50",
-        !isSelected && "hover:scale-[1.03]"
+        !isSelected && "hover:scale-[1.04]"
       )}
       style={{
         background: isSelected
@@ -49,28 +62,25 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
       }}
     >
       <div
-        className="flex flex-col p-4 rounded-xl h-full"
+        className={cn("flex flex-col rounded-xl h-full", is2xl ? "p-4" : "p-2")}
         style={{
-          background: isSelected
-            ? "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)"
-            : "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)",
+          background: "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)",
         }}
       >
-        <div className="flex items-start justify-between mb-2">
-          <div className="flex items-center">
-            {pool?.tokens?.length > 0 &&
-              pool.tokens.map((token, index) => (
-                <img
-                  key={token}
-                  src={`/coins/${token?.toLowerCase()}.png`}
-                  alt={token}
-                  className={cn(
-                    "mr-2 rounded-full",
-                    is2xl ? "w-[36px] h-[36px]" : "w-[24px] h-[24px]",
-                    index > 0 && "ml-[-15px]"
-                  )}
-                />
-              ))}
+        <div className="flex items-start justify-center mb-5 gap-2">
+          <div className="flex items-center justify-center">
+            {pool.tokens.map((token, index) => (
+              <span
+                key={token}
+                className={cn(
+                  "text-white font-bold",
+                  is2xl ? "text-md" : "text-sm"
+                )}
+              >
+                {token}
+                {index < pool.tokens.length - 1 ? " - " : ""}
+              </span>
+            ))}
           </div>
           <div
             className={cn(
@@ -85,35 +95,31 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
             {pool.isLive ? "Live" : "Coming Soon"}
           </div>
         </div>
-        <div>
-          {pool.tokens.map((token, index) => (
-            <span
-              key={token}
-              className={cn(
-                "text-white  font-bold",
-                is2xl ? "text-md" : "text-sm"
-              )}
-            >
-              {token}
-              {index < pool.tokens.length - 1 ? " - " : ""}
-            </span>
-          ))}
+        <div className="flex items-center justify-center">
+          {pool?.tokens?.length > 0 &&
+            pool.tokens.map((token, index) => (
+              <img
+                key={token}
+                src={`/coins/${token?.toLowerCase()}.png`}
+                alt={token}
+                className={cn(
+                  "mr-2 rounded-full",
+                  is2xl ? "w-[36px] h-[36px]" : "w-[24px] h-[24px]",
+                  index > 0 && "ml-[-15px]"
+                )}
+              />
+            ))}
         </div>
-        <div className="mt-2.5">
+        <div className="mt-5 flex items-center justify-between">
           <span
-            className={cn(
-              " text-white/50  text-left",
-              is2xl ? "text-[18px]" : "text-base"
-            )}
+            className={cn(" text-white/50", is2xl ? "text-base" : "text-xs")}
           >
-            APR:{" "}
-            <span
-              className={cn(
-                "font-bold  text-white",
-                is2xl ? "text-[24px]" : "text-xl"
-              )}
-            >
-              {pool.APR && pool.APR !== 0
+            APR:
+          </span>
+          <APR
+            is2xl={is2xl}
+            text={
+              pool.APR && pool.APR !== 0
                 ? `${formatCurrency(
                     pool.APR < 0 ? 0 : pool.APR,
                     0,
@@ -121,9 +127,28 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
                     2,
                     "decimal"
                   )}%`
-                : "--"}
-            </span>
-          </span>
+                : "--"
+            }
+          />
+        </div>
+        <div className="flex items-center justify-between mt-2">
+          <div className={cn("text-white/50", is2xl ? "text-base" : "text-xs")}>
+            DEX
+          </div>
+          <div className="flex gap-1 items-center text-base">
+            <img
+              src="/dexs/momentum.png"
+              className={cn(is2xl ? "h-[16px]" : "h-[12px]")}
+            />
+            <div
+              className={cn(
+                "font-sans font-bold",
+                is2xl ? "text-base" : "text-xs"
+              )}
+            >
+              Momentum
+            </div>
+          </div>
         </div>
         <div
           className={cn(

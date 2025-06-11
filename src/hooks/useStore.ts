@@ -18,3 +18,22 @@ export const useDepositVaultStore = () => {
     setDepositVault,
   };
 };
+
+type WhiteListModalState = {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+};
+
+const whiteListModalStore = create<WhiteListModalState>((set) => ({
+  isOpen: false,
+  setIsOpen: (isOpen: boolean) => set({ isOpen }),
+}));
+
+export const useWhiteListModalStore = () => {
+  const isOpen = whiteListModalStore((state) => state.isOpen);
+  const setIsOpen = whiteListModalStore((state) => state.setIsOpen);
+  return {
+    isOpen,
+    setIsOpen,
+  };
+};

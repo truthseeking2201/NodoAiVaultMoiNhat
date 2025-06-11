@@ -27,13 +27,6 @@ import { formatCurrency } from "@/utils/currency";
 import { truncateBetween } from "@/utils/truncate";
 
 export function TxTable() {
-  const tokenImgs = {
-    USDC: '/coins/usdc.png',
-    SUI: '/coins/sui.png',
-    CETUS: '/coins/cetus.png',
-    DEEP: '/coins/deep.png',
-    WAL: '/coins/wal.png',
-  };
   const [filter, setFilter] = useState<Types["type"][]>(["ALL"]);
   const [currentPage, setCurrentPage] = useState(1);
   const [lastTotalPages, setLastTotalPages] = useState(1);
@@ -340,40 +333,40 @@ export function TxTable() {
                     <TableCell className="px-2">
                       <div className="flex items-center justify-start gap-1">
                         <img
-                          src={tokenImgs[tx.tokens?.[0]?.token_symbol]}
+                          src={`/coins/${tx.tokens?.[0]?.token_symbol?.toLowerCase()}.png`}
                           alt={tx.tokens?.[0]?.token_name}
-                          className="w-4 h-4"
+                          className="w-4 h-4 inline mr-1"
                         />
-                        <div className="font-mono text-sm text-white">
+                        <span className="font-mono text-sm text-white">
                           {formatCurrency(
                             tx.tokens?.[0]?.amount || 0,
                             tx.tokens?.[0]?.decimal,
                             0,
                             2
                           )}{" "}
-                        </div>
-                        <div className="font-mono text-xs text-white/70">
-                          {tx.tokens?.[0]?.token_symbol}
-                        </div>
+                          <span className="font-mono text-xs text-white/70">
+                            {tx.tokens?.[0]?.token_symbol}
+                          </span>
+                        </span>
                       </div>
-                      {tx.tokens?.[1] && tx.tokens?.[1]?.amount !== 0 && (
-                        <div className="flex items-center justify-start gap-1 mt-1">
+                      {tx.tokens?.[1] && tx.tokens?.[1]?.amount > 0 && (
+                        <div className="flex items-center justify-start gap-1">
                           <img
-                            src={tokenImgs[tx.tokens?.[1]?.token_symbol]}
+                            src={`/coins/${tx.tokens?.[1]?.token_symbol?.toLowerCase()}.png`}
                             alt={tx.tokens?.[1]?.token_name}
-                            className="w-4 h-4"
+                            className="w-4 h-4 inline mr-1"
                           />
-                          <div className="font-mono text-sm text-white">
+                          <span className="font-mono text-sm text-white">
                             {formatCurrency(
                               tx.tokens?.[1]?.amount || 0,
                               tx.tokens?.[1]?.decimal,
                               0,
                               4
                             )}{" "}
-                          </div>
-                          <div className="font-mono text-xs text-white/70">
-                            {tx.tokens?.[1]?.token_symbol}
-                          </div>
+                            <span className="font-mono text-xs text-white/70">
+                              {tx.tokens?.[1]?.token_symbol}
+                            </span>
+                          </span>
                         </div>
                       )}
                     </TableCell>

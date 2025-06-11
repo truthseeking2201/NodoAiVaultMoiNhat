@@ -46,4 +46,7 @@ coverage
 .nyc_output
 
 # Tailwind
-.cache 
+.cache
+
+public/vault-data.json
+public/vault-data.json

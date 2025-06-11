@@ -1,5 +1,4 @@
 import suiWallet from "@/assets/images/sui-wallet.png";
-import RegisterForWhiteLayout from "@/components/dashboard/request-whitelist-button/RegisterForWhiteLayout";
 import ConditionRenderer from "@/components/shared/ConditionRenderer";
 import { Button } from "@/components/ui/button";
 import { FormattedNumberInput } from "@/components/ui/formatted-number-input";
@@ -7,7 +6,11 @@ import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { RowItem } from "@/components/ui/row-item";
 import { useToast } from "@/components/ui/use-toast";
 import DepositModal from "@/components/vault/deposit/DepositModal";
-import { useCurrentDepositVault, useGetDepositVaults } from "@/hooks";
+import {
+  useCurrentDepositVault,
+  useGetDepositVaults,
+  useWhiteListModalStore,
+} from "@/hooks";
 import {
   useCalculateNDLPReturn,
   useCollateralLPRate,
@@ -64,6 +67,8 @@ export default function DepositVaultSection() {
     [assets]
   );
 
+  const { setIsOpen: openWhiteListModal } = useWhiteListModalStore();
+
   const ndlpAmountWillGet = useCalculateNDLPReturn(
     Number(depositAmount),
     depositVault.collateral_token_decimals,
@@ -107,13 +112,18 @@ export default function DepositVaultSection() {
   }, [openConnectWalletDialog]);
 
   const handleDeposit = useCallback(() => {
+    if (!isWhitelisted) {
+      openWhiteListModal(true);
+      return;
+    }
+
     if (isConnected) {
       // TODO: Handle deposit
       setIsDepositModalOpen(true);
     } else {
       handleConnectWallet();
     }
-  }, [isConnected, handleConnectWallet]);
+  }, [isConnected, handleConnectWallet, isWhitelisted, openWhiteListModal]);
 
   const handleCloseDepositModal = useCallback(() => {
     setIsDepositModalOpen(false);
@@ -178,8 +188,9 @@ export default function DepositVaultSection() {
 
   const disabledDeposit = useMemo(() => {
     if (!isConnected) return false;
+    if (!depositVault?.ready) return true;
     return !!error || !depositAmount;
-  }, [isConnected, error, depositAmount]);
+  }, [isConnected, error, depositAmount, depositVault.ready]);
 
   return (
     <div className="p-6 bg-black rounded-b-2xl rounded-tr-2xl">
@@ -251,20 +262,15 @@ export default function DepositVaultSection() {
           </Button>
         }
       >
-        <ConditionRenderer
-          when={isWhitelisted}
-          fallback={<RegisterForWhiteLayout />}
+        <Button
+          variant="primary"
+          size="xl"
+          onClick={handleDeposit}
+          disabled={isWhitelisted ? disabledDeposit : false}
+          className="w-full font-semibold text-lg"
         >
-          <Button
-            variant="primary"
-            size="xl"
-            onClick={handleDeposit}
-            disabled={disabledDeposit}
-            className="w-full font-semibold text-lg"
-          >
-            Deposit
-          </Button>
-        </ConditionRenderer>
+          Deposit
+        </Button>
       </ConditionRenderer>
 
       <DepositModal

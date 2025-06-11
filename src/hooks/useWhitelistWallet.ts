@@ -9,7 +9,11 @@ export const useWhitelistWallet = () => {
   const walletAddress = account?.address;
   const walletProvider = currentWallet?.name;
 
-  const { data: walletDetails, isLoading } = useQuery({
+  const {
+    data: walletDetails,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["walletDetails", walletAddress, walletProvider],
     queryFn: () => subscribeWhitelistRequest(walletAddress, walletProvider),
     enabled: !!walletAddress && !!walletProvider,
@@ -17,7 +21,11 @@ export const useWhitelistWallet = () => {
   }) as UseQueryResult<WalletDetails>;
 
   return {
-    isWhitelisted: walletDetails?.status === "APPROVED",
+    isWhitelisted:
+      walletDetails?.status === "APPROVED" ||
+      walletDetails?.status === "SIGNED_UP",
     isLoading,
+    walletDetails,
+    refetch,
   };
 };

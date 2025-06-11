@@ -22,7 +22,8 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 export default function NodoAIVaults() {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
-  const { isWhitelisted } = useWhitelistWallet();
+  const { isWhitelisted, isLoading: isCheckingWhitelist } =
+    useWhitelistWallet();
   const account = useCurrentAccount();
   const { isConnectWalletDialogOpen, openConnectWalletDialog } = useWallet();
 
@@ -52,6 +53,10 @@ export default function NodoAIVaults() {
       window.localStorage.setItem("is-whitelist-address", "true");
     }
 
+    if (isCheckingWhitelist) {
+      return;
+    }
+
     const isWhitelistModalShown = window.localStorage.getItem(
       "is-whitelist-address"
     );
@@ -73,12 +78,12 @@ export default function NodoAIVaults() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isWhitelisted, account, isConnectWalletDialogOpen]);
+  }, [isWhitelisted, account, isConnectWalletDialogOpen, isCheckingWhitelist]);
 
   return (
     <div className="min-h-screen main-bg" ref={containerRef}>
       <PageContainer>
-        <div style={{ maxWidth: "1400px" }}>
+        <div style={{ maxWidth: "1440px" }}>
           {/* Main Header */}
           <header className="text-center font-sans mb-16">
             <h1 className="text-[60px] leading-[48px] font-bold">

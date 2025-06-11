@@ -5,6 +5,8 @@ import React from "react";
 import demoUIOfDesktop from "../../assets/images/demo-ui-nodo-ai-vault.png";
 import UseDesktopBanner from "../dashboard/UseDesktopBanner";
 import { AppHeader } from "./AppHeader";
+import RegisterForWhiteList from "../dashboard/request-whitelist-button/RegisterForWhiteLayout";
+
 interface MainLayoutProps {
   children: React.ReactNode;
 }
@@ -57,6 +59,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           >
             <AppHeader />
             <div className="flex-1 relative">{children}</div>
+            <RegisterForWhiteList />
             {/* <AppFooter /> */}
           </motion.div>
         </AnimatePresence>
