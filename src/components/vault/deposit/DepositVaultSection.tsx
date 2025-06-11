@@ -178,8 +178,9 @@ export default function DepositVaultSection() {
 
   const disabledDeposit = useMemo(() => {
     if (!isConnected) return false;
+    if (!depositVault?.ready) return true;
     return !!error || !depositAmount;
-  }, [isConnected, error, depositAmount]);
+  }, [isConnected, error, depositAmount, depositVault.ready]);
 
   return (
     <div className="p-6 bg-black rounded-b-2xl rounded-tr-2xl">

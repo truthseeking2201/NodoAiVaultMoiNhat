@@ -6,9 +6,14 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
 import { VaultPool } from ".";
 
-const APR = ({ text }: { text: string }) => {
+const APR = ({ text, is2xl }: { text: string; is2xl: boolean }) => {
   return (
-    <div className="font-sans font-bold text-[22px] bg-gradient-to-r from-[#9DEBFF] to-[#00FF5E] bg-clip-text text-transparent">
+    <div
+      className={cn(
+        "font-sans font-bold bg-gradient-to-r from-[#9DEBFF] to-[#00FF5E] bg-clip-text text-transparent",
+        is2xl ? "text-[22px]" : "text-[16px]"
+      )}
+    >
       {text}
     </div>
   );
@@ -57,7 +62,7 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
       }}
     >
       <div
-        className="flex flex-col p-4 rounded-xl h-full"
+        className={cn("flex flex-col rounded-xl h-full", is2xl ? "p-4" : "p-2")}
         style={{
           background: "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)",
         }}
@@ -106,8 +111,13 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
             ))}
         </div>
         <div className="mt-5 flex items-center justify-between">
-          <span className={cn(" text-white/50  text-base")}>APR:</span>
+          <span
+            className={cn(" text-white/50", is2xl ? "text-base" : "text-xs")}
+          >
+            APR:
+          </span>
           <APR
+            is2xl={is2xl}
             text={
               pool.APR && pool.APR !== 0
                 ? `${formatCurrency(
@@ -122,10 +132,22 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
           />
         </div>
         <div className="flex items-center justify-between mt-2">
-          <div className="text-white/50 text-base">DEX</div>
+          <div className={cn("text-white/50", is2xl ? "text-base" : "text-xs")}>
+            DEX
+          </div>
           <div className="flex gap-1 items-center text-base">
-            <img src="/dexs/momentum.png" className="h-[16px]" />
-            <div className="font-sans font-bold">Momentum</div>
+            <img
+              src="/dexs/momentum.png"
+              className={cn(is2xl ? "h-[16px]" : "h-[12px]")}
+            />
+            <div
+              className={cn(
+                "font-sans font-bold",
+                is2xl ? "text-base" : "text-xs"
+              )}
+            >
+              Momentum
+            </div>
           </div>
         </div>
         <div
