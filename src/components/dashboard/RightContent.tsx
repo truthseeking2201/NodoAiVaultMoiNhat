@@ -5,6 +5,7 @@ import EarnWithdrawIcon from "@/assets/images/dashboard/earn_withdraw.png";
 import ExclusiveBenefits from "@/assets/images/dashboard/exclusive_benefits.png";
 import LimitedSupplyIcon from "@/assets/images/dashboard/limited_supply.png";
 import { BalanceCard } from "@/components/wallet/BalanceCard";
+import { MyReferralsCard } from "@/components/myReferrals/MyReferralsCard.tsx";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 
 const RightContent = () => {
@@ -16,6 +17,9 @@ const RightContent = () => {
       {/* Balance Card - Only visible when wallet is connected */}
       {isConnected && <BalanceCard className="mb-6" />}
 
+      {/* My Referrals Card - Only visible when wallet is connected */}
+      {isConnected && <MyReferralsCard className="mb-6" />}
+
       {/* Metric Card */}
 
       {/* Introducing NDLP Card */}
@@ -23,7 +27,11 @@ const RightContent = () => {
         <h3 className="font-heading-md text-100 mb-4">Introducing</h3>
 
         <div className="flex items-center gap-2 mb-3">
-          <img src="/coins/ndlp.png" alt="NDLP" className="w-10" />
+          <img
+            src="/coins/ndlp.png"
+            alt="NDLP"
+            className="w-10"
+          />
           <span className="font-heading-md text-100">$NDLP</span>
         </div>
 
@@ -99,7 +107,11 @@ const RightContent = () => {
         <div className="space-y-6">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-full bg-surface-075 border border-brand-orange/20 flex items-center justify-center flex-shrink-0">
-              <img src={DepositIcon} alt="deposit" className="w-8 h-8" />
+              <img
+                src={DepositIcon}
+                alt="deposit"
+                className="w-8 h-8"
+              />
             </div>
             <div>
               <div className="font-body font-medium mb-1 text-100">Deposit</div>
@@ -112,7 +124,11 @@ const RightContent = () => {
 
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-full bg-surface-075 border border-brand-orange/20 flex items-center justify-center flex-shrink-0">
-              <img src={AIInvestIcon} alt="AI invest" className="w-8 h-8" />
+              <img
+                src={AIInvestIcon}
+                alt="AI invest"
+                className="w-8 h-8"
+              />
             </div>
             <div>
               <div className="font-body font-medium mb-1 text-100">

@@ -41,3 +41,8 @@ export const getVaultsActivities = (payload: any) => {
 export const getDepositVaults = () => {
   return httpNodo.get(`${NODO_URL}/data-management/vaults`);
 };
+
+export const getMyReferral = (params: any) => {
+  // TODO
+  return httpNodo.get("/execution/position-requests", { params: params });
+};
