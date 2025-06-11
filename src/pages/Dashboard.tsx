@@ -17,19 +17,31 @@ import { useCurrentAccount } from "@mysten/dapp-kit";
 import { useWallet } from "@/hooks/useWallet";
 import WhiteListModal from "@/components/dashboard/white-list-modal/WhiteListModal";
 import { truncateBetween } from "@/utils/truncate";
+import { useSearchParams, useNavigate } from "react-router-dom";
 
 export default function NodoAIVaults() {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
   const { isWhitelisted } = useWhitelistWallet();
   const account = useCurrentAccount();
-  const { isConnectWalletDialogOpen } = useWallet();
+  const { isConnectWalletDialogOpen, openConnectWalletDialog } = useWallet();
 
   const [isOpen, setIsOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const referralCode = searchParams.get("ref");
 
   const handleClose = () => {
     setIsOpen(false);
   };
+
+  useEffect(() => {
+    if (referralCode) {
+      window.sessionStorage.setItem("ref-code", referralCode);
+      navigate("/");
+      openConnectWalletDialog();
+    }
+  }, [referralCode]);
 
   useEffect(() => {
     if (window.localStorage.getItem("is-whitelist-address") === null) {

@@ -34,7 +34,7 @@ export function ConnectWalletModal({
     email: "demo@gmail.com",
     referralCode: "NODO123",
   });
-  const referralCode = "NODO123";
+  const [linkRefCode, setLinkRefCode] = useState<string | null>(null);
 
   const handleNextStep = (chosenStep?: string) => {
     switch (userType) {
@@ -107,11 +107,17 @@ export function ConnectWalletModal({
     }
   };
 
-  // useEffect(() => {
-  //   if (CASES.NEW_USER_WITH_REFERRAL === userType) {
-  //     setStep(STEPS.REFERRAL_CONFIRM);
-  //   }
-  // }, [userType]);
+  useEffect(() => {
+    const linkRefCode = window.sessionStorage.getItem("ref-code");
+    if (linkRefCode) {
+      setUserType(CASES.NEW_USER_WITH_REFERRAL);
+      setStep(STEPS.REFERRAL_CONFIRM);
+      setLinkRefCode(linkRefCode);
+    } else {
+      setUserType(CASES.NEW_USER_WITHOUT_REFERRAL);
+      setStep(STEPS.CONNECT_WALLET);
+    }
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -169,7 +175,7 @@ export function ConnectWalletModal({
           {step === STEPS.REFERRAL_CONFIRM && (
             <ConfirmReferral
               onNextStep={handleNextStep}
-              referralCode={referralCode}
+              linkRefCode={linkRefCode}
             />
           )}
         </DialogDescription>

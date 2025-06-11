@@ -1,28 +1,9 @@
-import phantomWallet from "@/assets/images/phantom-wallet.png";
-import slushWallet from "@/assets/images/slush-wallet.png";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useConnectWallet, useWallets } from "@mysten/dapp-kit";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-const WALLETS = [
-  {
-    displayName: "Slush",
-    name: "Slush",
-    icon: slushWallet,
-    description: "Connect to your Slush Wallet",
-    extensionUrl:
-      "https://chromewebstore.google.com/detail/slush-%E2%80%94-a-sui-wallet/opcgpfmipidbgpenhmajoajpbobppdil",
-  },
-  {
-    displayName: "Phantom",
-    name: "Phantom",
-    icon: phantomWallet,
-    description: "Connect to your Phantom Wallet",
-    extensionUrl: "https://phantom.app/download",
-  },
-];
+import { WALLETS } from "@/components/wallet/constants";
 
 type Wallet = {
   name: string;
@@ -72,7 +53,6 @@ const WalletList = ({ onClose, onNextStep }: WalletListProps) => {
               } else {
                 onNextStep();
               }
-              
             },
             onError: (error) => {
               console.error("Failed to connect wallet:", error);

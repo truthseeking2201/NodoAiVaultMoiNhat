@@ -3,7 +3,8 @@ import ExistingUserErrorIcon from "@/assets/images/wallet/existing-account-error
 
 import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CircleAlert } from "lucide-react";
+import { ArrowRight, CircleAlert, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 type InputReferralProps = {
   onClose: () => void;
@@ -14,7 +15,7 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setError,
   } = useForm({
     defaultValues: {
@@ -53,7 +54,7 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
           name="referralCode"
           control={control}
           render={({ field }) => (
-            <input
+            <Input
               {...field}
               type="text"
               placeholder="Enter referral code"
@@ -79,6 +80,7 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
             size="lg"
             onClick={onClose}
             className="w-full font-semibold text-sm h-[44px] rounded-lg"
+            disabled={isSubmitting}
           >
             Skip
           </Button>
@@ -87,9 +89,16 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
             size="lg"
             type="submit"
             className="w-full font-semibold text-sm h-[44px] rounded-lg"
+            disabled={isSubmitting}
           >
-            Continue
-            <ArrowRight size={16} />
+            {isSubmitting ? (
+              <Loader2 className="animate-spin mr-2" size={16} />
+            ) : (
+              <>
+                Continue
+                <ArrowRight size={16} />
+              </>
+            )}
           </Button>
         </div>
       </form>

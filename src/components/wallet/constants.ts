@@ -1,3 +1,6 @@
+import phantomWallet from "@/assets/images/phantom-wallet.png";
+import slushWallet from "@/assets/images/slush-wallet.png";
+
 const STEPS = {
   CONNECT_WALLET: "connect_wallet",
   INPUT_REFERRAL: "input_referral",
@@ -12,4 +15,22 @@ const CASES = {
   EXISTING_USER: "existing_user",
 };
 
-export { STEPS, CASES };
+const WALLETS = [
+  {
+    displayName: "Slush",
+    name: "Slush",
+    icon: slushWallet,
+    description: "Connect to your Slush Wallet",
+    extensionUrl:
+      "https://chromewebstore.google.com/detail/slush-%E2%80%94-a-sui-wallet/opcgpfmipidbgpenhmajoajpbobppdil",
+  },
+  {
+    displayName: "Phantom",
+    name: "Phantom",
+    icon: phantomWallet,
+    description: "Connect to your Phantom Wallet",
+    extensionUrl: "https://phantom.app/download",
+  },
+];
+
+export { STEPS, CASES, WALLETS };
