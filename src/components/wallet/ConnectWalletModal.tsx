@@ -113,11 +113,12 @@ export function ConnectWalletModal({
       setUserType(CASES.NEW_USER_WITH_REFERRAL);
       setStep(STEPS.REFERRAL_CONFIRM);
       setLinkRefCode(linkRefCode);
+      window.sessionStorage.removeItem("ref-code");
     } else {
       setUserType(CASES.NEW_USER_WITHOUT_REFERRAL);
       setStep(STEPS.CONNECT_WALLET);
     }
-  }, []);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
