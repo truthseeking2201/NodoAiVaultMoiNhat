@@ -38,7 +38,7 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
       <img
         src={errors.referralCode ? ExistingUserErrorIcon : ExistingUserIcon}
         alt="Existing User"
-        className="w-16 h-16"
+        className="w-16 h-16 mb-6"
       />
       <div className="text-2xl font-bold text-white mb-2 text-center">
         Were You Referred?

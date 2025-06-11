@@ -18,7 +18,7 @@ const ExistingUser = ({ onNextStep, user }: ExistingUserProps) => {
   };
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 pt-4">
-      <img src={ExistingUserIcon} alt="Existing User" className="w-16 h-16" />
+      <img src={ExistingUserIcon} alt="Existing User" className="w-16 h-16 mb-6" />
       <div className="text-2xl font-bold text-white mb-2 text-center">
         Existing Account Detected
       </div>

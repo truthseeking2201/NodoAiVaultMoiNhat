@@ -11,7 +11,7 @@ type SuccessReferralProps = {
 const SuccessReferral = ({ user, onNextStep }: SuccessReferralProps) => {
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 pt-4 w-full">
-      <img src={ReferralSuccessIcon} alt="Success" className="w-16 h-16 mb-4" />
+      <img src={ReferralSuccessIcon} alt="Success" className="w-16 h-16 mb-6" />
       <div className="text-xl font-bold text-white mb-2 text-center">
         Referral Applied Successfully!
       </div>
@@ -27,7 +27,7 @@ const SuccessReferral = ({ user, onNextStep }: SuccessReferralProps) => {
         variant="primary"
         size="lg"
         onClick={onNextStep}
-        className="w-full font-semibold text-sm h-[44px] rounded-lg"
+        className="w-full font-semibold text-lg h-[44px] rounded-lg"
       >
         Continue to App
         <ArrowRight size={16} className="ml-2 inline" />
