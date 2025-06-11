@@ -1,13 +1,13 @@
 import { OptionsSelectType } from "@/types/options-select.types.ts";
 
 export const TIME_FILTER = {
-  all: "all",
-  today: "today",
-  thisWeek: "this-week",
-  last7days: "last-7-days",
-  thisMonth: "this-month",
-  last30days: "last-30-days",
-  thisYear: "this-year",
+  all: "ALL_TIME",
+  today: "TODAY",
+  thisWeek: "THIS_WEEK",
+  last7days: "LAST_7_DAYS",
+  thisMonth: "THIS_MONTH",
+  last30days: "LAST_30_DAYS",
+  thisYear: "THIS_YEAR",
 };
 export const TIME_FILTER_OPTIONS_REFERRAL: OptionsSelectType[] = [
   { value: TIME_FILTER.all, label: "All Time" },
