@@ -21,7 +21,8 @@ import { truncateBetween } from "@/utils/truncate";
 export default function NodoAIVaults() {
   const containerRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
-  const { isWhitelisted } = useWhitelistWallet();
+  const { isWhitelisted, isLoading: isCheckingWhitelist } =
+    useWhitelistWallet();
   const account = useCurrentAccount();
   const { isConnectWalletDialogOpen } = useWallet();
 
@@ -38,6 +39,10 @@ export default function NodoAIVaults() {
 
     if (account && isWhitelisted) {
       window.localStorage.setItem("is-whitelist-address", "true");
+    }
+
+    if (isCheckingWhitelist) {
+      return;
     }
 
     const isWhitelistModalShown = window.localStorage.getItem(
@@ -61,7 +66,7 @@ export default function NodoAIVaults() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isWhitelisted, account, isConnectWalletDialogOpen]);
+  }, [isWhitelisted, account, isConnectWalletDialogOpen, isCheckingWhitelist]);
 
   return (
     <div className="min-h-screen main-bg" ref={containerRef}>

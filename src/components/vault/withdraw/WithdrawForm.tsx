@@ -28,6 +28,7 @@ import {
   useEstWithdrawVault,
   useWithdrawVault,
 } from "@/hooks/useWithdrawVault";
+import { useWhiteListModalStore, useWhitelistWallet } from "@/hooks";
 
 type Props = {
   balanceLp: number;
@@ -87,6 +88,8 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
     form?.amount || 0,
     lpData
   );
+  const { isWhitelisted } = useWhitelistWallet();
+  const { setIsOpen: openWhiteListModal } = useWhiteListModalStore();
 
   /**
    * FUNCTION
@@ -248,10 +251,16 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
         {BadgeCoolDown}
 
         <Button
-          type="submit"
+          type={isWhitelisted ? "submit" : "button"}
           variant="primary"
           size="xl"
           className="w-full font-semibold text-lg mt-5"
+          onClick={() => {
+            if (!isWhitelisted) {
+              openWhiteListModal(true);
+              return;
+            }
+          }}
         >
           Withdraw
         </Button>
