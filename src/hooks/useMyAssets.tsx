@@ -10,6 +10,7 @@ import { SuiClient } from "@mysten/sui/client";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 import { useCurrentDepositVault } from "./useVault";
+import { roundDownBalance } from "@/lib/utils";
 
 interface CoinMetadata {
   decimals: number;
@@ -18,10 +19,6 @@ interface CoinMetadata {
   url?: string;
   iconUrl?: string;
 }
-
-const roundDownBalance = (balance: number) => {
-  return Math.floor(balance * 100) / 100;
-};
 
 const getCoinObjects = async (
   suiClient: SuiClient,
