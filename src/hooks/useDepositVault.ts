@@ -8,6 +8,7 @@ import {
 import { Transaction } from "@mysten/sui/transactions";
 import { useMergeCoins } from "./useMergeCoins";
 import { useGetDepositVaultById, useGetVaultConfig } from "./useVault";
+import { roundDownBalance } from "@/lib/utils";
 
 export const useDepositVault = (vaultId: string) => {
   const { mutateAsync: signAndExecuteTransaction } =
@@ -123,7 +124,7 @@ export const useCalculateNDLPReturn = (
 
   const ndlpAmountWillGet = lp / Math.pow(10, ndlpDecimals);
 
-  return Number(ndlpAmountWillGet).toFixed(2);
+  return roundDownBalance(Number(ndlpAmountWillGet));
 };
 
 // calculate the rate of 1 collateral = ? NDLP

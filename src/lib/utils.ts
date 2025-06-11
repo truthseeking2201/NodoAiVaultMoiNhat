@@ -38,3 +38,7 @@ export const formatAmount = ({
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
+
+export const roundDownBalance = (balance: number) => {
+  return Math.floor(balance * 100) / 100;
+};
