@@ -1,23 +1,13 @@
-import { Info } from "lucide-react";
-import styles from "./RegisterForWhiteListButton.module.css";
+import { useWhiteListModalStore } from "@/hooks/useStore";
 import WhiteListModal from "../white-list-modal/WhiteListModal";
-import { useState } from "react";
-import RegisterForWhiteListButton from "./RegisterForWhiteListButton";
 
-const RegisterForWhiteLayout = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const handleRegisterForWhiteList = () => {
-    setIsOpen(true);
-  };
+const RegisterForWhiteListLayout = () => {
+  const { isOpen, setIsOpen } = useWhiteListModalStore();
+
   const handleClose = () => {
     setIsOpen(false);
   };
-  return (
-    <div>
-      <RegisterForWhiteListButton onClick={handleRegisterForWhiteList} />
-      <WhiteListModal open={isOpen} onClose={handleClose} />
-    </div>
-  );
+  return <WhiteListModal open={isOpen} onClose={handleClose} />;
 };
 
-export default RegisterForWhiteLayout;
+export default RegisterForWhiteListLayout;
