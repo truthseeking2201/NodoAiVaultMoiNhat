@@ -18,8 +18,12 @@ export async function loadVaultData(
       // Try to load static data first
       const response = await fetch("/vault-data.json");
       if (response.ok) {
-        const responseData = await response.json();
-        staticVaultData = responseData.data as DepositVaultConfig[];
+        const responseData = (await response.json()) as {
+          data: DepositVaultConfig[];
+        };
+        staticVaultData = responseData.data.map((item) => {
+          return { ...item, apr: 0 };
+        });
         hasLoadStaticData = true;
       }
     }
