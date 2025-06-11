@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/generate-version.js",
-    "build:dev": "env-cmd -f .env.dev vite build && node scripts/generate-version.js",
-    "build:uat": "env-cmd -f .env.uat vite build && node scripts/generate-version.js",
+    "build:dev": "APP_ENV=dev env-cmd -f .env.dev vite build && node scripts/generate-version.js",
+    "build:uat": "APP_ENV=uat env-cmd -f .env.uat vite build && node scripts/generate-version.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

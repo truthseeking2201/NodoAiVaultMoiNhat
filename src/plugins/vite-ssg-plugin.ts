@@ -10,7 +10,7 @@ import { dirname, join } from "path";
 
 async function generateVaultData() {
   // Load environment variables
-  const mode = process.env.NODE_ENV || "development";
+  const mode = process.env.APP_ENV || "development";
   const env = loadEnv(mode, process.cwd(), "");
 
   // Access environment variables
