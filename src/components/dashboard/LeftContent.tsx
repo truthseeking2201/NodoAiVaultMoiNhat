@@ -11,7 +11,7 @@ const LeftContent = () => {
       <div
         className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4 flex items-center hover:bg-white/20 transition duration-300 ease-in-out cursor-pointer"
         onClick={() => {
-          window.open(`${import.meta.env.VITE_NODO_APP_URL}`, "_blank");
+          window.open(`https://app.nodo.xyz`, "_blank");
         }}
       >
         <div className="flex-1">Explore Prediction Market</div>
