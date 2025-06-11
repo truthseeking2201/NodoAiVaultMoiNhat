@@ -10,6 +10,15 @@ let hasLoadStaticData = false;
  * Falls back to API call if static data is not available
  */
 
+async function loadRealTimeData() {
+  return getDepositVaults().then((res: any) => {
+    const latestVaults = res.map((item) => {
+      return { ...item, ready: true };
+    });
+    return latestVaults;
+  });
+}
+
 export async function loadVaultData(
   queryClient: QueryClient
 ): Promise<DepositVaultConfig[]> {
@@ -24,26 +33,21 @@ export async function loadVaultData(
         staticVaultData = responseData.data.map((item) => {
           return { ...item, apr: 0 };
         });
-        hasLoadStaticData = true;
       }
+
+      loadRealTimeData().then((latestVaults) => {
+        queryClient.setQueryData(["deposit-vaults-data"], latestVaults);
+      });
     }
   } catch (error) {
-    console.warn("⚠️ Static vault data not found, falling back to API");
+    console.warn("⚠️ Static vault data not found, using real time data");
   }
 
-  // Fallback to API call
-  try {
-    getDepositVaults().then((res: any) => {
-      const latestVaults = res.map((item) => {
-        return { ...item, ready: true };
-      });
-
-      queryClient.setQueryData(["deposit-vaults-data"], latestVaults);
-    });
-  } catch (error) {
-    console.error("❌ Failed to load vault data from API:", error);
-    throw error;
+  if (hasLoadStaticData) {
+    staticVaultData = await loadRealTimeData();
   }
+
+  hasLoadStaticData = true;
 
   return staticVaultData;
 }
