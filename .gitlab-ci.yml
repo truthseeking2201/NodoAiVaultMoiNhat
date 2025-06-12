@@ -34,5 +34,5 @@ PRD-DEPLOY:
   script:
     - yarn
     - yarn build
-    - aws s3 sync dist/ s3://nodo-ai-copy-trading-prd --delete
+    - aws s3 sync dist/ s3://ai.nodo.xyz --delete
     - aws cloudfront create-invalidation --distribution-id ${PRD_CLOUDFRONT_DIST} --paths "/*"
