@@ -20,7 +20,7 @@ const RightContent = () => {
 
       {/* Introducing NDLP Card */}
       <div className="bg-black/80 backdrop-blur-sm rounded-xl p-6 mb-6">
-        <h3 className="font-heading-md text-100 mb-4">Introducing</h3>
+        <h3 className="text-100 mb-4 font-bold text-lg">Introducing</h3>
 
         <div className="flex items-center gap-2 mb-3">
           <img src="/coins/ndlp.png" alt="NDLP" className="w-10" />
@@ -92,7 +92,7 @@ const RightContent = () => {
 
       {/* How NODO AI Vault works */}
       <div className="bg-black/80 backdrop-blur-sm rounded-xl p-6">
-        <h3 className="font-heading-md text-100 mb-4">
+        <h3 className="font-bold text-lg text-100 mb-4">
           How NODO AI Vault works
         </h3>
 
