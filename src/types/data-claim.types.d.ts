@@ -8,6 +8,7 @@ export default interface DataClaimType {
   withdrawAmount: number;
   withdrawSymbol: string;
 
+  receiveAmountRaw: number;
   receiveAmount: number;
   receiveSymbol: string;
 
