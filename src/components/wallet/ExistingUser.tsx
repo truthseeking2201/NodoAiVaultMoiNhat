@@ -18,7 +18,11 @@ const ExistingUser = ({ onNextStep, user }: ExistingUserProps) => {
   };
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 pt-4">
-      <img src={ExistingUserIcon} alt="Existing User" className="w-16 h-16 mb-6" />
+      <img
+        src={ExistingUserIcon}
+        alt="Existing User"
+        className="w-16 h-16 mb-6"
+      />
       <div className="text-2xl font-bold text-white mb-2 text-center">
         Existing Account Detected
       </div>
@@ -32,12 +36,14 @@ const ExistingUser = ({ onNextStep, user }: ExistingUserProps) => {
           alt="Default Avatar"
           className="w-[42px] h-[42px] mb-4 rounded-full"
         />
-        <div className="text-base font-semibold text-white">{user.name}</div>
+        <div className="text-base font-semibold text-white">
+          {user.invite_code.nodo_account.full_name}
+        </div>
         <div className="text-sm text-gray-400">{user.email}</div>
         <div className="flex items-center justify-between mt-3 w-full bg-white/15 py-[6px] px-3 rounded-md">
           <div className="text-sm text-gray-400">Referral Code:</div>
           <div className="font-mono font-bold text-sm text-white">
-            {user.referralCode}
+            {user.invite_code.code}
           </div>
         </div>
       </div>

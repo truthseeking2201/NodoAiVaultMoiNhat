@@ -9,6 +9,7 @@ import {
   checkReferralCode,
   linkReferralCode,
   skipReferralCode,
+  checkSubscribeWalletDetails,
 } from "@/apis/wallet";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 
@@ -42,7 +43,7 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
   const handleSkipReferral = async () => {
     try {
       const res = await skipReferralCode(account?.address);
-      if (res.success) {
+      if (res) {
         onClose();
       }
     } catch (error) {
@@ -57,6 +58,7 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
         user_wallet: account?.address,
         invite_code: referralCode,
       });
+
       return res;
     } catch (error) {
       console.error("Error linking referral code:", error);
@@ -71,10 +73,13 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
   };
 
   const onSubmit = async (data: { referralCode: string }) => {
-    if (data.referralCode) {
+    if (data.referralCode !== "") {
       const isValid = await handleCheckReferralCode(data.referralCode);
       if (isValid) {
         const res = await handleLinkReferralCode(data.referralCode);
+        const subscribeWalletRes = await checkSubscribeWalletDetails(
+          account?.address
+        );
         if (res.success) {
           onNextStep();
         } else {
