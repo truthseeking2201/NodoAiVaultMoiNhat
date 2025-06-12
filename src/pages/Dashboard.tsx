@@ -1,22 +1,22 @@
 import { PageContainer } from "@/components/layout/PageContainer";
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useEffect, useRef } from "react";
 
 import LeftContent from "@/components/dashboard/LeftContent";
 import RightContent from "@/components/dashboard/RightContent";
 import "@/styles/design-tokens.css";
 
-import { TxTable } from "@/components/dashboard/TxTable";
-import NodoAIVaultsMainCard from "@/components/vault/NodoAIVaultsMainCard";
 import TelegramIcon from "@/assets/icons/telegram.svg";
 import XIcon from "@/assets/icons/x.svg";
-import VaultPools from "@/components/vault/pools";
-import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
+import { TxTable } from "@/components/dashboard/TxTable";
 import { Button } from "@/components/ui/button";
-import { ArrowUpRight } from "lucide-react";
-import { useCurrentAccount } from "@mysten/dapp-kit";
+import NodoAIVaultsMainCard from "@/components/vault/NodoAIVaultsMainCard";
+import VaultPools from "@/components/vault/pools";
+import { useWhiteListModalStore } from "@/hooks/useStore";
 import { useWallet } from "@/hooks/useWallet";
-import WhiteListModal from "@/components/dashboard/white-list-modal/WhiteListModal";
+import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { truncateBetween } from "@/utils/truncate";
+import { useCurrentAccount } from "@mysten/dapp-kit";
+import { ArrowUpRight } from "lucide-react";
 
 export default function NodoAIVaults() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,7 +26,7 @@ export default function NodoAIVaults() {
   const account = useCurrentAccount();
   const { isConnectWalletDialogOpen } = useWallet();
 
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, setIsOpen } = useWhiteListModalStore();
 
   const handleClose = () => {
     setIsOpen(false);
@@ -147,7 +147,6 @@ export default function NodoAIVaults() {
             <RightContent />
           </div>
         </div>
-        <WhiteListModal open={isOpen} onClose={handleClose} />
       </PageContainer>
       {/* Footer */}
       <footer className="py-6 text-center text-100 font-caption border-t border-white/10 bg-transparent">
