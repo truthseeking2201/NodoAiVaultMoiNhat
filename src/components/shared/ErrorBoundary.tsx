@@ -16,7 +16,7 @@ interface State {
 export class ErrorBoundary extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: true, error: null };
   }
 
   static getDerivedStateFromError(error: Error): State {
@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div
-          className="flex h-screen w-screen flex-row items-center justify-center gap-6"
+          className="flex min-h-screen w-screen flex-col md:flex-row items-center justify-center gap-6 p-4"
           style={{
             backgroundImage: `url(${errorBg})`,
             backgroundSize: "cover",
@@ -43,8 +43,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
           <motion.img 
             src={disconnectedImg} 
             alt="Error"
-            initial={{ x: -100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
+            className="w-48 md:w-auto"
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
             transition={{ 
               type: "spring",
               stiffness: 100,
@@ -53,9 +54,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
             }}
           />
           <motion.div 
-            className="flex flex-col items-start justify-center gap-2 p-4 text-center"
-            initial={{ x: 100, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
+            className="flex flex-col items-center md:items-start justify-center gap-2 p-4 text-center md:text-left"
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
             transition={{ 
               type: "spring",
               stiffness: 100,
@@ -63,24 +64,24 @@ export class ErrorBoundary extends React.Component<Props, State> {
               duration: 0.8 
             }}
           >
-            <h1 className="text-3xl font-bold text-white text-left max-w-xs">
+            <h1 className="text-2xl md:text-3xl font-bold text-white max-w-xs">
               Oops, something went wrong on our end.
             </h1>
-            <p className="text-base text-white max-w-md text-left">
+            <p className="text-sm md:text-base text-white max-w-md">
               The system encountered an unexpected issue and couldn't complete
               your request
             </p>
-            <p className="text-base text-white max-w-md">
+            <p className="text-sm md:text-base text-white max-w-md">
               We're already working to fix it — please try again shortly.
             </p>
             <motion.div 
-              className="flex rounded-[12px] bg-gradient-to-tr from-[#0090FF] via-[#FF6D9C] to-[#FB7E16] p-px hover:opacity-70 transition-all duration-300"
+              className="flex rounded-[12px] bg-gradient-to-tr from-[#0090FF] via-[#FF6D9C] to-[#FB7E16] p-px hover:opacity-70 transition-all duration-300 w-full md:w-auto"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <button
                 onClick={() => window.location.reload()}
-                className="bg-black text-white hover:text-white m-[1px] h-[40px] rounded-[12px] text-md font-semibold px-8"
+                className="bg-black text-white hover:text-white m-[1px] h-[40px] rounded-[12px] text-md font-semibold px-8 w-full md:w-auto"
               >
                 Reload Page
               </button>

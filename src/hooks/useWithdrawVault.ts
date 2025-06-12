@@ -12,6 +12,15 @@ import LpType from "@/types/lp.type";
 import DataClaimType from "@/types/data-claim.types.d";
 import BigNumber from "bignumber.js";
 
+const _calcRateFee = (fee_bps) => {
+  return BigNumber(fee_bps || 0)
+    .dividedBy(100)
+    .toNumber();
+};
+const _calcPercent = (amount, fee_bps) => {
+  return BigNumber(amount).times(fee_bps).div(10000).toNumber();
+};
+
 const _getEstWithdraw = (
   amountLp: number,
   configLp: LpType,
@@ -44,9 +53,7 @@ const _getEstWithdraw = (
       amount: amountLp,
       receive: _receiveAmount,
       fee: _fee,
-      rateFee: BigNumber(configVault.withdraw.fee_bps || 0)
-        .dividedBy(100)
-        .toNumber(),
+      rateFee: _calcRateFee(configVault.withdraw.fee_bps),
     };
   } catch (error) {
     return null;
@@ -85,34 +92,40 @@ export const useWithdrawVault = () => {
       });
       const values = data?.data?.content?.fields?.value || [];
       console.log("-----getRequestClaim-values", values);
-      const available_liquidity = getBalanceAmount(
-        configVault.available_liquidity,
-        configLp.token_decimals
-      );
 
       return values?.map((val) => {
         const fields = val.fields;
-        const amount = getBalanceAmount(
-          fields.amount,
-          configLp.lp_decimals
-        )?.toNumber();
-        const est = _getEstWithdraw(amount, configLp, configVault);
+
+        const withdrawAmount =
+          getBalanceAmount(fields?.lp || 0, configLp.lp_decimals)?.toNumber() ||
+          0;
+
+        const is_available_liquidity = new BigNumber(
+          configVault.available_liquidity
+        ).gte(fields.amount);
+
+        const receiveAmount =
+          getBalanceAmount(fields.amount, configLp.token_decimals) ||
+          new BigNumber(0);
+        const rateFee = configVault?.withdraw?.fee_bps || 0;
+        const fee = _calcPercent(receiveAmount, rateFee);
+
         const timeUnlock =
           Number(fields?.withdraw_time) + Number(configVault.lock_duration_ms);
         const now = Date.now().valueOf();
-        const isClaim =
-          timeUnlock < now && available_liquidity.gte(est.receive);
+        const isClaim = timeUnlock < now && is_available_liquidity;
         return {
           id: 1,
           timeUnlock: timeUnlock,
           isClaim: isClaim,
-          withdrawAmount: amount,
+          withdrawAmount: withdrawAmount,
           withdrawSymbol: configLp.lp_symbol,
-          receiveAmount: est.receive,
+          receiveAmountRaw: receiveAmount.toNumber(),
+          receiveAmount: receiveAmount.minus(fee).toNumber(),
           receiveSymbol: configLp.token_symbol,
-          feeAmount: est.fee,
+          feeAmount: fee,
           feeSymbol: configLp.token_symbol,
-          feeRate: est?.rateFee,
+          feeRate: _calcRateFee(rateFee),
           configLp: configLp,
         };
       });
