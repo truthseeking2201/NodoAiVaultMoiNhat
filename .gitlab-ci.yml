@@ -33,6 +33,6 @@ PRD-DEPLOY:
     - main
   script:
     - yarn
-    - yarn build
+    - yarn build:production
     - aws s3 sync dist/ s3://ai.nodo.xyz --delete
     - aws cloudfront create-invalidation --distribution-id ${PRD_CLOUDFRONT_DIST} --paths "/*"
