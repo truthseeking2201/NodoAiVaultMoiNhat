@@ -1,0 +1,1 @@
+export const RATE_DENOMINATOR = 1000000;
