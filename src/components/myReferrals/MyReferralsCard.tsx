@@ -1,45 +1,36 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { ItemRow } from "./ItemRow";
 import { MyReferralsDashboardModal } from "./MyReferralsDashboardModal";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
-
+import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 interface MyReferralsCardProps {
   className?: string;
 }
 
 export function MyReferralsCard({ className = "" }: MyReferralsCardProps) {
-  const count = useRef(0);
-  const [dataRefer, setDataRefer] = useState<any>();
   const [openModalRefer, setOpenModalRefer] = useState(false);
 
   /**
-   * FUNCTION
+   * HOOKS
    */
-  const initData = useCallback(async () => {
-    // TODO
-    const referCode = "MAKS5YHTKVH";
+  const { walletDetails } = useWhitelistWallet();
+  const dataRefer = useMemo(() => {
+    const referCode = walletDetails?.invite_code?.code;
     const href = window.location?.origin;
-    setDataRefer({
+    return {
       referCode: referCode,
-      referLinkCode: `${href}?ref-code=${referCode}`,
-      referTotal: 12,
-    });
-  }, []);
+      referLinkCode: `${href}?invite-ref=${referCode}`,
+      referTotal: walletDetails?.total_referrals,
+    };
+  }, [walletDetails]);
 
   /**
-   * LIFECYCLES
+   * RENDER
    */
-  useEffect(() => {
-    if (count.current == 0) {
-      initData();
-    }
-    count.current = 1;
-  }, []);
-
   return (
     <>
-      {dataRefer && (
+      {dataRefer?.referCode && (
         <div
           className={`bg-black/80 backdrop-blur-sm rounded-xl p-6 mb-6 font-sans text-left flex flex-col gap-4 ${className}`}
         >

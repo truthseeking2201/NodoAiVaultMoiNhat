@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SORT_TYPE } from "@/config/constants-types.ts";
 
 interface ColumnsTable {
   title?: string;
@@ -68,7 +69,7 @@ export function TableRender({
                         onClick={() => changeSort(el.keySort)}
                         disabled={isLoading}
                       >
-                        {paramsSearch[el.keySort] == "desc" ? (
+                        {paramsSearch[el.keySort] == SORT_TYPE.desc ? (
                           <ArrowDown className="w-4 h-4" />
                         ) : (
                           <ArrowUp className="w-4 h-4" />
@@ -82,15 +83,24 @@ export function TableRender({
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              Array(numRowLoading)
+              Array(data?.length || numRowLoading)
                 .fill(0)
                 .map((_, i) => (
                   <TableRow
                     key={i}
-                    className="hover:bg-white/5 w-full h-[50.5px]"
+                    className={cn(
+                      "hover:bg-white/5 font-medium border-b border-white/10",
+                      classRowBody
+                    )}
                   >
-                    {columns.map((el, index) => (
-                      <TableCell key={`loading-${index}`}>
+                    {columns.map((column, index) => (
+                      <TableCell
+                        key={`loading-${index}`}
+                        className={cn(
+                          "px-6 py-3 h-[50.5px]",
+                          column?.classCell
+                        )}
+                      >
                         <div className="h-5 bg-white/10 animate-pulse rounded"></div>
                       </TableCell>
                     ))}

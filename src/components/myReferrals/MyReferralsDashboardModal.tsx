@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -7,13 +9,13 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-
+import { Button } from "@/components/ui/button";
 import { SelectRender } from "@/components/ui/select-render";
 import { Info } from "lucide-react";
 import { TableRender } from "@/components/ui/table-render";
 import { PaginationRender } from "@/components/ui/pagination-render";
 import { InputSearch } from "@/components/ui/input-search";
-import { getMyReferral } from "@/apis/vault";
+import { getMyReferral } from "@/apis/wallet";
 import debounce from "lodash/debounce";
 import { truncateStringWithSeparator } from "@/utils/helpers";
 import { formatDate } from "@/utils/date";
@@ -22,8 +24,9 @@ import { COIN_TYPES_CONFIG } from "@/config/coin-config";
 import {
   TIME_FILTER,
   TIME_FILTER_OPTIONS_REFERRAL,
+  SORT_TYPE,
 } from "@/config/constants-types.ts";
-import { isValidSuiAddress } from "@mysten/sui/utils";
+// import { isValidSuiAddress } from "@mysten/sui/utils";
 
 interface MyReferralsDashboardModalProps {
   isOpen: boolean;
@@ -43,9 +46,17 @@ export function MyReferralsDashboardModal({
       classTitle: "w-3/6",
       dataIndex: "address",
       render: (value: any) => (
-        <span className="gradient-3rd-underline">
-          {truncateStringWithSeparator(value, 13, "...", 6)}
-        </span>
+        <Button
+          variant="icon"
+          size="none"
+          className=""
+          onClick={() => handleCopy(value)}
+          disabled={isLoading}
+        >
+          <span className="gradient-3rd-underline">
+            {truncateStringWithSeparator(value, 13, "...", 6)}
+          </span>
+        </Button>
       ),
     },
     {
@@ -80,8 +91,9 @@ export function MyReferralsDashboardModal({
     limit: 10,
     address: "",
     timeSelect: TIME_FILTER.all,
-    dateSort: "desc", //asc | desc
-    depositSort: "desc", //asc | desc
+    dateSort: SORT_TYPE.desc,
+    depositSort: SORT_TYPE.desc,
+    keySort: "dateSort",
   };
 
   const count = useRef<string>("");
@@ -96,39 +108,69 @@ export function MyReferralsDashboardModal({
    */
   const currentAccount = useCurrentAccount();
   const address = currentAccount?.address;
+  const { toast } = useToast();
+  const { walletDetails, refetch: refetchWalletDetails } = useWhitelistWallet();
 
   /**
    * FUNCTION
    */
+  const handleCopy = async (text) => {
+    if (text) {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied",
+        description: "",
+        duration: 2000,
+      });
+    }
+  };
 
   const initData = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log("------paramsRefer", paramsRefer);
-      const response: any = await getMyReferral(paramsRefer);
-      console.log("-----response", response);
-      // TODO
-      const data = response?.list?.map((el, index) => {
+      const sortField = {
+        dateSort: "TIMESTAMP",
+        depositSort: "TOTAL_DEPOSIT",
+      };
+      const params = {
+        page: paramsRefer.page,
+        limit: paramsRefer.limit,
+        timeframe: paramsRefer.timeSelect,
+        sortField: sortField[paramsRefer.keySort],
+        sortType: paramsRefer[paramsRefer.keySort],
+        filterWalletAddress: paramsRefer?.address
+          ? encodeURIComponent(paramsRefer?.address)
+          : undefined,
+      };
+      const response: any = await getMyReferral(address, params);
+      const data = response?.data?.map((el, index) => {
         return {
           id: index,
-          address: el?.vault_address,
-          dateJoin: el?.time,
-          depositAmount: (el?.tokens[1]?.price || 0) * 1000,
+          address: el?.wallet_address,
+          dateJoin: el?.timestamp,
+          depositAmount: el?.total_deposit || 0,
         };
       });
-      console.log("-----data", data);
       setListRefer(data);
       setTotalRefer(response?.total || 0);
+
+      // check refetch
+      if (
+        Number(walletDetails?.total_referrals) !== Number(response?.total || 0)
+      ) {
+        refetchWalletDetails();
+      }
     } catch (error) {
       console.log(error);
     }
     setIsLoading(false);
-  }, [address, paramsRefer]);
+  }, [address, paramsRefer, walletDetails, refetchWalletDetails]);
 
   const changeSort = useCallback(
     async (key) => {
-      const _params = { ...paramsRefer };
-      _params[key] = _params[key] == "desc" ? "asc" : "desc";
+      const _params = { ...paramsRefer, keySort: key };
+      _params[key] =
+        _params[key] == SORT_TYPE.desc ? SORT_TYPE.asc : SORT_TYPE.desc;
       setParamsRefer(_params);
     },
     [paramsRefer]
@@ -147,17 +189,18 @@ export function MyReferralsDashboardModal({
   );
   const handleChangeAddress = useCallback(
     (inputValue) => {
-      const isAddress = isValidSuiAddress(inputValue);
-      if (isAddress || (paramsRefer.address && inputValue == "")) {
+      // const isAddress = isValidSuiAddress(inputValue);
+      // if (isAddress || (paramsRefer.address && inputValue == "")) {
+      if (inputValue || (paramsRefer.address && inputValue == "")) {
         setParamsRefer({ ...paramsRefer, address: inputValue, page: 1 });
       }
-      setIsInvalidAddress(inputValue && !isAddress);
+      // setIsInvalidAddress(inputValue && !isAddress);
     },
     [paramsRefer]
   );
 
   const debouncedChange = useMemo(() => {
-    return debounce(initData, 500);
+    return debounce(initData, 1000);
   }, [initData]);
 
   /**
@@ -208,6 +251,7 @@ export function MyReferralsDashboardModal({
                 placeholder="Search address"
                 onChange={handleChangeAddress}
                 disabled={isLoading}
+                maxLength={66}
               />
               {isInvalidAddress && (
                 <div className="text-red-error text-sm mt-1 flex items-center">
@@ -244,6 +288,7 @@ export function MyReferralsDashboardModal({
             total={totalRefer}
             handlePageChange={handlePageChange}
             disabled={isLoading}
+            templateShowing="Showing {min}-{max} of {total}"
           />
         )}
       </DialogContent>

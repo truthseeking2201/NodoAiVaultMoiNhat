@@ -9,6 +9,7 @@ export const TIME_FILTER = {
   last30days: "LAST_30_DAYS",
   thisYear: "THIS_YEAR",
 };
+
 export const TIME_FILTER_OPTIONS_REFERRAL: OptionsSelectType[] = [
   { value: TIME_FILTER.all, label: "All Time" },
   { value: TIME_FILTER.today, label: "Today" },
@@ -18,3 +19,8 @@ export const TIME_FILTER_OPTIONS_REFERRAL: OptionsSelectType[] = [
   { value: TIME_FILTER.last30days, label: "Last 30 Days" },
   { value: TIME_FILTER.thisYear, label: "This Year" },
 ];
+
+export const SORT_TYPE = {
+  asc: "ASC",
+  desc: "DESC",
+};

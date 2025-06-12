@@ -28,3 +28,12 @@ export const subscribeWhitelistRequest = async (
   }
   return res;
 };
+
+export const getMyReferral = (address: string, params: any) => {
+  return httpNodo.get(
+    `/data-management/user/my-affiliate-dashboard/${address}`,
+    {
+      params: params,
+    }
+  );
+};
