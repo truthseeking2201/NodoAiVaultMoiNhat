@@ -33,7 +33,7 @@ export function ItemRow({
           onClick={handleCopy}
           className="relative w-full text-left bg-black rounded-[14px] p-4 group"
         >
-          <span className="text-lg font-medium text-white block truncate pr-8">
+          <span className="text-lg font-medium text-white block truncate pr-8 font-mono">
             {value}
           </span>
           <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-white rounded-lg group-hover:bg-white/20 w-8 h-8 flex items-center justify-center flex-shrink-0">

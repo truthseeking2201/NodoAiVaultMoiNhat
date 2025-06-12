@@ -34,7 +34,7 @@ export function MyReferralsCard({ className = "" }: MyReferralsCardProps) {
         <div
           className={`bg-black/80 backdrop-blur-sm rounded-xl p-6 mb-6 font-sans text-left flex flex-col gap-4 ${className}`}
         >
-          <h3 className="font-heading-md text-100 mb-0">My Referrals</h3>
+          <h3 className="text-white text-xl font-bold mb-0">My Referrals</h3>
           <ItemRow
             title="Your Referral Code"
             value={dataRefer.referCode}
