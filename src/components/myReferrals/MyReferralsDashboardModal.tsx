@@ -2,13 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { DialogOutsideClose } from "@/components/ui/dialog-outside-close";
 import { Button } from "@/components/ui/button";
 import { SelectRender } from "@/components/ui/select-render";
 import { Info } from "lucide-react";
@@ -229,21 +223,14 @@ export function MyReferralsDashboardModal({
    * RENDER
    */
   return (
-    <Dialog
+    <DialogOutsideClose
       open={isOpen}
       onOpenChange={(isOpen) => !isOpen && onClose()}
+      name="My Referral Dashboard"
     >
-      <DialogContent
-        className="md:max-w-[764px] !rounded-xl	bg-black"
-        hideIconClose
-      >
-        <DialogHeader className="p-0 relative flex flex-row items-start justify-between	flex-wrap">
-          <DialogTitle className="text-xl font-bold m-0">
-            My Referral Dashboard
-          </DialogTitle>
-          <DialogDescription className="sr-only">
-            My Referral Dashboard
-          </DialogDescription>
+      <div className="grid gap-4">
+        <div className="p-0 relative flex flex-row items-start justify-between flex-wrap">
+          <div className="text-xl font-bold m-0">My Referral Dashboard</div>
 
           <div className="flex gap-3 w-2/3 !mt-0">
             <div className="ml-auto max-w-60">
@@ -271,7 +258,7 @@ export function MyReferralsDashboardModal({
               disabled={isLoading}
             />
           </div>
-        </DialogHeader>
+        </div>
 
         <TableRender
           data={listRefer}
@@ -291,7 +278,7 @@ export function MyReferralsDashboardModal({
             templateShowing="Showing {min}-{max} of {total}"
           />
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </DialogOutsideClose>
   );
 }
