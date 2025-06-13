@@ -33,6 +33,7 @@ export type UserType = {
   wallet_address: string;
   timestamp: string;
   metadata?: any;
+  is_skip_invitation_code?: boolean;
   invite_code: {
     created_at: string;
     updated_at: string;

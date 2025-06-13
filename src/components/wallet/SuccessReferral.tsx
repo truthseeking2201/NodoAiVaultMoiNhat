@@ -4,12 +4,11 @@ import type { UserType } from "@/types/user";
 import { Button } from "@/components/ui/button";
 
 type SuccessReferralProps = {
-  user: UserType;
+  linkRefCode: string;
   onNextStep: () => void;
 };
 
-const SuccessReferral = ({ user, onNextStep }: SuccessReferralProps) => {
-  console.log("SuccessReferral user:", user);
+const SuccessReferral = ({ linkRefCode, onNextStep }: SuccessReferralProps) => {
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 pt-4 w-full">
       <img src={ReferralSuccessIcon} alt="Success" className="w-16 h-16 mb-6" />
@@ -18,8 +17,7 @@ const SuccessReferral = ({ user, onNextStep }: SuccessReferralProps) => {
       </div>
       <div className="text-gray-400 mb-6 text-center text-base">
         You've been successfully referred with
-        <br /> code{" "}
-        <span className="font-bold text-white">{user?.invite_code?.code}</span>.
+        <br /> code <span className="font-bold text-white">{linkRefCode}</span>.
         Both you and your referrer
         <br /> will receive bonuses when you make your
         <br /> first deposit.

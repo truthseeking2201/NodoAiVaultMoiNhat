@@ -60,6 +60,14 @@ export const checkSubscribeWalletDetails = async (walletAddress: string) => {
   return res;
 };
 
+export const getWalletDetail = async (walletAddress: string) => {
+  const res = (await httpNodo.get(
+    `${URLS.walletDetails}?wallet_address=${walletAddress}`
+  )) as any;
+
+  return res;
+};
+
 export const checkUserExists = async ({ wallet_address }) => {
   const res = (await httpNodo.post(`${URLS.checkUserExists}`, {
     wallet_address,

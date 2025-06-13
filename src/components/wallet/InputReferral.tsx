@@ -15,7 +15,7 @@ import { useCurrentAccount } from "@mysten/dapp-kit";
 
 type InputReferralProps = {
   onClose: () => void;
-  onNextStep: () => void;
+  onNextStep: (referralCode: string) => void;
 };
 
 const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
@@ -77,11 +77,8 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
       const isValid = await handleCheckReferralCode(data.referralCode);
       if (isValid) {
         const res = await handleLinkReferralCode(data.referralCode);
-        const subscribeWalletRes = await checkSubscribeWalletDetails(
-          account?.address
-        );
         if (res.success) {
-          onNextStep();
+          onNextStep(data.referralCode);
         } else {
           setFieldError();
         }
