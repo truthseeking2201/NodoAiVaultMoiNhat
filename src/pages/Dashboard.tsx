@@ -26,11 +26,7 @@ export default function NodoAIVaults() {
   const account = useCurrentAccount();
   const { isConnectWalletDialogOpen } = useWallet();
 
-  const { isOpen, setIsOpen } = useWhiteListModalStore();
-
-  const handleClose = () => {
-    setIsOpen(false);
-  };
+  const { setIsOpen } = useWhiteListModalStore();
 
   useEffect(() => {
     if (window.localStorage.getItem("is-whitelist-address") === null) {

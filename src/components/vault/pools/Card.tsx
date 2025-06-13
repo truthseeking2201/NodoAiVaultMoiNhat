@@ -5,6 +5,7 @@ import { useDepositVaultStore } from "@/hooks/useStore";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
 import { VaultPool } from ".";
+import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 
 const APR = ({ text, is2xl }: { text: string; is2xl: boolean }) => {
   return (
@@ -21,6 +22,7 @@ const APR = ({ text, is2xl }: { text: string; is2xl: boolean }) => {
 
 const VaultCard = ({ pool }: { pool: VaultPool }) => {
   const { is2xl } = useBreakpoint();
+  const exchange = EXCHANGE_CODES_MAP[pool.exchange_id];
 
   const { balance: ndlpAmount } = useGetCoinBalance(
     pool.vault_lp_token,
@@ -137,7 +139,7 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
           </div>
           <div className="flex gap-1 items-center text-base">
             <img
-              src="/dexs/momentum.png"
+              src={`/dexs/${exchange?.code}.png`}
               className={cn(is2xl ? "h-[16px]" : "h-[12px]")}
             />
             <div
@@ -146,7 +148,7 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
                 is2xl ? "text-base" : "text-xs"
               )}
             >
-              Momentum
+              {exchange.name}
             </div>
           </div>
         </div>

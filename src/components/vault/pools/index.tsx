@@ -1,6 +1,7 @@
 import { useCurrentDepositVault, useGetDepositVaults } from "@/hooks";
 import { useMemo } from "react";
 import VaultCard from "./Card";
+import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 
 export type VaultPool = {
   vault_id: string;
@@ -10,6 +11,7 @@ export type VaultPool = {
   vault_lp_token: string;
   vault_lp_token_decimals: number;
   isSelected: boolean;
+  exchange_id: number;
 };
 
 const VaultPools = () => {
@@ -19,12 +21,13 @@ const VaultPools = () => {
   const pools = useMemo(() => {
     return depositVaults.map((vault) => ({
       vault_id: vault.vault_id,
-      tokens: vault.vault_name.split(" - "),
+      tokens: vault.pool.pool_name.split("-"),
       APR: vault.apr,
       isLive: vault.is_active,
       vault_lp_token: vault.vault_lp_token,
       vault_lp_token_decimals: vault.vault_lp_token_decimals,
       isSelected: vault.vault_id === currentVault.vault_id,
+      exchange_id: vault.metadata.exchange_id,
     }));
   }, [depositVaults, currentVault]);
 
