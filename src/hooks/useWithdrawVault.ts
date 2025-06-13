@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
   useSuiClient,
 } from "@mysten/dapp-kit";
+import { useGetVaultConfig } from "./useVault";
 import { Transaction } from "@mysten/sui/transactions";
 import { useMergeCoins } from "./useMergeCoins";
 import { RATE_DENOMINATOR } from "@/config/vault-config";
@@ -281,48 +282,31 @@ export const useWithdrawVault = () => {
  * @returns
  */
 export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
-  const configVaultDefault = {
-    withdraw: { fee_bps: "0", min: "0", total_fee: "0" },
-    rate: "0",
-    lock_duration_ms: 0,
-    id_pending_redeems: "",
-    available_liquidity: "",
-  };
-
   const amountEstDefault = {
     amount: 0,
     receive: 0,
     fee: 0,
     rateFee: 0,
   };
-  const count = useRef<string>("0");
-  const [configVault, setConfigVault] = useState(configVaultDefault);
 
   const [amountEst, setAmountEst] = useState(amountEstDefault);
 
-  const suiClient = useSuiClient();
+  const { vaultConfig } = useGetVaultConfig(configLp?.vault_id);
 
-  const getConfigVault = useCallback(async () => {
-    try {
-      const res: any = await suiClient.getObject({
-        id: configLp.vault_id,
-        options: {
-          showContent: true,
-        },
-      });
-      const fields = res?.data?.content?.fields;
-      // console.log("-----getConfigVault", fields);
-      setConfigVault({
-        withdraw: fields?.withdraw?.fields,
-        rate: fields?.rate || "0",
-        lock_duration_ms: fields?.lock_duration_ms || "0",
-        available_liquidity: fields?.available_liquidity || "0",
-        id_pending_redeems: fields?.pending_redeems?.fields?.id?.id || "0",
-      });
-    } catch (error) {
-      setConfigVault(configVaultDefault);
-    }
-  }, [configLp]);
+  const configVault = useMemo(() => {
+    const fields = vaultConfig;
+    return {
+      withdraw: fields?.withdraw?.fields || {
+        fee_bps: "0",
+        min: "0",
+        total_fee: "0",
+      },
+      rate: fields?.rate || "0",
+      lock_duration_ms: fields?.lock_duration_ms || "0",
+      available_liquidity: fields?.available_liquidity || "0",
+      id_pending_redeems: fields?.pending_redeems?.fields?.id?.id || "",
+    };
+  }, [vaultConfig]);
 
   const getEstWithdraw = useCallback(() => {
     try {
@@ -332,13 +316,6 @@ export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
       setAmountEst(amountEstDefault);
     }
   }, [configVault, amountLp]);
-
-  useEffect(() => {
-    if (count.current !== configLp.vault_id && configLp.vault_id) {
-      getConfigVault();
-    }
-    count.current = configLp?.vault_id;
-  }, [configLp]);
 
   useEffect(() => {
     getEstWithdraw();
