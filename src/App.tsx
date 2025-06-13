@@ -32,7 +32,7 @@ const Dashboard = lazy(() =>
 
 const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
   const { isLoading, data, error } = useGetDepositVaults();
-  if (isLoading) {
+  if (isLoading || !data) {
     return <PageFallback />;
   }
 

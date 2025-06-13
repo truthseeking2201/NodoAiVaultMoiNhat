@@ -157,6 +157,7 @@ export type DepositVaultConfig = {
   metadata: {
     package_id: string;
     vault_config_id: string;
+    exchange_id: number;
   };
   pool: {
     pool_name: string;
