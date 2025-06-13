@@ -155,7 +155,10 @@ export default function WithdrawVaultSection() {
               className="w-full font-semibold text-lg"
             >
               <span>Connect Wallet</span>
-              <ArrowRight size={16} className="ml-2" />
+              <ArrowRight
+                size={16}
+                className="ml-2"
+              />
             </Button>
           </div>
         )}
@@ -178,7 +181,7 @@ export default function WithdrawVaultSection() {
                 </div>
               </div>
               <div className="font-sans text-sm text-white/60 mt-3">
-                1 {lpData.lp_symbol} ≈ {showFormatNumber(amountEst.receive)}{" "}
+                1 {lpData.lp_symbol} ≈ {showFormatNumber(amountEst?.receive)}{" "}
                 {lpData.token_symbol}
               </div>
             </div>

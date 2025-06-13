@@ -23,7 +23,7 @@ export function BalanceCard({ className = "" }: BalanceCardProps) {
     <div
       className={`bg-black backdrop-blur-sm rounded-2xl p-6 font-sans ${className}`}
     >
-      <h2 className="text-white text-2xl font-bold mb-6">Balance</h2>
+      <h2 className="text-white text-lg font-bold mb-6">Balance</h2>
       <div className="flex items-center gap-4">
         <img src="/coins/ndlp.png" alt="NDLP" className="w-10" />
         <div>
