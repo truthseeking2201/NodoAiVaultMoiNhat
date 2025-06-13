@@ -5,7 +5,7 @@ const URLS = {
   walletDetails: "/data-management/user/wallet-detail",
   subscribe: "/data-management/user/subscribe",
   updateWalletProvider: "/data-management/user/update-wallet-provider",
-  checkUserExists: "/data-management/user/apply-referral",
+  confirmUserExists: "/data-management/user/apply-referral",
   checkReferralCode: (referralCode: string) =>
     `/data-management/user/check-referral/${referralCode}`,
   linkReferralCode: (user_wallet: string) =>
@@ -46,20 +46,6 @@ export const getMyReferral = (address: string, params: any) => {
   );
 };
 
-export const checkSubscribeWalletDetails = async (walletAddress: string) => {
-  const res = (await httpNodo.get(
-    `${URLS.walletDetails}?wallet_address=${walletAddress}`
-  )) as any;
-
-  if (res?.data === null) {
-    await httpNodo.post(URLS.subscribe, {
-      wallet_address: walletAddress,
-    });
-  }
-
-  return res;
-};
-
 export const getWalletDetail = async (walletAddress: string) => {
   const res = (await httpNodo.get(
     `${URLS.walletDetails}?wallet_address=${walletAddress}`
@@ -68,8 +54,8 @@ export const getWalletDetail = async (walletAddress: string) => {
   return res;
 };
 
-export const checkUserExists = async ({ wallet_address }) => {
-  const res = (await httpNodo.post(`${URLS.checkUserExists}`, {
+export const confirmUserExists = async ({ wallet_address }) => {
+  const res = (await httpNodo.post(`${URLS.confirmUserExists}`, {
     wallet_address,
   })) as any;
 

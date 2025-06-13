@@ -9,7 +9,6 @@ import {
   checkReferralCode,
   linkReferralCode,
   skipReferralCode,
-  checkSubscribeWalletDetails,
 } from "@/apis/wallet";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 
