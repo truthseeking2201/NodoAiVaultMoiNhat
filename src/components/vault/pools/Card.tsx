@@ -37,7 +37,7 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
   return (
     <div
       className={cn(
-        "bg-white rounded-xl shadow w-[calc(100%/3-0.5rem)] p-[2px] cursor-pointer group transition-transform duration-300",
+        "bg-white rounded-xl shadow w-full p-[2px] cursor-pointer group transition-transform duration-300",
         !pool.isLive && "opacity-50",
         !isSelected && "hover:scale-[1.04]"
       )}
