@@ -81,7 +81,8 @@ const VaultCard = ({
             <span
               className={cn(
                 "text-white font-bold",
-                is2xl ? "text-md" : "text-sm"
+                is2xl ? "text-md" : "text-sm",
+                "truncate max-w-[120px]"
               )}
             >
               {pool.vault_name}
