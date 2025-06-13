@@ -1,9 +1,17 @@
 import httpNodo from "@/utils/httpNodo";
+import { link } from "fs";
 
 const URLS = {
   walletDetails: "/data-management/user/wallet-detail",
   subscribe: "/data-management/user/subscribe",
   updateWalletProvider: "/data-management/user/update-wallet-provider",
+  checkUserExists: "/data-management/user/apply-referral",
+  checkReferralCode: (referralCode: string) =>
+    `/data-management/user/check-referral/${referralCode}`,
+  linkReferralCode: (user_wallet: string) =>
+    `/data-management/user/${user_wallet}/invite-code`,
+  skipReferralCode: (user_wallet: string) =>
+    `/data-management/user/${user_wallet}/skip-invite-code`,
 };
 
 export const subscribeWhitelistRequest = async (
@@ -36,4 +44,54 @@ export const getMyReferral = (address: string, params: any) => {
       params: params,
     }
   );
+};
+
+export const checkSubscribeWalletDetails = async (walletAddress: string) => {
+  const res = (await httpNodo.get(
+    `${URLS.walletDetails}?wallet_address=${walletAddress}`
+  )) as any;
+
+  if (res?.data === null) {
+    await httpNodo.post(URLS.subscribe, {
+      wallet_address: walletAddress,
+    });
+  }
+
+  return res;
+};
+
+export const checkUserExists = async ({ wallet_address }) => {
+  const res = (await httpNodo.post(`${URLS.checkUserExists}`, {
+    wallet_address,
+  })) as any;
+
+  return res;
+};
+
+export const checkReferralCode = async (referralCode: string) => {
+  const res = (await httpNodo.get(URLS.checkReferralCode(referralCode))) as any;
+
+  return res;
+};
+
+export const linkReferralCode = async ({
+  user_wallet,
+  invite_code,
+}: {
+  user_wallet: string;
+  invite_code: string;
+}) => {
+  const res = (await httpNodo.post(URLS.linkReferralCode(user_wallet), {
+    invite_code,
+  })) as any;
+
+  return res;
+};
+
+export const skipReferralCode = async (user_wallet: string) => {
+  const res = (await httpNodo.post(
+    `${URLS.skipReferralCode(user_wallet)}`
+  )) as any;
+
+  return res;
 };

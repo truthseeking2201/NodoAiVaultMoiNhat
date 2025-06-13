@@ -30,7 +30,7 @@ export default function NodoAIVaults() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const referralCode = searchParams.get("ref");
+  const referralCode = searchParams.get("invite-ref");
 
   const handleClose = () => {
     setIsOpen(false);

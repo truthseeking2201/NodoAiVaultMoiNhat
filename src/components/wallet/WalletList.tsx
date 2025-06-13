@@ -13,17 +13,15 @@ type Wallet = {
 };
 
 type WalletListProps = {
-  onClose: () => void;
-  onNextStep: () => void;
+  onConnectSuccess: (address: string) => void;
 };
 
-const WalletList = ({ onClose, onNextStep }: WalletListProps) => {
+const WalletList = ({ onConnectSuccess }: WalletListProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const wallets = useWallets();
   const { mutate: connect } = useConnectWallet();
-  const [isConnectedUser, setIsConnectedUser] = useState(false);
 
   const allowWallets = WALLETS.map((wallet) => {
     const foundWallet = wallets.find((w) => w.name === wallet.name);
@@ -46,13 +44,9 @@ const WalletList = ({ onClose, onNextStep }: WalletListProps) => {
         connect(
           { wallet: foundWallet },
           {
-            onSuccess: () => {
+            onSuccess: (data) => {
               setConnectedWallet(null);
-              if (isConnectedUser) {
-                onClose();
-              } else {
-                onNextStep();
-              }
+              onConnectSuccess(data.accounts[0].address);
             },
             onError: (error) => {
               console.error("Failed to connect wallet:", error);

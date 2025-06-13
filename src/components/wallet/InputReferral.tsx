@@ -5,6 +5,12 @@ import { useForm, Controller } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CircleAlert, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  checkReferralCode,
+  linkReferralCode,
+  skipReferralCode,
+} from "@/apis/wallet";
+import { useCurrentAccount } from "@mysten/dapp-kit";
 
 type InputReferralProps = {
   onClose: () => void;
@@ -22,18 +28,64 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
       referralCode: "",
     },
   });
+  const account = useCurrentAccount();
 
-  const onSubmit = (data: { referralCode: string }) => {
-    if (data.referralCode && data.referralCode.length < 5) {
-      setError("referralCode", {
-        type: "manual",
-        message: "Invalid referral code. Please check and try again.",
-      });
-      return;
+  const handleCheckReferralCode = async (referralCode: string) => {
+    try {
+      const response = await checkReferralCode(referralCode);
+      return response.valid;
+    } catch (error) {
+      console.error("Error checking referral code:", error);
     }
-    console.log("Referral Code Submitted:", data.referralCode);
-    onNextStep();
   };
+
+  const handleSkipReferral = async () => {
+    try {
+      const res = await skipReferralCode(account?.address);
+      if (res.success) {
+        onClose();
+      }
+    } catch (error) {
+      console.error("Error skipping referral code:", error);
+      setFieldError();
+    }
+  };
+
+  const handleLinkReferralCode = async (referralCode: string) => {
+    try {
+      const res = await linkReferralCode({
+        user_wallet: account?.address,
+        invite_code: referralCode,
+      });
+      return res;
+    } catch (error) {
+      console.error("Error linking referral code:", error);
+    }
+  };
+
+  const setFieldError = () => {
+    setError("referralCode", {
+      type: "value",
+      message: "Failed to link referral code. Please try again.",
+    });
+  };
+
+  const onSubmit = async (data: { referralCode: string }) => {
+    if (data.referralCode) {
+      const isValid = await handleCheckReferralCode(data.referralCode);
+      if (isValid) {
+        const res = await handleLinkReferralCode(data.referralCode);
+        if (res.success) {
+          onNextStep();
+        } else {
+          setFieldError();
+        }
+      } else {
+        setFieldError();
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 pt-4 w-full">
       <img
@@ -78,7 +130,7 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
           <Button
             variant="outline"
             size="lg"
-            onClick={onClose}
+            onClick={handleSkipReferral}
             className="w-full font-semibold text-sm h-[44px] rounded-lg"
             disabled={isSubmitting}
           >

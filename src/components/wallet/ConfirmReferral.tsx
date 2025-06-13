@@ -1,6 +1,8 @@
 import ReferralConfirmIcon from "@/assets/images/wallet/referral-confirm.png";
 import { Wallet, Check, CircleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { checkReferralCode } from "@/apis/wallet";
+import { useState, useEffect } from "react";
 
 type ConfirmReferralProps = {
   onNextStep: () => void;
@@ -8,7 +10,25 @@ type ConfirmReferralProps = {
 };
 
 const ConfirmReferral = ({ onNextStep, linkRefCode }: ConfirmReferralProps) => {
-  const isWrongCode = linkRefCode.length < 5;
+  const [isValidCode, setIsValidCode] = useState(true);
+
+  const handleCheckReferralCode = async (code: string) => {
+    try {
+      const response = await checkReferralCode(code);
+      if (response) {
+        setIsValidCode(response?.valid);
+      }
+    } catch (error) {
+      console.error("Error checking referral code:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (linkRefCode) {
+      handleCheckReferralCode(linkRefCode);
+    }
+  }, [linkRefCode]);
+
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 pt-4">
       <img
@@ -28,7 +48,7 @@ const ConfirmReferral = ({ onNextStep, linkRefCode }: ConfirmReferralProps) => {
         <span className="font-medium font-mono">{linkRefCode}</span>
       </div>
       <div className="flex items-center justify-start mb-6 mt-2 w-full">
-        {!isWrongCode ? (
+        {isValidCode ? (
           <>
             <Check size={12} className="text-green-500 mr-2" />
             <span className="text-gray-400 text-sm">
@@ -51,7 +71,7 @@ const ConfirmReferral = ({ onNextStep, linkRefCode }: ConfirmReferralProps) => {
         className="w-full font-semibold text-sm h-[44px] rounded-lg"
       >
         <Wallet className="inline !w-6 !h-6" />
-        {!isWrongCode ? "Connect Wallet" : "Connect Without Code"}
+        {isValidCode ? "Connect Wallet" : "Connect Without Code"}
       </Button>
     </div>
   );
