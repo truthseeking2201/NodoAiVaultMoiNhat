@@ -39,6 +39,6 @@ export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export const roundDownBalance = (balance: number) => {
-  return Math.floor(balance * 100) / 100;
+export const roundDownBalance = (balance: number, decimal: number = 4) => {
+  return Math.floor(balance * 10 ** decimal) / 10 ** decimal;
 };
