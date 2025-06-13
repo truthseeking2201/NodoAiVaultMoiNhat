@@ -8,7 +8,7 @@ import {
 import { X } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { CASES, STEPS, WALLET_STATUS } from "@/components/wallet/constants.ts";
+import { CASES, STEPS } from "@/components/wallet/constants.ts";
 import WalletList from "@/components/wallet/WalletList";
 import InputReferral from "@/components/wallet/InputReferral";
 import ExistingUser from "@/components/wallet/ExistingUser";
@@ -24,6 +24,7 @@ import {
 import { useWallet } from "@/hooks/useWallet";
 import { useToast } from "@/hooks/use-toast";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
+import { IconCheckSuccess } from "@/components/ui/icon-check-success";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { useSearchParams } from "react-router-dom";
 
@@ -93,19 +94,23 @@ export function ConnectWalletModal({
 
   const handleCheckExistingUser = async (successAddress: string) => {
     try {
-      const response = await checkUserExists({
+      const existingUser = await checkUserExists({
         wallet_address: successAddress,
       });
-      console.log("Checking existing user response:", response);
-      if (response?.data) {
-        setUser(response.data);
-        setUserType(CASES.EXISTING_USER);
-        setStep(STEPS.EXISTING_USER_CONFIRM);
+      console.log(
+        "Checking existing user response inside handleCheckExistingUser:",
+        existingUser
+      );
+      if (existingUser?.success) {
+        const response = await getWalletDetail(successAddress);
+        if (response?.data) {
+          setUser(response.data);
+          setUserType(CASES.EXISTING_USER);
+          setStep(STEPS.EXISTING_USER_CONFIRM);
+        }
       }
-      return response;
     } catch (error) {
-      setUserType(CASES.NEW_USER_WITHOUT_REFERRAL);
-      setStep(STEPS.INPUT_REFERRAL);
+      console.error("Error checking existing user:", error);
     }
   };
 
@@ -116,7 +121,7 @@ export function ConnectWalletModal({
     try {
       console.log("Linking referral code:", referralCode);
       await checkSubscribeWalletDetails(successAddress);
-
+      console.log("current step linking referral code:", step);
       const res = await linkReferralCode({
         user_wallet: successAddress,
         invite_code: referralCode,
@@ -167,17 +172,22 @@ export function ConnectWalletModal({
       return;
     }
     if (isFirstConnect) {
+      // check new user and signed up user
       const walletDetail = await handleGetWalletDetail(successAddress);
-      if (walletDetail.data) {
-        toast({
-          title: "You are already signed up!",
-          variant: "success",
-          duration: 5000,
-        });
-      } else {
+      console.log("Wallet detail:", walletDetail);
+      if (walletDetail.invite_code) {
+        // If the user is already signed up
+        // toast({
+        //   title: "You are already signed up!",
+        //   variant: "success",
+        //   duration: 5000,
+        //   icon: <IconCheckSuccess />,
+        // });
+        handleClosePopup();
+      } else if (!walletDetail.data) {
+        // If wallet detail is null, it means the first connect
+        console.log("First connect, checking for existing user...");
         await handleCheckExistingUser(successAddress).then(() => {
-          console.log("Checked successAddress:", successAddress);
-          console.log("Checked existing user:", user);
           handleUserTypeStep(chosenStep, successAddress);
         });
       }
@@ -208,6 +218,7 @@ export function ConnectWalletModal({
   const handleNewUserWithoutReferral = async (currentStep: string) => {
     switch (currentStep) {
       case STEPS.CONNECT_WALLET:
+        console.log("Connecting wallet for new user without referral");
         setStep(STEPS.INPUT_REFERRAL);
         break;
       case STEPS.INPUT_REFERRAL:
@@ -235,9 +246,11 @@ export function ConnectWalletModal({
         setStep(STEPS.CONNECT_WALLET);
         break;
       case STEPS.CONNECT_WALLET:
+        console.log("Connecting wallet for new user with referral");
         await handleLinkReferralCode(linkRefCode, successAddress);
         break;
       case STEPS.REFERRAL_SUCCESS:
+        console.log("Referral success step");
         handleClosePopup();
         break;
       default:
