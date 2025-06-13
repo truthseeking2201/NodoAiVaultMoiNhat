@@ -34,7 +34,7 @@ const VaultPools = () => {
   return (
     <div>
       <div className="font-md font-semibold">Select a Vault</div>
-      <div className="grid grid-cols-3 gap-6 mt-[10px] w-full">
+      <div className="grid grid-cols-3 gap-6 mt-[10px]">
         {pools.map((pool, index) => (
           <VaultCard pool={pool} key={index} />
         ))}
