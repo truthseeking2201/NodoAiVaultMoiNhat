@@ -71,6 +71,19 @@ export function ConnectWalletModal({
     }
   }, []);
 
+  const handleCheckExistingUser = async (successAddress: string) => {
+    try {
+      const walletDetail = await getWalletDetail(successAddress);
+      if (walletDetail?.invite_code?.nodo_account) {
+        setUser(walletDetail);
+        setUserType(CASES.EXISTING_USER);
+        setIsCheckedExistingUser(true);
+      }
+    } catch (error) {
+      console.error("Error checking existing user:", error);
+    }
+  };
+
   const handleConfirmExistingUser = async (successAddress: string) => {
     try {
       await sleep(1000);
@@ -110,7 +123,8 @@ export function ConnectWalletModal({
   };
 
   const handleUserTypeStep = (chosenStep?: string, successAddress?: string) => {
-    switch (userType) {
+    const tempType = userType;
+    switch (tempType) {
       case CASES.EXISTING_USER:
         handleExistingUser(step, chosenStep);
         break;
@@ -135,6 +149,7 @@ export function ConnectWalletModal({
       return;
     }
     if (isFirstConnect) {
+      await sleep(3000); // wait for wallet connection
       const walletDetail = await handleGetWalletDetail(successAddress);
       if (walletDetail.invite_code) {
         // If the user is already signed up
@@ -144,20 +159,12 @@ export function ConnectWalletModal({
         //   duration: 5000,
         //   icon: <IconCheckSuccess />,
         // });
+
         handleClosePopup();
       } else if (!walletDetail.data) {
         // If wallet detail is null, it means the first connect
         if (!isCheckedExistingUser) {
-          await sleep(2000); // wait for wallet connection
-          const walletDetailAfterSubscribe = await handleGetWalletDetail(
-            successAddress
-          );
-
-          if (walletDetailAfterSubscribe.invite_code.nodo_account) {
-            setUser(walletDetailAfterSubscribe);
-            setUserType(CASES.EXISTING_USER);
-            setIsCheckedExistingUser(true);
-          }
+          await handleCheckExistingUser(successAddress);
         }
         handleUserTypeStep(chosenStep, successAddress);
       }
@@ -232,6 +239,13 @@ export function ConnectWalletModal({
       setLinkRefCode(linkRefCode);
     }
   }, [open]);
+
+  useEffect(() => {
+    // handle userType doesnot change
+    if (userType === CASES.EXISTING_USER) {
+      handleNextStep();
+    }
+  }, [userType]);
 
   return (
     <Dialog
