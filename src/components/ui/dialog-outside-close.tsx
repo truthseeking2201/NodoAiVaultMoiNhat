@@ -16,6 +16,7 @@ interface DialogOutsideCloseProps {
   children: ReactNode;
   maxWidth?: number;
   className?: string;
+  classNameDialog?: string;
   name?: string;
   hideIconClose?: boolean;
 }
@@ -24,8 +25,8 @@ export function DialogOutsideClose({
   open = false,
   onOpenChange = () => {},
   children,
-  maxWidth = 764,
   className = "",
+  classNameDialog = "",
   name = "dialog-outside-close",
   hideIconClose = false,
 }: DialogOutsideCloseProps) {
@@ -38,7 +39,10 @@ export function DialogOutsideClose({
       onOpenChange={onOpenChange}
     >
       <DialogContent
-        className={`md:max-w-[${maxWidth}px] !rounded-xl !p-0 bg-transparent border-none gap-0 max-h-[100vh] !pb-4 !pt-4`}
+        className={cn(
+          `!rounded-xl !p-0 bg-transparent border-none gap-0 max-h-[100vh] !pb-4 !pt-4`,
+          classNameDialog
+        )}
         hideIconClose
       >
         {hideIconClose !== true && (
