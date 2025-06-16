@@ -2,7 +2,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useCollateralLPRate } from "@/hooks/useDepositVault";
 import { useGetCoinBalance } from "@/hooks/useMyAssets";
 import { useDepositVaultStore } from "@/hooks/useStore";
-import { cn } from "@/lib/utils";
+import { cn, formatAmount } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
 import { VaultPool } from ".";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
@@ -20,7 +20,13 @@ const APR = ({ text, is2xl }: { text: string; is2xl: boolean }) => {
   );
 };
 
-const VaultCard = ({ pool }: { pool: VaultPool }) => {
+const VaultCard = ({
+  pool,
+  className,
+}: {
+  pool: VaultPool;
+  className?: string;
+}) => {
   const { is2xl } = useBreakpoint();
   const exchange = EXCHANGE_CODES_MAP[pool.exchange_id];
 
@@ -39,7 +45,8 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
       className={cn(
         "bg-white rounded-xl shadow p-[2px] cursor-pointer group transition-transform duration-300",
         !pool.isLive && "opacity-50",
-        !isSelected && "hover:scale-[1.04]"
+        !isSelected && "hover:scale-[1.04]",
+        className
       )}
       style={{
         background: isSelected
@@ -71,18 +78,15 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
       >
         <div className="flex items-start justify-center mb-5 gap-2">
           <div className="flex items-center justify-center">
-            {pool.tokens.map((token, index) => (
-              <span
-                key={token}
-                className={cn(
-                  "text-white font-bold",
-                  is2xl ? "text-md" : "text-sm"
-                )}
-              >
-                {token}
-                {index < pool.tokens.length - 1 ? " - " : ""}
-              </span>
-            ))}
+            <span
+              className={cn(
+                "text-white font-bold",
+                is2xl ? "text-md" : "text-sm",
+                "truncate max-w-[120px]"
+              )}
+            >
+              {pool.vault_name}
+            </span>
           </div>
           <div
             className={cn(
@@ -161,7 +165,7 @@ const VaultCard = ({ pool }: { pool: VaultPool }) => {
           <span className={"text-white/50"}>Your holding: </span>
           <span className="text-white font-bold">
             {userHolding && userHolding !== 0
-              ? `${formatCurrency(userHolding)}` // Assuming 9 decimals, adjust as needed
+              ? `${formatAmount({ amount: userHolding })}` // Assuming 9 decimals, adjust as needed
               : "--"}
           </span>
         </div>
