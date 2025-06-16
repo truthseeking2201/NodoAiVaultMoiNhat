@@ -38,7 +38,7 @@ const VaultPools = () => {
       <div className="font-md font-semibold">Select a Vault</div>
       <div
         className={cn(
-          "gap-6 mt-[10px] auto-rows-fr",
+          "gap-4 mt-[10px] auto-rows-fr",
           pools.length === 2 && "grid grid-cols-2",
           // 3 items: 3 columns
           pools.length === 3 && "grid grid-cols-3",
