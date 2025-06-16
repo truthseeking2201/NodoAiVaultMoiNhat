@@ -10,7 +10,7 @@ type SuccessReferralProps = {
 
 const SuccessReferral = ({ linkRefCode, onNextStep }: SuccessReferralProps) => {
   return (
-    <div className="flex flex-col items-center justify-center h-full px-6 pt-4 w-full">
+    <div className="flex flex-col items-center justify-center h-full px-6 pt-4 w-full pb-6">
       <img src={ReferralSuccessIcon} alt="Success" className="w-16 h-16 mb-6" />
       <div className="text-xl font-bold text-white mb-2 text-center">
         Referral Applied Successfully!
@@ -29,7 +29,7 @@ const SuccessReferral = ({ linkRefCode, onNextStep }: SuccessReferralProps) => {
         className="w-full font-semibold text-lg h-[44px] rounded-lg"
       >
         Continue to App
-        <ArrowRight size={16} className="ml-2 inline" />
+        <ArrowRight size={16} className="inline" />
       </Button>
     </div>
   );
