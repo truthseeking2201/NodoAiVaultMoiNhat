@@ -297,7 +297,7 @@ export function ConnectWalletModal({
             }
           />
         )}
-        <DialogDescription>
+        <div>
           {step === STEPS.EXISTING_USER_CONFIRM && (
             <ExistingUser onNextStep={handleNextStep} user={user} />
           )}
@@ -322,7 +322,7 @@ export function ConnectWalletModal({
               linkRefCode={linkRefCode}
             />
           )}
-        </DialogDescription>
+        </div>
       </DialogContent>
     </Dialog>
   );
