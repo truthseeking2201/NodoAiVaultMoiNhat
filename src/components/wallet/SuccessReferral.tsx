@@ -29,7 +29,7 @@ const SuccessReferral = ({ linkRefCode, onNextStep }: SuccessReferralProps) => {
         className="w-full font-semibold text-lg h-[44px] rounded-lg"
       >
         Continue to App
-        <ArrowRight size={16} className="ml-2 inline" />
+        <ArrowRight size={16} className="inline" />
       </Button>
     </div>
   );
