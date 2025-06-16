@@ -4,17 +4,20 @@ import { MyReferralsDashboardModal } from "./MyReferralsDashboardModal";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
+import { useCurrentAccount } from "@mysten/dapp-kit";
+import { sleep } from "@/lib/utils";
 interface MyReferralsCardProps {
   className?: string;
 }
 
 export function MyReferralsCard({ className = "" }: MyReferralsCardProps) {
   const [openModalRefer, setOpenModalRefer] = useState(false);
+  const currentAccount = useCurrentAccount();
 
   /**
    * HOOKS
    */
-  const { walletDetails } = useWhitelistWallet();
+  const { walletDetails, refetch } = useWhitelistWallet();
   const dataRefer = useMemo(() => {
     const referCode = walletDetails?.invite_code?.code;
     const href = window.location?.origin;
@@ -24,6 +27,16 @@ export function MyReferralsCard({ className = "" }: MyReferralsCardProps) {
       referTotal: walletDetails?.total_referrals,
     };
   }, [walletDetails]);
+
+  useEffect(() => {
+    const reloadData = async () => {
+      if (currentAccount) {
+        await sleep(3000); // Wait for 3 second before refetching
+        refetch();
+      }
+    };
+    reloadData();
+  }, [currentAccount]);
 
   /**
    * RENDER
@@ -35,14 +48,8 @@ export function MyReferralsCard({ className = "" }: MyReferralsCardProps) {
           className={`bg-black/80 backdrop-blur-sm rounded-xl p-6 mb-6 font-sans text-left flex flex-col gap-4 ${className}`}
         >
           <h3 className="text-white text-xl font-bold mb-0">My Referrals</h3>
-          <ItemRow
-            title="Your Referral Code"
-            value={dataRefer.referCode}
-          />
-          <ItemRow
-            title="Your Referral Link"
-            value={dataRefer.referLinkCode}
-          />
+          <ItemRow title="Your Referral Code" value={dataRefer.referCode} />
+          <ItemRow title="Your Referral Link" value={dataRefer.referLinkCode} />
           <div>
             <div className="text-075 text-sm mb-2">Total Referrals</div>
             <div className="text-white text-2xl font-bold font-mono">
