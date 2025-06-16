@@ -2,17 +2,22 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useCollateralLPRate } from "@/hooks/useDepositVault";
 import { useGetCoinBalance } from "@/hooks/useMyAssets";
 import { useDepositVaultStore } from "@/hooks/useStore";
-import { cn, formatAmount } from "@/lib/utils";
-import { formatCurrency } from "@/utils/currency";
+import { cn, formatAmount, formatPercentage } from "@/lib/utils";
 import { VaultPool } from ".";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 
-const APR = ({ text, is2xl }: { text: string; is2xl: boolean }) => {
+const APR = ({
+  text,
+  isLargeScreen,
+}: {
+  text: string;
+  isLargeScreen: boolean;
+}) => {
   return (
     <div
       className={cn(
         "font-sans font-bold bg-gradient-to-r from-[#9DEBFF] to-[#00FF5E] bg-clip-text text-transparent",
-        is2xl ? "text-[22px]" : "text-[16px]"
+        isLargeScreen ? "text-[22px]" : "text-[16px]"
       )}
     >
       {text}
@@ -27,7 +32,8 @@ const VaultCard = ({
   pool: VaultPool;
   className?: string;
 }) => {
-  const { is2xl } = useBreakpoint();
+  const { windowWidth } = useBreakpoint();
+  const isLargeScreen = windowWidth >= 1440;
   const exchange = EXCHANGE_CODES_MAP[pool.exchange_id];
 
   const { balance: ndlpAmount } = useGetCoinBalance(
@@ -71,7 +77,7 @@ const VaultCard = ({
       }}
     >
       <div
-        className={cn("flex flex-col rounded-xl h-full", is2xl ? "p-4" : "p-2")}
+        className={cn("flex flex-col rounded-xl h-full p-4")}
         style={{
           background: "linear-gradient(135deg, #212121 22.8%, #060606 90.81%)",
         }}
@@ -81,7 +87,7 @@ const VaultCard = ({
             <span
               className={cn(
                 "text-white font-bold",
-                is2xl ? "text-md" : "text-sm",
+                isLargeScreen ? "text-md" : "text-sm",
                 "truncate max-w-[120px]"
               )}
             >
@@ -93,7 +99,7 @@ const VaultCard = ({
               "font-medium text-xs bg-[#44EF8B] rounded-xl",
               pool.isLive ? "bg-[#44EF8B]" : "bg-[#FFFFFF33]",
               pool.isLive ? "text-black" : "text-white",
-              is2xl
+              isLargeScreen
                 ? "text-[12px] px-2 pt-1 pb-0.5"
                 : "text-[10px] px-1.5 py-0.5"
             )}
@@ -110,7 +116,7 @@ const VaultCard = ({
                 alt={token}
                 className={cn(
                   "mr-2 rounded-full",
-                  is2xl ? "w-[36px] h-[36px]" : "w-[24px] h-[24px]",
+                  isLargeScreen ? "w-[36px] h-[36px]" : "w-[24px] h-[24px]",
                   index > 0 && "ml-[-15px]"
                 )}
               />
@@ -118,38 +124,40 @@ const VaultCard = ({
         </div>
         <div className="mt-5 flex items-center justify-between">
           <span
-            className={cn(" text-white/50", is2xl ? "text-base" : "text-xs")}
+            className={cn(
+              " text-white/50",
+              isLargeScreen ? "text-base" : "text-xs"
+            )}
           >
             APR:
           </span>
           <APR
-            is2xl={is2xl}
+            isLargeScreen={isLargeScreen}
             text={
               pool.APR && pool.APR !== 0
-                ? `${formatCurrency(
-                    pool.APR < 0 ? 0 : pool.APR,
-                    0,
-                    0,
-                    2,
-                    "decimal"
-                  )}%`
+                ? `${formatPercentage(pool.APR < 0 ? 0 : pool.APR)}`
                 : "--"
             }
           />
         </div>
         <div className="flex items-center justify-between mt-2">
-          <div className={cn("text-white/50", is2xl ? "text-base" : "text-xs")}>
+          <div
+            className={cn(
+              "text-white/50",
+              isLargeScreen ? "text-base" : "text-xs"
+            )}
+          >
             DEX
           </div>
           <div className="flex gap-1 items-center text-base">
             <img
               src={`/dexs/${exchange?.code}.png`}
-              className={cn(is2xl ? "h-[16px]" : "h-[12px]")}
+              className={cn(isLargeScreen ? "h-[16px]" : "h-[12px]")}
             />
             <div
               className={cn(
                 "font-sans font-bold",
-                is2xl ? "text-base" : "text-xs"
+                isLargeScreen ? "text-base" : "text-xs"
               )}
             >
               {exchange.name}
@@ -159,7 +167,7 @@ const VaultCard = ({
         <div
           className={cn(
             "mt-4 bg-[#FFFFFF26] py-[6px] px-2 rounded-[6px] w-full  flex items-center justify-between",
-            is2xl ? "text-sm" : "text-xs"
+            isLargeScreen ? "text-sm" : "text-xs"
           )}
         >
           <span className={"text-white/50"}>Your holding: </span>
