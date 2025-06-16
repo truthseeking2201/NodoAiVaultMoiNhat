@@ -5,4 +5,6 @@ export type WalletDetails = {
   wallet_address: string;
   timestamp: string;
   metadata: string | null;
+  invite_code?: any;
+  total_referrals?: number;
 };

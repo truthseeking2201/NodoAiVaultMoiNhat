@@ -15,6 +15,7 @@ import { useWhiteListModalStore } from "@/hooks/useStore";
 import { useWallet } from "@/hooks/useWallet";
 import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { truncateBetween } from "@/utils/truncate";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { ArrowUpRight } from "lucide-react";
 
@@ -24,9 +25,20 @@ export default function NodoAIVaults() {
   const { isWhitelisted, isLoading: isCheckingWhitelist } =
     useWhitelistWallet();
   const account = useCurrentAccount();
-  const { isConnectWalletDialogOpen } = useWallet();
+  const { isConnectWalletDialogOpen, openConnectWalletDialog } = useWallet();
 
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const referralCode = searchParams.get("invite-ref");
   const { setIsOpen } = useWhiteListModalStore();
+
+  useEffect(() => {
+    if (referralCode) {
+      window.sessionStorage.setItem("ref-code", referralCode);
+      navigate("/");
+      openConnectWalletDialog();
+    }
+  }, [referralCode]);
 
   useEffect(() => {
     if (window.localStorage.getItem("is-whitelist-address") === null) {
