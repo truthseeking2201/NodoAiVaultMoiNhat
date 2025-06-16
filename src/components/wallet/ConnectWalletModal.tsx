@@ -232,8 +232,9 @@ export function ConnectWalletModal({
   };
 
   useEffect(() => {
-    const linkRefCode = searchParams.get("invite-ref");
+    let linkRefCode = searchParams.get("invite-ref");
     if (linkRefCode) {
+      linkRefCode = linkRefCode.replace(/ /g, "+");
       setUserType(CASES.NEW_USER_WITH_REFERRAL);
       setStep(STEPS.REFERRAL_CONFIRM);
       setLinkRefCode(linkRefCode);
