@@ -19,6 +19,13 @@ http.interceptors.request.use(
   (config) => {
     const method = config.method.toUpperCase();
     const url = new URL(config.url, config.baseURL);
+    if (config.params && typeof config.params === "object") {
+      Object.entries(config.params).forEach(([key, value]) => {
+        if (["string", "number", "boolean"].includes(typeof value)) {
+          url.searchParams.set(key, String(value));
+        }
+      });
+    }
     const fullPath = url.pathname + (url.search ? url.search : "");
 
     const timestamp = Math.floor(Date.now() / 1000).toString();

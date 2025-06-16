@@ -19,11 +19,14 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "border border-brand-500 text-brand-500 hover:bg-brand-50/10",
         link: "text-brand-500 underline-offset-4 hover:underline",
+        icon: "bg-transparent border-0 hover:opacity-80",
         primary: "bg-ai text-[#0A080E] font-semibold hover:bg-ai/85",
         "pagination-default":
           "bg-black text-white/70 font-semibold hover:bg-black/70",
         "link-orange":
           "bg-gradient-to-r from-[#F2BB89] via-[#F3D2B5] to-[#F5C8A4] bg-clip-text text-transparent hover:opacity-80",
+        'ai-outline':
+          "border border-ai bg-transparent text-ai hover:bg-ai/5 hover:border-ai/50 font-semibold",
       },
       size: {
         default: "h-11 px-4 py-2",
@@ -31,7 +34,8 @@ const buttonVariants = cva(
         lg: "h-12 rounded-xl px-8 text-[16px]",
         xl: "h-14 rounded-xl px-16 text-lg",
         icon: "h-10 w-10 rounded-lg",
-        pagination: "h-[32px] w-[32px] rounded-lg",
+        pagination: "h-[32px] w-[32px] rounded-lg border border-white/10",
+        none: "p-0",
       },
     },
     defaultVariants: {
