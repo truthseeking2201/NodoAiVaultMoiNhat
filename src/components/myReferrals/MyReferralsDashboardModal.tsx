@@ -193,10 +193,6 @@ export function MyReferralsDashboardModal({
     [paramsRefer]
   );
 
-  const debouncedChange = useMemo(() => {
-    return debounce(initData, 1000);
-  }, [initData]);
-
   /**
    * LIFECYCLES
    */
@@ -212,12 +208,9 @@ export function MyReferralsDashboardModal({
 
   useEffect(() => {
     if (count.current) {
-      debouncedChange(paramsRefer);
-      return () => {
-        debouncedChange.cancel();
-      };
+      initData();
     }
-  }, [paramsRefer, debouncedChange, count]);
+  }, [paramsRefer, count]);
 
   /**
    * RENDER
