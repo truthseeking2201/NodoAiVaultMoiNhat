@@ -149,7 +149,6 @@ export function ConnectWalletModal({
       return;
     }
     if (isFirstConnect) {
-      await sleep(3000); // wait for wallet connection
       const walletDetail = await handleGetWalletDetail(successAddress);
       if (walletDetail.invite_code) {
         // If the user is already signed up
@@ -164,6 +163,7 @@ export function ConnectWalletModal({
       } else if (!walletDetail.data) {
         // If wallet detail is null, it means the first connect
         if (!isCheckedExistingUser) {
+          await sleep(2000); // wait for wallet connection
           await handleCheckExistingUser(successAddress);
         }
         handleUserTypeStep(chosenStep, successAddress);
