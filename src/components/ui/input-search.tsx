@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ChangeEvent, useCallback, useState } from "react";
+import { ChangeEvent, useCallback, useState, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,15 +15,21 @@ const InputSearch = React.forwardRef<
     (e: ChangeEvent<HTMLInputElement>) => {
       const inputValue = e.target.value;
       setValue(inputValue);
-      onChange(inputValue);
     },
     [onChange]
   );
 
   const handleClear = useCallback(() => {
-    onChange("");
     setValue("");
   }, [onChange]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      onChange(value);
+    }, 1000); // wait 1000ms after user stops typing
+
+    return () => clearTimeout(handler); // clear timeout if value changes before 1000ms
+  }, [value]);
 
   return (
     <div className="relative">
