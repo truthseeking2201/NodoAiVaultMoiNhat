@@ -36,7 +36,7 @@ export function ItemRow({
           <span className="text-lg font-medium text-white block truncate pr-8 font-mono">
             {value}
           </span>
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-white rounded-lg group-hover:bg-white/20 w-8 h-8 flex items-center justify-center flex-shrink-0">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-white rounded-lg group-hover:bg-white/80 w-8 h-8 flex items-center justify-center flex-shrink-0">
             <Copy className="w-4 h-4 text-black" />
           </div>
         </button>
