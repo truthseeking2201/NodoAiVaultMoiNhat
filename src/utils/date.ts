@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 export const formatDate12Hours = (dateString: string) => {
   const date = new Date(dateString);
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -10,4 +12,9 @@ export const formatDate12Hours = (dateString: string) => {
   hour = hour === 0 ? 12 : hour;
   return `${month}/${day}/${year} ${hour}:${minute} ${ampm}`;
   //Example return value: 05/14/2025 5:24 PM
+};
+
+export const formatDate = (dateStr: string, formatStr = "MM/dd/yyyy") => {
+  if (!dateStr) return;
+  return format(new Date(dateStr), formatStr);
 };
