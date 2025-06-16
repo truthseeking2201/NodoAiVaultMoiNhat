@@ -84,6 +84,8 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
       } else {
         setFieldError();
       }
+    } else {
+      setFieldError();
     }
   };
 

@@ -30,7 +30,7 @@ const ConfirmReferral = ({ onNextStep, linkRefCode }: ConfirmReferralProps) => {
   }, [linkRefCode]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full px-6 pt-4">
+    <div className="flex flex-col items-center justify-center h-full px-6 pt-4 pb-6">
       <img
         src={ReferralConfirmIcon}
         alt="Confirm Referral"
