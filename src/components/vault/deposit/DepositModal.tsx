@@ -157,7 +157,7 @@ const DepositModal = (props: DepositModalProps) => {
                 <div className="flex justify-between">
                   <span className="text-base text-[#9CA3AF]">APR</span>
                   <span className="font-mono text-lg text-white">
-                    {formatPercentage(apr || 0)}%
+                    {formatPercentage(apr || 0)}
                   </span>
                 </div>
 
