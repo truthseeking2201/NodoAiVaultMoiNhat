@@ -227,8 +227,9 @@ export function MyReferralsDashboardModal({
       open={isOpen}
       onOpenChange={(isOpen) => !isOpen && onClose()}
       name="My Referral Dashboard"
+      classNameDialog="md:max-w-[764px]"
     >
-      <div className="grid gap-4">
+      <div className="grid gap-4 ">
         <div className="p-0 relative flex flex-row items-start justify-between flex-wrap">
           <div className="text-xl font-bold m-0">My Referral Dashboard</div>
 
