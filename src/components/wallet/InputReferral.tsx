@@ -88,7 +88,7 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full px-6 pt-4 w-full">
+    <div className="flex flex-col items-center justify-center h-full px-6 pt-4 w-full pb-6">
       <img
         src={errors.referralCode ? ExistingUserErrorIcon : ExistingUserIcon}
         alt="Existing User"
