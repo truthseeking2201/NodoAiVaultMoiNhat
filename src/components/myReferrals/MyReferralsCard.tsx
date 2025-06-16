@@ -32,7 +32,7 @@ export function MyReferralsCard({ className = "" }: MyReferralsCardProps) {
     const reloadData = async () => {
       if (currentAccount) {
         await sleep(3000); // Wait for 3 second before refetching
-        refetch();
+        await refetch();
       }
     };
     reloadData();
