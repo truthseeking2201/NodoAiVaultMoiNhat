@@ -64,7 +64,7 @@ export default function DepositVaultSection() {
   const collateralToken = useMemo(
     () =>
       assets.find((asset) => asset.coin_type === depositVault.collateral_token),
-    [assets]
+    [assets, depositVault.collateral_token]
   );
 
   const { setIsOpen: openWhiteListModal } = useWhiteListModalStore();
