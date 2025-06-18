@@ -26,6 +26,7 @@ export const formatAmount = ({
   let formatted = new Intl.NumberFormat(undefined, {
     style: "decimal",
     minimumFractionDigits: precision,
+    maximumFractionDigits: precision,
   }).format(amount);
 
   if (stripZero) {
@@ -39,6 +40,10 @@ export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export const roundDownBalance = (balance: number) => {
-  return Math.floor(balance * 100) / 100;
+export const roundDownBalance = (balance: number, decimal: number = 4) => {
+  return Math.floor(balance * 10 ** decimal) / 10 ** decimal;
+};
+
+export const formatPercentage = (value: number) => {
+  return formatAmount({ amount: value, precision: 2 }) + "%";
 };

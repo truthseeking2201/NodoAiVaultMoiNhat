@@ -30,6 +30,9 @@ export async function loadVaultData(
         const responseData = (await response.json()) as {
           data: DepositVaultConfig[];
         };
+        if (!responseData?.data) {
+          return await loadRealTimeData();
+        }
         staticVaultData = responseData.data.map((item) => {
           return { ...item, apr: 0 };
         });

@@ -33,7 +33,7 @@ async function generateVaultData() {
     const rawString = `${method}${fullPath}${bodyString}${timestamp}`;
     const signature = CryptoJS.HmacSHA256(
       rawString,
-      env.VITE_NODO_APP_URL_API_KEY_API_SECRET
+      env.VITE_NODO_APP_URL_API_KEY_API_SECRET?.toString()
     ).toString();
     const response = await axios.get(fullUrl, {
       headers: {
@@ -48,6 +48,7 @@ async function generateVaultData() {
   } catch (error) {
     console.error(`❌ Failed to fetch vault-data.json:`, error);
     // Don't fail the build, just warn
+    throw error;
   }
 }
 
@@ -66,11 +67,15 @@ export function viteSsgPlugin(): Plugin {
 
         // Write file to public folder
 
-        const response = await generateVaultData();
-        writeFileSync(publicPath, JSON.stringify({ ...response }, null, 2));
-        console.log(
-          `✅ Generated vault-data.json in public folder (development mode)`
-        );
+        try {
+          const response = await generateVaultData();
+          writeFileSync(publicPath, JSON.stringify({ ...response }, null, 2));
+          console.log(
+            `✅ Generated vault-data.json in public folder (development mode)`
+          );
+        } catch (error) {
+          console.error(`❌ Failed to fetch vault-data.json:`, error);
+        }
       }
     },
     async generateBundle(outputOptions, bundle) {
