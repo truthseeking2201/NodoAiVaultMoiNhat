@@ -11,7 +11,7 @@ import {
 import { Loader } from "@/components/ui/loader";
 import { useCurrentDepositVault } from "@/hooks";
 import { formatNumber } from "@/lib/number";
-import { formatAmount } from "@/lib/utils";
+import { formatAmount, formatPercentage } from "@/lib/utils";
 import { truncateBetween } from "@/utils/truncate";
 import { ExternalLink, X } from "lucide-react";
 
@@ -108,7 +108,7 @@ const DepositModal = (props: DepositModalProps) => {
               <div className="flex justify-between">
                 <span className="text-base text-[#9CA3AF]">APR</span>
                 <span className="font-mono text-lg text-white">
-                  {formatNumber(apr || 0)}%
+                  {formatPercentage(apr || 0)}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -157,7 +157,7 @@ const DepositModal = (props: DepositModalProps) => {
                 <div className="flex justify-between">
                   <span className="text-base text-[#9CA3AF]">APR</span>
                   <span className="font-mono text-lg text-white">
-                    {formatNumber(apr || 0)}%
+                    {formatPercentage(apr || 0)}
                   </span>
                 </div>
 
