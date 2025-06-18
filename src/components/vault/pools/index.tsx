@@ -13,6 +13,7 @@ export type VaultPool = {
   isSelected: boolean;
   exchange_id: number;
   vault_name: string;
+  isReady?: boolean;
 };
 
 const VaultPools = () => {
@@ -30,6 +31,7 @@ const VaultPools = () => {
       isSelected: vault.vault_id === currentVault.vault_id,
       exchange_id: vault.metadata.exchange_id,
       vault_name: vault.vault_name,
+      isReady: vault.ready,
     }));
   }, [depositVaults, currentVault]);
 

@@ -52,6 +52,7 @@ const VaultCard = ({
         "bg-white rounded-xl shadow p-[2px] cursor-pointer group transition-transform duration-300",
         !pool.isLive && "opacity-50",
         !isSelected && "hover:scale-[1.04]",
+        !pool.isReady && "pointer-events-none opacity-50",
         className
       )}
       style={{
@@ -71,7 +72,7 @@ const VaultCard = ({
         }
       }}
       onClick={() => {
-        if (pool.isLive) {
+        if (pool.isLive && pool.isReady) {
           setDepositVault(pool.vault_id);
         }
       }}
