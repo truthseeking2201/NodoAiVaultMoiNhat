@@ -23,7 +23,7 @@ import { formatNumber } from "@/lib/number";
 import { formatAmount } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { AlertCircle, ArrowRight } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import SuccessfulToast from "./SuccessfulToast";
 
 type DepositSuccessData = {
@@ -78,40 +78,37 @@ export default function DepositVaultSection() {
 
   const conversionRate = useCollateralLPRate(false, depositVault.vault_id);
 
-  const handleValidateDepositAmount = useCallback(
-    (value: string) => {
-      if (!value) {
-        setError("Please enter an amount.");
-        return;
-      }
+  const handleValidateDepositAmount = (value: string) => {
+    if (!value) {
+      setError("Please enter an amount.");
+      return;
+    }
 
-      if (value && Number(value) < MIN_DEPOSIT_AMOUNT) {
-        setError(
-          `Minimum amount is ${MIN_DEPOSIT_AMOUNT} ${collateralToken?.display_name}.`
-        );
-        return;
-      }
+    if (value && Number(value) < MIN_DEPOSIT_AMOUNT) {
+      setError(
+        `Minimum amount is ${MIN_DEPOSIT_AMOUNT} ${collateralToken?.display_name}.`
+      );
+      return;
+    }
 
-      if (value && Number(value) > Number(collateralToken?.balance)) {
-        setError("Not enough balance to deposit. Please top-up your wallet.");
-        return;
-      }
+    if (value && Number(value) > Number(collateralToken?.balance)) {
+      setError("Not enough balance to deposit. Please top-up your wallet.");
+      return;
+    }
 
-      setError("");
-    },
-    [collateralToken?.balance]
-  );
+    setError("");
+  };
 
-  const handleMaxAmount = useCallback(() => {
+  const handleMaxAmount = () => {
     handleValidateDepositAmount(collateralToken?.balance.toString() || "0");
     setDepositAmount(collateralToken?.balance.toString() || "0");
-  }, [collateralToken?.balance, handleValidateDepositAmount]);
+  };
 
-  const handleConnectWallet = useCallback(() => {
+  const handleConnectWallet = () => {
     openConnectWalletDialog();
-  }, [openConnectWalletDialog]);
+  };
 
-  const handleDeposit = useCallback(() => {
+  const handleDeposit = () => {
     if (!isWhitelisted) {
       openWhiteListModal(true);
       return;
@@ -123,13 +120,13 @@ export default function DepositVaultSection() {
     } else {
       handleConnectWallet();
     }
-  }, [isConnected, handleConnectWallet, isWhitelisted, openWhiteListModal]);
+  };
 
-  const handleCloseDepositModal = useCallback(() => {
+  const handleCloseDepositModal = () => {
     setIsDepositModalOpen(false);
-  }, []);
+  };
 
-  const handleSendRequestDeposit = useCallback(async () => {
+  const handleSendRequestDeposit = async () => {
     // TODO: Handle deposit request
     try {
       setLoading(true);
@@ -149,24 +146,21 @@ export default function DepositVaultSection() {
       console.error(error);
       setLoading(false);
     }
-  }, [depositAmount]);
+  };
 
-  const handleDepositSuccessCallback = useCallback(
-    (data) => {
-      const timeoutId = setTimeout(async () => {
-        setDepositSuccessData(data);
-        refreshBalance();
-        setLoading(false);
-        setDepositStep(2);
-        refetchDepositVaults();
-        refetchNdlpBalance();
-        clearTimeout(timeoutId);
-      }, 1000);
-    },
-    [refreshBalance, refetchDepositVaults, refetchNdlpBalance]
-  );
+  const handleDepositSuccessCallback = (data) => {
+    const timeoutId = setTimeout(async () => {
+      setDepositSuccessData(data);
+      refreshBalance();
+      setLoading(false);
+      setDepositStep(2);
+      refetchDepositVaults();
+      refetchNdlpBalance();
+      clearTimeout(timeoutId);
+    }, 1000);
+  };
 
-  const handleDone = useCallback(() => {
+  const handleDone = () => {
     setIsDepositModalOpen(false);
     setDepositStep(1);
     setDepositAmount("");
@@ -184,7 +178,7 @@ export default function DepositVaultSection() {
       variant: "success",
       hideClose: true,
     });
-  }, [toast, dismiss, depositAmount, ndlpAmountWillGet]);
+  };
 
   const disabledDeposit = useMemo(() => {
     if (!isConnected) return false;
