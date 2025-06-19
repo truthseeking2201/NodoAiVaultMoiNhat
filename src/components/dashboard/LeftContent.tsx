@@ -8,7 +8,7 @@ const LeftContent = () => {
 
   return (
     <div className="w-[252px] flex-shrink-0">
-      <div
+      {/* <div
         className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-4 flex items-center hover:bg-white/20 transition duration-300 ease-in-out cursor-pointer"
         onClick={() => {
           window.open(`https://app.nodo.xyz`, "_blank");
@@ -18,7 +18,7 @@ const LeftContent = () => {
         <div className="ml-2">
           <ArrowUpRight size={16} className="text-white" />
         </div>
-      </div>
+      </div> */}
 
       <div
         className="bg-white/10 backdrop-blur-sm rounded-xl p-4 flex items-center hover:bg-white/20 transition duration-300 ease-in-out cursor-pointer"
@@ -50,7 +50,9 @@ const LeftContent = () => {
               className="text-white inline"
             />
           </p>
-          <span className="text-md text-white/80 mt-2">First of its kind on</span>
+          <span className="text-md text-white/80 mt-2">
+            First of its kind on
+          </span>
           <div className="flex items-center gap-3 mt-1 mb-3">
             <img src={SUIIcon} width={36} height={36} />
             <span className="text-xl text-white font-medium">SUI</span>
