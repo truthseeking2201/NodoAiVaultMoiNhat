@@ -1,11 +1,10 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ItemRow } from "./ItemRow";
 import { MyReferralsDashboardModal } from "./MyReferralsDashboardModal";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { sleep } from "@/lib/utils";
 interface MyReferralsCardProps {
   className?: string;
 }
@@ -29,14 +28,14 @@ export function MyReferralsCard({ className = "" }: MyReferralsCardProps) {
   }, [walletDetails]);
 
   useEffect(() => {
-    const reloadData = async () => {
-      if (currentAccount) {
-        await sleep(3000); // Wait for 3 second before refetching
-        await refetch();
+    const handler = setTimeout(() => {
+      if (currentAccount && !walletDetails?.invite_code?.code) {
+        refetch();
       }
-    };
-    reloadData();
-  }, [currentAccount]);
+    }, 3000);
+
+    return () => clearTimeout(handler);
+  }, [currentAccount, walletDetails, refetch]);
 
   /**
    * RENDER
@@ -48,8 +47,14 @@ export function MyReferralsCard({ className = "" }: MyReferralsCardProps) {
           className={`bg-black/80 backdrop-blur-sm rounded-xl p-6 mb-6 font-sans text-left flex flex-col gap-4 ${className}`}
         >
           <h3 className="text-white text-xl font-bold mb-0">My Referrals</h3>
-          <ItemRow title="Your Referral Code" value={dataRefer.referCode} />
-          <ItemRow title="Your Referral Link" value={dataRefer.referLinkCode} />
+          <ItemRow
+            title="Your Referral Code"
+            value={dataRefer.referCode}
+          />
+          <ItemRow
+            title="Your Referral Link"
+            value={dataRefer.referLinkCode}
+          />
           <div>
             <div className="text-075 text-sm mb-2">Total Referrals</div>
             <div className="text-white text-2xl font-bold font-mono">

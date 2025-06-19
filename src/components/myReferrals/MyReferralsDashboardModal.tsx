@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { useToast } from "@/hooks/use-toast";
 import { DialogOutsideClose } from "@/components/ui/dialog-outside-close";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,6 @@ import { TableRender } from "@/components/ui/table-render";
 import { PaginationRender } from "@/components/ui/pagination-render";
 import { InputSearch } from "@/components/ui/input-search";
 import { getMyReferral } from "@/apis/wallet";
-import debounce from "lodash/debounce";
 import { truncateStringWithSeparator } from "@/utils/helpers";
 import { formatDate } from "@/utils/date";
 import { showFormatNumber } from "@/lib/number";
@@ -103,7 +101,6 @@ export function MyReferralsDashboardModal({
   const currentAccount = useCurrentAccount();
   const address = currentAccount?.address;
   const { toast } = useToast();
-  const { walletDetails, refetch: refetchWalletDetails } = useWhitelistWallet();
 
   /**
    * FUNCTION
@@ -122,6 +119,11 @@ export function MyReferralsDashboardModal({
   const initData = useCallback(async () => {
     setIsLoading(true);
     try {
+      if (!address) {
+        setListRefer([]);
+        return;
+      }
+
       const sortField = {
         dateSort: "TIMESTAMP",
         depositSort: "TOTAL_DEPOSIT",
@@ -147,18 +149,12 @@ export function MyReferralsDashboardModal({
       });
       setListRefer(data);
       setTotalRefer(response?.total || 0);
-
-      // check refetch
-      if (
-        Number(walletDetails?.total_referrals) !== Number(response?.total || 0)
-      ) {
-        refetchWalletDetails();
-      }
     } catch (error) {
       console.log(error);
+      setListRefer([]);
     }
     setIsLoading(false);
-  }, [address, paramsRefer, walletDetails, refetchWalletDetails]);
+  }, [address, paramsRefer]);
 
   const changeSort = useCallback(
     async (key) => {
@@ -201,16 +197,16 @@ export function MyReferralsDashboardModal({
       setTotalRefer(0);
       initData();
       count.current = address;
-    } else {
+    } else if (!isOpen) {
       count.current = "";
     }
-  }, [address, isOpen]);
+  }, [address, isOpen, initData]);
 
   useEffect(() => {
     if (count.current) {
       initData();
     }
-  }, [paramsRefer, count]);
+  }, [paramsRefer, initData]);
 
   /**
    * RENDER

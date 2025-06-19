@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import ClaimToken from "./ClaimToken";
 import WithdrawForm from "./WithdrawForm";
 
@@ -70,7 +70,8 @@ export default function WithdrawVaultSection() {
   /**
    * FUNCTION
    */
-  const initBalance = async () => {
+
+  const initBalance = useCallback(() => {
     try {
       const lpasset = assets.find(
         (asset) => asset.coin_type === lpData.lp_coin_type
@@ -85,7 +86,7 @@ export default function WithdrawVaultSection() {
     } catch (error) {
       setBalanceLp(0);
     }
-  };
+  }, [assets, lpData]);
 
   const initDataClaim = async () => {
     try {
@@ -96,6 +97,16 @@ export default function WithdrawVaultSection() {
       setDataClaim(null);
     }
   };
+
+  // const initDataClaim = useCallback(async () => {
+  //   try {
+  //     const res = await getLatestRequestClaim(address, lpData, configVault);
+  //     setDataClaim(res);
+  //     return res;
+  //   } catch (error) {
+  //     setDataClaim(null);
+  //   }
+  // }, [address, lpData, configVault, getLatestRequestClaim]);
 
   const onSuccessWithdraw = async () => {
     setLoading(true);
@@ -131,11 +142,12 @@ export default function WithdrawVaultSection() {
       setLoading(false);
     };
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, configVault]);
 
   useEffect(() => {
     initBalance();
-  }, [assets]);
+  }, [initBalance]);
 
   /**
    * RENDER

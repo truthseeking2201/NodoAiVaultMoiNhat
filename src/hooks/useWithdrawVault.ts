@@ -281,14 +281,13 @@ export const useWithdrawVault = () => {
  * @param configLp
  * @returns
  */
+const amountEstDefault = {
+  amount: 0,
+  receive: 0,
+  fee: 0,
+  rateFee: 0,
+};
 export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
-  const amountEstDefault = {
-    amount: 0,
-    receive: 0,
-    fee: 0,
-    rateFee: 0,
-  };
-
   const [amountEst, setAmountEst] = useState(amountEstDefault);
 
   const { vaultConfig } = useGetVaultConfig(configLp?.vault_id);
@@ -315,10 +314,11 @@ export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
     } catch (error) {
       setAmountEst(amountEstDefault);
     }
-  }, [configVault, amountLp]);
+  }, [configVault, amountLp, configLp]);
 
   useEffect(() => {
     getEstWithdraw();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [configVault, amountLp]);
 
   return {
