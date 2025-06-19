@@ -15,9 +15,14 @@ import { useCurrentAccount } from "@mysten/dapp-kit";
 type InputReferralProps = {
   onClose: () => void;
   onNextStep: (referralCode: string) => void;
+  isLoading?: boolean;
 };
 
-const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
+const InputReferral = ({
+  onClose,
+  onNextStep,
+  isLoading,
+}: InputReferralProps) => {
   const {
     control,
     handleSubmit,
@@ -135,9 +140,13 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
             size="lg"
             onClick={handleSkipReferral}
             className="w-full font-semibold text-sm h-[44px] rounded-lg"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoading}
           >
-            Skip
+            {isSubmitting || isLoading ? (
+              <Loader2 className="animate-spin mr-2" size={16} />
+            ) : (
+              "Skip"
+            )}
           </Button>
           <Button
             variant="primary"
@@ -146,7 +155,7 @@ const InputReferral = ({ onClose, onNextStep }: InputReferralProps) => {
             className="w-full font-semibold text-sm h-[44px] rounded-lg"
             disabled={isSubmitting}
           >
-            {isSubmitting ? (
+            {isSubmitting || isLoading ? (
               <Loader2 className="animate-spin mr-2" size={16} />
             ) : (
               <>
