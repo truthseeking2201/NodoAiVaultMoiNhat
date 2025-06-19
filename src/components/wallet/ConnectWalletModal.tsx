@@ -44,7 +44,7 @@ export function ConnectWalletModal({
   const [linkRefCode, setLinkRefCode] = useState<string | null>(null);
   const [isFirstConnect, setIsFirstConnect] = useState(true);
   const [isCheckedExistingUser, setIsCheckedExistingUser] = useState(false);
-  const { isConnected } = useWallet();
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const currentAccount = useCurrentAccount();
   const [searchParams] = useSearchParams();
@@ -54,25 +54,33 @@ export function ConnectWalletModal({
     window.sessionStorage.removeItem("ref-code");
   };
 
-  const handleGetWalletDetail = useCallback(async (successAddress: string) => {
-    try {
-      const res = await getWalletDetail(successAddress);
-      setIsFirstConnect(false);
-      return res;
-    } catch (error) {
-      console.error("Error checking old user:", error);
-      toast({
-        title: "Error",
-        description: "Failed to check if user is already signed up.",
-        variant: "error",
-        duration: 5000,
-        icon: <IconErrorToast />,
-      });
-    }
-  }, []);
+  const handleGetWalletDetail = useCallback(
+    async (successAddress: string) => {
+      try {
+        setIsLoading(true);
+        const res = await getWalletDetail(successAddress);
+        setIsFirstConnect(false);
+        return res;
+      } catch (error) {
+        console.error("Error checking old user:", error);
+        toast({
+          title: "Error",
+          description: "Failed to check if user is already signed up.",
+          variant: "error",
+          duration: 5000,
+          icon: <IconErrorToast />,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [toast]
+  );
 
   const handleCheckExistingUser = async (successAddress: string) => {
     try {
+      setIsLoading(true);
+      await sleep(2000);
       const walletDetail = await getWalletDetail(successAddress);
       if (walletDetail?.invite_code?.nodo_account) {
         setUser(walletDetail);
@@ -81,17 +89,22 @@ export function ConnectWalletModal({
       }
     } catch (error) {
       console.error("Error checking existing user:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleConfirmExistingUser = async (successAddress: string) => {
     try {
+      setIsLoading(true);
       await sleep(1000);
       await confirmUserExists({
         wallet_address: successAddress,
       });
     } catch (error) {
       console.error("Error checking existing user:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,6 +113,7 @@ export function ConnectWalletModal({
     successAddress?: string
   ) => {
     try {
+      setIsLoading(true);
       await sleep(1000); // waiting connect wallet
       const res = await linkReferralCode({
         user_wallet: successAddress,
@@ -119,6 +133,8 @@ export function ConnectWalletModal({
       }
     } catch (error) {
       console.error("Error linking referral code:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -142,7 +158,8 @@ export function ConnectWalletModal({
 
   const handleNextStep = async (
     chosenStep?: string,
-    successAddress?: string
+    successAddress?: string,
+    resetConnection?: () => void
   ) => {
     if (STEPS.REFERRAL_CONFIRM === step) {
       handleUserTypeStep(chosenStep, successAddress);
@@ -163,7 +180,6 @@ export function ConnectWalletModal({
       } else if (!walletDetail.data) {
         // If wallet detail is null, it means the first connect
         if (!isCheckedExistingUser) {
-          await sleep(2000); // wait for wallet connection
           await handleCheckExistingUser(successAddress);
         }
         handleUserTypeStep(chosenStep, successAddress);
@@ -171,6 +187,7 @@ export function ConnectWalletModal({
     } else {
       handleUserTypeStep(chosenStep, successAddress);
     }
+    resetConnection?.();
   };
 
   const handleExistingUser = (currentStep: string, chosenStep: string) => {
@@ -293,14 +310,18 @@ export function ConnectWalletModal({
         </DialogHeader>
         {step === STEPS.CONNECT_WALLET && (
           <WalletList
-            onConnectSuccess={(successAddress) =>
-              handleNextStep(null, successAddress)
+            onConnectSuccess={(successAddress, resetConnection) =>
+              handleNextStep(null, successAddress, resetConnection)
             }
           />
         )}
         <div>
           {step === STEPS.EXISTING_USER_CONFIRM && (
-            <ExistingUser onNextStep={handleNextStep} user={user} />
+            <ExistingUser
+              onNextStep={handleNextStep}
+              user={user}
+              isLoading={isLoading}
+            />
           )}
           {step === STEPS.INPUT_REFERRAL && (
             <InputReferral
@@ -309,6 +330,7 @@ export function ConnectWalletModal({
                 handleNextStep();
                 setLinkRefCode(referralCode);
               }}
+              isLoading={isLoading}
             />
           )}
           {step === STEPS.REFERRAL_SUCCESS && (

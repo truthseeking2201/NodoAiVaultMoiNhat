@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import ExistingUserIcon from "@/assets/images/wallet/existing-account.png";
 import DefaultAvatar from "@/assets/images/wallet/default-avatar.png";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import type { UserType } from "@/types/user";
 import { STEPS } from "@/components/wallet/constants.ts";
 import { useDisconnectWallet } from "@mysten/dapp-kit";
@@ -9,8 +9,9 @@ import { useDisconnectWallet } from "@mysten/dapp-kit";
 type ExistingUserProps = {
   onNextStep: (step?: string) => void;
   user: UserType;
+  isLoading?: boolean;
 };
-const ExistingUser = ({ onNextStep, user }: ExistingUserProps) => {
+const ExistingUser = ({ onNextStep, user, isLoading }: ExistingUserProps) => {
   const { mutate: disconnect } = useDisconnectWallet();
   const handleBackToConnectWallet = () => {
     disconnect();
@@ -62,8 +63,16 @@ const ExistingUser = ({ onNextStep, user }: ExistingUserProps) => {
           onClick={() => onNextStep()}
           className="w-full max-w-xs font-semibold text-sm h-[44px] rounded-lg"
         >
-          Confirm login
-          <ArrowRight size={16} />
+          {isLoading ? (
+            <div className="flex items-center justify-center">
+              <Loader2 size={16} className="animate-spin" />
+            </div>
+          ) : (
+            <>
+              Confirm login
+              <ArrowRight size={16} />
+            </>
+          )}
         </Button>
       </div>
     </div>
