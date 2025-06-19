@@ -1,6 +1,6 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useConnectWallet, useWallets } from "@mysten/dapp-kit";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WALLETS } from "@/components/wallet/constants";
@@ -13,7 +13,7 @@ type Wallet = {
 };
 
 type WalletListProps = {
-  onConnectSuccess: (address: string) => void;
+  onConnectSuccess: (address: string, resetConnection?: () => void) => void;
 };
 
 const WalletList = ({ onConnectSuccess }: WalletListProps) => {
@@ -45,8 +45,10 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
           { wallet: foundWallet },
           {
             onSuccess: (data) => {
-              setConnectedWallet(null);
-              onConnectSuccess(data.accounts[0].address);
+              onConnectSuccess(data.accounts[0].address, () => {
+                setConnectedWallet(null);
+                setIsConnecting(false);
+              });
             },
             onError: (error) => {
               console.error("Failed to connect wallet:", error);
@@ -66,8 +68,6 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
         `Failed to connect to ${selectedWallet.displayName} wallet. Please try again.`
       );
       setConnectedWallet(null);
-    } finally {
-      setIsConnecting(false);
     }
   };
 
