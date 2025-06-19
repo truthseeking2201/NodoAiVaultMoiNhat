@@ -11,17 +11,14 @@ const InputSearch = React.forwardRef<
 >(({ className, type, onChange, ...props }, ref) => {
   const [value, setValue] = useState<string>("");
 
-  const handleChangeValue = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const inputValue = e.target.value;
-      setValue(inputValue);
-    },
-    [onChange]
-  );
+  const handleChangeValue = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    setValue(inputValue);
+  }, []);
 
   const handleClear = useCallback(() => {
     setValue("");
-  }, [onChange]);
+  }, []);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -29,6 +26,7 @@ const InputSearch = React.forwardRef<
     }, 1000); // wait 1000ms after user stops typing
 
     return () => clearTimeout(handler); // clear timeout if value changes before 1000ms
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   return (

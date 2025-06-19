@@ -56,9 +56,15 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const BadgeCoolDown = (
-    <Badge variant="warning" className="w-full p-4 rounded-xl block">
+    <Badge
+      variant="warning"
+      className="w-full p-4 rounded-xl block"
+    >
       <div className="flex items-center mb-1">
-        <Clock4 size={14} className="flex-shrink-0" />{" "}
+        <Clock4
+          size={14}
+          className="flex-shrink-0"
+        />{" "}
         <span className="text-sm text-white font-medium	ml-1.5 capitalize">
           {timeCoolDown} Cooldown Period
         </span>
@@ -112,7 +118,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
 
   const handleMaxAmount = useCallback(() => {
     setValue("amount", balanceLp, { shouldValidate: true });
-  }, [balanceLp]);
+  }, [balanceLp, setValue]);
 
   const handleFormChange = useCallback((data: IFormInput) => {
     setForm(data);
@@ -135,7 +141,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
       });
     }
     setIsLoading(false);
-  }, [form, summary]);
+  }, [form, summary, lpData, onCloseModalConfirm, toast, withdraw]);
 
   /**
    * LIFECYCLES
@@ -145,7 +151,9 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
   }, [amountEst]);
 
   useEffect(() => {
-    const duration = Math.floor(configVault.lock_duration_ms / 1000);
+    const duration = Math.floor(
+      Number(configVault?.lock_duration_ms || 0) / 1000 / 1000
+    );
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration - hours * 3600) / 60);
     if (hours > 0) {
@@ -164,7 +172,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
 
     const subscription = watch(debouncedCb);
     return () => subscription.unsubscribe();
-  }, [watch]);
+  }, [watch, handleFormChange]);
 
   /**
    * RENDER
@@ -204,7 +212,10 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
         />
         {errors.amount?.type && (
           <div className="text-red-error text-sm mt-1 flex items-center">
-            <Info size={18} className="mr-2" />
+            <Info
+              size={18}
+              className="mr-2"
+            />
             {(() => {
               if (errors.amount?.type === "required") {
                 return "Please enter withdrawal amount";
@@ -223,12 +234,18 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
         <div className="mb-5 p-4 border border-white/15 rounded-xl mt-5">
           <div className="mb-3 text-gray-200 font-medium">Withdraw Summary</div>
           <hr className="w-full border-t border-white/15" />
-          <RowItem label="Amount" className="mt-3">
+          <RowItem
+            label="Amount"
+            className="mt-3"
+          >
             {summary?.amount
               ? `${showFormatNumber(summary.amount)} ${lpData.lp_symbol}`
               : "--"}
           </RowItem>
-          <RowItem label="To Receive" className="mt-3">
+          <RowItem
+            label="To Receive"
+            className="mt-3"
+          >
             {summary?.receive
               ? `${showFormatNumber(summary.receive)} ${lpData.token_symbol}`
               : "--"}

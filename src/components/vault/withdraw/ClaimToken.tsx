@@ -61,7 +61,7 @@ const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
       });
     }
     setIsLoading(false);
-  }, []);
+  }, [data, onSuccess, redeem, toast]);
 
   const renderer = ({ hours, minutes, seconds }) => {
     return (
