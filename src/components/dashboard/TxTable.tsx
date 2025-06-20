@@ -259,7 +259,7 @@ export function TxTable() {
                       key={i}
                       className="hover:bg-white/5 w-full h-[76.4px]"
                     >
-                      <TableCell>
+                      <TableCell className="pl-4">
                         <div className="h-5 bg-white/10 animate-pulse rounded"></div>
                       </TableCell>
                       <TableCell className="px-2">
@@ -274,7 +274,7 @@ export function TxTable() {
                       <TableCell className="px-2">
                         <div className="h-5 bg-white/10 animate-pulse rounded"></div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="pr-4">
                         <div className="h-5 bg-white/10 animate-pulse rounded"></div>
                       </TableCell>
                     </TableRow>
@@ -283,13 +283,13 @@ export function TxTable() {
                 paginatedTransactions.map((tx, index) => (
                   <TableRow
                     key={`transaction-${index}`}
-                    className="hover:bg-white/5 cursor-pointer h-[76.4px]"
+                    className="hover:bg-white/5 cursor-pointer h-[70px]"
                     onClick={() => handleSelectTransaction(tx)}
                   >
-                    <TableCell className="pr-0 pl-4">
+                    <TableCell className="pr-0 pl-4 pt-3">
                       <span
                         className={cn(
-                          "inline-block text-xs font-medium px-2 py-1 rounded-md mt-0.5",
+                          "inline-block text-xs font-medium px-2 py-1 rounded-md",
                           REMOVE_LIQUIDITY_TYPES.includes(tx.type) &&
                             "bg-[#F97316]/30 text-[#F97316]",
                           ADD_LIQUIDITY_TYPES.includes(tx.type) &&
@@ -317,18 +317,18 @@ export function TxTable() {
                         {renamingType(tx.type)}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-white/70 px-2 pt-2.5 ">
+                    <TableCell className="font-mono text-xs text-white/70 px-2 pt-2">
                       {formatDate12Hours(tx.time)}
                     </TableCell>
                     <TableCell
-                      className="font-mono text-xs text-white/70 flex items-center px-2 hover:text-white transition-colors hover:cursor-pointer"
+                      className="font-mono text-xs text-white/70 flex items-center px-2 hover:text-white transition-colors hover:cursor-pointer pt-4"
                       onClick={(e) => {
                         directToAddress(e, tx.vault_address);
                       }}
                     >
                       {truncateBetween(tx.vault_address, 4, 4)}
                     </TableCell>
-                    <TableCell className="px-2">
+                    <TableCell className="px-2 pt-1">
                       <div className="flex items-center justify-start gap-1">
                         <img
                           src={`/coins/${tx.tokens?.[0]?.token_symbol?.toLowerCase()}.png`}
@@ -368,10 +368,10 @@ export function TxTable() {
                         </div>
                       )}
                     </TableCell>
-                    <TableCell className="font-mono font-medium text-white px-2 flex">
+                    <TableCell className="font-mono font-medium text-white px-2 flex pt-3.5">
                       {formatCurrency(tx.value, 0, 0, 2, "currency", "USD")}
                     </TableCell>
-                    <TableCell className="text-right font-mono font-medium px-4">
+                    <TableCell className="text-right font-mono font-medium px-4 pt-4">
                       <Button
                         variant="link"
                         size="sm"
