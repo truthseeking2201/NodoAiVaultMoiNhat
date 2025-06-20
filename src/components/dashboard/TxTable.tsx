@@ -371,7 +371,7 @@ export function TxTable() {
                     <TableCell className="font-mono font-medium text-white px-2 flex">
                       {formatCurrency(tx.value, 0, 0, 2, "currency", "USD")}
                     </TableCell>
-                    <TableCell className="text-right font-mono font-medium">
+                    <TableCell className="text-right font-mono font-medium px-4">
                       <Button
                         variant="link"
                         size="sm"
