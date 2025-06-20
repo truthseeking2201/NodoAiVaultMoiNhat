@@ -230,13 +230,13 @@ export function TxTable() {
           <Table className="w-full">
             <TableHeader>
               <TableRow className="border-b border-white/10 hover:bg-transparent">
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[170px] ">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[165px] pl-4 pr-0">
                   Type
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[100px] px-4">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[100px] px-2">
                   Time
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[130px] px-4">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[130px] px-2">
                   Vault address
                 </TableHead>
                 <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[136px] px-2">
@@ -286,10 +286,10 @@ export function TxTable() {
                     className="hover:bg-white/5 cursor-pointer h-[76.4px]"
                     onClick={() => handleSelectTransaction(tx)}
                   >
-                    <TableCell>
+                    <TableCell className="pr-0 pl-4">
                       <span
                         className={cn(
-                          "inline-block text-xs font-medium px-2 py-1 rounded-md",
+                          "inline-block text-xs font-medium px-2 py-1 rounded-md mt-0.5",
                           REMOVE_LIQUIDITY_TYPES.includes(tx.type) &&
                             "bg-[#F97316]/30 text-[#F97316]",
                           ADD_LIQUIDITY_TYPES.includes(tx.type) &&
@@ -317,25 +317,23 @@ export function TxTable() {
                         {renamingType(tx.type)}
                       </span>
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-white/70 px-4">
+                    <TableCell className="font-mono text-xs text-white/70 px-2 pt-2.5 ">
                       {formatDate12Hours(tx.time)}
                     </TableCell>
-                    <TableCell className="font-mono text-xs text-white/70 flex items-center px-4">
-                      <span
-                        className="hover:text-white transition-colors mt-1.5 hover:cursor-pointer"
-                        onClick={(e) => {
-                          directToAddress(e, tx.vault_address);
-                        }}
-                      >
-                        {truncateBetween(tx.vault_address, 4, 4)}
-                      </span>
+                    <TableCell
+                      className="font-mono text-xs text-white/70 flex items-center px-2 hover:text-white transition-colors hover:cursor-pointer"
+                      onClick={(e) => {
+                        directToAddress(e, tx.vault_address);
+                      }}
+                    >
+                      {truncateBetween(tx.vault_address, 4, 4)}
                     </TableCell>
                     <TableCell className="px-2">
                       <div className="flex items-center justify-start gap-1">
                         <img
                           src={`/coins/${tx.tokens?.[0]?.token_symbol?.toLowerCase()}.png`}
                           alt={tx.tokens?.[0]?.token_name}
-                          className="w-4 h-4 inline mr-1"
+                          className="w-4 h-4 inline-flex items-center"
                         />
                         <span className="font-mono text-sm text-white">
                           {formatCurrency(
@@ -354,7 +352,7 @@ export function TxTable() {
                           <img
                             src={`/coins/${tx.tokens?.[1]?.token_symbol?.toLowerCase()}.png`}
                             alt={tx.tokens?.[1]?.token_name}
-                            className="w-4 h-4 inline mr-1"
+                            className="w-4 h-4 inline-flex items-center"
                           />
                           <span className="font-mono text-sm text-white">
                             {formatCurrency(
