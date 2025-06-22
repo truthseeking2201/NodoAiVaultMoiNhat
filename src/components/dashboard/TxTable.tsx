@@ -283,7 +283,7 @@ export function TxTable() {
                 paginatedTransactions.map((tx, index) => (
                   <TableRow
                     key={`transaction-${index}`}
-                    className="hover:bg-white/5 cursor-pointer h-[70px]"
+                    className="hover:bg-[#FFFFFF14] cursor-pointer h-[70px]"
                     onClick={() => handleSelectTransaction(tx)}
                   >
                     <TableCell className="pr-0 pl-4 pt-3">
@@ -371,7 +371,7 @@ export function TxTable() {
                     <TableCell className="font-mono font-medium text-white px-2 flex pt-3.5">
                       {formatCurrency(tx.value, 0, 0, 2, "currency", "USD")}
                     </TableCell>
-                    <TableCell className="text-right font-mono font-medium px-4 pt-4">
+                    <TableCell className="text-right font-mono font-medium pr-7 pt-4">
                       <Button
                         variant="link"
                         size="sm"
