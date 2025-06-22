@@ -328,7 +328,7 @@ export function TxTable() {
                     >
                       {truncateBetween(tx.vault_address, 4, 4)}
                     </TableCell>
-                    <TableCell className="px-2 pt-1">
+                    <TableCell className="p-2">
                       <div className="flex items-center justify-start gap-1">
                         <img
                           src={`/coins/${tx.tokens?.[0]?.token_symbol?.toLowerCase()}.png`}
