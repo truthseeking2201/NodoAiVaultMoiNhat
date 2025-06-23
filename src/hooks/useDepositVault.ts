@@ -43,7 +43,7 @@ export const useDepositVault = (vaultId: string) => {
       ]);
 
       tx.moveCall({
-        target: `${vaultConfig.metadata.package_id}::vault::deposit`,
+        target: `${vaultConfig.metadata.package_id}::${vaultConfig.vault_module}::deposit`,
         arguments: [
           tx.object(vaultConfig.metadata.vault_config_id),
           tx.object(vaultConfig.vault_id),

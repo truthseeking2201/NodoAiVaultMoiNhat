@@ -59,7 +59,7 @@ export default function DepositVaultSection() {
   const isConnected = !!currentAccount?.address;
 
   const { openConnectWalletDialog } = useWallet();
-  const { assets, refreshBalance } = useMyAssets();
+  const { refreshBalance } = useMyAssets();
   const { deposit } = useDepositVault(depositVault.vault_id);
   const { toast, dismiss } = useToast();
 
