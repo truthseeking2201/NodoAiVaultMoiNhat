@@ -12,6 +12,7 @@ import { Loader } from "@/components/ui/loader";
 import { useCurrentDepositVault } from "@/hooks";
 import { formatNumber } from "@/lib/number";
 import { formatAmount, formatPercentage } from "@/lib/utils";
+import { UserCoinAsset } from "@/types/coin.types";
 import { truncateBetween } from "@/utils/truncate";
 import { ExternalLink, X } from "lucide-react";
 
@@ -30,6 +31,7 @@ interface DepositModalProps {
   };
   loading: boolean;
   depositSuccessData: any;
+  collateralTokenName: string;
 }
 
 const DepositModal = (props: DepositModalProps) => {
@@ -42,6 +44,7 @@ const DepositModal = (props: DepositModalProps) => {
     confirmData,
     depositSuccessData,
     loading,
+    collateralTokenName,
   } = props;
 
   const { amount, apr, ndlp, conversionRate } = confirmData;
@@ -101,7 +104,7 @@ const DepositModal = (props: DepositModalProps) => {
               <div className="flex justify-between">
                 <span className="text-base text-[#9CA3AF]">Amount</span>
                 <span className="font-mono text-lg text-white">
-                  {formatNumber(amount || 0)} USDC
+                  {formatNumber(amount || 0)} {collateralTokenName}
                 </span>
               </div>
 
@@ -116,7 +119,8 @@ const DepositModal = (props: DepositModalProps) => {
                   Conversation Rate
                 </span>
                 <span className="font-mono text-lg text-white">
-                  1 USDC = {formatAmount({ amount: conversionRate })} NDLP
+                  1 {collateralTokenName} ={" "}
+                  {formatAmount({ amount: conversionRate })} NDLP
                 </span>
               </div>
               <div className="border-t border-white/15 my-2" />
@@ -144,14 +148,14 @@ const DepositModal = (props: DepositModalProps) => {
                 Deposit Successful!
               </h3>
               <div className="text-center text-base mb-2 text-[#9CA3AF]">
-                Your deposit of {formatNumber(amount || 0)} USDC to Nodo AI
-                Vault was successful.
+                Your deposit of {formatNumber(amount || 0)}{" "}
+                {collateralTokenName} to Nodo AI Vault was successful.
               </div>
               <div className="flex flex-col gap-2 p-4 border border-white/15 rounded-lg bg-white/5">
                 <div className="flex justify-between">
                   <span className="text-base text-[#9CA3AF]">Amount</span>
                   <span className="font-mono text-lg text-white">
-                    {formatNumber(amount || 0)} USDC
+                    {formatNumber(amount || 0)} {collateralTokenName}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -166,7 +170,8 @@ const DepositModal = (props: DepositModalProps) => {
                     Conversation Rate
                   </span>
                   <span className="font-mono text-lg text-white">
-                    1 USDC = {formatAmount({ amount: conversionRate })} NDLP
+                    1 {collateralTokenName} ={" "}
+                    {formatAmount({ amount: conversionRate })} NDLP
                   </span>
                 </div>
 

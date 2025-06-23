@@ -72,14 +72,6 @@ export function AppHeader() {
       read: false,
     },
     {
-      id: "4",
-      title: "Performance Alert",
-      message: "SUI-USDC vault has gained 3.2% in the last 24 hours.",
-      timestamp: new Date(Date.now() - 86400000).toISOString(),
-      type: "info",
-      read: true,
-    },
-    {
       id: "5",
       title: "AI Risk Assessment",
       message: "Market volatility detected. AI has adjusted risk parameters.",

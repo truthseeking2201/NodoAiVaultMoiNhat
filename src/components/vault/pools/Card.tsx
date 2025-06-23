@@ -51,8 +51,9 @@ const VaultCard = ({
       className={cn(
         "bg-white rounded-xl shadow p-[2px] cursor-pointer group transition-transform duration-300",
         !pool.isLive && "opacity-50",
-        !isSelected && "hover:scale-[1.04]",
+        !isSelected && "p-[1px] hover:scale-[1.04]",
         !pool.isReady && "pointer-events-none opacity-50",
+        isSelected && "p-[4px] ",
         className
       )}
       style={{

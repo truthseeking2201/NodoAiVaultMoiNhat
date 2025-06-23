@@ -113,8 +113,9 @@ export const useMyAssets = () => {
         const rawBalance = Number(coin.balance || "0");
         const balance = rawBalance / Math.pow(10, decimals);
 
-        const isCollateralToken =
-          coin.coinType === COIN_TYPES_CONFIG.collateral_token.id;
+        const collateralToken = COIN_TYPES_CONFIG.collateral_tokens.find(
+          (token) => token.id === coin.coinType
+        );
 
         const existingAsset = acc.find(
           (asset) => asset.coin_type === coin.coinType
@@ -128,12 +129,12 @@ export const useMyAssets = () => {
             coin_type: coin.coinType,
             balance,
             raw_balance: rawBalance,
-            image_url: isCollateralToken
-              ? COIN_TYPES_CONFIG.collateral_token.image_url
+            image_url: collateralToken
+              ? collateralToken.image_url
               : LP_TOKEN_CONFIG.image_url,
             decimals: decimals,
-            display_name: isCollateralToken
-              ? COIN_TYPES_CONFIG.collateral_token.display_name
+            display_name: collateralToken
+              ? collateralToken.display_name
               : LP_TOKEN_CONFIG.display_name,
             name: metadata?.name,
             symbol: metadata?.symbol,
@@ -201,7 +202,26 @@ export const useGetCoinBalance = (coinType: string, decimals: number) => {
     }, 0);
 
     return totalBalance;
-  }, [allCoins]);
+  }, [allCoins, decimals]);
 
   return { balance: userLPBalance, refetch };
+};
+
+export const useGetVaultTokenPair = () => {
+  const { assets } = useMyAssets();
+  const depositVault = useCurrentDepositVault();
+
+  const collateralToken = useMemo(
+    () =>
+      assets.find((asset) => asset.coin_type === depositVault.collateral_token),
+    [assets, depositVault.collateral_token]
+  );
+
+  const lpToken = useMemo(
+    () =>
+      assets.find((asset) => asset.coin_type === depositVault.vault_lp_token),
+    [assets, depositVault.vault_lp_token]
+  );
+
+  return { collateralToken, lpToken };
 };
