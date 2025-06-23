@@ -105,18 +105,18 @@ export const useDepositVault = (vaultId: string) => {
 
 export const useCalculateNDLPReturn = (
   amount: number,
-  usdcDecimals: number,
+  collateralTokenDecimals: number,
   ndlpDecimals: number,
   vaultId: string
 ) => {
   const { vaultConfig } = useGetVaultConfig(vaultId);
   const vaultRate = +vaultConfig?.rate || 1000000;
 
-  if (!amount || !vaultConfig || !usdcDecimals || !ndlpDecimals) {
+  if (!amount || !vaultConfig || !collateralTokenDecimals || !ndlpDecimals) {
     return 0;
   }
 
-  const rawAmount = amount * 10 ** usdcDecimals;
+  const rawAmount = amount * 10 ** collateralTokenDecimals;
   const fee = (rawAmount * +vaultConfig.deposit.fields.fee_bps) / 10000;
   const net_amount = rawAmount - fee;
 
@@ -139,7 +139,7 @@ export const useCollateralLPRate = (isReverse = false, vaultId: string) => {
 
   const rate = vaultRate / RATE_DENOMINATOR;
 
-  const usdcRate = isReverse ? rate : 1 / rate;
+  const collateralTokenRate = isReverse ? rate : 1 / rate;
 
-  return usdcRate;
+  return collateralTokenRate;
 };

@@ -1,4 +1,4 @@
-import { useCurrentDepositVault, useMyAssets } from "@/hooks";
+import { useCurrentDepositVault, useGetVaultTokenPair } from "@/hooks";
 
 import arrowDown from "@/assets/icons/arrow-down.svg";
 import { useCollateralLPRate } from "@/hooks/useDepositVault";
@@ -9,15 +9,12 @@ interface BalanceCardProps {
 }
 
 export function BalanceCard({ className = "" }: BalanceCardProps) {
-  const { assets } = useMyAssets();
   const currentVault = useCurrentDepositVault();
-  const ndlpAmount =
-    assets.find((asset) => asset.coin_type === currentVault.vault_lp_token)
-      ?.balance || 0;
-
+  const { collateralToken, lpToken } = useGetVaultTokenPair();
   const conversionRate = useCollateralLPRate(true, currentVault.vault_id);
-  const usdcEquivalent = ndlpAmount * conversionRate;
-  const usdcDollarRate = usdcEquivalent * 1;
+
+  const ndlpAmount = lpToken?.balance || 0;
+  const collateralTokenEquivalent = ndlpAmount * conversionRate;
 
   return (
     <div
@@ -32,7 +29,7 @@ export function BalanceCard({ className = "" }: BalanceCardProps) {
             {formatAmount({ amount: ndlpAmount })} NDLP
           </div>
           <div className="text-white/70 text-xs">
-            1 NDLP = {conversionRate} USDC
+            1 NDLP = {conversionRate} {collateralToken?.display_name}
           </div>
         </div>
       </div>
@@ -42,11 +39,16 @@ export function BalanceCard({ className = "" }: BalanceCardProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <img src="/coins/usdc.png" alt="USDC" className="w-10" />
+        <img
+          src={collateralToken?.image_url}
+          alt={collateralToken?.display_name}
+          className="w-10"
+        />
         <div>
           <div className="text-white/70 text-sm">You will get</div>
           <div className="text-white text-xl font-bold">
-            {formatAmount({ amount: usdcEquivalent })} USDC
+            {formatAmount({ amount: collateralTokenEquivalent })}{" "}
+            {collateralToken?.display_name}
           </div>
         </div>
       </div>
