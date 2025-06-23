@@ -67,7 +67,7 @@ export default function DepositVaultSection() {
 
   const { collateralToken } = useGetVaultTokenPair();
 
-  const collateralTokenName = collateralToken?.display_name || "x";
+  const collateralTokenName = collateralToken?.display_name || "";
 
   const { setIsOpen: openWhiteListModal } = useWhiteListModalStore();
 
