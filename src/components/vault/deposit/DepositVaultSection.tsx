@@ -197,7 +197,7 @@ export default function DepositVaultSection() {
   return (
     <div className="p-6 bg-black rounded-b-2xl rounded-tr-2xl">
       <div className="mb-6">
-        <div className="flex items-center gap-4 ml-6 mb-5">
+        {/* <div className="flex items-center gap-4 ml-6 mb-5">
           <div className="relative flex">
             <img
               src={`/coins/${token1?.toLowerCase()}.png`}
@@ -214,7 +214,7 @@ export default function DepositVaultSection() {
           <span className="font-sans text-white font-bold text-xl">
             {depositVault.pool.pool_name}
           </span>
-        </div>
+        </div> */}
         <div className="flex justify-between">
           <div className="font-body text-075 !font-medium">
             Amount ({collateralTokenName})
