@@ -145,7 +145,7 @@ export const useMyAssets = () => {
   return {
     assets: assets.map((asset) => ({
       ...asset,
-      balance: roundDownBalance(asset.balance),
+      balance: roundDownBalance(asset.balance, 2),
     })),
     isLoading: lpCoinObjectsLoading || collateralCoinObjectsLoading,
     refreshBalance,

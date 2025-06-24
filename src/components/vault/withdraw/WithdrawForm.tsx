@@ -157,9 +157,9 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration - hours * 3600) / 60);
     if (hours > 0) {
-      setTimeCoolDown(`${hours}-hour`);
+      setTimeCoolDown(`${hours}-hours`);
     } else if (minutes > 0) {
-      setTimeCoolDown(`${minutes}-minute`);
+      setTimeCoolDown(`${minutes}-minutes`);
     } else {
       setTimeCoolDown(`${duration}-seconds`);
     }
