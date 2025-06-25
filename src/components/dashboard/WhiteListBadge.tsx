@@ -18,7 +18,7 @@ const WhiteListBadge = () => {
       };
 
   return (
-    <ConditionRenderer when={account && !isLoading} fallback={null}>
+    <ConditionRenderer when={Boolean(account)} fallback={null}>
       <div
         style={{
           borderRadius: "90px",
