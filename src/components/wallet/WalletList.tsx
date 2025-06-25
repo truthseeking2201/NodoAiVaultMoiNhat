@@ -56,6 +56,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
                 `Failed to connect to ${selectedWallet.displayName} wallet. Please try again.`
               );
               setConnectedWallet(null);
+              setIsConnecting(false);
             },
           }
         );
@@ -68,6 +69,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
         `Failed to connect to ${selectedWallet.displayName} wallet. Please try again.`
       );
       setConnectedWallet(null);
+      setIsConnecting(false);
     }
   };
 
