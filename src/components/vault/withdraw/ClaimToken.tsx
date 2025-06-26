@@ -112,7 +112,7 @@ const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
         <RowItem
           label={
             data.isClaim
-              ? "Your withdrawal is ready to claim:"
+              ? "Your withdrawal is ready to claim"
               : "Withdrawal in progress"
           }
         >
