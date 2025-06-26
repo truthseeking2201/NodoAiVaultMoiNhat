@@ -1,38 +1,45 @@
 cache:
   paths:
-  - node_modules
+    - node_modules
 
 stages:
   - build
-  - deploy
 
 DEV-DEPLOY:
-  image: sleavely/node-awscli:20.x
+  image: node:20
   stage: build
   only:
     - develop
+  before_script:
+    - npm install -g yarn aws-cli
   script:
-    - yarn
+    - yarn install
     - yarn build:dev
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-dev --delete
     - aws cloudfront create-invalidation --distribution-id ${DEV_CLOUDFRONT_DIST} --paths "/*"
+
 UAT-DEPLOY:
-  image: sleavely/node-awscli:20.x
+  image: node:20
   stage: build
   only:
     - uat
+  before_script:
+    - npm install -g yarn aws-cli
   script:
-    - yarn
+    - yarn install
     - yarn build:uat
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-uat --delete
     - aws cloudfront create-invalidation --distribution-id E2FHC9LSU3PJ2T --paths "/*"
+
 PRD-DEPLOY:
-  image: sleavely/node-awscli:20.x
+  image: node:20
   stage: build
   only:
     - main
+  before_script:
+    - npm install -g yarn aws-cli
   script:
-    - yarn
+    - yarn install
     - yarn build:production
     - aws s3 sync dist/ s3://ai.nodo.xyz --delete
     - aws cloudfront create-invalidation --distribution-id ${PRD_CLOUDFRONT_DIST} --paths "/*"
