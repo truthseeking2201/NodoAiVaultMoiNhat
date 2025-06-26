@@ -6,40 +6,32 @@ stages:
   - build
 
 DEV-DEPLOY:
-  image: node:20
+  image: sleavely/node-awscli:20.x
   stage: build
   only:
     - develop
-  before_script:
-    - npm install -g yarn aws-cli
   script:
-    - yarn install
+    - yarn
     - yarn build:dev
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-dev --delete
     - aws cloudfront create-invalidation --distribution-id ${DEV_CLOUDFRONT_DIST} --paths "/*"
-
 UAT-DEPLOY:
-  image: node:20
+  image: sleavely/node-awscli:20.x
   stage: build
   only:
     - uat
-  before_script:
-    - npm install -g yarn aws-cli
   script:
-    - yarn install
+    - yarn
     - yarn build:uat
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-uat --delete
     - aws cloudfront create-invalidation --distribution-id E2FHC9LSU3PJ2T --paths "/*"
-
 PRD-DEPLOY:
-  image: node:20
+  image: sleavely/node-awscli:20.x
   stage: build
   only:
     - main
-  before_script:
-    - npm install -g yarn aws-cli
   script:
-    - yarn install
+    - yarn
     - yarn build:production
     - aws s3 sync dist/ s3://ai.nodo.xyz --delete
     - aws cloudfront create-invalidation --distribution-id ${PRD_CLOUDFRONT_DIST} --paths "/*"
