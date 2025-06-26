@@ -85,13 +85,11 @@ const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
     <div className="">
       <div className="flex items-center justify-between">
         <div className="font-body text-gray-400 !font-medium">
-          {data.isClaim
-            ? "Your withdrawal is ready to claim:"
-            : "Withdrawal in progress"}
+          You’ll Receive
         </div>
         <div className="flex items-center">
           <div className="font-mono font-bold text-2xl text-white">
-            {showFormatNumber(data.withdrawAmount)} {data.withdrawSymbol}
+            {`${showFormatNumber(data.receiveAmount)} ${data.receiveSymbol}`}
           </div>
           {!data.isClaim && (
             <div className="ml-6 flex items-center bg-amber-600/10 p-2.5 rounded-full">
@@ -111,8 +109,14 @@ const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
       </div>
 
       <div className=" p-4 border border-white/15 rounded-lg mt-5">
-        <RowItem label="You’ll  Receive">
-          {`${showFormatNumber(data.receiveAmount)} ${data.receiveSymbol}`}
+        <RowItem
+          label={
+            data.isClaim
+              ? "Your withdrawal is ready to claim:"
+              : "Withdrawal in progress"
+          }
+        >
+          {showFormatNumber(data.withdrawAmount)} {data.withdrawSymbol}
         </RowItem>
         <RowItem
           label="Withdraw Fee"
