@@ -230,22 +230,22 @@ export function TxTable() {
           <Table className="w-full">
             <TableHeader>
               <TableRow className="border-b border-white/10 hover:bg-transparent">
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[165px] pl-4 pr-0">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[150px] pl-4 pr-0">
                   Type
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[100px] px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[85px] px-2">
                   Time
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[130px] px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[115px] px-2">
                   Vault address
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[136px] px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[170px] px-2">
                   Tokens
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[72px] px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[100px] px-2">
                   Value
                 </TableHead>
-                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[90px] px-2">
+                <TableHead className="text-xs uppercase tracking-wide text-white/60 w-[80px] px-2">
                   Tx Hash
                 </TableHead>
               </TableRow>
