@@ -46,7 +46,6 @@ export const useGetDepositVaults = (lastAddress?: string) => {
     queryFn: () => loadVaultData(queryClient, "default"),
     staleTime: REFETCH_VAULT_DATA_INTERVAL,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
-    enabled: !lastAddress,
   });
 
   const addressQuery = useQuery({
