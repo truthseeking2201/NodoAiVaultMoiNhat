@@ -11,8 +11,8 @@ DEV-DEPLOY:
   only:
     - develop
   script:
-    - corepack enable
-    - corepack prepare yarn@stable --activate
+    - npm install -g yarn
+    - yarn install
     - yarn
     - yarn build:dev
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-dev --delete
