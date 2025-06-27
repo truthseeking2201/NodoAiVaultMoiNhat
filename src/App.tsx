@@ -15,17 +15,11 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import VersionChecker from "./components/shared/VersionChecker";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { useGetDepositVaults } from "./hooks";
+import Dashboard from "./pages/Dashboard";
 
 const NotFound = lazy(() =>
   import("./pages/NotFound").catch((e) => {
     console.error("Error loading NotFound:", e);
-    return { default: () => <PageFallback /> };
-  })
-);
-
-const Dashboard = lazy(() =>
-  import("./pages/Dashboard").catch((e) => {
-    console.error("Error loading Dashboard:", e);
     return { default: () => <PageFallback /> };
   })
 );
