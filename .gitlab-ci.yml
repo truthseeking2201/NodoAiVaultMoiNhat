@@ -16,7 +16,7 @@ DEV-DEPLOY:
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-dev --delete
     - aws cloudfront create-invalidation --distribution-id ${DEV_CLOUDFRONT_DIST} --paths "/*"
   tags:
-    - nodo-runner-docker  
+    - nodo-dev-aws-runner
 UAT-DEPLOY:
   image: sleavely/node-awscli:20.x
   stage: build
