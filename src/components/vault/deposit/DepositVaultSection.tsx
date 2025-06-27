@@ -163,6 +163,7 @@ export default function DepositVaultSection() {
   };
 
   const handleDone = () => {
+    setDepositSuccessData(null);
     setIsDepositModalOpen(false);
     setDepositStep(1);
     setDepositAmount("");
