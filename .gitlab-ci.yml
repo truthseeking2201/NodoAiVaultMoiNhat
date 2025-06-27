@@ -27,6 +27,8 @@ UAT-DEPLOY:
     - yarn build:uat
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-uat --delete
     - aws cloudfront create-invalidation --distribution-id E2FHC9LSU3PJ2T --paths "/*"
+  tags:
+    - nodo-docker-runner  
 PRD-DEPLOY:
   image: sleavely/node-awscli:20.x
   stage: build
@@ -37,3 +39,5 @@ PRD-DEPLOY:
     - yarn build:production
     - aws s3 sync dist/ s3://ai.nodo.xyz --delete
     - aws cloudfront create-invalidation --distribution-id ${PRD_CLOUDFRONT_DIST} --paths "/*"
+  tags:
+    - nodo-docker-runner  
