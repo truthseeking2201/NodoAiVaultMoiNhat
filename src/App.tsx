@@ -25,7 +25,12 @@ const NotFound = lazy(() =>
 );
 
 const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
-  const { isLoading, data, error } = useGetDepositVaults();
+  const walletConnectionInfo = JSON.parse(
+    localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
+  );
+  const lastAddress = walletConnectionInfo?.state?.lastConnectedAccountAddress;
+  const { isLoading, error, data } = useGetDepositVaults(lastAddress);
+
   if (isLoading || !data) {
     return <PageFallback />;
   }

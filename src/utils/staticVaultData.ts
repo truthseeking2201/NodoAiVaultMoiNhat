@@ -4,14 +4,14 @@ import { QueryClient } from "@tanstack/react-query";
 
 // Cache for the loaded static data
 let staticVaultData: DepositVaultConfig[];
-let hasLoadStaticData = false;
+const hasLoadStaticData = {};
 /**
  * Load vault data from static JSON file (generated at build time)
  * Falls back to API call if static data is not available
  */
 
-async function loadRealTimeData() {
-  return getDepositVaults().then((res: any) => {
+async function loadRealTimeData(accountAddress?: string) {
+  return getDepositVaults(accountAddress).then((res: any) => {
     const latestVaults = res.map((item) => {
       return { ...item, ready: true };
     });
@@ -20,10 +20,11 @@ async function loadRealTimeData() {
 }
 
 export async function loadVaultData(
-  queryClient: QueryClient
+  queryClient: QueryClient,
+  accountAddress?: string
 ): Promise<DepositVaultConfig[]> {
   try {
-    if (!hasLoadStaticData) {
+    if (!hasLoadStaticData[accountAddress]) {
       // Try to load static data first
       const response = await fetch("/vault-data.json");
       if (response.ok) {
@@ -31,26 +32,29 @@ export async function loadVaultData(
           data: DepositVaultConfig[];
         };
         if (!responseData?.data) {
-          return await loadRealTimeData();
+          return await loadRealTimeData(accountAddress);
         }
         staticVaultData = responseData.data.map((item) => {
           return { ...item, apr: 0 };
         });
       }
 
-      loadRealTimeData().then((latestVaults) => {
-        queryClient.setQueryData(["deposit-vaults-data"], latestVaults);
+      loadRealTimeData(accountAddress).then((latestVaults) => {
+        queryClient.setQueryData(
+          ["deposit-vaults-data", accountAddress],
+          latestVaults
+        );
       });
     }
   } catch (error) {
     console.warn("⚠️ Static vault data not found, using real time data");
   }
 
-  if (hasLoadStaticData) {
-    staticVaultData = await loadRealTimeData();
+  if (hasLoadStaticData[accountAddress]) {
+    staticVaultData = await loadRealTimeData(accountAddress);
   }
 
-  hasLoadStaticData = true;
+  hasLoadStaticData[accountAddress] = true;
 
   return staticVaultData;
 }
