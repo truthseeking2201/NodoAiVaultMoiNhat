@@ -12,7 +12,7 @@ DEV-DEPLOY:
     - develop
   script:
     - yarn install
-    - yarn
+   # - yarn
     - yarn build:dev
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-dev --delete
     - aws cloudfront create-invalidation --distribution-id ${DEV_CLOUDFRONT_DIST} --paths "/*"
