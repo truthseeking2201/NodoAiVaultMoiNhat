@@ -38,6 +38,10 @@ export const getVaultsActivities = (payload: any) => {
   }
 };
 
-export const getDepositVaults = () => {
-  return httpNodo.get(`${NODO_URL}/data-management/vaults`);
+export const getDepositVaults = (accountAddress?: string) => {
+  let url = `${NODO_URL}/data-management/vaults`;
+  if (accountAddress && accountAddress !== "default") {
+    url += `?wallet_address=${accountAddress}`;
+  }
+  return httpNodo.get(url);
 };

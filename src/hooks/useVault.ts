@@ -1,14 +1,13 @@
-import { getDepositVaults } from "@/apis/vault";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { DepositVaultConfig, VaultConfig } from "@/types/vault-config.types";
-import { useSuiClientQuery } from "@mysten/dapp-kit";
+import { loadVaultData } from "@/utils/staticVaultData";
+import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
 import {
   useQuery,
   useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
 import { useDepositVaultStore } from "./useStore";
-import { loadVaultData } from "@/utils/staticVaultData";
 
 export const useGetVaultConfig = (vaultId: string) => {
   const { data, isLoading, refetch } = useSuiClientQuery(
@@ -37,15 +36,27 @@ export const useGetVaultConfig = (vaultId: string) => {
   };
 };
 
-export const useGetDepositVaults = () => {
+export const useGetDepositVaults = (lastAddress?: string) => {
   const queryClient = useQueryClient();
+  const account = useCurrentAccount();
+  const address = account?.address || lastAddress;
 
-  return useQuery({
-    queryKey: ["deposit-vaults-data"],
-    queryFn: () => loadVaultData(queryClient),
+  const defaultQuery = useQuery({
+    queryKey: ["deposit-vaults-data", "default"],
+    queryFn: () => loadVaultData(queryClient, "default"),
     staleTime: REFETCH_VAULT_DATA_INTERVAL,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
+  });
+
+  const addressQuery = useQuery({
+    queryKey: ["deposit-vaults-data", address],
+    queryFn: () => loadVaultData(queryClient, address),
+    staleTime: REFETCH_VAULT_DATA_INTERVAL,
+    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
+    enabled: !!address,
   }) as UseQueryResult<DepositVaultConfig[], Error>;
+
+  return address && !!addressQuery?.data ? addressQuery : defaultQuery;
 };
 
 export const useGetDepositVaultById = (vaultId?: string) => {

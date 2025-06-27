@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ClaimToken from "./ClaimToken";
 import WithdrawForm from "./WithdrawForm";
 
 import {
   useCurrentDepositVault,
   useGetDepositVaults,
+  useGetVaultTokenPair,
   useMyAssets,
   useWallet,
 } from "@/hooks";
@@ -18,9 +19,7 @@ import {
 import { getBalanceAmountForInput, showFormatNumber } from "@/lib/number";
 import { sleep } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-
-import ConditionRenderer from "@/components/shared/ConditionRenderer";
-import { COIN_TYPES_CONFIG, LP_TOKEN_CONFIG } from "@/config/coin-config";
+import { LP_TOKEN_CONFIG } from "@/config/coin-config";
 import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import DataClaimType from "@/types/data-claim.types.d";
 
@@ -33,6 +32,7 @@ export default function WithdrawVaultSection() {
   const [ready, setReady] = useState(false);
   const currentDepositVault = useCurrentDepositVault();
   const { refetch: refetchDepositVaults } = useGetDepositVaults();
+  const { collateralToken } = useGetVaultTokenPair();
 
   const lpData = useMemo(() => {
     const { metadata } = currentDepositVault;
@@ -51,9 +51,9 @@ export default function WithdrawVaultSection() {
       token_coin_type: currentDepositVault.collateral_token,
       token_symbol: currentDepositVault.collateral_token_symbol,
       token_decimals: currentDepositVault.collateral_token_decimals,
-      token_image: COIN_TYPES_CONFIG.collateral_token.image_url,
+      token_image: collateralToken?.image_url,
     };
-  }, [currentDepositVault]);
+  }, [currentDepositVault, collateralToken]);
 
   /**
    * HOOKS
@@ -167,10 +167,7 @@ export default function WithdrawVaultSection() {
               className="w-full font-semibold text-lg"
             >
               <span>Connect Wallet</span>
-              <ArrowRight
-                size={16}
-                className="ml-2"
-              />
+              <ArrowRight size={16} className="ml-2" />
             </Button>
           </div>
         )}

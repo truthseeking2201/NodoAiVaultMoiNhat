@@ -15,6 +15,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import VersionChecker from "./components/shared/VersionChecker";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { useGetDepositVaults } from "./hooks";
+import Dashboard from "./pages/Dashboard";
 
 const NotFound = lazy(() =>
   import("./pages/NotFound").catch((e) => {
@@ -23,15 +24,13 @@ const NotFound = lazy(() =>
   })
 );
 
-const Dashboard = lazy(() =>
-  import("./pages/Dashboard").catch((e) => {
-    console.error("Error loading Dashboard:", e);
-    return { default: () => <PageFallback /> };
-  })
-);
-
 const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
-  const { isLoading, data, error } = useGetDepositVaults();
+  const walletConnectionInfo = JSON.parse(
+    localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
+  );
+  const lastAddress = walletConnectionInfo?.state?.lastConnectedAccountAddress;
+  const { isLoading, error, data } = useGetDepositVaults(lastAddress);
+
   if (isLoading || !data) {
     return <PageFallback />;
   }

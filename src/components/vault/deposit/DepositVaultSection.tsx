@@ -16,7 +16,11 @@ import {
   useCollateralLPRate,
   useDepositVault,
 } from "@/hooks/useDepositVault";
-import { useGetCoinBalance, useMyAssets } from "@/hooks/useMyAssets";
+import {
+  useGetCoinBalance,
+  useGetVaultTokenPair,
+  useMyAssets,
+} from "@/hooks/useMyAssets";
 import { useWallet } from "@/hooks/useWallet";
 import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
 import { formatNumber } from "@/lib/number";
@@ -55,17 +59,15 @@ export default function DepositVaultSection() {
   const isConnected = !!currentAccount?.address;
 
   const { openConnectWalletDialog } = useWallet();
-  const { assets, refreshBalance } = useMyAssets();
+  const { refreshBalance } = useMyAssets();
   const { deposit } = useDepositVault(depositVault.vault_id);
   const { toast, dismiss } = useToast();
 
   const { isWhitelisted } = useWhitelistWallet();
 
-  const collateralToken = useMemo(
-    () =>
-      assets.find((asset) => asset.coin_type === depositVault.collateral_token),
-    [assets, depositVault.collateral_token]
-  );
+  const { collateralToken } = useGetVaultTokenPair();
+
+  const collateralTokenName = collateralToken?.display_name || "";
 
   const { setIsOpen: openWhiteListModal } = useWhiteListModalStore();
 
@@ -169,9 +171,11 @@ export default function DepositVaultSection() {
       description: (
         <SuccessfulToast
           title="Deposit successful!"
-          content={`${depositAmount} USDC deposited — ${formatAmount({
-            amount: +ndlpAmountWillGet || 0,
-          })} NDLP minted to your account. Check your wallet for Tx details`}
+          content={`${depositAmount} ${collateralTokenName} deposited — ${formatAmount(
+            {
+              amount: +ndlpAmountWillGet || 0,
+            }
+          )} NDLP minted to your account. Check your wallet for Tx details`}
           closeToast={() => dismiss()}
         />
       ),
@@ -186,16 +190,42 @@ export default function DepositVaultSection() {
     return !!error || !depositAmount;
   }, [isConnected, error, depositAmount, depositVault.ready]);
 
+  const poolName = depositVault.pool.pool_name;
+  const token1 = poolName.split("-")[0];
+  const token2 = poolName.split("-")[1];
+
   return (
     <div className="p-6 bg-black rounded-b-2xl rounded-tr-2xl">
       <div className="mb-6">
+        {/* <div className="flex items-center gap-4 ml-6 mb-5">
+          <div className="relative flex">
+            <img
+              src={`/coins/${token1?.toLowerCase()}.png`}
+              alt="deep"
+              className=" absolute right-[18px] z-0"
+            />
+            <img
+              src={`/coins/${token2?.toLowerCase()}.png`}
+              alt="deep"
+              className="w-6 h-6 z-10"
+            />
+          </div>
+
+          <span className="font-sans text-white font-bold text-xl">
+            {depositVault.pool.pool_name}
+          </span>
+        </div> */}
         <div className="flex justify-between">
-          <div className="font-body text-075 !font-medium">Amount (USDC)</div>
+          <div className="font-body text-075 !font-medium">
+            Amount ({collateralTokenName})
+          </div>
           <div className="font-body text-075">
             Balance:{" "}
             <span className="font-mono text-text-primary">
               {isConnected
-                ? `${formatNumber(collateralToken?.balance || 0)} USDC`
+                ? `${formatNumber(
+                    collateralToken?.balance || 0
+                  )} ${collateralTokenName}`
                 : "--"}
             </span>
           </div>
@@ -230,7 +260,9 @@ export default function DepositVaultSection() {
         <hr className="w-full border-t border-white/15" />
         <RowItem label="Conversion Rate" className="mt-3">
           {conversionRate
-            ? `1 USDC = ${formatAmount({ amount: conversionRate })} NDLP`
+            ? `1 ${collateralTokenName} = ${formatAmount({
+                amount: conversionRate,
+              })} NDLP`
             : "Unable to fetch conversion rate. Please try again later."}
         </RowItem>
 
@@ -281,6 +313,7 @@ export default function DepositVaultSection() {
         }}
         depositSuccessData={depositSuccessData}
         loading={loading}
+        collateralTokenName={collateralTokenName}
       />
     </div>
   );
