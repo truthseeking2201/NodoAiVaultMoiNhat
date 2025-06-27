@@ -11,9 +11,7 @@ DEV-DEPLOY:
   only:
     - develop
   script:
-    - corepack enable
-    - corepack prepare yarn@stable --activate
-    - yarn install --immutable
+    - yarn install
     - yarn build:dev
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-dev --delete
     - aws cloudfront create-invalidation --distribution-id ${DEV_CLOUDFRONT_DIST} --paths "/*"
