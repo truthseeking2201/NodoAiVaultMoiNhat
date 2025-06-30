@@ -1,6 +1,6 @@
+import { getDepositVaults } from "@/apis";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { DepositVaultConfig, VaultConfig } from "@/types/vault-config.types";
-import { loadVaultData } from "@/utils/staticVaultData";
 import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
 import {
   useQuery,
@@ -8,6 +8,8 @@ import {
   UseQueryResult,
 } from "@tanstack/react-query";
 import { useDepositVaultStore } from "./useStore";
+import { useEffect, useState } from "react";
+import { sleep } from "@/lib/utils";
 
 export const useGetVaultConfig = (vaultId: string) => {
   const { data, isLoading, refetch } = useSuiClientQuery(
@@ -37,26 +39,33 @@ export const useGetVaultConfig = (vaultId: string) => {
 };
 
 export const useGetDepositVaults = (lastAddress?: string) => {
-  const queryClient = useQueryClient();
   const account = useCurrentAccount();
   const address = account?.address || lastAddress;
-
-  const defaultQuery = useQuery({
-    queryKey: ["deposit-vaults-data", "default"],
-    queryFn: () => loadVaultData(queryClient, "default"),
-    staleTime: REFETCH_VAULT_DATA_INTERVAL,
-    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
-  });
+  const [enabledDefaultQuery, setEnabledDefaultQuery] = useState(!address);
 
   const addressQuery = useQuery({
     queryKey: ["deposit-vaults-data", address],
-    queryFn: () => loadVaultData(queryClient, address),
+    queryFn: () => getDepositVaults(address),
     staleTime: REFETCH_VAULT_DATA_INTERVAL,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
     enabled: !!address,
   }) as UseQueryResult<DepositVaultConfig[], Error>;
 
-  return address && !!addressQuery?.data ? addressQuery : defaultQuery;
+  const defaultQuery = useQuery({
+    queryKey: ["deposit-vaults-data", "default"],
+    queryFn: () => getDepositVaults(),
+    staleTime: REFETCH_VAULT_DATA_INTERVAL,
+    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
+    enabled: enabledDefaultQuery,
+  });
+
+  useEffect(() => {
+    if (addressQuery.data) {
+      sleep(1000).then(() => setEnabledDefaultQuery(true));
+    }
+  }, [addressQuery.data, address]);
+
+  return address && addressQuery.data ? addressQuery : defaultQuery;
 };
 
 export const useGetDepositVaultById = (vaultId?: string) => {
