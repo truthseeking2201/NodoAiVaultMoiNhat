@@ -1,3 +1,4 @@
+import { DepositVaultConfig } from "@/types/vault-config.types";
 import http from "@/utils/http";
 import httpNodo from "@/utils/httpNodo";
 
@@ -43,5 +44,5 @@ export const getDepositVaults = (accountAddress?: string) => {
   if (accountAddress && accountAddress !== "default") {
     url += `?wallet_address=${accountAddress}`;
   }
-  return httpNodo.get(url);
+  return httpNodo.get(url) as Promise<DepositVaultConfig[]>;
 };
