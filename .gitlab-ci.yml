@@ -41,5 +41,3 @@ PRD-DEPLOY:
     - aws cloudfront create-invalidation --distribution-id ${PRD_CLOUDFRONT_DIST} --paths "/*"
   tags:
     - nodo-docker-runner  
-
-#####
