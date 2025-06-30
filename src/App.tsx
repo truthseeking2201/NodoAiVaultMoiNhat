@@ -28,6 +28,7 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
   const walletConnectionInfo = JSON.parse(
     localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
   );
+  // tmp
   const lastAddress = walletConnectionInfo?.state?.lastConnectedAccountAddress;
   const { isLoading, error, data } = useGetDepositVaults(lastAddress);
 
