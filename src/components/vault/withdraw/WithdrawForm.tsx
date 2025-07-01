@@ -152,7 +152,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
 
   useEffect(() => {
     const duration = Math.floor(
-      Number(configVault?.lock_duration_ms || 0) / 1000 / 1000
+      Number(configVault?.lock_duration_ms || 0) / 1000
     );
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration - hours * 3600) / 60);
