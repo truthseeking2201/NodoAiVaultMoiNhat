@@ -187,9 +187,8 @@ export default function DepositVaultSection() {
 
   const disabledDeposit = useMemo(() => {
     if (!isConnected) return false;
-    if (!depositVault?.ready) return true;
     return !!error || !depositAmount;
-  }, [isConnected, error, depositAmount, depositVault.ready]);
+  }, [isConnected, error, depositAmount]);
 
   const poolName = depositVault.pool.pool_name;
   const token1 = poolName.split("-")[0];
