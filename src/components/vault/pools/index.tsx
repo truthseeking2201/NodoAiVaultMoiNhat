@@ -1,4 +1,8 @@
-import { useCurrentDepositVault, useGetDepositVaults } from "@/hooks";
+import {
+  useCurrentDepositVault,
+  useGetDepositVaults,
+  useWhitelistWallet,
+} from "@/hooks";
 import { cn } from "@/lib/utils";
 import { useMemo } from "react";
 import VaultCard from "./Card";
@@ -13,11 +17,13 @@ export type VaultPool = {
   isSelected: boolean;
   exchange_id: number;
   vault_name: string;
+  show_dex?: boolean;
 };
 
 const VaultPools = () => {
   const { data: depositVaults } = useGetDepositVaults();
   const currentVault = useCurrentDepositVault();
+  const { isWhitelisted, isLoading } = useWhitelistWallet();
 
   const pools = useMemo(() => {
     return depositVaults.map((vault) => ({
@@ -30,8 +36,9 @@ const VaultPools = () => {
       isSelected: vault.vault_id === currentVault.vault_id,
       exchange_id: vault.metadata.exchange_id,
       vault_name: vault.vault_name,
+      show_dex: !isLoading && !!isWhitelisted,
     }));
-  }, [depositVaults, currentVault]);
+  }, [depositVaults, currentVault, isWhitelisted, isLoading]);
 
   return (
     <div>

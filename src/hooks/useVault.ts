@@ -46,7 +46,7 @@ export const useGetDepositVaults = (lastAddress?: string) => {
   const addressQuery = useQuery({
     queryKey: ["deposit-vaults-data", address],
     queryFn: () => getDepositVaults(address),
-    staleTime: REFETCH_VAULT_DATA_INTERVAL,
+    staleTime: REFETCH_VAULT_DATA_INTERVAL + 5000,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
     enabled: !!address,
   }) as UseQueryResult<DepositVaultConfig[], Error>;
@@ -54,7 +54,7 @@ export const useGetDepositVaults = (lastAddress?: string) => {
   const defaultQuery = useQuery({
     queryKey: ["deposit-vaults-data", "default"],
     queryFn: () => getDepositVaults(),
-    staleTime: REFETCH_VAULT_DATA_INTERVAL,
+    staleTime: REFETCH_VAULT_DATA_INTERVAL + 5000,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
     enabled: enabledDefaultQuery,
   });
