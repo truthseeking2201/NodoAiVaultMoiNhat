@@ -26,7 +26,19 @@ UAT-DEPLOY:
     - yarn
     - yarn build:uat
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-uat --delete
-    - aws cloudfront create-invalidation --distribution-id E2FHC9LSU3PJ2T --paths "/*"
+    - aws cloudfront create-invalidation --distribution-id ${UAT_CLOUDFRONT_DIST} --paths "/*"
+  tags:
+    - nodo-docker-runner  
+STG-DEPLOY:
+  image: sleavely/node-awscli:20.x
+  stage: build
+  only:
+    - staging
+  script:
+    - yarn
+    - yarn build:staging
+    - aws s3 sync dist/ s3://nodo-ai-copy-trading-staging --delete
+    - aws cloudfront create-invalidation --distribution-id ${STG_CLOUDFRONT_DIST} --paths "/*"
   tags:
     - nodo-docker-runner  
 PRD-DEPLOY:
