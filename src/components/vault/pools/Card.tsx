@@ -5,6 +5,8 @@ import { useDepositVaultStore } from "@/hooks/useStore";
 import { cn, formatAmount, formatPercentage } from "@/lib/utils";
 import { VaultPool } from ".";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
+import ConditionRenderer from "@/components/shared/ConditionRenderer";
+import { useCurrentAccount } from "@mysten/dapp-kit";
 
 const APR = ({
   text,
@@ -45,6 +47,7 @@ const VaultCard = ({
   const userHolding = ndlpAmount * conversionRate;
   const isSelected = pool.isSelected && pool.isLive;
   const { setDepositVault } = useDepositVaultStore();
+  const currentAccount = useCurrentAccount();
 
   return (
     <div
@@ -141,30 +144,39 @@ const VaultCard = ({
             }
           />
         </div>
-        <div className="flex items-center justify-between mt-2">
-          <div
-            className={cn(
-              "text-white/50",
-              isLargeScreen ? "text-base" : "text-xs"
-            )}
-          >
-            DEX
-          </div>
-          <div className="flex gap-1 items-center text-base">
-            <img
-              src={`/dexs/${exchange?.code}.png`}
-              className={cn(isLargeScreen ? "h-[16px]" : "h-[12px]")}
-            />
+        <ConditionRenderer
+          when={pool.show_dex}
+          fallback={
+            <ConditionRenderer when={!!currentAccount}>
+              <div className="min-h-[26px]" />
+            </ConditionRenderer>
+          }
+        >
+          <div className="flex items-center justify-between mt-2">
             <div
               className={cn(
-                "font-sans font-bold",
+                "text-white/50",
                 isLargeScreen ? "text-base" : "text-xs"
               )}
             >
-              {exchange.name}
+              DEX
+            </div>
+            <div className="flex gap-1 items-center text-base">
+              <img
+                src={`/dexs/${exchange?.code}.png`}
+                className={cn(isLargeScreen ? "h-[16px]" : "h-[12px]")}
+              />
+              <div
+                className={cn(
+                  "font-sans font-bold",
+                  isLargeScreen ? "text-base" : "text-xs"
+                )}
+              >
+                {exchange.name}
+              </div>
             </div>
           </div>
-        </div>
+        </ConditionRenderer>
         <div
           className={cn(
             "mt-4 bg-[#FFFFFF26] py-[6px] px-2 rounded-[6px] w-full  flex items-center justify-between",
