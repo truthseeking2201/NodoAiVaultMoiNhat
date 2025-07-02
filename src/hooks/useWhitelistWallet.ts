@@ -36,11 +36,11 @@ export const useWhitelistWallet = () => {
   }, [wlServer, walletAddress]);
 
   useEffect(() => {
-    if (cachedWhitelistedAddress && !wlServer) {
+    if (cachedWhitelistedAddress && !wlServer && walletAddress) {
       localStorage.removeItem("whitelisted_address");
       refetch();
     }
-  }, [cachedWhitelistedAddress, wlServer, refetch]);
+  }, [cachedWhitelistedAddress, wlServer, walletAddress, refetch]);
 
   return {
     isWhitelisted,
