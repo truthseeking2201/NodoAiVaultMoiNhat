@@ -110,23 +110,27 @@ export default function WithdrawVaultSection() {
 
   const onSuccessWithdraw = async () => {
     setLoading(true);
-    refreshBalance();
-    refetchDepositVaults();
     for (let index = 0; index < 10; index++) {
       await sleep(2000);
       const res = await initDataClaim();
-      if (res) break;
+      if (res) {
+        refreshBalance();
+        refetchDepositVaults();
+        break;
+      }
     }
     setLoading(false);
   };
 
   const onSuccessClaim = async () => {
     setLoading(true);
-    refreshBalance();
     for (let index = 0; index < 10; index++) {
       await sleep(2000);
       const res = await initDataClaim();
-      if (!res) break;
+      if (!res) {
+        refreshBalance();
+        break;
+      }
     }
     setLoading(false);
   };
@@ -167,7 +171,10 @@ export default function WithdrawVaultSection() {
               className="w-full font-semibold text-lg"
             >
               <span>Connect Wallet</span>
-              <ArrowRight size={16} className="ml-2" />
+              <ArrowRight
+                size={16}
+                className="ml-2"
+              />
             </Button>
           </div>
         )}
