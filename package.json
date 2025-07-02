@@ -7,9 +7,9 @@
     "dev": "vite",
     "build": "vite build && node scripts/generate-version.js",
     "build:dev": "cross-env APP_ENV=dev env-cmd -f .env.dev vite build && node scripts/generate-version.js",
-    "build:uat": "APP_ENV=uat env-cmd -f .env.uat vite build && node scripts/generate-version.js",
-    "build:staging": "APP_ENV=staging env-cmd -f .env.staging vite build && node scripts/generate-version.js",
-    "build:production": "APP_ENV=production env-cmd -f .env.production vite build && node scripts/generate-version.js",
+    "build:uat": "cross-env APP_ENV=uat env-cmd -f .env.uat vite build && node scripts/generate-version.js",
+    "build:staging": "cross-env APP_ENV=staging env-cmd -f .env.staging vite build && node scripts/generate-version.js",
+    "build:production": "cross-env APP_ENV=production env-cmd -f .env.production vite build && node scripts/generate-version.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
