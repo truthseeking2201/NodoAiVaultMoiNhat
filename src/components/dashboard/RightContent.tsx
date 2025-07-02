@@ -20,8 +20,6 @@ const RightContent = () => {
       {/* My Referrals Card - Only visible when wallet is connected */}
       {isConnected && <MyReferralsCard className="mb-6" />}
 
-      {/* Metric Card */}
-
       {/* Introducing NDLP Card */}
       <div className="bg-black/80 backdrop-blur-sm rounded-xl p-6 mb-6">
         <h3 className="text-100 mb-4 font-bold text-lg">Introducing</h3>
