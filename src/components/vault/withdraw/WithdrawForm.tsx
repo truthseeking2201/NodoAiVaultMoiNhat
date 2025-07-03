@@ -158,12 +158,13 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
     );
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration - hours * 3600) / 60);
+    const getText = (num) => (num == 1 ? "" : "s");
     if (hours > 0) {
-      setTimeCoolDown(`${hours} hours`);
+      setTimeCoolDown(`${hours} hour${getText(hours)}`);
     } else if (minutes > 0) {
-      setTimeCoolDown(`${minutes} minutes`);
+      setTimeCoolDown(`${minutes} minute${getText(minutes)}`);
     } else {
-      setTimeCoolDown(`${duration} seconds`);
+      setTimeCoolDown(`${duration} second${getText(duration)}`);
     }
   }, [configVault.lock_duration_ms]);
 
