@@ -36,6 +36,7 @@ STG-DEPLOY:
     - staging
   script:
     - yarn
+    - yarn add cross-env --dev
     - yarn build:staging
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-staging --delete
     - aws cloudfront create-invalidation --distribution-id ${STG_CLOUDFRONT_DIST} --paths "/*"
