@@ -6,10 +6,11 @@ import { truncateStringWithSeparator } from "@/utils/helpers";
 type Props = {
   summary?: any;
   lpData?: any;
+  configVault?: any;
   address?: string;
 };
 
-const ClaimToken = ({ summary, lpData, address }: Props) => {
+const ClaimToken = ({ summary, lpData, configVault, address }: Props) => {
   /**
    * HOOKS
    */
@@ -44,7 +45,14 @@ const ClaimToken = ({ summary, lpData, address }: Props) => {
         {showFormatNumber(summary?.fee || 0)} {lpData?.token_symbol}
       </RowItem>
       <hr className="w-full border-t border-white/15 mt-3 mb-3" />
-      <RowItem label="You’ll Receive">
+      <RowItem label="Rate">
+        1 {lpData.lp_symbol} = {showFormatNumber(configVault?.lpToTokenRate)}{" "}
+        {lpData.token_symbol}
+      </RowItem>
+      <RowItem
+        label="Est. Receive Amount"
+        className="mt-3"
+      >
         <div className="flex items-center font-bold">
           <img
             src={lpData?.token_image}

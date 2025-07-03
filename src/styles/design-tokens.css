@@ -80,6 +80,8 @@
     #f3d2b5 50.48%,
     #f5c8a4 100%
   );
+
+  --nodi-gradient: linear-gradient(90deg, #f59e0b 0%, #f97316 100%);
 }
 
 /* Typography Tokens */
@@ -342,4 +344,13 @@
   height: 1px;
   width: 100%;
   background: var(--3rd-gradient);
+}
+
+.text-nodi-gradient {
+  background: var(--nodi-gradient);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: textGradient 4s linear infinite;
 }

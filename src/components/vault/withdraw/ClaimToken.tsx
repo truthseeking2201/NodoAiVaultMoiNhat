@@ -144,7 +144,7 @@ const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
               size={14}
               className="flex-shrink-0"
             />{" "}
-            <span className="text-sm text-white font-medium	ml-1.5 capitalize">
+            <span className="text-sm text-white font-medium ml-1.5">
               Please wait to claim your previous withdrawal before initiating a
               new one
             </span>

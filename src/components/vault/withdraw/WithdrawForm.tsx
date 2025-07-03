@@ -66,12 +66,14 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
           className="flex-shrink-0"
         />{" "}
         <span className="text-sm text-white font-medium	ml-1.5 capitalize">
-          {timeCoolDown} Cooldown Period
+          Withdrawal Cooldown Time
         </span>
       </div>
       <p className="m-0 font-normal text-xs">
-        After confirming your withdrawal, there will be a {timeCoolDown}{" "}
-        cooldown period before funds are released.
+        After confirming your withdrawal, please wait up to{" "}
+        <span className="text-nodi-gradient font-black">{timeCoolDown}</span>{" "}
+        for processing. Once ready, you can claim your funds back to your
+        wallet.
       </p>
     </Badge>
   );
@@ -157,11 +159,11 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration - hours * 3600) / 60);
     if (hours > 0) {
-      setTimeCoolDown(`${hours}-hours`);
+      setTimeCoolDown(`${hours} hours`);
     } else if (minutes > 0) {
-      setTimeCoolDown(`${minutes}-minutes`);
+      setTimeCoolDown(`${minutes} minutes`);
     } else {
-      setTimeCoolDown(`${duration}-seconds`);
+      setTimeCoolDown(`${duration} seconds`);
     }
   }, [configVault.lock_duration_ms]);
 
@@ -243,7 +245,14 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
               : "--"}
           </RowItem>
           <RowItem
-            label="To Receive"
+            label="Rate"
+            className="mt-3"
+          >
+            1 {lpData.lp_symbol} ={" "}
+            {showFormatNumber(configVault?.lpToTokenRate)} {lpData.token_symbol}
+          </RowItem>
+          <RowItem
+            label="Est. Receive Amount"
             className="mt-3"
           >
             {summary?.receive
@@ -304,6 +313,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
               summary={summary}
               lpData={lpData}
               address={address}
+              configVault={configVault}
             />
             <div className="mt-4">{BadgeCoolDown}</div>
           </div>
@@ -360,6 +370,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
             summary={summary}
             lpData={lpData}
             address={address}
+            configVault={configVault}
           />
           <div className="">
             <Button

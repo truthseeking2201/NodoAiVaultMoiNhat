@@ -97,7 +97,7 @@ export const useWithdrawVault = () => {
       return values?.map((val) => {
         const fields = val.fields;
 
-        const withdrawAmount =
+        let withdrawAmount =
           getBalanceAmount(fields?.lp || 0, configLp.lp_decimals)?.toNumber() ||
           0;
 
@@ -115,6 +115,12 @@ export const useWithdrawVault = () => {
           Number(fields?.withdraw_time) + Number(configVault.lock_duration_ms);
         const now = Date.now().valueOf();
         const isClaim = timeUnlock < now && is_available_liquidity;
+
+        if (withdrawAmount == 0) {
+          withdrawAmount = Number(
+            receiveAmount.dividedBy(configVault.lpToTokenRate).toFixed(2)
+          );
+        }
         return {
           id: 1,
           timeUnlock: timeUnlock,
@@ -294,16 +300,25 @@ export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
 
   const configVault = useMemo(() => {
     const fields = vaultConfig;
+    const rate = fields?.rate || "0";
+    const lpToTokenRateRaw = getDecimalAmount(1, configLp.lp_decimals)
+      .times(rate)
+      .dividedBy(RATE_DENOMINATOR);
+    const lpToTokenRate =
+      getBalanceAmount(lpToTokenRateRaw, configLp.token_decimals)?.toNumber() ||
+      0;
+
     return {
       withdraw: fields?.withdraw?.fields || {
         fee_bps: "0",
         min: "0",
         total_fee: "0",
       },
-      rate: fields?.rate || "0",
       lock_duration_ms: fields?.lock_duration_ms || "0",
       available_liquidity: fields?.available_liquidity || "0",
       id_pending_redeems: fields?.pending_redeems?.fields?.id?.id || "",
+      rate,
+      lpToTokenRate,
     };
   }, [vaultConfig]);
 

@@ -98,16 +98,6 @@ export default function WithdrawVaultSection() {
     }
   };
 
-  // const initDataClaim = useCallback(async () => {
-  //   try {
-  //     const res = await getLatestRequestClaim(address, lpData, configVault);
-  //     setDataClaim(res);
-  //     return res;
-  //   } catch (error) {
-  //     setDataClaim(null);
-  //   }
-  // }, [address, lpData, configVault, getLatestRequestClaim]);
-
   const onSuccessWithdraw = async () => {
     setLoading(true);
     for (let index = 0; index < 10; index++) {
@@ -180,28 +170,7 @@ export default function WithdrawVaultSection() {
         )}
 
         {isConnected && (
-          <div>
-            {/* Balance */}
-            <div className="mb-9">
-              <div className="font-sans text-base text-zinc-400 mb-3">
-                Total Balance
-              </div>
-              <div className="flex items-center">
-                <img
-                  src={lpData.lp_image}
-                  alt="NODOAIx Token"
-                  className="w-[36px] h-[36px]"
-                />
-                <div className="text-white font-mono font-medium text-[40px] leading-[40px] ml-2">
-                  {showFormatNumber(balanceLp)}
-                </div>
-              </div>
-              <div className="font-sans text-sm text-white/60 mt-3">
-                1 {lpData.lp_symbol} ≈ {showFormatNumber(amountEst?.receive)}{" "}
-                {lpData.token_symbol}
-              </div>
-            </div>
-
+          <>
             {dataClaim && ready && (
               <ClaimToken
                 data={dataClaim}
@@ -217,7 +186,7 @@ export default function WithdrawVaultSection() {
                 onSuccess={onSuccessWithdraw}
               />
             )}
-          </div>
+          </>
         )}
       </div>
     </Spinner>
