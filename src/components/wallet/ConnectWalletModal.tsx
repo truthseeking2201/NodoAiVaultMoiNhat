@@ -51,6 +51,13 @@ export function ConnectWalletModal({
 
   const handleClosePopup = () => {
     onClose();
+    setStep(STEPS.CONNECT_WALLET);
+    setUserType(CASES.NEW_USER_WITHOUT_REFERRAL);
+    setUser(null);
+    setLinkRefCode(null);
+    setIsFirstConnect(true);
+    setIsCheckedExistingUser(false);
+    setIsLoading(false);
     window.sessionStorage.removeItem("ref-code");
   };
 

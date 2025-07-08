@@ -10,7 +10,7 @@ import {
 import { getFullnodeUrl } from "@mysten/sui/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import VersionChecker from "./components/shared/VersionChecker";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -28,15 +28,23 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
   const walletConnectionInfo = JSON.parse(
     localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
   );
-  // tmp
+  const initLoad = useRef(false);
+
   const lastAddress = walletConnectionInfo?.state?.lastConnectedAccountAddress;
   const { isLoading, error, data } = useGetDepositVaults(lastAddress);
+
+  useEffect(() => {
+    if (!initLoad.current && data) {
+      initLoad.current = true;
+    }
+  }, [data]);
 
   if (isLoading || !data) {
     return <PageFallback />;
   }
 
-  if (error) {
+  // show error when failed to fetch deposit vaults for first load
+  if (error && !initLoad.current) {
     throw new Error("Failed to fetch deposit vaults");
   }
 
