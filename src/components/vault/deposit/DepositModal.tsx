@@ -120,7 +120,7 @@ const DepositModal = (props: DepositModalProps) => {
                 </span>
                 <span className="font-mono text-lg text-white">
                   1 {collateralTokenName} ={" "}
-                  {formatAmount({ amount: conversionRate })} NDLP
+                  {formatAmount({ amount: conversionRate, precision: 6 })} NDLP
                 </span>
               </div>
               <div className="border-t border-white/15 my-2" />
@@ -171,7 +171,8 @@ const DepositModal = (props: DepositModalProps) => {
                   </span>
                   <span className="font-mono text-lg text-white">
                     1 {collateralTokenName} ={" "}
-                    {formatAmount({ amount: conversionRate })} NDLP
+                    {formatAmount({ amount: conversionRate, precision: 6 })}{" "}
+                    NDLP
                   </span>
                 </div>
 

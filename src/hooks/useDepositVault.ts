@@ -124,7 +124,7 @@ export const useCalculateNDLPReturn = (
 
   const ndlpAmountWillGet = lp / Math.pow(10, ndlpDecimals);
 
-  return roundDownBalance(Number(ndlpAmountWillGet));
+  return Number(ndlpAmountWillGet);
 };
 
 // calculate the rate of 1 collateral = ? NDLP

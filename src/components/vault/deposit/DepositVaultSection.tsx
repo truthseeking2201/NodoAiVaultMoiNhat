@@ -172,11 +172,12 @@ export default function DepositVaultSection() {
       description: (
         <SuccessfulToast
           title="Deposit successful!"
-          content={`${depositAmount} ${collateralTokenName} deposited — ${formatAmount(
-            {
-              amount: +ndlpAmountWillGet || 0,
-            }
-          )} NDLP minted to your account. Check your wallet for Tx details`}
+          content={`${formatAmount({
+            amount: Number(depositAmount),
+          })} ${collateralTokenName} deposited — ${formatAmount({
+            amount: +ndlpAmountWillGet || 0,
+            precision: 6,
+          })} NDLP minted to your account. Check your wallet for Tx details`}
           closeToast={() => dismiss()}
         />
       ),
@@ -246,14 +247,14 @@ export default function DepositVaultSection() {
           </div>
         )}
       </div>
-
       <div className="mb-6 p-4 border border-white/15 rounded-xl">
         <div className="flex justify-between items-center mb-3">
           <div className="text-gray-200 font-medium">You will get</div>
           <div className="flex items-center">
             <img src="/coins/ndlp.png" alt="NDLP" className="w-6 h-6 mr-1" />
             <span className="font-mono font-bold text-lg">
-              {formatAmount({ amount: +ndlpAmountWillGet || 0 })} NDLP
+              {formatAmount({ amount: +ndlpAmountWillGet || 0, precision: 6 })}{" "}
+              NDLP
             </span>
           </div>
         </div>
@@ -262,6 +263,7 @@ export default function DepositVaultSection() {
           {conversionRate
             ? `1 ${collateralTokenName} = ${formatAmount({
                 amount: conversionRate,
+                precision: 6,
               })} NDLP`
             : "Unable to fetch conversion rate. Please try again later."}
         </RowItem>
