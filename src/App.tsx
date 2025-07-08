@@ -16,6 +16,7 @@ import VersionChecker from "./components/shared/VersionChecker";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { useGetDepositVaults } from "./hooks";
 import Dashboard from "./pages/Dashboard";
+import { DelayRender } from "./components/shared/DelayRender";
 
 const NotFound = lazy(() =>
   import("./pages/NotFound").catch((e) => {
@@ -48,7 +49,7 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
     throw new Error("Failed to fetch deposit vaults");
   }
 
-  return <>{children}</>;
+  return <DelayRender>{children}</DelayRender>;
 };
 
 // Create query client that still loads data but doesn't show loading states

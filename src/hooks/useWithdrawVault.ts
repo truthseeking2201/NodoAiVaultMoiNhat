@@ -92,7 +92,6 @@ export const useWithdrawVault = () => {
         },
       });
       const values = data?.data?.content?.fields?.value || [];
-      console.log("-----getRequestClaim-values", values);
 
       return values?.map((val) => {
         const fields = val.fields;
