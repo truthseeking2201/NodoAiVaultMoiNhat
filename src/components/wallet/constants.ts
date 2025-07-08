@@ -1,5 +1,6 @@
 import phantomWallet from "@/assets/images/phantom-wallet.png";
 import slushWallet from "@/assets/images/slush-wallet.png";
+// import newmoneyWallet from "@/assets/images/newmoney-wallet.png";
 
 const STEPS = {
   CONNECT_WALLET: "connect_wallet",
@@ -31,6 +32,14 @@ const WALLETS = [
     description: "Connect to your Phantom Wallet",
     extensionUrl: "https://phantom.app/download",
   },
+  // {
+  //   displayName: "Newmoney.ai",
+  //   name: "Newmoney",
+  //   icon: newmoneyWallet,
+  //   description: "Connect to your Newmoney Wallet",
+  //   extensionUrl:
+  //     "https://chromewebstore.google.com/detail/newmoneyai/coknkdplmddfgoggddpienehfhdgegna?pli=1",
+  // },
 ];
 
 const WALLET_STATUS = {
@@ -41,4 +50,4 @@ const WALLET_STATUS = {
   SIGNED_UP: "SIGNED_UP",
 };
 
-export { STEPS, CASES, WALLETS,WALLET_STATUS };
+export { STEPS, CASES, WALLETS, WALLET_STATUS };

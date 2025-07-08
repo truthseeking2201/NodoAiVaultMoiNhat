@@ -81,6 +81,11 @@ export const useCurrentDepositVault = () => {
   const vault =
     data?.find((vault) => vault.vault_id === depositVault) || defaultVault;
 
+  if (!vault) {
+    // reload the page when no vault found
+    window.location.reload();
+  }
+
   return {
     ...vault,
     collateral_token_symbol: vault?.collateral_token.split("::")[2],
