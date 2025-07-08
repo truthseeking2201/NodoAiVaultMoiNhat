@@ -236,7 +236,7 @@ export const useGetCoinBalance = (coinType: string, decimals: number) => {
     return totalBalance;
   }, [allCoins, decimals]);
 
-  return { balance: userLPBalance, refetch };
+  return { balance: roundDownBalance(userLPBalance, 2), refetch };
 };
 
 export const useGetVaultTokenPair = () => {
