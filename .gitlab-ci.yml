@@ -12,6 +12,7 @@ DEV-DEPLOY:
     - develop
   script:
     - yarn
+    - yarn add cross-env --dev
     - yarn build:dev
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-dev --delete
     - aws cloudfront create-invalidation --distribution-id ${DEV_CLOUDFRONT_DIST} --paths "/*"
@@ -24,6 +25,7 @@ UAT-DEPLOY:
     - uat
   script:
     - yarn
+    - yarn add cross-env --dev
     - yarn build:uat
     - aws s3 sync dist/ s3://nodo-ai-copy-trading-uat --delete
     - aws cloudfront create-invalidation --distribution-id ${UAT_CLOUDFRONT_DIST} --paths "/*"
