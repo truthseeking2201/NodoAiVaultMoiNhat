@@ -1,19 +1,19 @@
-import { PageContainer } from "@/components/layout/PageContainer";
+import { PageContainer } from "@/components/layout/page-container";
 import { useEffect, useRef } from "react";
 
-import LeftContent from "@/components/dashboard/LeftContent";
-import RightContent from "@/components/dashboard/RightContent";
+import LeftContent from "@/components/dashboard/left-content";
+import RightContent from "@/components/dashboard/right-content";
 import "@/styles/design-tokens.css";
 
 import TelegramIcon from "@/assets/icons/telegram.svg";
 import XIcon from "@/assets/icons/x.svg";
-import { TxTable } from "@/components/dashboard/TxTable";
+import { TxTable } from "@/components/dashboard/tx-table";
 import { Button } from "@/components/ui/button";
-import NodoAIVaultsMainCard from "@/components/vault/NodoAIVaultsMainCard";
+import NodoAIVaultsMainCard from "@/components/vault/nodo-ai-vaults-main-card";
 import VaultPools from "@/components/vault/pools";
-import { useWhiteListModalStore } from "@/hooks/useStore";
-import { useWallet } from "@/hooks/useWallet";
-import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
+import { useWhiteListModalStore } from "@/hooks/use-store";
+import { useWallet } from "@/hooks/use-wallet";
+import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 import { truncateBetween } from "@/utils/truncate";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useCurrentAccount } from "@mysten/dapp-kit";

@@ -1,8 +1,8 @@
 import { ArrowUpRight, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import DepositVaultSection from "@/components/vault/deposit/DepositVaultSection";
-import WithdrawVaultSection from "@/components/vault/withdraw/WithdrawVaultSection";
+import DepositVaultSection from "@/components/vault/deposit/deposit-vault-section";
+import WithdrawVaultSection from "@/components/vault/withdraw/withdraw-vault-section";
 
 export default function NodoAIVaultsMainCard() {
   const [depositWithdrawTab, setDepositWithdrawTab] = useState("deposit");

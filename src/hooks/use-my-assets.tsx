@@ -10,7 +10,7 @@ import {
 import { SuiClient } from "@mysten/sui/client";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
-import { useCurrentDepositVault } from "./useVault";
+import { useCurrentDepositVault } from "./use-vault";
 
 interface CoinMetadata {
   decimals: number;

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { MoveLeft } from "lucide-react";
-import RegisterForWhiteListButton from "../request-whitelist-button/RegisterForWhiteListButton";
+import RegisterForWhiteListButton from "../request-whitelist-button/register-for-white-list-button";
 import RealizeYields from "@/assets/images/whitelist/realize-yields.png";
 import VIPAccess from "@/assets/images/whitelist/vip-access.png";
 import SeamlessLiquidity from "@/assets/images/whitelist/seamless-liquidity.png";
@@ -11,7 +11,7 @@ import WhitelistAddress from "@/assets/images/whitelist/whitelist-address.png";
 import NDLPIcon from "@/assets/images/NDLP.png";
 import Background from "@/assets/images/whitelist/background.png";
 import { Key, useState } from "react";
-import DemoVideoModal from "./DemoVideoModal";
+import DemoVideoModal from "./demo-video-modal";
 import AutonomousManagementIcon from "@/assets/images/whitelist/autonomous-management.png";
 import OptimizedYields from "@/assets/images/whitelist/optimized-yields.png";
 

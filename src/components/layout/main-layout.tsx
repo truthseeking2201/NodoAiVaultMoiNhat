@@ -1,11 +1,11 @@
 import { useIsChromeDesktop } from "@/hooks";
-import useBreakpoint from "@/hooks/useBreakpoint";
+import useBreakpoint from "@/hooks/use-breakpoint";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import demoUIOfDesktop from "../../assets/images/demo-ui-nodo-ai-vault.png";
-import UseDesktopBanner from "../dashboard/UseDesktopBanner";
-import { AppHeader } from "./AppHeader";
-import RegisterForWhiteList from "../dashboard/request-whitelist-button/RegisterForWhiteLayout";
+import UseDesktopBanner from "../dashboard/use-desktop-banner";
+import { AppHeader } from "./app-header";
+import RegisterForWhiteList from "../dashboard/request-whitelist-button/register-for-white-layout";
 
 interface MainLayoutProps {
   children: React.ReactNode;

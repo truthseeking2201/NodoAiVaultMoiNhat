@@ -1,17 +1,19 @@
+import { Buffer } from "buffer";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
   useSuiClient,
 } from "@mysten/dapp-kit";
-import { useGetVaultConfig } from "./useVault";
+import { useGetVaultConfig } from "./use-vault";
 import { Transaction } from "@mysten/sui/transactions";
-import { useMergeCoins } from "./useMergeCoins";
+import { useMergeCoins } from "./use-merge-coins";
 import { RATE_DENOMINATOR } from "@/config/vault-config";
 import { getDecimalAmount, getBalanceAmount } from "@/lib/number";
 import LpType from "@/types/lp.type";
 import DataClaimType from "@/types/data-claim.types.d";
 import BigNumber from "bignumber.js";
+import { executionProfitData } from "@/apis/vault";
 
 const _calcRateFee = (fee_bps) => {
   return BigNumber(fee_bps || 0)
@@ -196,6 +198,11 @@ export const useWithdrawVault = () => {
         throw new Error("No account connected");
       }
 
+      const profitData: any = await executionProfitData(configLp.vault_id);
+      if (!profitData || !profitData?.signature) {
+        throw new Error("Failed to get signature");
+      }
+
       // Merge coins first
       const mergedCoinId = await mergeCoins(configLp.lp_coin_type);
       if (!mergedCoinId) {
@@ -214,21 +221,42 @@ export const useWithdrawVault = () => {
         tx.pure.u64(rawAmount),
       ]);
 
-      const _arguments = [
+      const _arguments: any = [
         tx.object(configLp.vault_config_id),
         tx.object(configLp.vault_id),
         splitCoin,
+        tx.pure.u64(profitData.vault_value_usd),
+        tx.pure.u64(new BigNumber(profitData.profit_amount).abs().toString()),
+        tx.pure.bool(profitData.negative),
+        tx.pure.u64(profitData.expire_time),
+        tx.pure.u64(profitData.last_credit_time),
+        tx.pure(
+          "vector<vector<u8>>",
+          [profitData.signer_publickey].map((key) =>
+            Array.from(Buffer.from(key, "hex"))
+          )
+        ),
+        tx.pure(
+          "vector<vector<u8>>",
+          [profitData.signature].map((key) =>
+            Array.from(Buffer.from(key, "hex"))
+          )
+        ),
         tx.object(configLp.clock),
       ];
-      const typeArguments = [configLp.token_coin_type, configLp.lp_coin_type];
-
-      console.log("------_arguments", { _arguments, typeArguments });
+      const typeArguments = [
+        configLp.token_coin_type,
+        configLp.lp_coin_type,
+        configLp.token_coin_type, //USDC for now
+      ];
 
       tx.moveCall({
-        target: `${configLp.package_id}::vault::withdraw`,
+        target: `${configLp.package_id}::vault::withdraw_with_sigs_credit_time`,
         arguments: _arguments,
         typeArguments: typeArguments,
       });
+      // console.log("🧱 Inputs:", tx.blockData.inputs);
+      // console.log("📄 Raw tx:", JSON.stringify(tx.serialize(), null, 2));
 
       const result = await signAndExecuteTransaction({
         transaction: tx,
@@ -257,8 +285,6 @@ export const useWithdrawVault = () => {
         tx.object(configLp.clock),
       ];
       const typeArguments = [configLp.token_coin_type, configLp.lp_coin_type];
-
-      console.log("------_arguments", { _arguments, typeArguments });
 
       tx.moveCall({
         target: `${configLp.package_id}::vault::redeem`,

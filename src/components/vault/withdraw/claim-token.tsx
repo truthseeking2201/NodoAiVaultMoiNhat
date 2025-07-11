@@ -13,7 +13,7 @@ import { showFormatNumber } from "@/lib/number";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { useToast } from "@/components/ui/use-toast";
 import DataClaimType from "@/types/data-claim.types.d";
-import { useWithdrawVault } from "@/hooks/useWithdrawVault";
+import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
 
 type Props = {
   data?: DataClaimType;

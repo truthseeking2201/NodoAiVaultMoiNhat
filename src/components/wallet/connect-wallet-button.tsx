@@ -18,7 +18,7 @@ import { useCurrentAccount, useDisconnectWallet } from "@mysten/dapp-kit";
 import { motion } from "framer-motion";
 import { Copy, LogOut, RefreshCw, Wallet } from "lucide-react";
 import { memo, useEffect, useState } from "react";
-import { ConnectWalletModal } from "./ConnectWalletModal";
+import { ConnectWalletModal } from "./connect-wallet-modal";
 
 export const ConnectWalletButton = memo(() => {
   const { toast } = useToast();

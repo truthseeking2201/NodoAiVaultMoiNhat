@@ -1,4 +1,4 @@
-import styles from "./RegisterForWhiteListButton.module.css";
+import styles from "./register-for-white-list-button.module.css";
 import { cn } from "@/lib/utils";
 
 type RegisterForWhiteListButtonProps = {

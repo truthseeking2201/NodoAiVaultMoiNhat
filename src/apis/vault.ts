@@ -1,5 +1,5 @@
 import { DepositVaultConfig } from "@/types/vault-config.types";
-import httpNodo from "@/utils/httpNodo";
+import httpNodo from "@/utils/http-nodo";
 
 const NODO_URL = import.meta.env.VITE_NODO_APP_URL;
 
@@ -9,6 +9,12 @@ export const getLatestWithdrawal = (sender_address) => {
 
 export const executionWithdrawal = (payload) => {
   return httpNodo.post(`/execution/withdrawals`, payload);
+};
+
+export const executionProfitData = (vault_id) => {
+  return httpNodo.get(
+    `execution/vaults/${vault_id}/profit-data?lock_data=true`
+  );
 };
 
 export const getVaultConfig = (vault_address) => {

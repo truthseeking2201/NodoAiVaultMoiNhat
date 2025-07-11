@@ -1,5 +1,5 @@
 import { useToast } from "@/hooks/use-toast";
-import { initVersionChecker } from "@/utils/versionChecker";
+import { initVersionChecker } from "@/utils/version-checker";
 import { useEffect } from "react";
 
 const DEFAULT_DURATION = 30000;

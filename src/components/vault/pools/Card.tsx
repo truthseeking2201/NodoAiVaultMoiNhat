@@ -1,11 +1,11 @@
-import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { useCollateralLPRate } from "@/hooks/useDepositVault";
-import { useGetCoinBalance } from "@/hooks/useMyAssets";
-import { useDepositVaultStore } from "@/hooks/useStore";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
+import { useCollateralLPRate } from "@/hooks/use-deposit-vault";
+import { useGetCoinBalance } from "@/hooks/use-my-assets";
+import { useDepositVaultStore } from "@/hooks/use-store";
 import { cn, formatAmount, formatPercentage } from "@/lib/utils";
 import { VaultPool } from ".";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
-import ConditionRenderer from "@/components/shared/ConditionRenderer";
+import ConditionRenderer from "@/components/shared/condition-renderer";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 
 const APR = ({

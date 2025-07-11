@@ -1,7 +1,7 @@
 import { useCurrentDepositVault, useGetVaultTokenPair } from "@/hooks";
 
 import arrowDown from "@/assets/icons/arrow-down.svg";
-import { useCollateralLPRate } from "@/hooks/useDepositVault";
+import { useCollateralLPRate } from "@/hooks/use-deposit-vault";
 import { formatAmount } from "@/lib/utils";
 
 interface BalanceCardProps {

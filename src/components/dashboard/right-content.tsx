@@ -4,8 +4,8 @@ import DepositIcon from "@/assets/images/dashboard/deposit.png";
 import EarnWithdrawIcon from "@/assets/images/dashboard/earn_withdraw.png";
 import ExclusiveBenefits from "@/assets/images/dashboard/exclusive_benefits.png";
 import LimitedSupplyIcon from "@/assets/images/dashboard/limited_supply.png";
-import { BalanceCard } from "@/components/wallet/BalanceCard";
-import { MyReferralsCard } from "@/components/myReferrals/MyReferralsCard.tsx";
+import { BalanceCard } from "@/components/wallet/balance-card";
+import { MyReferralsCard } from "@/components/my-referrals/my-referrals-card";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 
 const RightContent = () => {

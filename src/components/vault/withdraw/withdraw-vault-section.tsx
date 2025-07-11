@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import ClaimToken from "./ClaimToken";
-import WithdrawForm from "./WithdrawForm";
+import ClaimToken from "./claim-token";
+import WithdrawForm from "./withdraw-form";
 
 import {
   useCurrentDepositVault,
@@ -15,12 +15,13 @@ import {
 import {
   useEstWithdrawVault,
   useWithdrawVault,
-} from "@/hooks/useWithdrawVault";
+} from "@/hooks/use-withdraw-vault";
 import { getBalanceAmountForInput, showFormatNumber } from "@/lib/number";
 import { sleep } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { LP_TOKEN_CONFIG } from "@/config/coin-config";
-import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
+import { CLOCK } from "@/config/vault-config";
+import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 import DataClaimType from "@/types/data-claim.types.d";
 
 export default function WithdrawVaultSection() {
@@ -40,7 +41,7 @@ export default function WithdrawVaultSection() {
       package_id: currentDepositVault.metadata.package_id,
       vault_config_id: metadata.vault_config_id,
       vault_id: currentDepositVault.vault_id,
-      clock: "0x6",
+      clock: CLOCK,
 
       lp_coin_type: currentDepositVault.vault_lp_token,
       lp_symbol: "NDLP", // hardcode for now

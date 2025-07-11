@@ -1,5 +1,5 @@
-import { useWhiteListModalStore } from "@/hooks/useStore";
-import WhiteListModal from "../white-list-modal/WhiteListModal";
+import { useWhiteListModalStore } from "@/hooks/use-store";
+import WhiteListModal from "../white-list-modal/white-list-modal";
 
 const RegisterForWhiteListLayout = () => {
   const { isOpen, setIsOpen } = useWhiteListModalStore();

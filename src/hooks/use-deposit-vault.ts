@@ -1,4 +1,5 @@
-import { RATE_DENOMINATOR } from "@/config/vault-config";
+import { Buffer } from "buffer";
+import { RATE_DENOMINATOR, CLOCK } from "@/config/vault-config";
 import { UserCoinAsset } from "@/types/coin.types";
 import {
   useCurrentAccount,
@@ -6,9 +7,11 @@ import {
   useSuiClient,
 } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
-import { useMergeCoins } from "./useMergeCoins";
-import { useGetDepositVaultById, useGetVaultConfig } from "./useVault";
+import { useMergeCoins } from "./use-merge-coins";
+import { useGetDepositVaultById, useGetVaultConfig } from "./use-vault";
 import { roundDownBalance } from "@/lib/utils";
+import { executionProfitData } from "@/apis/vault";
+import BigNumber from "bignumber.js";
 
 export const useDepositVault = (vaultId: string) => {
   const { mutateAsync: signAndExecuteTransaction } =
@@ -29,6 +32,11 @@ export const useDepositVault = (vaultId: string) => {
         throw new Error("No account connected");
       }
 
+      const profitData: any = await executionProfitData(vaultConfig.vault_id);
+      if (!profitData || !profitData?.signature) {
+        throw new Error("Failed to get signature");
+      }
+
       // Merge coins first
       const mergedCoinId = await mergeCoins(coin.coin_type);
       if (!mergedCoinId) {
@@ -41,20 +49,40 @@ export const useDepositVault = (vaultId: string) => {
       const [splitCoin] = tx.splitCoins(tx.object(mergedCoinId), [
         tx.pure.u64(Math.floor(amount * 10 ** coin.decimals)),
       ]);
+      const _arguments: any = [
+        tx.object(vaultConfig.metadata.vault_config_id),
+        tx.object(vaultConfig.vault_id),
+        splitCoin,
+        tx.pure.u64(profitData.vault_value_usd),
+        tx.pure.u64(new BigNumber(profitData.profit_amount).abs().toString()),
+        tx.pure.bool(profitData.negative),
+        tx.pure.u64(profitData.expire_time),
+        tx.pure.u64(profitData.last_credit_time),
+        tx.pure(
+          "vector<vector<u8>>",
+          [profitData.signer_publickey].map((key) =>
+            Array.from(Buffer.from(key, "hex"))
+          )
+        ),
+        tx.pure(
+          "vector<vector<u8>>",
+          [profitData.signature].map((key) =>
+            Array.from(Buffer.from(key, "hex"))
+          )
+        ),
+        tx.object(CLOCK),
+      ];
 
       tx.moveCall({
-        target: `${vaultConfig.metadata.package_id}::${vaultConfig.vault_module}::deposit`,
-        arguments: [
-          tx.object(vaultConfig.metadata.vault_config_id),
-          tx.object(vaultConfig.vault_id),
-          splitCoin,
-        ],
+        target: `${vaultConfig.metadata.package_id}::${vaultConfig.vault_module}::deposit_with_sigs_credit_time`,
+        arguments: _arguments,
         typeArguments: [
           vaultConfig.collateral_token,
           vaultConfig.vault_lp_token,
         ],
       });
-
+      // console.log("🧱 Inputs:", tx.blockData.inputs);
+      // console.log("📄 Raw tx:", JSON.stringify(tx.serialize(), null, 2));
       const result = await signAndExecuteTransaction(
         {
           transaction: tx,
@@ -73,7 +101,7 @@ export const useDepositVault = (vaultId: string) => {
             const events = txResponse?.events;
 
             const depositEvent = events.find((event) =>
-              event.type.includes("vault::DepositEvent")
+              event.type.includes("vault::DepositWithSigTimeEvent")
             );
             // Pass the event data to your callback
             onDepositSuccessCallback?.({
