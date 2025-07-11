@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import useBreakpoint from "./useBreakpoint";
+import useBreakpoint from "./use-breakpoint";
 
 export const useIsChromeDesktop = () => {
   const [isChromeDesktop, setIsChromeDesktop] = useState(true);

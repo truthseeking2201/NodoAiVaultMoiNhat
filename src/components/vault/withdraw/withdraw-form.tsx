@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import debounce from "lodash/debounce";
 
-import SummaryConfirmWithraw from "./SummaryConfirmWithraw";
+import SummaryConfirmWithraw from "./summary-confirm-withdraw";
 import { Button } from "@/components/ui/button";
 import { RowItem } from "@/components/ui/row-item";
 import { Loader } from "@/components/ui/loader";
@@ -27,7 +27,7 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   useEstWithdrawVault,
   useWithdrawVault,
-} from "@/hooks/useWithdrawVault";
+} from "@/hooks/use-withdraw-vault";
 import { useWhiteListModalStore, useWhitelistWallet } from "@/hooks";
 
 type Props = {

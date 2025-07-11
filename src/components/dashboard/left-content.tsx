@@ -1,7 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 import SUIIcon from "@/assets/images/sui-wallet.png";
 import Illustration from "@/assets/images/dashboard/illustration.png";
-import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
+import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 
 const LeftContent = () => {
   const { isWhitelisted } = useWhitelistWallet();

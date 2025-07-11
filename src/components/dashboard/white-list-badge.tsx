@@ -1,7 +1,7 @@
 import { useWhitelistWallet } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import ConditionRenderer from "../shared/ConditionRenderer";
+import ConditionRenderer from "../shared/condition-renderer";
 
 const baseColor = "#656565";
 

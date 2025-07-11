@@ -18,7 +18,6 @@ import {
   TIME_FILTER_OPTIONS_REFERRAL,
   SORT_TYPE,
 } from "@/config/constants-types.ts";
-// import { isValidSuiAddress } from "@mysten/sui/utils";
 
 interface MyReferralsDashboardModalProps {
   isOpen: boolean;

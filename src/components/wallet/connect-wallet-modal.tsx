@@ -9,18 +9,18 @@ import { X } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { CASES, STEPS } from "@/components/wallet/constants.ts";
-import WalletList from "@/components/wallet/WalletList";
-import InputReferral from "@/components/wallet/InputReferral";
-import ExistingUser from "@/components/wallet/ExistingUser";
-import SuccessReferral from "@/components/wallet/SuccessReferral";
-import ConfirmReferral from "@/components/wallet/ConfirmReferral";
+import WalletList from "@/components/wallet/wallet-list";
+import InputReferral from "@/components/wallet/input-referral";
+import ExistingUser from "@/components/wallet/existing-user";
+import SuccessReferral from "@/components/wallet/success-referral";
+import ConfirmReferral from "@/components/wallet/confirm-referral";
 import type { UserType } from "@/types/user";
 import {
   confirmUserExists,
   linkReferralCode,
   getWalletDetail,
 } from "@/apis/wallet";
-import { useWallet } from "@/hooks/useWallet";
+import { useWallet } from "@/hooks/use-wallet";
 import { useToast } from "@/hooks/use-toast";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { useCurrentAccount } from "@mysten/dapp-kit";

@@ -1,7 +1,7 @@
-import EnhancedVaultCatalog from "./EnhancedVaultCatalog";
+import Home from "./home";
 
 const Index = () => {
-  return <EnhancedVaultCatalog />;
+  return <Home />;
 };
 
 export default Index;

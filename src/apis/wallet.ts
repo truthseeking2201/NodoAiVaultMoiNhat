@@ -1,4 +1,4 @@
-import httpNodo from "@/utils/httpNodo";
+import httpNodo from "@/utils/http-nodo";
 import { link } from "fs";
 
 const URLS = {

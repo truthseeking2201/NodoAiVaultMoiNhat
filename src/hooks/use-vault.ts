@@ -7,7 +7,7 @@ import {
   useQueryClient,
   UseQueryResult,
 } from "@tanstack/react-query";
-import { useDepositVaultStore } from "./useStore";
+import { useDepositVaultStore } from "./use-store";
 import { useEffect, useState } from "react";
 import { sleep } from "@/lib/utils";
 

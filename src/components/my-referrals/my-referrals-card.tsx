@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { ItemRow } from "./ItemRow";
-import { MyReferralsDashboardModal } from "./MyReferralsDashboardModal";
+import { ItemRow } from "./item-row";
+import { MyReferralsDashboardModal } from "./my-referrals-dashboard-modal";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
-import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
+import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 interface MyReferralsCardProps {
   className?: string;

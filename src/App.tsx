@@ -1,5 +1,5 @@
-import { MainLayout } from "@/components/layout/MainLayout";
-import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { MainLayout } from "@/components/layout/main-layout";
+import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
@@ -12,14 +12,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import VersionChecker from "./components/shared/VersionChecker";
-import { LanguageProvider } from "./contexts/LanguageContext";
+import VersionChecker from "./components/shared/version-checker";
+import { LanguageProvider } from "./contexts/language-context";
 import { useGetDepositVaults } from "./hooks";
-import Dashboard from "./pages/Dashboard";
-import { DelayRender } from "./components/shared/DelayRender";
+import Home from "./pages/home";
+import { DelayRender } from "./components/shared/delay-render";
 
 const NotFound = lazy(() =>
-  import("./pages/NotFound").catch((e) => {
+  import("./pages/not-found").catch((e) => {
     console.error("Error loading NotFound:", e);
     return { default: () => <PageFallback /> };
   })
@@ -86,7 +86,7 @@ const App = () => (
                         path="/"
                         element={
                           <MainLayout>
-                            <Dashboard />
+                            <Home />
                           </MainLayout>
                         }
                       />

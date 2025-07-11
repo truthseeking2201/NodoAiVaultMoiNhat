@@ -1,4 +1,4 @@
-import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -7,7 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { ConnectWalletButton } from "@/components/wallet/ConnectWalletButton";
+import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Bell,
@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import WhiteListBadge from "../dashboard/WhiteListBadge";
+import WhiteListBadge from "../dashboard/white-list-badge";
 
 interface Notification {
   id: string;

@@ -1,5 +1,7 @@
 export const RATE_DENOMINATOR = 1000000;
 
+export const CLOCK = "0x6";
+
 export const EXCHANGE_CODES_MAP: Record<
   number,
   {

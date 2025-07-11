@@ -1,11 +1,11 @@
 import suiWallet from "@/assets/images/sui-wallet.png";
-import ConditionRenderer from "@/components/shared/ConditionRenderer";
+import ConditionRenderer from "@/components/shared/condition-renderer";
 import { Button } from "@/components/ui/button";
 import { FormattedNumberInput } from "@/components/ui/formatted-number-input";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { RowItem } from "@/components/ui/row-item";
 import { useToast } from "@/components/ui/use-toast";
-import DepositModal from "@/components/vault/deposit/DepositModal";
+import DepositModal from "@/components/vault/deposit/deposit-modal";
 import {
   useCurrentDepositVault,
   useGetDepositVaults,
@@ -15,20 +15,20 @@ import {
   useCalculateNDLPReturn,
   useCollateralLPRate,
   useDepositVault,
-} from "@/hooks/useDepositVault";
+} from "@/hooks/use-deposit-vault";
 import {
   useGetCoinBalance,
   useGetVaultTokenPair,
   useMyAssets,
-} from "@/hooks/useMyAssets";
-import { useWallet } from "@/hooks/useWallet";
-import { useWhitelistWallet } from "@/hooks/useWhitelistWallet";
+} from "@/hooks/use-my-assets";
+import { useWallet } from "@/hooks/use-wallet";
+import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 import { formatNumber } from "@/lib/number";
 import { formatAmount } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import { useMemo, useState } from "react";
-import SuccessfulToast from "./SuccessfulToast";
+import SuccessfulToast from "./successful-toast";
 
 type DepositSuccessData = {
   amount: number;
