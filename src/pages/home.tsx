@@ -191,10 +191,10 @@ export default function NodoAIVaults() {
               </a>
             </div>
           </div>
-          <div>
+          {/* <div>
             NODO Global Limited 10 Anson Road #22-06 International Plaza,
             Singapore 079903
-          </div>
+          </div> */}
         </div>
       </footer>
     </div>
