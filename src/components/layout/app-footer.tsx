@@ -12,10 +12,10 @@ export function AppFooter() {
         className="flex flex-col md:flex-row justify-between items-center"
       >
         <div>©{currentYear} NODO. All rights reserved</div>
-        <div>
+        {/* <div>
           NODO Global Limited 10 Anson Road #22-06 International Plaza,
           Singapore 079903
-        </div>
+        </div> */}
       </div>
     </footer>
   );
