@@ -1,11 +1,13 @@
-import { useIsChromeDesktop } from "@/hooks";
+import { useGetDepositVaults, useIsChromeDesktop } from "@/hooks";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { AnimatePresence, motion } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import React from "react";
 import demoUIOfDesktop from "../../assets/images/demo-ui-nodo-ai-vault.png";
-import UseDesktopBanner from "../dashboard/use-desktop-banner";
-import { AppHeader } from "./app-header";
 import RegisterForWhiteList from "../dashboard/request-whitelist-button/register-for-white-layout";
+import UseDesktopBanner from "../dashboard/use-desktop-banner";
+import ConditionRenderer from "../shared/condition-renderer";
+import { AppHeader } from "./app-header";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -14,6 +16,8 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   const { isChromeDesktop } = useIsChromeDesktop();
   const { isLg } = useBreakpoint();
+  const { data, isLoading } = useGetDepositVaults();
+  const isEmptyVaults = !isLoading && data?.length === 0;
 
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden main-bg">
@@ -58,7 +62,16 @@ export function MainLayout({ children }: MainLayoutProps) {
             transition={{ duration: 0.4 }}
           >
             <AppHeader />
-            <div className="flex-1 relative">{children}</div>
+            <ConditionRenderer
+              when={!isEmptyVaults}
+              fallback={
+                <div className="flex h-screen w-screen items-center justify-center">
+                  <Loader2 className="h-10 w-10 animate-spin" />
+                </div>
+              }
+            >
+              <div className="flex-1 relative">{children}</div>
+            </ConditionRenderer>
             <RegisterForWhiteList />
             {/* <AppFooter /> */}
           </motion.div>
