@@ -26,7 +26,7 @@ const InputReferral = ({
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
     setError,
   } = useForm({
     defaultValues: {
@@ -89,8 +89,6 @@ const InputReferral = ({
       } else {
         setFieldError();
       }
-    } else {
-      setFieldError();
     }
   };
 
@@ -153,7 +151,7 @@ const InputReferral = ({
             size="lg"
             type="submit"
             className="w-full font-semibold text-sm h-[44px] rounded-lg"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isLoading || !isDirty}
           >
             {isSubmitting || isLoading ? (
               <Loader2 className="animate-spin mr-2" size={16} />
