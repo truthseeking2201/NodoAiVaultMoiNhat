@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
-import ExistingUserIcon from "@/assets/images/wallet/existing-account.png";
 import DefaultAvatar from "@/assets/images/wallet/default-avatar.png";
-import { ArrowRight, Loader2 } from "lucide-react";
-import type { UserType } from "@/types/user";
+import ExistingUserIcon from "@/assets/images/wallet/existing-account.png";
+import { Button } from "@/components/ui/button";
 import { STEPS } from "@/components/wallet/constants.ts";
-import { useDisconnectWallet } from "@mysten/dapp-kit";
+import type { UserType } from "@/types/user";
+import { triggerWalletDisconnect } from "@/utils/wallet-disconnect";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 type ExistingUserProps = {
   onNextStep: (step?: string) => void;
@@ -12,9 +12,8 @@ type ExistingUserProps = {
   isLoading?: boolean;
 };
 const ExistingUser = ({ onNextStep, user, isLoading }: ExistingUserProps) => {
-  const { mutate: disconnect } = useDisconnectWallet();
   const handleBackToConnectWallet = () => {
-    disconnect();
+    triggerWalletDisconnect();
     onNextStep(STEPS.CONNECT_WALLET);
   };
   return (

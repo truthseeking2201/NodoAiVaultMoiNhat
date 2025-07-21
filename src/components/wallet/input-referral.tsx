@@ -10,7 +10,7 @@ import {
   linkReferralCode,
   skipReferralCode,
 } from "@/apis/wallet";
-import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useWallet } from "@/hooks";
 
 type InputReferralProps = {
   onClose: () => void;
@@ -33,7 +33,7 @@ const InputReferral = ({
       referralCode: "",
     },
   });
-  const account = useCurrentAccount();
+  const { address } = useWallet();
 
   const handleCheckReferralCode = async (referralCode: string) => {
     try {
@@ -46,7 +46,7 @@ const InputReferral = ({
 
   const handleSkipReferral = async () => {
     try {
-      const res = await skipReferralCode(account?.address);
+      const res = await skipReferralCode();
       if (res) {
         onClose();
       }
@@ -59,7 +59,6 @@ const InputReferral = ({
   const handleLinkReferralCode = async (referralCode: string) => {
     try {
       const res = await linkReferralCode({
-        user_wallet: account?.address,
         invite_code: referralCode,
       });
 

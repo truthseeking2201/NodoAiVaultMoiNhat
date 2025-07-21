@@ -6,30 +6,25 @@ import ExclusiveBenefits from "@/assets/images/dashboard/exclusive_benefits.png"
 import LimitedSupplyIcon from "@/assets/images/dashboard/limited_supply.png";
 import { BalanceCard } from "@/components/wallet/balance-card";
 import { MyReferralsCard } from "@/components/my-referrals/my-referrals-card";
-import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useWallet } from "@/hooks";
 
 const RightContent = () => {
-  const currentAccount = useCurrentAccount();
-  const isConnected = !!currentAccount?.address;
+  const { isAuthenticated } = useWallet();
 
   return (
     <div className="w-[252px] flex-shrink-0">
       {/* Balance Card - Only visible when wallet is connected */}
-      {isConnected && <BalanceCard className="mb-6" />}
+      {isAuthenticated && <BalanceCard className="mb-6" />}
 
       {/* My Referrals Card - Only visible when wallet is connected */}
-      {isConnected && <MyReferralsCard className="mb-6" />}
+      {isAuthenticated && <MyReferralsCard className="mb-6" />}
 
       {/* Introducing NDLP Card */}
       <div className="bg-black/80 backdrop-blur-sm rounded-xl p-6 mb-6">
         <h3 className="text-100 mb-4 font-bold text-lg">Introducing</h3>
 
         <div className="flex items-center gap-2 mb-3">
-          <img
-            src="/coins/ndlp.png"
-            alt="NDLP"
-            className="w-10"
-          />
+          <img src="/coins/ndlp.png" alt="NDLP" className="w-10" />
           <span className="font-heading-md text-100">$NDLP</span>
         </div>
 
@@ -105,11 +100,7 @@ const RightContent = () => {
         <div className="space-y-6">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-full bg-surface-075 border border-brand-orange/20 flex items-center justify-center flex-shrink-0">
-              <img
-                src={DepositIcon}
-                alt="deposit"
-                className="w-8 h-8"
-              />
+              <img src={DepositIcon} alt="deposit" className="w-8 h-8" />
             </div>
             <div>
               <div className="font-body font-medium mb-1 text-100">Deposit</div>
@@ -122,11 +113,7 @@ const RightContent = () => {
 
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-full bg-surface-075 border border-brand-orange/20 flex items-center justify-center flex-shrink-0">
-              <img
-                src={AIInvestIcon}
-                alt="AI invest"
-                className="w-8 h-8"
-              />
+              <img src={AIInvestIcon} alt="AI invest" className="w-8 h-8" />
             </div>
             <div>
               <div className="font-body font-medium mb-1 text-100">

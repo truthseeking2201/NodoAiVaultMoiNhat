@@ -1,12 +1,12 @@
+import ConditionRenderer from "@/components/shared/condition-renderer";
+import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import { useCollateralLPRate } from "@/hooks/use-deposit-vault";
 import { useGetCoinBalance } from "@/hooks/use-my-assets";
 import { useDepositVaultStore } from "@/hooks/use-store";
+import { useWallet } from "@/hooks/use-wallet";
 import { cn, formatAmount, formatPercentage } from "@/lib/utils";
 import { VaultPool } from ".";
-import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
-import ConditionRenderer from "@/components/shared/condition-renderer";
-import { useCurrentAccount } from "@mysten/dapp-kit";
 
 const APR = ({
   text,
@@ -47,7 +47,7 @@ const VaultCard = ({
   const userHolding = ndlpAmount * conversionRate;
   const isSelected = pool.isSelected && pool.isLive;
   const { setDepositVault } = useDepositVaultStore();
-  const currentAccount = useCurrentAccount();
+  const { isAuthenticated } = useWallet();
 
   return (
     <div
@@ -147,7 +147,7 @@ const VaultCard = ({
         <ConditionRenderer
           when={pool.show_dex}
           fallback={
-            <ConditionRenderer when={!!currentAccount}>
+            <ConditionRenderer when={isAuthenticated}>
               <div className="min-h-[26px]" />
             </ConditionRenderer>
           }

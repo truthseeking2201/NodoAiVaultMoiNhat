@@ -1,31 +1,29 @@
 import {
+  confirmUserExists,
+  getWalletDetail,
+  linkReferralCode,
+} from "@/apis/wallet";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { X } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
-import { cn } from "@/lib/utils";
-import { CASES, STEPS } from "@/components/wallet/constants.ts";
-import WalletList from "@/components/wallet/wallet-list";
-import InputReferral from "@/components/wallet/input-referral";
-import ExistingUser from "@/components/wallet/existing-user";
-import SuccessReferral from "@/components/wallet/success-referral";
-import ConfirmReferral from "@/components/wallet/confirm-referral";
-import type { UserType } from "@/types/user";
-import {
-  confirmUserExists,
-  linkReferralCode,
-  getWalletDetail,
-} from "@/apis/wallet";
-import { useWallet } from "@/hooks/use-wallet";
-import { useToast } from "@/hooks/use-toast";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
-import { useCurrentAccount } from "@mysten/dapp-kit";
+import ConfirmReferral from "@/components/wallet/confirm-referral";
+import { CASES, STEPS } from "@/components/wallet/constants.ts";
+import ExistingUser from "@/components/wallet/existing-user";
+import InputReferral from "@/components/wallet/input-referral";
+import SuccessReferral from "@/components/wallet/success-referral";
+import WalletList from "@/components/wallet/wallet-list";
+import { useWallet } from "@/hooks";
+import { useToast } from "@/hooks/use-toast";
+import { cn, sleep } from "@/lib/utils";
+import type { UserType } from "@/types/user";
+import { X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { sleep } from "@/lib/utils";
 
 interface ConnectWalletModalProps {
   open: boolean;
@@ -46,7 +44,7 @@ export function ConnectWalletModal({
   const [isCheckedExistingUser, setIsCheckedExistingUser] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const currentAccount = useCurrentAccount();
+  const { address } = useWallet();
   const [searchParams] = useSearchParams();
 
   const handleClosePopup = () => {
@@ -115,15 +113,11 @@ export function ConnectWalletModal({
     }
   };
 
-  const handleLinkReferralCode = async (
-    referralCode: string,
-    successAddress?: string
-  ) => {
+  const handleLinkReferralCode = async (referralCode: string) => {
     try {
       setIsLoading(true);
       await sleep(1000); // waiting connect wallet
       const res = await linkReferralCode({
-        user_wallet: successAddress,
         invite_code: referralCode,
       });
       if (res.success) {
@@ -208,7 +202,7 @@ export function ConnectWalletModal({
         setStep(STEPS.EXISTING_USER_CONFIRM);
         break;
       case STEPS.EXISTING_USER_CONFIRM:
-        handleConfirmExistingUser(currentAccount?.address).then(() => {
+        handleConfirmExistingUser(address).then(() => {
           handleClosePopup();
         });
         break;
@@ -244,7 +238,7 @@ export function ConnectWalletModal({
         setStep(STEPS.CONNECT_WALLET);
         break;
       case STEPS.CONNECT_WALLET:
-        await handleLinkReferralCode(linkRefCode, successAddress);
+        await handleLinkReferralCode(linkRefCode);
         break;
       case STEPS.REFERRAL_SUCCESS:
         handleClosePopup();

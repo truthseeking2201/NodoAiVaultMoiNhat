@@ -1,2 +1,1 @@
-export * from "./RegisterForWhiteLayout";
-export * from "./RegisterForWhiteListButton";
+export * from "./register-for-white-layout";

@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import {
   createNetworkConfig,
   SuiClientProvider,
+  useCurrentAccount,
+  useDisconnectWallet,
   WalletProvider,
 } from "@mysten/dapp-kit";
 import { getFullnodeUrl } from "@mysten/sui/client";
@@ -12,11 +14,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { DelayRender } from "./components/shared/delay-render";
 import VersionChecker from "./components/shared/version-checker";
 import { LanguageProvider } from "./contexts/language-context";
 import { useGetDepositVaults } from "./hooks";
 import Home from "./pages/home";
-import { DelayRender } from "./components/shared/delay-render";
+import {
+  clearWalletDisconnectHandler,
+  setWalletDisconnectHandler,
+} from "./utils/wallet-disconnect";
 
 const NotFound = lazy(() =>
   import("./pages/not-found").catch((e) => {
@@ -26,19 +32,32 @@ const NotFound = lazy(() =>
 );
 
 const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
-  const walletConnectionInfo = JSON.parse(
-    localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
-  );
   const initLoad = useRef(false);
-
-  const lastAddress = walletConnectionInfo?.state?.lastConnectedAccountAddress;
-  const { isLoading, error, data } = useGetDepositVaults(lastAddress);
+  const { isLoading, error, data } = useGetDepositVaults();
+  const account = useCurrentAccount();
+  const { mutate: disconnect } = useDisconnectWallet();
 
   useEffect(() => {
     if (!initLoad.current && data) {
       initLoad.current = true;
     }
   }, [data]);
+
+  useEffect(() => {
+    if (account?.address) {
+      setWalletDisconnectHandler(() => {
+        disconnect();
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("current-address");
+        localStorage.removeItem("whitelisted_address");
+      });
+    }
+
+    return () => {
+      clearWalletDisconnectHandler();
+    };
+  }, [account, disconnect]);
 
   if (isLoading || !data) {
     return <PageFallback />;

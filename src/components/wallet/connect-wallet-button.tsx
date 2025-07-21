@@ -14,7 +14,7 @@ import { useCurrentDepositVault, useMyAssets, useWallet } from "@/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { formatNumber } from "@/lib/number";
 import { truncateStringWithSeparator } from "@/utils/helpers";
-import { useCurrentAccount, useDisconnectWallet } from "@mysten/dapp-kit";
+import { triggerWalletDisconnect } from "@/utils/wallet-disconnect";
 import { motion } from "framer-motion";
 import { Copy, LogOut, RefreshCw, Wallet } from "lucide-react";
 import { memo, useEffect, useState } from "react";
@@ -33,12 +33,11 @@ export const ConnectWalletButton = memo(() => {
     isConnectWalletDialogOpen,
     openConnectWalletDialog,
     closeConnectWalletDialog,
+    isAuthenticated,
     isConnected,
+    address,
   } = useWallet();
 
-  const currentAccount = useCurrentAccount();
-  const address = currentAccount?.address;
-  const { mutate: disconnect } = useDisconnectWallet();
   const { refreshBalance, assets } = useMyAssets();
 
   const currentVault = useCurrentDepositVault();
@@ -55,14 +54,14 @@ export const ConnectWalletButton = memo(() => {
     );
 
     // Set pulse animation on button when first connecting
-    if (isConnected) {
+    if (isAuthenticated) {
       setShowPulse(true);
       const timer = setTimeout(() => {
         setShowPulse(false);
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [isConnected]);
+  }, [isAuthenticated]);
 
   const formatAddress = (address: string) => {
     return truncateStringWithSeparator(address, 13, "...", 6);
@@ -107,14 +106,9 @@ export const ConnectWalletButton = memo(() => {
     );
   }
 
-  const handleDisconnect = () => {
-    disconnect();
-    window.localStorage.removeItem("current-address");
-  };
-
   return (
     <>
-      {!isConnected ? (
+      {!isAuthenticated ? (
         <motion.div
           initial={{ opacity: 0.9, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -288,7 +282,7 @@ export const ConnectWalletButton = memo(() => {
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={handleDisconnect}
+                    onClick={triggerWalletDisconnect}
                     className="w-full h-[40px]"
                   >
                     <LogOut className="w-4 h-4" />

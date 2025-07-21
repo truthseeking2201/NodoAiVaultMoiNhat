@@ -1,22 +1,18 @@
-import { Buffer } from "buffer";
-import { RATE_DENOMINATOR, CLOCK } from "@/config/vault-config";
+import { executionProfitData } from "@/apis/vault";
+import { CLOCK, RATE_DENOMINATOR } from "@/config/vault-config";
 import { UserCoinAsset } from "@/types/coin.types";
-import {
-  useCurrentAccount,
-  useSignAndExecuteTransaction,
-  useSuiClient,
-} from "@mysten/dapp-kit";
+import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
+import BigNumber from "bignumber.js";
+import { Buffer } from "buffer";
 import { useMergeCoins } from "./use-merge-coins";
 import { useGetDepositVaultById, useGetVaultConfig } from "./use-vault";
-import { roundDownBalance } from "@/lib/utils";
-import { executionProfitData } from "@/apis/vault";
-import BigNumber from "bignumber.js";
+import { useWallet } from "./use-wallet";
 
 export const useDepositVault = (vaultId: string) => {
   const { mutateAsync: signAndExecuteTransaction } =
     useSignAndExecuteTransaction();
-  const account = useCurrentAccount();
+  const { address } = useWallet();
   const suiClient = useSuiClient();
   const vaultConfig = useGetDepositVaultById(vaultId);
 
@@ -28,7 +24,7 @@ export const useDepositVault = (vaultId: string) => {
     onDepositSuccessCallback?: (data: any) => void
   ) => {
     try {
-      if (!account?.address) {
+      if (!address) {
         throw new Error("No account connected");
       }
 

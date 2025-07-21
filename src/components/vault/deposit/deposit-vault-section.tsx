@@ -25,7 +25,6 @@ import { useWallet } from "@/hooks/use-wallet";
 import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 import { formatNumber } from "@/lib/number";
 import { formatAmount } from "@/lib/utils";
-import { useCurrentAccount } from "@mysten/dapp-kit";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import { useMemo, useState } from "react";
 import SuccessfulToast from "./successful-toast";
@@ -55,10 +54,7 @@ export default function DepositVaultSection() {
     depositVault.vault_lp_token_decimals
   );
   const apr = depositVault?.apr;
-  const currentAccount = useCurrentAccount();
-  const isConnected = !!currentAccount?.address;
-
-  const { openConnectWalletDialog } = useWallet();
+  const { openConnectWalletDialog, isAuthenticated } = useWallet();
   const { refreshBalance } = useMyAssets();
   const { deposit } = useDepositVault(depositVault.vault_id);
   const { toast, dismiss } = useToast();
@@ -116,7 +112,7 @@ export default function DepositVaultSection() {
       return;
     }
 
-    if (isConnected) {
+    if (isAuthenticated) {
       // TODO: Handle deposit
       setIsDepositModalOpen(true);
     } else {
@@ -187,9 +183,9 @@ export default function DepositVaultSection() {
   };
 
   const disabledDeposit = useMemo(() => {
-    if (!isConnected) return false;
+    if (!isAuthenticated) return false;
     return !!error || !depositAmount;
-  }, [isConnected, error, depositAmount]);
+  }, [isAuthenticated, error, depositAmount]);
 
   const poolName = depositVault.pool.pool_name;
   const token1 = poolName.split("-")[0];
@@ -223,7 +219,7 @@ export default function DepositVaultSection() {
           <div className="font-body text-075">
             Balance:{" "}
             <span className="font-mono text-text-primary">
-              {isConnected
+              {isAuthenticated
                 ? `${formatNumber(
                     collateralToken?.balance || 0
                   )} ${collateralTokenName}`
@@ -277,7 +273,7 @@ export default function DepositVaultSection() {
       </div>
 
       <ConditionRenderer
-        when={isConnected}
+        when={isAuthenticated}
         fallback={
           <Button
             variant="primary"

@@ -13,7 +13,7 @@ import { getDecimalAmount, getBalanceAmount } from "@/lib/number";
 import LpType from "@/types/lp.type";
 import DataClaimType from "@/types/data-claim.types.d";
 import BigNumber from "bignumber.js";
-import { executionProfitData } from "@/apis/vault";
+import { executionProfitData, getSignatureRedeem } from "@/apis/vault";
 
 const _calcRateFee = (fee_bps) => {
   return BigNumber(fee_bps || 0)
@@ -278,16 +278,38 @@ export const useWithdrawVault = () => {
       if (!account?.address) {
         throw new Error("No account connected");
       }
+      const dataSignature: any = await getSignatureRedeem({
+        wallet_address: account.address,
+        vault_id: configLp.vault_id,
+      });
+      if (!dataSignature || !dataSignature?.signatures) {
+        throw new Error("Failed to get signature");
+      }
+
       const tx = new Transaction();
-      const _arguments = [
+      const _arguments: any = [
         tx.object(configLp.vault_config_id),
         tx.object(configLp.vault_id),
+        tx.pure.address(account.address),
+        tx.pure("vector<u64>", dataSignature.withdraw_time_requests),
+        tx.pure("vector<u64>", dataSignature.withdraw_amount_requests),
+        tx.pure.u64(dataSignature.expire_time),
+        tx.pure(
+          "vector<vector<u8>>",
+          dataSignature.pks.map((key) => Array.from(Buffer.from(key, "hex")))
+        ),
+        tx.pure(
+          "vector<vector<u8>>",
+          dataSignature.signatures.map((key) =>
+            Array.from(Buffer.from(key, "hex"))
+          )
+        ),
         tx.object(configLp.clock),
       ];
       const typeArguments = [configLp.token_coin_type, configLp.lp_coin_type];
 
       tx.moveCall({
-        target: `${configLp.package_id}::vault::redeem`,
+        target: `${configLp.package_id}::vault::redeem_with_sigs`,
         arguments: _arguments,
         typeArguments: typeArguments,
       });

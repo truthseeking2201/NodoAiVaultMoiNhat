@@ -5,6 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ClaimToken from "./claim-token";
 import WithdrawForm from "./withdraw-form";
 
+import { LP_TOKEN_CONFIG } from "@/config/coin-config";
+import { CLOCK } from "@/config/vault-config";
 import {
   useCurrentDepositVault,
   useGetDepositVaults,
@@ -16,12 +18,8 @@ import {
   useEstWithdrawVault,
   useWithdrawVault,
 } from "@/hooks/use-withdraw-vault";
-import { getBalanceAmountForInput, showFormatNumber } from "@/lib/number";
+import { getBalanceAmountForInput } from "@/lib/number";
 import { sleep } from "@/lib/utils";
-import { useCurrentAccount } from "@mysten/dapp-kit";
-import { LP_TOKEN_CONFIG } from "@/config/coin-config";
-import { CLOCK } from "@/config/vault-config";
-import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 import DataClaimType from "@/types/data-claim.types.d";
 
 export default function WithdrawVaultSection() {
@@ -60,10 +58,7 @@ export default function WithdrawVaultSection() {
    * HOOKS
    */
   const { openConnectWalletDialog } = useWallet();
-  const { isWhitelisted } = useWhitelistWallet();
-  const currentAccount = useCurrentAccount();
-  const isConnected = !!currentAccount?.address;
-  const address = currentAccount?.address;
+  const { address, isAuthenticated } = useWallet();
   const { refreshBalance, assets } = useMyAssets();
   const { amountEst, configVault } = useEstWithdrawVault(1, lpData);
   const { getLatestRequestClaim } = useWithdrawVault();
@@ -150,7 +145,7 @@ export default function WithdrawVaultSection() {
   return (
     <Spinner loading={loading}>
       <div className="p-6 bg-black rounded-b-2xl rounded-tr-2xl">
-        {!isConnected && (
+        {!isAuthenticated && (
           <div>
             <p className="text-base text-white/60 text-center mb-5">
               Connect Wallet First to see your Funds
@@ -162,15 +157,12 @@ export default function WithdrawVaultSection() {
               className="w-full font-semibold text-lg"
             >
               <span>Connect Wallet</span>
-              <ArrowRight
-                size={16}
-                className="ml-2"
-              />
+              <ArrowRight size={16} className="ml-2" />
             </Button>
           </div>
         )}
 
-        {isConnected && (
+        {isAuthenticated && (
           <>
             {dataClaim && ready && (
               <ClaimToken

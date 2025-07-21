@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WALLETS } from "@/components/wallet/constants";
+import { useLoginWallet } from "@/hooks";
 
 type Wallet = {
   name: string;
@@ -22,6 +23,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const wallets = useWallets();
   const { mutate: connect } = useConnectWallet();
+  const loginWallet = useLoginWallet();
 
   const allowWallets = WALLETS.map((wallet) => {
     const foundWallet = wallets.find((w) => w.name === wallet.name);
@@ -30,6 +32,11 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
       name: foundWallet?.name || wallet.name,
     };
   }) as Wallet[];
+
+  const handleReject = () => {
+    setError(null);
+    setIsConnecting(false);
+  };
 
   const handleConnect = async (selectedWallet: Wallet) => {
     try {
@@ -44,8 +51,17 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
         connect(
           { wallet: foundWallet },
           {
-            onSuccess: (data) => {
-              onConnectSuccess(data.accounts[0].address, () => {
+            onSuccess: async (data) => {
+              const address = data.accounts[0].address;
+              const isLoginSuccess = await loginWallet(address);
+              if (!isLoginSuccess) {
+                setError(
+                  `Failed to connect to ${selectedWallet.displayName} wallet. Please try again.`
+                );
+                handleReject();
+                return;
+              }
+              onConnectSuccess(address, () => {
                 setConnectedWallet(null);
                 setIsConnecting(false);
               });
@@ -55,8 +71,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
               setError(
                 `Failed to connect to ${selectedWallet.displayName} wallet. Please try again.`
               );
-              setConnectedWallet(null);
-              setIsConnecting(false);
+              handleReject();
             },
           }
         );
@@ -68,8 +83,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
       setError(
         `Failed to connect to ${selectedWallet.displayName} wallet. Please try again.`
       );
-      setConnectedWallet(null);
-      setIsConnecting(false);
+      handleReject();
     }
   };
 

@@ -1,12 +1,11 @@
-import { useWhitelistWallet } from "@/hooks";
+import { useWallet, useWhitelistWallet } from "@/hooks";
 import { cn } from "@/lib/utils";
-import { useCurrentAccount } from "@mysten/dapp-kit";
 import ConditionRenderer from "../shared/condition-renderer";
 
 const baseColor = "#656565";
 
 const WhiteListBadge = () => {
-  const account = useCurrentAccount();
+  const { isAuthenticated } = useWallet();
   const { isWhitelisted, isLoading } = useWhitelistWallet();
   const styles = isWhitelisted
     ? {
@@ -18,7 +17,7 @@ const WhiteListBadge = () => {
       };
 
   return (
-    <ConditionRenderer when={Boolean(account)} fallback={null}>
+    <ConditionRenderer when={isAuthenticated} fallback={null}>
       <div
         style={{
           borderRadius: "90px",

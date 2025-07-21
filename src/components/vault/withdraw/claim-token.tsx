@@ -10,7 +10,6 @@ import Countdown, { zeroPad } from "react-countdown";
 import AvgPaceIcon from "@/assets/images/avg-pace.png";
 
 import { showFormatNumber } from "@/lib/number";
-import { useCurrentAccount } from "@mysten/dapp-kit";
 import { useToast } from "@/components/ui/use-toast";
 import DataClaimType from "@/types/data-claim.types.d";
 import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
@@ -26,8 +25,6 @@ const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
   /**
    * HOOKS
    */
-  const currentAccount = useCurrentAccount();
-  const address = currentAccount?.address;
   const { toast } = useToast();
   const { redeem } = useWithdrawVault();
 
@@ -43,12 +40,7 @@ const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
         title: "Claim successful",
         variant: "success",
         duration: 5000,
-        icon: (
-          <IconCheckSuccess
-            size={14}
-            className="h-6 w-6"
-          />
-        ),
+        icon: <IconCheckSuccess size={14} className="h-6 w-6" />,
       });
     } catch (error) {
       console.log(error);
@@ -118,10 +110,7 @@ const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
         >
           {showFormatNumber(data.withdrawAmount)} {data.withdrawSymbol}
         </RowItem>
-        <RowItem
-          label="Withdraw Fee"
-          className="mt-3"
-        >
+        <RowItem label="Withdraw Fee" className="mt-3">
           <RowItem.Label>
             Withdraw Fee
             <span className="text-gray-200 font-mono ml-2">
@@ -135,15 +124,9 @@ const ClaimToken = ({ data, onSuccess, reloadData }: Props) => {
       </div>
 
       {!data.isClaim && (
-        <Badge
-          variant="warning"
-          className="w-full p-4 rounded-xl block mt-5"
-        >
+        <Badge variant="warning" className="w-full p-4 rounded-xl block mt-5">
           <div className="flex items-center">
-            <Clock4
-              size={14}
-              className="flex-shrink-0"
-            />{" "}
+            <Clock4 size={14} className="flex-shrink-0" />{" "}
             <span className="text-sm text-white font-medium ml-1.5">
               Please wait to claim your previous withdrawal before initiating a
               new one
