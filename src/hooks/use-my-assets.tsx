@@ -11,6 +11,7 @@ import { SuiClient } from "@mysten/sui/client";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo } from "react";
 import { useCurrentDepositVault } from "./use-vault";
+import { useWallet } from "./use-wallet";
 
 interface CoinMetadata {
   decimals: number;
@@ -51,7 +52,7 @@ const getCoinObjects = async (
 };
 
 export const useMyAssets = () => {
-  const account = useCurrentAccount();
+  const { address: currentAddress, isAuthenticated } = useWallet();
   const suiClient = useSuiClient();
   const queryClient = useQueryClient();
 
@@ -59,25 +60,25 @@ export const useMyAssets = () => {
 
   // Clear cache when account address becomes empty
   useEffect(() => {
-    if (!account?.address) {
+    if (!currentAddress) {
       queryClient.removeQueries({ queryKey: ["lpCoinObjects"] });
       queryClient.removeQueries({ queryKey: ["collateralCoinObjects"] });
     }
-  }, [account?.address, queryClient]);
+  }, [currentAddress, queryClient]);
 
   const {
     data: lpCoinObjects,
     isLoading: lpCoinObjectsLoading,
     refetch: lpCoinObjectsRefetch,
   } = useQuery({
-    queryKey: ["lpCoinObjects", account?.address, currentVault.vault_id],
+    queryKey: ["lpCoinObjects", currentAddress, currentVault.vault_id],
     queryFn: () =>
       getCoinObjects(
         suiClient,
         currentVault.vault_lp_token,
-        account?.address || ""
+        currentAddress || ""
       ),
-    enabled: !!account?.address,
+    enabled: isAuthenticated,
     staleTime: REFETCH_VAULT_DATA_INTERVAL,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
   });
@@ -87,14 +88,14 @@ export const useMyAssets = () => {
     isLoading: collateralCoinObjectsLoading,
     refetch: collateralCoinObjectsRefetch,
   } = useQuery({
-    queryKey: ["collateralCoinObjects", account?.address],
+    queryKey: ["collateralCoinObjects", currentAddress],
     queryFn: () =>
       getCoinObjects(
         suiClient,
         currentVault.collateral_token,
-        account?.address || ""
+        currentAddress || ""
       ),
-    enabled: !!account?.address,
+    enabled: isAuthenticated,
     staleTime: REFETCH_VAULT_DATA_INTERVAL,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
   });
@@ -212,16 +213,16 @@ export const useGetCoinsMetadata = () => {
 };
 
 export const useGetCoinBalance = (coinType: string, decimals: number) => {
-  const account = useCurrentAccount();
+  const { address: currentAddress, isAuthenticated } = useWallet();
 
   const { data: allCoins, refetch } = useSuiClientQuery(
     "getCoins",
     {
-      owner: account?.address,
+      owner: currentAddress,
       coinType,
     },
     {
-      enabled: !!account?.address && !!coinType,
+      enabled: isAuthenticated && !!coinType,
     }
   );
 

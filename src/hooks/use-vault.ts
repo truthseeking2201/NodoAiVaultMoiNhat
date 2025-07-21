@@ -1,15 +1,12 @@
 import { getDepositVaults } from "@/apis";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
-import { DepositVaultConfig, VaultConfig } from "@/types/vault-config.types";
-import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
-import {
-  useQuery,
-  useQueryClient,
-  UseQueryResult,
-} from "@tanstack/react-query";
-import { useDepositVaultStore } from "./use-store";
-import { useEffect, useState } from "react";
 import { sleep } from "@/lib/utils";
+import { DepositVaultConfig, VaultConfig } from "@/types/vault-config.types";
+import { useSuiClientQuery } from "@mysten/dapp-kit";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useDepositVaultStore } from "./use-store";
+import { useWallet } from "./use-wallet";
 
 export const useGetVaultConfig = (vaultId: string) => {
   const { data, isLoading, refetch } = useSuiClientQuery(
@@ -38,17 +35,24 @@ export const useGetVaultConfig = (vaultId: string) => {
   };
 };
 
-export const useGetDepositVaults = (lastAddress?: string) => {
-  const account = useCurrentAccount();
-  const address = account?.address || lastAddress;
-  const [enabledDefaultQuery, setEnabledDefaultQuery] = useState(!address);
+export const useGetDepositVaults = () => {
+  const walletConnectionInfo = JSON.parse(
+    localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
+  );
+  const { address: currentAddress, isAuthenticated } = useWallet();
+  const address =
+    currentAddress || walletConnectionInfo?.state?.lastConnectedAccountAddress;
+
+  const [enabledDefaultQuery, setEnabledDefaultQuery] = useState(
+    !isAuthenticated
+  );
 
   const addressQuery = useQuery({
     queryKey: ["deposit-vaults-data", address],
     queryFn: () => getDepositVaults(address),
     staleTime: REFETCH_VAULT_DATA_INTERVAL + 5000,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
-    enabled: !!address,
+    enabled: isAuthenticated,
   }) as UseQueryResult<DepositVaultConfig[], Error>;
 
   const defaultQuery = useQuery({

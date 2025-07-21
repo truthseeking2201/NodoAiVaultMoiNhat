@@ -21,14 +21,13 @@ import {
 } from "@/components/ui/dialog";
 
 import { showFormatNumber } from "@/lib/number";
-import { useCurrentAccount } from "@mysten/dapp-kit";
 import LpType from "@/types/lp.type";
 import { useToast } from "@/components/ui/use-toast";
 import {
   useEstWithdrawVault,
   useWithdrawVault,
 } from "@/hooks/use-withdraw-vault";
-import { useWhiteListModalStore, useWhitelistWallet } from "@/hooks";
+import { useWallet, useWhiteListModalStore, useWhitelistWallet } from "@/hooks";
 
 type Props = {
   balanceLp: number;
@@ -56,15 +55,9 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const BadgeCoolDown = (
-    <Badge
-      variant="warning"
-      className="w-full p-4 rounded-xl block"
-    >
+    <Badge variant="warning" className="w-full p-4 rounded-xl block">
       <div className="flex items-center mb-1">
-        <Clock4
-          size={14}
-          className="flex-shrink-0"
-        />{" "}
+        <Clock4 size={14} className="flex-shrink-0" />{" "}
         <span className="text-sm text-white font-medium	ml-1.5 capitalize">
           Withdrawal Cooldown Time
         </span>
@@ -88,8 +81,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
     reset,
     formState: { errors },
   } = useForm<IFormInput>({ mode: "all" });
-  const currentAccount = useCurrentAccount();
-  const address = currentAccount?.address;
+  const { address } = useWallet();
   const { toast } = useToast();
   const { withdraw } = useWithdrawVault();
   const { amountEst, configVault } = useEstWithdrawVault(
@@ -215,10 +207,7 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
         />
         {errors.amount?.type && (
           <div className="text-red-error text-sm mt-1 flex items-center">
-            <Info
-              size={18}
-              className="mr-2"
-            />
+            <Info size={18} className="mr-2" />
             {(() => {
               if (errors.amount?.type === "required") {
                 return "Please enter withdrawal amount";
@@ -237,25 +226,16 @@ export default function WithdrawForm({ balanceLp, lpData, onSuccess }: Props) {
         <div className="mb-5 p-4 border border-white/15 rounded-xl mt-5">
           <div className="mb-3 text-gray-200 font-medium">Withdraw Summary</div>
           <hr className="w-full border-t border-white/15" />
-          <RowItem
-            label="Amount"
-            className="mt-3"
-          >
+          <RowItem label="Amount" className="mt-3">
             {summary?.amount
               ? `${showFormatNumber(summary.amount)} ${lpData.lp_symbol}`
               : "--"}
           </RowItem>
-          <RowItem
-            label="Rate"
-            className="mt-3"
-          >
+          <RowItem label="Rate" className="mt-3">
             1 {lpData.lp_symbol} ={" "}
             {showFormatNumber(configVault?.lpToTokenRate)} {lpData.token_symbol}
           </RowItem>
-          <RowItem
-            label="Est. Receive Amount"
-            className="mt-3"
-          >
+          <RowItem label="Est. Receive Amount" className="mt-3">
             {summary?.receive
               ? `${showFormatNumber(summary.receive)} ${lpData.token_symbol}`
               : "--"}

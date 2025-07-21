@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useCurrentAccount } from "@mysten/dapp-kit";
 import { useToast } from "@/hooks/use-toast";
 import { DialogOutsideClose } from "@/components/ui/dialog-outside-close";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import {
   TIME_FILTER_OPTIONS_REFERRAL,
   SORT_TYPE,
 } from "@/config/constants-types.ts";
+import { useWallet } from "@/hooks";
 
 interface MyReferralsDashboardModalProps {
   isOpen: boolean;
@@ -67,8 +67,8 @@ export function MyReferralsDashboardModal({
       render: (value: any) => (
         <div className="flex items-center font-mono	text-white">
           <img
-            src={COIN_TYPES_CONFIG.collateral_token.image_url}
-            alt={COIN_TYPES_CONFIG.collateral_token.display_name}
+            src={COIN_TYPES_CONFIG.collateral_tokens[0].image_url}
+            alt={COIN_TYPES_CONFIG.collateral_tokens[0].display_name}
             className="w-4 h-4 mr-1 flex-shrink-0"
           />
           {showFormatNumber(value || 0, 2, 2)}
@@ -97,8 +97,7 @@ export function MyReferralsDashboardModal({
   /**
    * HOOKS
    */
-  const currentAccount = useCurrentAccount();
-  const address = currentAccount?.address;
+  const { address } = useWallet();
   const { toast } = useToast();
 
   /**
@@ -137,7 +136,7 @@ export function MyReferralsDashboardModal({
           ? encodeURIComponent(paramsRefer?.address)
           : undefined,
       };
-      const response: any = await getMyReferral(address, params);
+      const response: any = await getMyReferral(params);
       const data = response?.data?.map((el, index) => {
         return {
           id: index,
@@ -231,10 +230,7 @@ export function MyReferralsDashboardModal({
               />
               {isInvalidAddress && (
                 <div className="text-red-error text-sm mt-1 flex items-center">
-                  <Info
-                    size={16}
-                    className="mr-2"
-                  />
+                  <Info size={16} className="mr-2" />
                   Invalid address
                 </div>
               )}

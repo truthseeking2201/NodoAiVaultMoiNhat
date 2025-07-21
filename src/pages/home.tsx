@@ -16,7 +16,6 @@ import { useWallet } from "@/hooks/use-wallet";
 import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 import { truncateBetween } from "@/utils/truncate";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useCurrentAccount } from "@mysten/dapp-kit";
 import { ArrowUpRight } from "lucide-react";
 
 export default function NodoAIVaults() {
@@ -24,7 +23,7 @@ export default function NodoAIVaults() {
   const currentYear = new Date().getFullYear();
   const { isWhitelisted, isLoading: isCheckingWhitelist } =
     useWhitelistWallet();
-  const account = useCurrentAccount();
+  const { address } = useWallet();
   const { isConnectWalletDialogOpen, openConnectWalletDialog } = useWallet();
 
   const [searchParams] = useSearchParams();
@@ -45,7 +44,7 @@ export default function NodoAIVaults() {
       window.localStorage.setItem("is-whitelist-address", "false");
     }
 
-    if (account && isWhitelisted) {
+    if (address && isWhitelisted) {
       window.localStorage.setItem("is-whitelist-address", "true");
     }
 
@@ -57,8 +56,8 @@ export default function NodoAIVaults() {
       "is-whitelist-address"
     );
 
-    if (account && !isWhitelisted) {
-      const currentAddress = truncateBetween(account.address, 5, 5);
+    if (address && !isWhitelisted) {
+      const currentAddress = truncateBetween(address, 5, 5);
       const storedAddress = window.localStorage.getItem("current-address");
       if (currentAddress !== storedAddress) {
         window.localStorage.setItem("is-whitelist-address", "false");
@@ -74,7 +73,7 @@ export default function NodoAIVaults() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isWhitelisted, account, isConnectWalletDialogOpen, isCheckingWhitelist]);
+  }, [isWhitelisted, address, isConnectWalletDialogOpen, isCheckingWhitelist]);
 
   return (
     <div className="min-h-screen main-bg" ref={containerRef}>

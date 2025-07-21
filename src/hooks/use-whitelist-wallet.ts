@@ -1,13 +1,14 @@
 import { subscribeWhitelistRequest } from "@/apis";
 import { WalletDetails } from "@/types/wallet-detail";
-import { useCurrentAccount, useCurrentWallet } from "@mysten/dapp-kit";
+import { useCurrentWallet } from "@mysten/dapp-kit";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { useWallet } from "./use-wallet";
 
 export const useWhitelistWallet = () => {
-  const account = useCurrentAccount();
+  const { address: currentAddress, isAuthenticated } = useWallet();
   const { currentWallet } = useCurrentWallet();
-  const walletAddress = account?.address;
+  const walletAddress = currentAddress;
   const walletProvider = currentWallet?.name;
 
   const {
@@ -17,7 +18,7 @@ export const useWhitelistWallet = () => {
   } = useQuery({
     queryKey: ["walletDetails", walletAddress, walletProvider],
     queryFn: () => subscribeWhitelistRequest(walletAddress, walletProvider),
-    enabled: !!walletAddress && !!walletProvider,
+    enabled: !!walletAddress && !!walletProvider && isAuthenticated,
     staleTime: Infinity,
   }) as UseQueryResult<WalletDetails>;
 
@@ -40,7 +41,13 @@ export const useWhitelistWallet = () => {
       localStorage.removeItem("whitelisted_address");
       refetch();
     }
-  }, [cachedWhitelistedAddress, wlServer, walletAddress, refetch]);
+  }, [
+    cachedWhitelistedAddress,
+    wlServer,
+    walletAddress,
+    refetch,
+    isAuthenticated,
+  ]);
 
   return {
     isWhitelisted,
