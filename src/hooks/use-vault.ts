@@ -81,7 +81,7 @@ export const useGetDepositVaultById = (vaultId?: string) => {
 export const useCurrentDepositVault = () => {
   const { depositVault } = useDepositVaultStore();
   const { data } = useGetDepositVaults();
-  const defaultVault = data?.find((vault) => vault.is_active);
+  const defaultVault = data?.[0];
   const vault =
     data?.find((vault) => vault.vault_id === depositVault) || defaultVault;
 
