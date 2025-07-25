@@ -290,26 +290,11 @@ export const useWithdrawVault = () => {
       const _arguments: any = [
         tx.object(configLp.vault_config_id),
         tx.object(configLp.vault_id),
-        tx.pure.address(account.address),
-        tx.pure("vector<u64>", dataSignature.withdraw_time_requests),
-        tx.pure("vector<u64>", dataSignature.withdraw_amount_requests),
-        tx.pure.u64(dataSignature.expire_time),
-        tx.pure(
-          "vector<vector<u8>>",
-          dataSignature.pks.map((key) => Array.from(Buffer.from(key, "hex")))
-        ),
-        tx.pure(
-          "vector<vector<u8>>",
-          dataSignature.signatures.map((key) =>
-            Array.from(Buffer.from(key, "hex"))
-          )
-        ),
         tx.object(configLp.clock),
       ];
       const typeArguments = [configLp.token_coin_type, configLp.lp_coin_type];
-
       tx.moveCall({
-        target: `${configLp.package_id}::vault::redeem_with_sigs`,
+        target: `${configLp.package_id}::vault::redeem`,
         arguments: _arguments,
         typeArguments: typeArguments,
       });
