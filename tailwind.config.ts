@@ -16,6 +16,7 @@ export default {
       center: true,
       padding: "2rem",
       screens: {
+        "xl": "1280px",
         "2xl": "1400px",
       },
     },
@@ -30,6 +31,7 @@ export default {
         "card-background": "#121620",
         "text-primary": "#E5E7EB",
         "text-secondary": "#9CA3AF",
+        "section-title": "#1C1C1C",
 
         ai: {
           DEFAULT: "#FDEBCF",
@@ -44,6 +46,9 @@ export default {
         },
         toast: {
           default: "#242C32",
+        },
+        green: {
+          ready: "#07D993",
         },
 
         // shadcn UI colors
@@ -186,6 +191,14 @@ export default {
             transform: "translateY(-5px)",
           },
         },
+        "bounce-gentle": {
+          "0%, 100%": {
+            transform: "translateY(0)",
+          },
+          "50%": {
+            transform: "translateY(-2px)",
+          },
+        },
         shine: {
           "0%": { "background-position": "100%" },
           "100%": { "background-position": "-100%" },
@@ -205,6 +218,7 @@ export default {
         "pulse-glow": "pulse-glow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
         "pulse-slow": "pulse-slow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
         float: "float 4s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
+        "bounce-gentle": "bounce-gentle 1.2s infinite cubic-bezier(0.4,0,0.2,1)",
         shine: "shine 5s linear infinite",
       },
       spacing: {

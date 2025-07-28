@@ -3,6 +3,7 @@ import { triggerWalletDisconnect } from "@/utils/wallet-disconnect";
 import { useSignPersonalMessage } from "@mysten/dapp-kit";
 import { useMutation } from "@tanstack/react-query";
 import { useWallet } from "./use-wallet";
+import { useUserAssetsStore } from "./use-store";
 
 export const useLoginWallet = () => {
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
@@ -11,13 +12,15 @@ export const useLoginWallet = () => {
     mutationFn: loginWallet,
   });
 
+  const { setUpdated } = useUserAssetsStore();
+
   const { setIsAuthenticated } = useWallet();
 
   return async (walletAddress: string) => {
     try {
       const timestamp = Date.now();
       const message = new TextEncoder().encode(
-        `Login with wallet at ${timestamp}`
+        `Welcome to NODO AI Vaults. ${new Date(timestamp).toUTCString()}`
       );
       const signResult = await signPersonalMessage({
         message,
@@ -31,6 +34,7 @@ export const useLoginWallet = () => {
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("refresh_token", data.refresh_token);
       setIsAuthenticated(true);
+      setUpdated(false);
       return true;
     } catch (error) {
       console.log(error);

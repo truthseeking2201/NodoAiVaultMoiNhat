@@ -5,15 +5,19 @@ import {
   useSignAndExecuteTransaction,
   useSuiClient,
 } from "@mysten/dapp-kit";
-import { useGetVaultConfig } from "./use-vault";
+import { useGetVaultConfig, useEstimateWithdraw } from "./use-vault";
 import { Transaction } from "@mysten/sui/transactions";
 import { useMergeCoins } from "./use-merge-coins";
 import { RATE_DENOMINATOR } from "@/config/vault-config";
 import { getDecimalAmount, getBalanceAmount } from "@/lib/number";
+import { sleep } from "@/lib/utils";
 import LpType from "@/types/lp.type";
 import DataClaimType from "@/types/data-claim.types.d";
 import BigNumber from "bignumber.js";
-import { executionProfitData, getSignatureRedeem } from "@/apis/vault";
+import {
+  executionProfitData,
+  getWithdrawalRequestsMultiTokens,
+} from "@/apis/vault";
 
 const _calcRateFee = (fee_bps) => {
   return BigNumber(fee_bps || 0)
@@ -48,9 +52,12 @@ const _getEstWithdraw = (
 
     // convert amount to show
     const _receiveAmount =
-      getBalanceAmount(receiveAmount, configLp.token_decimals)?.toNumber() || 0;
+      getBalanceAmount(
+        receiveAmount,
+        configLp.collateral_decimals
+      )?.toNumber() || 0;
     const _fee =
-      getBalanceAmount(fee, configLp.token_decimals)?.toNumber() || 0;
+      getBalanceAmount(fee, configLp.collateral_decimals)?.toNumber() || 0;
 
     return {
       amount: amountLp,
@@ -85,7 +92,6 @@ export const useWithdrawVault = () => {
   ): Promise<DataClaimType[]> => {
     try {
       if (!configVault?.id_pending_redeems || !senderAddress) return null;
-
       const data: any = await suiClient.getDynamicFieldObject({
         parentId: configVault?.id_pending_redeems,
         name: {
@@ -93,47 +99,56 @@ export const useWithdrawVault = () => {
           value: senderAddress,
         },
       });
+
       const values = data?.data?.content?.fields?.value || [];
+      if (!values?.length) return [];
+      let dataRequest: any = null;
 
-      return values?.map((val) => {
-        const fields = val.fields;
-
-        let withdrawAmount =
-          getBalanceAmount(fields?.lp || 0, configLp.lp_decimals)?.toNumber() ||
-          0;
-
-        const is_available_liquidity = new BigNumber(
-          configVault.available_liquidity
-        ).gte(fields.amount);
-
-        const receiveAmount =
-          getBalanceAmount(fields.amount, configLp.token_decimals) ||
-          new BigNumber(0);
-        const rateFee = configVault?.withdraw?.fee_bps || 0;
-        const fee = _calcPercent(receiveAmount, rateFee);
-
-        const timeUnlock =
-          Number(fields?.withdraw_time) + Number(configVault.lock_duration_ms);
-        const now = Date.now().valueOf();
-        const isClaim = timeUnlock < now && is_available_liquidity;
-
-        if (withdrawAmount == 0) {
-          withdrawAmount = Number(
-            receiveAmount.dividedBy(configVault.lpToTokenRate).toFixed(2)
-          );
+      for (let index = 0; index < 10; index++) {
+        dataRequest = await getWithdrawalRequestsMultiTokens({
+          wallet_address: senderAddress,
+          vault_id: configLp.vault_id,
+        });
+        if (dataRequest.length) {
+          break;
         }
+        await sleep(2000);
+      }
+
+      return dataRequest?.map((val) => {
+        const withdrawAmount = getBalanceAmount(
+          val?.withdrawal_ndlp_amount || 0,
+          configLp.lp_decimals
+        )?.toNumber();
+        const receiveAmount = getBalanceAmount(
+          val?.receive_amount || 0,
+          val?.token?.decimal
+        );
+        const receiveSymbol = val?.token?.token_symbol;
+        const conversionRate = receiveAmount
+          .dividedBy(withdrawAmount)
+          .toNumber();
+        const now = Date.now().valueOf();
+        const timeUnlock = Number(val?.countdown || 0);
+        const isClaim = val.is_ready && timeUnlock < now;
+        const fee = 0;
+
         return {
           id: 1,
           timeUnlock: timeUnlock,
           isClaim: isClaim,
           withdrawAmount: withdrawAmount,
           withdrawSymbol: configLp.lp_symbol,
+          withdrawSymbolImage: configLp.lp_image,
           receiveAmountRaw: receiveAmount.toNumber(),
           receiveAmount: receiveAmount.minus(fee).toNumber(),
-          receiveSymbol: configLp.token_symbol,
+          receiveSymbol: receiveSymbol,
+          receiveSymbolImage: `/coins/${receiveSymbol?.toLowerCase()}.png`,
+          receiveDecimal: val?.token?.decimal || 9,
           feeAmount: fee,
-          feeSymbol: configLp.token_symbol,
-          feeRate: _calcRateFee(rateFee),
+          feeSymbol: configLp.collateral_symbol,
+          feeRate: 0,
+          conversionRate: conversionRate,
           configLp: configLp,
         };
       });
@@ -160,29 +175,9 @@ export const useWithdrawVault = () => {
       return null;
     }
     const req_availabe = res?.filter((el) => el.isClaim);
-    if (!req_availabe?.length) return res[0];
+    if (req_availabe?.length) return req_availabe[0];
 
-    // only claim all request
-    const default_req = {
-      withdrawAmount: 0,
-      receiveAmount: 0,
-      feeAmount: 0,
-    };
-    const grouped = req_availabe.reduce((acc, item) => {
-      const _acc = { ...item, ...acc };
-      _acc.withdrawAmount = BigNumber(_acc.withdrawAmount)
-        .plus(item.withdrawAmount)
-        .toNumber();
-      _acc.receiveAmount = BigNumber(_acc.receiveAmount)
-        .plus(item.receiveAmount)
-        .toNumber();
-      _acc.feeAmount = BigNumber(_acc.feeAmount)
-        .plus(item.feeAmount)
-        .toNumber();
-
-      return _acc;
-    }, default_req) as DataClaimType;
-    return grouped;
+    return res[0];
   };
 
   /**
@@ -192,10 +187,17 @@ export const useWithdrawVault = () => {
    * @param configLp
    * @returns
    */
-  const withdraw = async (amountLp: number, fee: number, configLp: LpType) => {
+  const withdraw = async (
+    amountLp: number,
+    configLp: LpType,
+    token_receive: string
+  ) => {
     try {
       if (!account?.address) {
         throw new Error("No account connected");
+      }
+      if (!token_receive) {
+        throw new Error("No payout token selected");
       }
 
       const profitData: any = await executionProfitData(configLp.vault_id);
@@ -245,9 +247,9 @@ export const useWithdrawVault = () => {
         tx.object(configLp.clock),
       ];
       const typeArguments = [
-        configLp.token_coin_type,
+        configLp.collateral_coin_type,
         configLp.lp_coin_type,
-        configLp.token_coin_type, //USDC for now
+        token_receive,
       ];
 
       tx.moveCall({
@@ -278,26 +280,58 @@ export const useWithdrawVault = () => {
       if (!account?.address) {
         throw new Error("No account connected");
       }
-      const dataSignature: any = await getSignatureRedeem({
+      const dataSignatures: any = await getWithdrawalRequestsMultiTokens({
         wallet_address: account.address,
         vault_id: configLp.vault_id,
       });
-      if (!dataSignature || !dataSignature?.signatures) {
+      if (!dataSignatures || !dataSignatures?.length) {
         throw new Error("Failed to get signature");
       }
 
       const tx = new Transaction();
-      const _arguments: any = [
-        tx.object(configLp.vault_config_id),
-        tx.object(configLp.vault_id),
-        tx.object(configLp.clock),
-      ];
-      const typeArguments = [configLp.token_coin_type, configLp.lp_coin_type];
-      tx.moveCall({
-        target: `${configLp.package_id}::vault::redeem`,
-        arguments: _arguments,
-        typeArguments: typeArguments,
-      });
+
+      for (let index = 0; index < dataSignatures.length; index++) {
+        const dataSignature = dataSignatures[index];
+        if (!dataSignature?.signatures?.length) {
+          continue;
+        }
+
+        const _arguments: any = [
+          tx.object(configLp.vault_config_id),
+          tx.object(configLp.vault_id),
+          tx.pure.address(account.address),
+          tx.pure.address(dataSignature.sig_token),
+          tx.pure("vector<u64>", dataSignature.withdraw_time_requests),
+          tx.pure("vector<u64>", dataSignature.withdraw_amount_requests),
+          tx.pure(
+            "vector<u64>",
+            dataSignature.withdraw_amount_collateral_requests
+          ),
+          tx.pure.u64(dataSignature.expire_time),
+          tx.pure(
+            "vector<vector<u8>>",
+            dataSignature.pks.map((key) => Array.from(Buffer.from(key, "hex")))
+          ),
+          tx.pure(
+            "vector<vector<u8>>",
+            dataSignature.signatures.map((key) =>
+              Array.from(Buffer.from(key, "hex"))
+            )
+          ),
+          tx.object(configLp.clock),
+        ];
+        const typeArguments = [
+          configLp.collateral_coin_type,
+          configLp.lp_coin_type,
+          dataSignature.token.token_address,
+        ];
+
+        tx.moveCall({
+          target: `${configLp.package_id}::vault::redeem_with_sigs_verify_token`,
+          arguments: _arguments,
+          typeArguments: typeArguments,
+        });
+      }
 
       const result = await signAndExecuteTransaction({
         transaction: tx,
@@ -311,6 +345,98 @@ export const useWithdrawVault = () => {
   };
 
   return { getRequestClaim, getLatestRequestClaim, withdraw, redeem };
+};
+
+export const useWithdrawVaultConfig = (configLp: LpType) => {
+  const { vaultConfig, refetch } = useGetVaultConfig(configLp?.vault_id);
+  const configVault = useMemo(() => {
+    const fields = vaultConfig;
+    const rate = fields?.rate || "0";
+    const lpToTokenRateRaw = getDecimalAmount(1, configLp.lp_decimals)
+      .times(rate)
+      .dividedBy(RATE_DENOMINATOR);
+    const lpToTokenRate =
+      getBalanceAmount(
+        lpToTokenRateRaw,
+        configLp.collateral_decimals
+      )?.toNumber() || 0;
+
+    return {
+      withdraw: fields?.withdraw?.fields || {
+        fee_bps: "0",
+        min: "0",
+        total_fee: "0",
+      },
+      lock_duration_ms: fields?.lock_duration_ms || "0",
+      available_liquidity: fields?.available_liquidity || "0",
+      id_pending_redeems: fields?.pending_redeems?.fields?.id?.id || "",
+      rate,
+      lpToTokenRate,
+    };
+  }, [vaultConfig, configLp]);
+
+  return {
+    configVault,
+    refetch,
+  };
+};
+
+export const useWithdrawEtsAmountReceive = (
+  lpData: LpType,
+  tokenReceive: any,
+  amountLp: number
+) => {
+  const min_amount_receive = 0.000001;
+
+  const {
+    data: dataEst,
+    refetch: refetchEstimateWithdraw,
+    error: errorEstimateWithdraw,
+    isLoading: isLoadingEstimateWithdraw,
+  } = useEstimateWithdraw(lpData?.vault_id, {
+    ndlp_amount: getDecimalAmount(1, lpData.lp_decimals).toString(),
+    payout_token: tokenReceive?.token_address
+      ? encodeURIComponent(tokenReceive?.token_address)
+      : null,
+  });
+  const rate_lp_per_token_receive = useMemo(() => {
+    return dataEst?.ndlp_per_payout_rate || 0;
+  }, [dataEst]);
+
+  const amount_receive = useMemo(() => {
+    return BigNumber(amountLp).times(rate_lp_per_token_receive).toNumber();
+  }, [amountLp, rate_lp_per_token_receive]);
+
+  const errorEstimate = useMemo(() => {
+    if (errorEstimateWithdraw) {
+      return typeof errorEstimateWithdraw === "string"
+        ? errorEstimateWithdraw
+        : errorEstimateWithdraw?.message;
+    }
+    if (Number(amountLp) && BigNumber(amount_receive).lt(min_amount_receive)) {
+      return "Amount received is too small.";
+    }
+    return "";
+  }, [amountLp, amount_receive, errorEstimateWithdraw]);
+
+  const conversion_rate = useMemo(() => {
+    return {
+      from_symbol: lpData?.lp_symbol,
+      to_symbol: tokenReceive?.token_symbol,
+      amount: rate_lp_per_token_receive,
+    };
+  }, [lpData, tokenReceive, rate_lp_per_token_receive]);
+
+  return {
+    receive: amount_receive,
+    amount: amountLp,
+    rate_lp_per_token_receive,
+    conversion_rate: conversion_rate,
+    tokenReceive,
+    errorEstimateWithdraw: errorEstimate,
+    isLoadingEstimateWithdraw,
+    refreshRate: refetchEstimateWithdraw,
+  };
 };
 
 /**
@@ -337,8 +463,10 @@ export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
       .times(rate)
       .dividedBy(RATE_DENOMINATOR);
     const lpToTokenRate =
-      getBalanceAmount(lpToTokenRateRaw, configLp.token_decimals)?.toNumber() ||
-      0;
+      getBalanceAmount(
+        lpToTokenRateRaw,
+        configLp.collateral_decimals
+      )?.toNumber() || 0;
 
     return {
       withdraw: fields?.withdraw?.fields || {
@@ -352,7 +480,7 @@ export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
       rate,
       lpToTokenRate,
     };
-  }, [vaultConfig]);
+  }, [vaultConfig, configLp]);
 
   const getEstWithdraw = useCallback(() => {
     try {

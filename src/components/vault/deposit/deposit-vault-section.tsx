@@ -9,6 +9,7 @@ import DepositModal from "@/components/vault/deposit/deposit-modal";
 import {
   useCurrentDepositVault,
   useGetDepositVaults,
+  useGetVaultConfig,
   useWhiteListModalStore,
 } from "@/hooks";
 import {
@@ -74,7 +75,8 @@ export default function DepositVaultSection() {
     depositVault.vault_id
   );
 
-  const conversionRate = useCollateralLPRate(false, depositVault.vault_id);
+  const { vaultConfig } = useGetVaultConfig(depositVault.vault_id);
+  const conversionRate = useCollateralLPRate(false, vaultConfig);
 
   const handleValidateDepositAmount = (value: string) => {
     if (!value) {

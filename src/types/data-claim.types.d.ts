@@ -7,12 +7,16 @@ export default interface DataClaimType {
   configLp: LpType;
   withdrawAmount: number;
   withdrawSymbol: string;
+  withdrawSymbolImage?: string;
 
   receiveAmountRaw: number;
   receiveAmount: number;
   receiveSymbol: string;
+  receiveSymbolImage?: string;
+  receiveDecimal?: number;
 
   feeAmount: number;
   feeSymbol: string;
   feeRate: number;
+  conversionRate: number;
 }

@@ -10,7 +10,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useCurrentDepositVault, useMyAssets, useWallet } from "@/hooks";
+import Web3Button from "@/components/ui/web3-button";
+import { useUserAssetsStore, useWallet } from "@/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { formatNumber } from "@/lib/number";
 import { truncateStringWithSeparator } from "@/utils/helpers";
@@ -19,6 +20,7 @@ import { motion } from "framer-motion";
 import { Copy, LogOut, RefreshCw, Wallet } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import { ConnectWalletModal } from "./connect-wallet-modal";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const ConnectWalletButton = memo(() => {
   const { toast } = useToast();
@@ -37,13 +39,16 @@ export const ConnectWalletButton = memo(() => {
     isConnected,
     address,
   } = useWallet();
+  const queryClient = useQueryClient();
+  const { assets, setRefetch, setAssets } = useUserAssetsStore();
 
-  const { refreshBalance, assets } = useMyAssets();
-
-  const currentVault = useCurrentDepositVault();
-
+  // get first for now due to we support usdc only
   const collateralToken = assets.find(
-    (asset) => asset.coin_type === currentVault.collateral_token
+    (asset) => asset.domain_type === "collateral" && asset.name === "USDC"
+  );
+
+  const displayTokens = assets.filter(
+    (asset) => asset.domain_type === "collateral"
   );
 
   useEffect(() => {
@@ -71,6 +76,7 @@ export const ConnectWalletButton = memo(() => {
     if (address) {
       await navigator.clipboard.writeText(address);
       toast({
+        variant: "success",
         title: "Address copied",
         description: "Wallet address copied to clipboard",
         duration: 2000,
@@ -82,29 +88,13 @@ export const ConnectWalletButton = memo(() => {
     // Simulate refresh with animation
     setLastRefreshTime(Date.now());
     toast({
+      variant: "success",
       title: "Wallet refreshed",
       description: "Latest wallet data loaded",
       duration: 2000,
     });
-    refreshBalance();
+    setRefetch();
   };
-
-  if (
-    !!walletConnectionInfo?.state?.lastConnectedAccountAddress &&
-    !isConnected
-  ) {
-    return (
-      <Button
-        variant="outline"
-        className="border-white/20 bg-gradient-to-r from-white/[0.07] to-white/[0.03] backdrop-blur-sm h-11 w-[252px]"
-        disabled
-      >
-        <div className="flex items-center">
-          <span className="text-white/50">Loading wallet...</span>
-        </div>
-      </Button>
-    );
-  }
 
   return (
     <>
@@ -114,23 +104,20 @@ export const ConnectWalletButton = memo(() => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <Button
+          <Web3Button
             onClick={openConnectWalletDialog}
-            className="relative overflow-hidden transition-all duration-300 w-[252px]"
-            variant="primary"
-            size="lg"
             data-wallet-connect="true"
+            className="flex items-center gap-1"
           >
-            <div className="absolute inset-0 bg-noise opacity-5 pointer-events-none"></div>
-            <Wallet className="mr-2 h-5 w-5" /> Connect Wallet
-          </Button>
+            <Wallet className="mr-1 h-4 w-4" /> Connect Wallet
+          </Web3Button>
         </motion.div>
       ) : (
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
               className="relative"
             >
@@ -196,8 +183,31 @@ export const ConnectWalletButton = memo(() => {
                 <div className="p-4 border-b border-white/10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                        <Wallet className="w-4 h-4 text-nova" />
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-r from-[#FFE8C9] via-[#F9F4E9] via-[#E3F6FF] to-[#C9D4FF]">
+                        <div className="w-[31px] h-[31px] inline-flex items-center justify-center rounded-full bg-[#121620]/95">
+                          <Wallet
+                            className="w-4 h-4"
+                            style={{
+                              stroke: "url(#wallet-gradient)",
+                            }}
+                          />
+                          <svg width="0" height="0">
+                            <defs>
+                              <linearGradient
+                                id="wallet-gradient"
+                                x1="0%"
+                                y1="0%"
+                                x2="100%"
+                                y2="100%"
+                              >
+                                <stop offset="0%" stopColor="#FFE8C9" />
+                                <stop offset="25%" stopColor="#F9F4E9" />
+                                <stop offset="60%" stopColor="#E3F6FF" />
+                                <stop offset="100%" stopColor="#C9D4FF" />
+                              </linearGradient>
+                            </defs>
+                          </svg>
+                        </div>
                       </div>
                       <span className="text-white font-medium">
                         Connected Wallet
@@ -218,7 +228,12 @@ export const ConnectWalletButton = memo(() => {
                               animate={{ rotate: [0, 360] }}
                               transition={{ duration: 0.6, ease: "easeInOut" }}
                             >
-                              <RefreshCw size={14} className="text-white/70" />
+                              <RefreshCw
+                                size={14}
+                                style={{
+                                  stroke: "url(#wallet-gradient)",
+                                }}
+                              />
                             </motion.div>
                           </Button>
                         </TooltipTrigger>
@@ -243,8 +258,13 @@ export const ConnectWalletButton = memo(() => {
                       <span className="font-mono text-xs text-white/80 block truncate pr-8">
                         {formatAddress(address || "")}
                       </span>
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/10 rounded-full p-1 group-hover:bg-white/20">
-                        <Copy className="w-3 h-3 text-white/70" />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/10 rounded-full p-[6px] group-hover:bg-white/20">
+                        <Copy
+                          className="w-3 h-3"
+                          style={{
+                            stroke: "url(#wallet-gradient)",
+                          }}
+                        />
                       </div>
                     </button>
                   </div>
@@ -253,10 +273,10 @@ export const ConnectWalletButton = memo(() => {
                   <div className="mb-4">
                     <div className="text-xs text-white/50 mb-2">Balance</div>
                     <div className="space-y-2">
-                      {assets.map((asset) => (
+                      {displayTokens.map((asset) => (
                         <div
                           className="flex items-center justify-between p-2.5 bg-black/20 border border-white/5 rounded-lg"
-                          key={asset.coin_type}
+                          key={`${asset.display_name}`}
                         >
                           <div className="flex items-center gap-2">
                             <img
@@ -280,9 +300,18 @@ export const ConnectWalletButton = memo(() => {
 
                   {/* Disconnect Button */}
                   <Button
-                    variant="primary"
+                    variant="web3"
                     size="sm"
-                    onClick={triggerWalletDisconnect}
+                    onClick={() => {
+                      triggerWalletDisconnect();
+                      queryClient
+                        .invalidateQueries({
+                          queryKey: ["allCoinObjects", address],
+                        })
+                        .then(() => {
+                          setAssets([]);
+                        });
+                    }}
                     className="w-full h-[40px]"
                   >
                     <LogOut className="w-4 h-4" />

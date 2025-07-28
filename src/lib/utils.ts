@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import BigNumber from "bignumber.js";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -19,7 +20,7 @@ export const formatAmount = ({
   precision = 2,
   stripZero = true,
 }: {
-  amount: number;
+  amount: number | string;
   precision?: number;
   stripZero?: boolean;
 }) => {
@@ -27,7 +28,7 @@ export const formatAmount = ({
     style: "decimal",
     minimumFractionDigits: precision,
     maximumFractionDigits: precision,
-  }).format(amount);
+  }).format(new BigNumber(amount).toNumber());
 
   if (stripZero) {
     formatted = formatted.replace(/\.?0+$/, "");
@@ -45,5 +46,5 @@ export const roundDownBalance = (balance: number, decimal: number = 4) => {
 };
 
 export const formatPercentage = (value: number) => {
-  return formatAmount({ amount: value, precision: 2 }) + "%";
+  return formatAmount({ amount: value, precision: 2, stripZero: false }) + "%";
 };

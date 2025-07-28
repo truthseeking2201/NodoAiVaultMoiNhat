@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
-import debounce from "lodash/debounce";
+import debounce from "lodash-es/debounce";
 
 import SummaryConfirmWithraw from "./summary-confirm-withdraw";
 import { Button } from "@/components/ui/button";

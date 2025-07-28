@@ -11,56 +11,66 @@ import {
 } from "@mysten/dapp-kit";
 import { getFullnodeUrl } from "@mysten/sui/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { lazy, Suspense, useEffect, useRef } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { DelayRender } from "./components/shared/delay-render";
-import VersionChecker from "./components/shared/version-checker";
-import { LanguageProvider } from "./contexts/language-context";
-import { useGetDepositVaults } from "./hooks";
-import Home from "./pages/home";
+import GlobalLoading from "./components/shared/global-loading";
+import ScrollToTop from "./components/ui/scroll-to-top";
 import {
-  clearWalletDisconnectHandler,
-  setWalletDisconnectHandler,
-} from "./utils/wallet-disconnect";
+  useFetchAssets,
+  useGetAllVaults,
+  useGetDepositVaults,
+  useWallet,
+} from "./hooks";
+import Home from "./pages/home";
+import VaultDetail from "./pages/vault-detail";
+import { setWalletDisconnectHandler } from "./utils/wallet-disconnect";
+import { ScrollToTopButton } from "@/components/ui/scroll-to-top-button";
 
 const NotFound = lazy(() =>
   import("./pages/not-found").catch((e) => {
     console.error("Error loading NotFound:", e);
-    return { default: () => <PageFallback /> };
+    return { default: () => <GlobalLoading /> };
   })
 );
 
-const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
-  const initLoad = useRef(false);
-  const { isLoading, error, data } = useGetDepositVaults();
+let hasLoadedVaults = false;
+
+const useSetWalletDisconnectHandler = () => {
   const account = useCurrentAccount();
   const { mutate: disconnect } = useDisconnectWallet();
-
-  useEffect(() => {
-    if (!initLoad.current && data) {
-      initLoad.current = true;
-    }
-  }, [data]);
+  const { setIsAuthenticated } = useWallet();
 
   useEffect(() => {
     if (account?.address) {
       setWalletDisconnectHandler(() => {
         disconnect();
+        setIsAuthenticated(false);
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("current-address");
         localStorage.removeItem("whitelisted_address");
       });
     }
+  }, [account, disconnect, setIsAuthenticated]);
+};
 
-    return () => {
-      clearWalletDisconnectHandler();
-    };
-  }, [account, disconnect]);
+const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
+  const initLoad = useRef(false);
+  const { isLoading, error, data } = useGetDepositVaults();
+  const vaultIds = data?.map((vault) => vault.vault_id) || [];
+  useFetchAssets();
+  useGetAllVaults(vaultIds);
+  useSetWalletDisconnectHandler();
 
-  if (isLoading || !data) {
-    return <PageFallback />;
+  useEffect(() => {
+    if (data && !hasLoadedVaults) {
+      hasLoadedVaults = true;
+    }
+  }, [data]);
+
+  if (isLoading && !hasLoadedVaults) {
+    return <GlobalLoading />;
   }
 
   // show error when failed to fetch deposit vaults for first load
@@ -68,55 +78,56 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
     throw new Error("Failed to fetch deposit vaults");
   }
 
-  return <DelayRender>{children}</DelayRender>;
+  return <>{children}</>;
 };
 
 // Create query client that still loads data but doesn't show loading states
 const queryClient = new QueryClient();
 
-// Replace loading state with mock data for demo - no loading screen needed
-const PageFallback = () => {
-  return (
-    <div className="flex h-screen w-screen items-center justify-center">
-      <Loader2 className="h-10 w-10 animate-spin" />
-    </div>
-  );
-};
-
 const { networkConfig } = createNetworkConfig({
   testnet: { url: getFullnodeUrl("testnet") },
   mainnet: { url: getFullnodeUrl("mainnet") },
 });
+//
 
 const App = () => (
   <ErrorBoundary>
-    <Suspense fallback={<PageFallback />}>
+    <Suspense fallback={<GlobalLoading />}>
       <QueryClientProvider client={queryClient}>
         <SuiClientProvider networks={networkConfig} defaultNetwork={"mainnet"}>
           <WalletProvider autoConnect>
             <ConfigWrapper>
-              <LanguageProvider>
-                <TooltipProvider>
-                  <Toaster />
-                  <VersionChecker />
-                  <BrowserRouter>
-                    <Routes>
-                      <Route
-                        path="/"
-                        element={
-                          <MainLayout>
-                            <Home />
-                          </MainLayout>
-                        }
-                      />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </BrowserRouter>
-                </TooltipProvider>
-              </LanguageProvider>
+              <TooltipProvider>
+                <Toaster />
+                {/* <VersionChecker /> */}
+                <BrowserRouter>
+                  <ScrollToTop />
+                  <ScrollToTopButton />
+                  <Routes>
+                    <Route
+                      path="/"
+                      element={
+                        <MainLayout>
+                          <Home />
+                        </MainLayout>
+                      }
+                    />
+                    <Route
+                      path="/vault/:vault_id"
+                      element={
+                        <MainLayout>
+                          <VaultDetail />
+                        </MainLayout>
+                      }
+                    />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+              </TooltipProvider>
             </ConfigWrapper>
           </WalletProvider>
         </SuiClientProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </Suspense>
   </ErrorBoundary>

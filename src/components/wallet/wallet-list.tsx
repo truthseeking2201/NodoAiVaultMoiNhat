@@ -5,6 +5,8 @@ import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WALLETS } from "@/components/wallet/constants";
 import { useLoginWallet } from "@/hooks";
+import { useToast } from "@/hooks/use-toast";
+import { IconErrorToast } from "../ui/icon-error-toast";
 
 type Wallet = {
   name: string;
@@ -24,6 +26,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
   const wallets = useWallets();
   const { mutate: connect } = useConnectWallet();
   const loginWallet = useLoginWallet();
+  const { toast } = useToast();
 
   const allowWallets = WALLETS.map((wallet) => {
     const foundWallet = wallets.find((w) => w.name === wallet.name);
@@ -55,9 +58,14 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
               const address = data.accounts[0].address;
               const isLoginSuccess = await loginWallet(address);
               if (!isLoginSuccess) {
-                setError(
-                  `Failed to connect to ${selectedWallet.displayName} wallet. Please try again.`
-                );
+                toast({
+                  title: "Login failed",
+                  description:
+                    "Failed to verify your wallet signature. Please try again.",
+                  variant: "error",
+                  duration: 5000,
+                  icon: <IconErrorToast />,
+                });
                 handleReject();
                 return;
               }
