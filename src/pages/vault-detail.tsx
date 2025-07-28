@@ -45,35 +45,35 @@ const VaultDetail = () => {
     return [
       {
         label: "APY",
-        tooltip: [
-          {
-            label: "DEX APR",
-            value: !isLoadingVaultDetails
-              ? formatAmount({
-                  amount: vaultDetails?.pool_apr,
-                })
-              : "--",
-            suffix: "%",
-          },
-          {
-            label: "NODO APR",
-            value: !isLoadingVaultDetails
-              ? formatAmount({
-                  amount: vaultDetails?.vault_apr,
-                })
-              : "--",
-            suffix: "%",
-          },
-          {
-            label: "NODO APY",
-            value: !isLoadingVaultDetails
-              ? formatAmount({
-                  amount: vaultDetails?.vault_apy,
-                })
-              : "--",
-            suffix: "%",
-          },
-        ],
+        // tooltip: [
+        //   {
+        //     label: "DEX APR",
+        //     value: !isLoadingVaultDetails
+        //       ? formatAmount({
+        //           amount: vaultDetails?.pool_apr,
+        //         })
+        //       : "--",
+        //     suffix: "%",
+        //   },
+        //   {
+        //     label: "NODO APR",
+        //     value: !isLoadingVaultDetails
+        //       ? formatAmount({
+        //           amount: vaultDetails?.vault_apr,
+        //         })
+        //       : "--",
+        //     suffix: "%",
+        //   },
+        //   {
+        //     label: "NODO APY",
+        //     value: !isLoadingVaultDetails
+        //       ? formatAmount({
+        //           amount: vaultDetails?.vault_apy,
+        //         })
+        //       : "--",
+        //     suffix: "%",
+        //   },
+        // ],
         value: !isLoadingVaultDetails
           ? formatAmount({
               amount: vaultDetails?.vault_apy,

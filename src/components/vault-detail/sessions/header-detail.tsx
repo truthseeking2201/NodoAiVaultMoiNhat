@@ -61,7 +61,11 @@ const HeaderDetail = ({
               ))}
           </div>
           <div>
-            <ShinyText text={vault.vault_name} className="text-2xl font-bold" textColor="text-white/75" />
+            <ShinyText
+              text={vault.vault_name}
+              className="text-2xl font-bold"
+              textColor="text-white/75"
+            />
             <div className="flex items-center gap-1">
               <div className="text-white/50"> Powered by </div>
               <img
@@ -98,50 +102,54 @@ const HeaderDetail = ({
                 <div className="text-white/80 text-xs text-right">
                   {info.label}
                 </div>
-                <TooltipProvider delayDuration={0}>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <HelpCircle className="h-3 w-3 text-white/80" />
-                    </TooltipTrigger>
-                    <TooltipContent className="shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3">
-                      {info?.tooltip?.map((tooltipItem: any, index: number) => (
-                        <div
-                          key={`${info.label}-${index}`}
-                          className="flex items-center justify-between gap-2 min-w-[200px] mb-1"
-                        >
-                          <div className="text-xs text-white/80">
-                            {tooltipItem.label}
-                          </div>
-                          {tooltipItem.isHighlighted ? (
+                {info?.tooltip?.length > 0 && (
+                  <TooltipProvider delayDuration={0}>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <HelpCircle className="h-3 w-3 text-white/80" />
+                      </TooltipTrigger>
+                      <TooltipContent className="shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3">
+                        {info?.tooltip?.map(
+                          (tooltipItem: any, index: number) => (
                             <div
-                              className={cn(
-                                "text-sm font-mono flex items-center",
-                                tooltipItem.isIncreasing
-                                  ? "text-[#64EBBC]"
-                                  : "text-red-400"
-                              )}
+                              key={`${info.label}-${index}`}
+                              className="flex items-center justify-between gap-2 min-w-[200px] mb-1"
                             >
-                              {tooltipItem.isIncreasing ? (
-                                <ArrowIncreasing />
+                              <div className="text-xs text-white/80">
+                                {tooltipItem.label}
+                              </div>
+                              {tooltipItem.isHighlighted ? (
+                                <div
+                                  className={cn(
+                                    "text-sm font-mono flex items-center",
+                                    tooltipItem.isIncreasing
+                                      ? "text-[#64EBBC]"
+                                      : "text-red-400"
+                                  )}
+                                >
+                                  {tooltipItem.isIncreasing ? (
+                                    <ArrowIncreasing />
+                                  ) : (
+                                    <ArrowDecreasing />
+                                  )}
+                                  {tooltipItem.prefix || ""}
+                                  {tooltipItem.value}
+                                  {tooltipItem.suffix || ""}
+                                </div>
                               ) : (
-                                <ArrowDecreasing />
+                                <div className="text-sm font-semibold text-white font-mono">
+                                  {tooltipItem.prefix || ""}
+                                  {tooltipItem.value}
+                                  {tooltipItem.suffix || ""}
+                                </div>
                               )}
-                              {tooltipItem.prefix || ""}
-                              {tooltipItem.value}
-                              {tooltipItem.suffix || ""}
                             </div>
-                          ) : (
-                            <div className="text-sm font-semibold text-white font-mono">
-                              {tooltipItem.prefix || ""}
-                              {tooltipItem.value}
-                              {tooltipItem.suffix || ""}
-                            </div>
-                          )}
-                        </div>
-                      )) || "No additional info available."}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                          )
+                        )}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
               </div>
 
               <div className="text-white font-medium text-right text-xl font-mono">
