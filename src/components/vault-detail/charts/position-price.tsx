@@ -221,29 +221,13 @@ const PositionPriceChart = ({
 
   const checkOffset = useMemo(() => {
     return (ref: number) => {
-      let offset = 2; // Default offset
-      if (ref < 0.00001) {
-        offset = 0.000001;
-      } else if (ref < 0.0001) {
-        offset = 0.00001;
-      } else if (ref < 0.001) {
-        offset = 0.0001;
-      } else if (ref < 0.01) {
-        offset = 0.001;
-      } else if (ref < 0.1) {
-        offset = 0.01;
-      } else if (ref < 1) {
-        offset = 0.1;
-      } else if (ref < 10) {
-        offset = 1;
-      } else if (ref < 100) {
-        offset = 10;
-      } else if (ref < 1000) {
-        offset = 100;
-      } else if (ref > 10000) {
-        offset = 1000;
+      let offset = 2;
+      const extendRange = ref < Math.pow(10, 4) ? 0.7 : 1;
+      if (ref <= 0) {
+        offset = 0.0000001;
       } else {
-        offset = 100;
+        const exponent = Math.floor(Math.log10(ref));
+        offset = Math.pow(10, exponent - extendRange);
       }
       return offset;
     };
@@ -355,18 +339,28 @@ const PositionPriceChart = ({
             }}
             axisLine={false}
             tickLine={false}
-            tick={({ x, y, payload }) => (
-              <text
-                x={x}
-                y={y}
-                fontSize={12}
-                className="font-mono text-white"
-                fill="#fff"
-                textAnchor="end"
-              >
-                {`${formatNumber(payload.value, 0, payload.value < 1 ? 6 : 2)}`}
-              </text>
-            )}
+            tick={({ x, y, payload }) => {
+              let decimalPlaces = 2;
+              if (payload.value < 1) {
+                decimalPlaces = 6;
+              } else if (payload.value < Math.pow(10, 4)) {
+                decimalPlaces = 2;
+              } else {
+                decimalPlaces = 0;
+              }
+              return (
+                <text
+                  x={x}
+                  y={y}
+                  fontSize={12}
+                  className="font-mono text-white"
+                  fill="#fff"
+                  textAnchor="end"
+                >
+                  {formatNumber(payload.value, 0, decimalPlaces)}
+                </text>
+              );
+            }}
           />
 
           <Legend content={<CustomLegend />} />
