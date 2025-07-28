@@ -1,13 +1,11 @@
-import { useGetDepositVaults, useIsChromeDesktop } from "@/hooks";
+import { useIsChromeDesktop } from "@/hooks";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
 import React from "react";
 import demoUIOfDesktop from "../../assets/images/demo-ui-nodo-ai-vault.png";
-import RegisterForWhiteList from "../dashboard/request-whitelist-button/register-for-white-layout";
 import UseDesktopBanner from "../dashboard/use-desktop-banner";
-import ConditionRenderer from "../shared/condition-renderer";
 import { AppHeader } from "./app-header";
+import { AppFooter } from "./app-footer";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -16,8 +14,6 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   const { isChromeDesktop } = useIsChromeDesktop();
   const { isLg } = useBreakpoint();
-  const { data, isLoading } = useGetDepositVaults();
-  const isEmptyVaults = !isLoading && data?.length === 0;
 
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden main-bg">
@@ -55,25 +51,24 @@ export function MainLayout({ children }: MainLayoutProps) {
       {isLg && (
         <AnimatePresence mode="wait">
           <motion.div
-            className="flex flex-col min-h-screen relative z-[var(--z-elevate)]"
+            id="main-layout"
+            className="flex flex-col h-screen relative"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.3 }}
           >
             <AppHeader />
-            <ConditionRenderer
-              when={!isEmptyVaults}
-              fallback={
-                <div className="flex h-screen w-screen items-center justify-center">
-                  <Loader2 className="h-10 w-10 animate-spin" />
-                </div>
-              }
+            <div
+              id="main-layout-content"
+              className="flex-1 overflow-y-auto pt-20"
+              style={{ height: "calc(100vh - 77px)" }}
             >
-              <div className="flex-1 relative">{children}</div>
-            </ConditionRenderer>
-            <RegisterForWhiteList />
-            {/* <AppFooter /> */}
+              <div>
+                {children}
+                <AppFooter />
+              </div>
+            </div>
           </motion.div>
         </AnimatePresence>
       )}

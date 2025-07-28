@@ -29,15 +29,21 @@ export const showFormatNumber = (
   number: string | number,
   minPrecision = 0,
   maxPrecision = 6,
-  prefix = ""
+  prefix = "",
+  isRoundDown = false
 ) => {
   if (number === null || number === undefined) return "--";
 
   // Convert to a number if it's a string
-  const num = typeof number === "string" ? parseFloat(number) : number;
+  let num = typeof number === "string" ? parseFloat(number) : number;
 
   // Handle cases where parseFloat results in NaN
   if (isNaN(num)) return "--";
+  if (isRoundDown) {
+    num = BigNumber(num)
+      .decimalPlaces(maxPrecision, BigNumber.ROUND_DOWN)
+      .toNumber();
+  }
 
   const options = {
     minimumFractionDigits: minPrecision,

@@ -1,4 +1,8 @@
 /* Dashboard Layout */
+:root {
+  --main-bg-color: #070707;
+}
+
 .dashboard-container {
   width: 100%;
   max-width: 1200px;
@@ -175,13 +179,5 @@
 
 
 .main-bg {
-  background-image: url('/bg-main.webp');
-  position: relative;
-  background-size: cover;
-  background-position: top;
-  background-repeat: no-repeat;
-
-  @media (max-width: 768px) {
-    background-image: url('/bg-main-mobile.png');
-  }
+  background: #000000;
 }

@@ -1,21 +1,217 @@
+import briefcase from "@/assets/images/footer/briefcase.png";
+import globe from "@/assets/images/footer/globe.png";
+import mail from "@/assets/images/footer/mail.png";
+import cns from "@/assets/images/partners/cns.png";
+import hashLockAudit from "@/assets/images/partners/hashlock.png";
+import onramp from "@/assets/images/partners/onramp.png";
+import quillAudits from "@/assets/images/partners/quillaudits.png";
+import discord from "@/assets/images/socials/discord.png";
+import linkedin from "@/assets/images/socials/linkedin.png";
+import telegram from "@/assets/images/socials/telegram.png";
+import twitter from "@/assets/images/socials/twitter.png";
+import VersionChecker from "../shared/version-checker";
+import { Button } from "../ui/button";
+import { useLocation } from "react-router-dom";
+// import footerBg from "@/assets/images/footer/footer-bg.svg";
+
+const Box = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="flex flex-1 p-px rounded-xl mx-auto bg-gradient-to-b from-[#FFDFD5CC] to-[#FFFFFF00] hover:opacity-80 transition-all duration-300">
+      <div
+        className="rounded-xl w-full flex-1 flex flex-col items-center p-6 bg-[#171717]"
+      >
+        {children}
+      </div>
+    </div>
+  );
+};
+
+const Link = ({
+  children,
+  href,
+  target = "_blank",
+}: {
+  children: React.ReactNode;
+  href: string;
+  target?: string;
+}) => {
+  return (
+    <a
+      href={href}
+      className="text-white/70 text-sm font-sans hover:text-white"
+      target={target}
+      rel="noopener noreferrer"
+    >
+      {children}
+    </a>
+  );
+};
+
 export function AppFooter() {
   const currentYear = new Date().getFullYear();
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
   return (
-    <footer className="py-6 text-center text-050 font-caption border-t border-[#1A1A1A] bg-transparent">
-      <div
-        style={{
-          maxWidth: "var(--layout-desktop-container)",
-          margin: "0 auto",
-          padding: "0 36px",
-        }}
-        className="flex flex-col md:flex-row justify-between items-center"
-      >
-        <div>©{currentYear} NODO. All rights reserved</div>
-        {/* <div>
-          NODO Global Limited 10 Anson Road #22-06 International Plaza,
-          Singapore 079903
-        </div> */}
+    <footer
+      className={`${isHome ? "mt-[100px]" : ""}`}
+      style={{
+        background:
+          "linear-gradient(90deg, rgba(255, 232, 201, 0.08) 0%, rgba(249, 244, 233, 0.08) 25%, rgba(227, 246, 255, 0.08) 60%, rgba(201, 212, 255, 0.08) 100%)",
+      }}
+    >
+      <div className="max-w-[var(--layout-desktop-breakpoint-xl)] mx-auto px-9 pt-9 relative z-10">
+        <div className="flex justify-between ">
+          <div>
+            <img src="/nodo-logo-tm.png" className="h-[48px] mb-5" />
+            <div className="font-light text-white/70 max-w-[654px] font-sans text-sm">
+              NODO is a yield infrastructure protocol delivering autonomous,
+              AI-powered liquidity provisioning to DeFi. It operates intelligent
+              vaults on-chain that actively manage LP positions in real time,
+              maximizing capital efficiency, minimizing impermanent loss, and
+              capturing trading fees across top decentralized exchanges.
+            </div>
+            <div className="flex gap-6 font-mono text-xs mt-6">
+              <div>
+                <div className="mb-3">Audited by</div>
+                <div className="rounded-lg px-4 py-3 bg-white/15 flex items-center gap-4 h-[40px]">
+                  <img src={quillAudits} className="h-[20px]" />
+                  <img src={hashLockAudit} className="h-[20px]" />
+                </div>
+              </div>
+              <div>
+                <div className="mb-3">Strategic Integration Partners</div>
+                <div className="rounded-lg px-4 py-3 bg-white/15 flex items-center gap-4 h-[40px]">
+                  <img src={onramp} className="h-[30px] object-cover" />
+                  <img src={cns} className="h-[30px] object-cover" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className="text-white font-bold text-base">Navigation</div>
+            <div className="text-white/70 text-sm mt-4 font-sans text-right hover:opacity-80 transition-all duration-300">
+              <div className="mb-2">
+                <Link href="https://docs.nodo.xyz">Docs</Link>
+              </div>
+              <div>
+                <Link href="mailto:support@nodo.xyz">Contact</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-6 mt-11 mb-12">
+          <Box>
+            <img src={globe} className="h-[48px]" />
+            <div className="font-semibold text-white mt-4">Follow Us</div>
+            <div className="flex gap-4 mt-4">
+              <img
+                src={discord}
+                className="h-[36px] opacity-50 cursor-pointer hover:opacity-100 transition-all duration-300"
+                onClick={() => {
+                  window.open(
+                    "https://discord.com/invite/eNfhEwz5bE",
+                    "_blank"
+                  );
+                }}
+              />
+              <img
+                src={twitter}
+                className="h-[36px] opacity-50 cursor-pointer hover:opacity-100 transition-all duration-300"
+                onClick={() => {
+                  window.open("https://twitter.com/Official_NODO", "_blank");
+                }}
+              />
+              <img
+                src={telegram}
+                className="h-[36px] opacity-50 cursor-pointer hover:opacity-100 transition-all duration-300"
+                onClick={() => {
+                  window.open("https://t.me/Official_NODO_Community", "_blank");
+                }}
+              />
+              <img
+                src={linkedin}
+                className="h-[36px] opacity-50 cursor-pointer hover:opacity-100 transition-all duration-300"
+                onClick={() => {
+                  window.open(
+                    "https://www.linkedin.com/company/nodo-official/",
+                    "_blank"
+                  );
+                }}
+              />
+            </div>
+          </Box>
+          <Box>
+            <img src={mail} className="h-[48px]" />
+            <div className="font-semibold text-white mb-4 mt-4">
+              For customer support queries
+            </div>
+            <Button
+              asChild
+              onClick={() => {
+                window.open("mailto:support@nodo.xyz", "_blank");
+              }}
+              className="cursor-pointer"
+            >
+              <div className="rounded-lg border border-[#FFE8C9] px-6 py-2 hover:bg-white/10">
+                Contact Support
+              </div>
+            </Button>
+          </Box>
+          <Box>
+            <img src={briefcase} className="h-[48px]" />
+            <div className="font-semibold text-white mb-4 mt-4">
+              For partnership queries
+            </div>
+            <Button
+              asChild
+              onClick={() => {
+                window.open("https://calendly.com/nodoxyz", "_blank");
+              }}
+              className="cursor-pointer"
+            >
+              <div className="rounded-lg border border-[#FFE8C9] px-6 py-2 hover:bg-white/10">
+                Get in Touch
+              </div>
+            </Button>
+          </Box>
+        </div>
+      </div>
+
+      <div className="border-t border-white/10 bg-transparent font-sans italic flex text-sm">
+        <div className="max-w-[var(--layout-desktop-breakpoint-xl)] mx-auto w-full px-9 py-4">
+          <div className="flex justify-between text-white/70">
+            <div className="flex items-center">
+              <span className="mr-6">
+                ©{currentYear} NODO. All rights reserved
+              </span>
+              {/* <div className="flex items-center gap-2 underline">
+                <Link href="https://app.nodo.xyz/Terms&Conditions.pdf">
+                  <span>T&C</span>
+                </Link>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="4"
+                  height="5"
+                  viewBox="0 0 4 5"
+                  fill="none"
+                >
+                  <circle
+                    opacity="0.7"
+                    cx="2"
+                    cy="2.51562"
+                    r="2"
+                    fill="white"
+                  />
+                </svg>
+                <Link href="https://app.nodo.xyz/PrivacyPolicy.pdf">
+                  <span>Privacy Policy</span>
+                </Link>
+              </div> */}
+            </div>
+            <VersionChecker />
+          </div>
+        </div>
       </div>
     </footer>
   );

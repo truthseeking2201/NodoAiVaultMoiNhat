@@ -1,31 +1,124 @@
 import { executionProfitData } from "@/apis/vault";
+import { SUI_CONFIG, USDC_CONFIG } from "@/config/coin-config";
 import { CLOCK, RATE_DENOMINATOR } from "@/config/vault-config";
-import { UserCoinAsset } from "@/types/coin.types";
+import { getBalanceAmountForInput } from "@/lib/number";
+import {
+  SCVaultConfig,
+  VaultSwapDepositInfo,
+} from "@/types/vault-config.types";
 import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
+import { SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import BigNumber from "bignumber.js";
 import { Buffer } from "buffer";
 import { useMergeCoins } from "./use-merge-coins";
-import { useGetDepositVaultById, useGetVaultConfig } from "./use-vault";
+import { useGetVaultConfig, useVaultBasicDetails } from "./use-vault";
 import { useWallet } from "./use-wallet";
+
+type DepositCoin = {
+  coin_type: string;
+  decimals: number;
+};
+
+type DepositArgs = {
+  coin: DepositCoin;
+  amount: number;
+  swapDepositInfo: VaultSwapDepositInfo;
+  onDepositSuccessCallback?: (data: any) => void;
+};
+
+const MODULE_ADAPTERS = {
+  mmt: "mmt_adapter",
+  bluefin: "bluefin_adapter",
+  cetus: "cetus_adapter",
+};
+
+const buildTarget = (
+  coin: DepositCoin,
+  vaultPackageId: string,
+  swapDepositInfo: VaultSwapDepositInfo
+) => {
+  if (coin.coin_type === USDC_CONFIG.coinType) {
+    return `${vaultPackageId}::vault::deposit_with_sigs_credit_time`;
+  }
+  if (!swapDepositInfo) {
+    throw new Error("No swap deposit info");
+  }
+  const { vault_package_id, vault_package_module, vault_package_function } =
+    swapDepositInfo;
+
+  return `${vault_package_id}::${vault_package_module}::${vault_package_function}`;
+};
+
+const validateDepositGasFee = async (suiClient: SuiClient, address: string) => {
+  const suiCoins = await suiClient.getCoins({
+    owner: address,
+    coinType: SUI_CONFIG.coinType,
+  });
+
+  const totalSuiBalance = getBalanceAmountForInput(
+    suiCoins.data.reduce((sum, coin) => {
+      return sum.plus(new BigNumber(coin.balance || "0"));
+    }, new BigNumber(0)),
+    SUI_CONFIG.decimals,
+    SUI_CONFIG.decimals
+  );
+
+  // Check if user is trying to deposit coin with insufficient SUI balance
+  if (totalSuiBalance < SUI_CONFIG.gas_fee) {
+    throw new Error(
+      `Insufficient SUI balance. You need at least ${SUI_CONFIG.gas_fee} SUI ` +
+        `(${
+          SUI_CONFIG.gas_fee
+        } for gas fees). Current balance: ${totalSuiBalance.toFixed(6)} SUI`
+    );
+  }
+
+  return totalSuiBalance;
+};
+
+const validateDepositSui = async (totalSuiBalance: number, amount: number) => {
+  const amountWithGasFee = amount + SUI_CONFIG.gas_fee;
+
+  if (totalSuiBalance - amountWithGasFee < 0) {
+    throw new Error(
+      `Insufficient SUI balance. You need at least ${amountWithGasFee} SUI ` +
+        `(${
+          SUI_CONFIG.gas_fee
+        } for gas fees). Current balance: ${totalSuiBalance.toFixed(6)} SUI`
+    );
+  }
+};
 
 export const useDepositVault = (vaultId: string) => {
   const { mutateAsync: signAndExecuteTransaction } =
     useSignAndExecuteTransaction();
   const { address } = useWallet();
   const suiClient = useSuiClient();
-  const vaultConfig = useGetDepositVaultById(vaultId);
+  const { data: vaultConfig } = useVaultBasicDetails(vaultId);
 
   const { mergeCoins } = useMergeCoins();
 
-  const deposit = async (
-    coin: UserCoinAsset,
-    amount: number,
-    onDepositSuccessCallback?: (data: any) => void
-  ) => {
+  const deposit = async ({
+    coin,
+    amount,
+    swapDepositInfo,
+    onDepositSuccessCallback,
+  }: DepositArgs) => {
     try {
+      const packageId = vaultConfig.metadata.package_id;
       if (!address) {
         throw new Error("No account connected");
+      }
+
+      if (!packageId) {
+        throw new Error("No package id");
+      }
+
+      const totalSuiBalance = await validateDepositGasFee(suiClient, address);
+
+      if (coin.coin_type === SUI_CONFIG.coinType) {
+        await validateDepositSui(totalSuiBalance, amount);
       }
 
       const profitData: any = await executionProfitData(vaultConfig.vault_id);
@@ -33,22 +126,31 @@ export const useDepositVault = (vaultId: string) => {
         throw new Error("Failed to get signature");
       }
 
-      // Merge coins first
-      const mergedCoinId = await mergeCoins(coin.coin_type);
-      if (!mergedCoinId) {
-        throw new Error("No coins available to deposit");
+      const tx = new Transaction();
+      let splitCoin;
+
+      // Calculate the exact amount to split (with proper precision)
+      const splitAmount = new BigNumber(amount)
+        .multipliedBy(new BigNumber(10).pow(coin.decimals))
+        .toString();
+
+      // Handle SUI vs other tokens differently
+      if (coin.coin_type === SUI_CONFIG.coinType) {
+        // For SUI: Split directly from gas coin to avoid gas coin conflicts
+        [splitCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(splitAmount)]);
+      } else {
+        // For other tokens: Use the normal merge and split flow
+        const mergedCoinId = await mergeCoins(coin.coin_type);
+        if (!mergedCoinId) {
+          throw new Error("No coins available to deposit");
+        }
+
+        [splitCoin] = tx.splitCoins(tx.object(mergedCoinId), [
+          tx.pure.u64(splitAmount),
+        ]);
       }
 
-      const tx = new Transaction();
-
-      // Split from the merged coin
-      const [splitCoin] = tx.splitCoins(tx.object(mergedCoinId), [
-        tx.pure.u64(Math.floor(amount * 10 ** coin.decimals)),
-      ]);
-      const _arguments: any = [
-        tx.object(vaultConfig.metadata.vault_config_id),
-        tx.object(vaultConfig.vault_id),
-        splitCoin,
+      const baseParams = [
         tx.pure.u64(profitData.vault_value_usd),
         tx.pure.u64(new BigNumber(profitData.profit_amount).abs().toString()),
         tx.pure.bool(profitData.negative),
@@ -69,13 +171,60 @@ export const useDepositVault = (vaultId: string) => {
         tx.object(CLOCK),
       ];
 
-      tx.moveCall({
-        target: `${vaultConfig.metadata.package_id}::${vaultConfig.vault_module}::deposit_with_sigs_credit_time`,
-        arguments: _arguments,
-        typeArguments: [
+      const slippageBps = 300; // 3%
+      let _arguments: any = [];
+      let _typeArguments: any = [];
+      if (coin.coin_type === USDC_CONFIG.coinType) {
+        _arguments = [
+          tx.object(vaultConfig.metadata.vault_config_id),
+          tx.object(vaultConfig.vault_id),
+          splitCoin,
+          ...baseParams,
+        ];
+        _typeArguments = [
           vaultConfig.collateral_token,
           vaultConfig.vault_lp_token,
-        ],
+        ];
+      } else {
+        _typeArguments = [
+          coin.coin_type,
+          swapDepositInfo.vault_collateral_token,
+          swapDepositInfo.vault_lp_token,
+        ];
+        switch (swapDepositInfo.vault_package_module) {
+          case MODULE_ADAPTERS.mmt:
+            _arguments = [
+              tx.object(swapDepositInfo.vault_config),
+              tx.object(swapDepositInfo.vault_id),
+              tx.object(swapDepositInfo.pool_address),
+              tx.object(swapDepositInfo.version),
+              splitCoin,
+              tx.pure.u128(slippageBps),
+              ...baseParams,
+            ];
+            break;
+          case MODULE_ADAPTERS.bluefin:
+          case MODULE_ADAPTERS.cetus:
+            _arguments = [
+              tx.object(swapDepositInfo.vault_config),
+              tx.object(swapDepositInfo.vault_id),
+              tx.object(swapDepositInfo.global_config),
+              tx.object(swapDepositInfo.pool_address),
+              splitCoin,
+              tx.pure.u128(slippageBps),
+              ...baseParams,
+            ];
+            break;
+          default:
+            throw new Error("Invalid vault package module");
+        }
+      }
+
+      const target = buildTarget(coin, packageId, swapDepositInfo);
+      tx.moveCall({
+        target,
+        arguments: _arguments,
+        typeArguments: _typeArguments,
       });
       // console.log("🧱 Inputs:", tx.blockData.inputs);
       // console.log("📄 Raw tx:", JSON.stringify(tx.serialize(), null, 2));
@@ -99,6 +248,7 @@ export const useDepositVault = (vaultId: string) => {
             const depositEvent = events.find((event) =>
               event.type.includes("vault::DepositWithSigTimeEvent")
             );
+            console.log("🚀 ~ depositEvent:", depositEvent);
             // Pass the event data to your callback
             onDepositSuccessCallback?.({
               ...data,
@@ -152,9 +302,10 @@ export const useCalculateNDLPReturn = (
 };
 
 // calculate the rate of 1 collateral = ? NDLP
-export const useCollateralLPRate = (isReverse = false, vaultId: string) => {
-  const { vaultConfig } = useGetVaultConfig(vaultId);
-
+export const useCollateralLPRate = (
+  isReverse = false,
+  vaultConfig: SCVaultConfig
+) => {
   if (!vaultConfig) {
     return 1;
   }

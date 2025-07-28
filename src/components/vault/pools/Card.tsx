@@ -7,6 +7,10 @@ import { useDepositVaultStore } from "@/hooks/use-store";
 import { useWallet } from "@/hooks/use-wallet";
 import { cn, formatAmount, formatPercentage } from "@/lib/utils";
 import { VaultPool } from ".";
+import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
+import ConditionRenderer from "@/components/shared/condition-renderer";
+import { useCurrentAccount } from "@mysten/dapp-kit";
+import { useGetVaultConfig } from "@/hooks";
 
 const APR = ({
   text,
@@ -43,7 +47,8 @@ const VaultCard = ({
     pool.vault_lp_token_decimals
   );
 
-  const conversionRate = useCollateralLPRate(true, pool.vault_id);
+  const { vaultConfig } = useGetVaultConfig(pool.vault_id);
+  const conversionRate = useCollateralLPRate(true, vaultConfig);
   const userHolding = ndlpAmount * conversionRate;
   const isSelected = pool.isSelected && pool.isLive;
   const { setDepositVault } = useDepositVaultStore();

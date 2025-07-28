@@ -1,13 +1,19 @@
 
 import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import ConditionRenderer from "../shared/condition-renderer";
 
 interface PageContainerProps {
   children: React.ReactNode;
   className?: string;
+  backgroundImage?: string;
 }
 
-export function PageContainer({ children, className = "" }: PageContainerProps) {
+export function PageContainer({
+  children,
+  className = "",
+  backgroundImage = "",
+}: PageContainerProps) {
   const [isReady, setIsReady] = useState(false);
 
   // Use requestAnimationFrame for smooth content appearance
@@ -21,10 +27,36 @@ export function PageContainer({ children, className = "" }: PageContainerProps) 
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  if (backgroundImage) {
+    return (
+      <ConditionRenderer when={!!backgroundImage} duration={0.5}>
+        <div
+          className="min-h-screen w-full"
+          style={{
+            backgroundImage: `url(${backgroundImage})`,
+            backgroundSize: "cover",
+            backgroundPosition: "top",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          <main
+            className={cn(
+              "flex-1 container mx-auto transition-opacity duration-300",
+              isReady ? "opacity-100" : "opacity-0",
+              className
+            )}
+          >
+            {children}
+          </main>
+        </div>
+      </ConditionRenderer>
+    );
+  }
+
   return (
     <main
       className={cn(
-        "flex-1 container mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-8 transition-opacity duration-300",
+        "flex-1 container mx-auto transition-opacity duration-300",
         isReady ? "opacity-100" : "opacity-0",
         className
       )}

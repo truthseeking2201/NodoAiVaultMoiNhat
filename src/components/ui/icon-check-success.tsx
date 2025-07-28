@@ -10,7 +10,7 @@ const IconCheckSuccess = ({ className, size }: Props) => {
   return (
     <div
       className={cn(
-        "bg-emerald-500 rounded-full flex items-center justify-center h-16 w-16",
+        "bg-emerald-500 rounded-full flex items-center justify-center h-16 w-16 flex-shrink-0",
         className
       )}
     >

@@ -1,25 +1,20 @@
-import { COIN_TYPES_CONFIG, LP_TOKEN_CONFIG } from "@/config/coin-config";
+import {
+  COIN_TYPES_CONFIG,
+  LP_TOKEN_CONFIG,
+  SUI_CONFIG,
+} from "@/config/coin-config";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
+import { getBalanceAmountForInput } from "@/lib/number";
 import { roundDownBalance } from "@/lib/utils";
 import { UserCoinAsset } from "@/types/coin.types";
-import {
-  useCurrentAccount,
-  useSuiClient,
-  useSuiClientQuery,
-} from "@mysten/dapp-kit";
-import { SuiClient } from "@mysten/sui/client";
+import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
+import { SuiClient, CoinMetadata } from "@mysten/sui/client";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import BigNumber from "bignumber.js";
 import { useCallback, useEffect, useMemo } from "react";
+import { useUserAssetsStore } from "./use-store";
 import { useCurrentDepositVault } from "./use-vault";
 import { useWallet } from "./use-wallet";
-
-interface CoinMetadata {
-  decimals: number;
-  name: string;
-  symbol: string;
-  url?: string;
-  iconUrl?: string;
-}
 
 const getCoinObjects = async (
   suiClient: SuiClient,
@@ -49,6 +44,38 @@ const getCoinObjects = async (
     hasNextPage = coinsPage.hasNextPage;
   }
   return allCoins;
+};
+
+const getAllCoinObjects = async (suiClient: SuiClient, address: string) => {
+  let allCoins = [];
+  let cursor = null;
+  let hasNextPage = true;
+
+  while (hasNextPage) {
+    // Get a page of coins with optional cursor
+    const coinsPage = await suiClient.getAllCoins({
+      owner: address,
+      cursor: cursor,
+      limit: 50, // Number of items per page (default is 50)
+    });
+
+    // Add coins from this page to our collection
+    allCoins = [...allCoins, ...coinsPage.data];
+
+    // Update the cursor for the next page
+    cursor = coinsPage.nextCursor;
+
+    // Check if there are more pages
+    hasNextPage = coinsPage.hasNextPage;
+  }
+  return allCoins.map((c) => {
+    return {
+      ...c,
+      // map to full 32-byte address representation for sui coin type
+      coinType:
+        c.coinType === SUI_CONFIG.shortType ? SUI_CONFIG.coinType : c.coinType,
+    };
+  });
 };
 
 export const useMyAssets = () => {
@@ -179,7 +206,11 @@ export const useMyAssets = () => {
   return {
     assets: assets.map((asset) => ({
       ...asset,
-      balance: roundDownBalance(asset.balance, 2),
+      balance: getBalanceAmountForInput(
+        asset.raw_balance,
+        asset.decimals,
+        asset.decimals
+      ),
     })),
     isLoading: lpCoinObjectsLoading || collateralCoinObjectsLoading,
     refreshBalance,
@@ -257,4 +288,158 @@ export const useGetVaultTokenPair = () => {
   );
 
   return { collateralToken, lpToken };
+};
+
+// ndlp is NODO LP token
+const NDLP_COIN = "ndlp";
+
+export const useFetchAssets = () => {
+  const { setAssets, setUpdated, updated, isRefetch, isLoading, setIsLoading } =
+    useUserAssetsStore();
+  const { address, isAuthenticated } = useWallet();
+  const suiClient = useSuiClient();
+
+  const {
+    data: allCoinObjects = [],
+    isLoading: allCoinObjectsLoading,
+    isFetching: allCoinObjectsFetching,
+    refetch: allCoinObjectsRefetch,
+  } = useQuery({
+    queryKey: ["allCoinObjects", address],
+    queryFn: () => getAllCoinObjects(suiClient, address || ""),
+    enabled: isAuthenticated && !!address,
+    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
+    refetchOnWindowFocus: true,
+  });
+
+  const collateralTokens = useMemo(() => {
+    // filter out ndlp coins by checking if coinType includes 'ndlp'
+    return allCoinObjects
+      .filter((coin) => !coin.coinType?.toLowerCase().includes(NDLP_COIN))
+      .filter(
+        (coin, index, self) =>
+          index === self.findIndex((t) => t.coinType === coin.coinType)
+      );
+  }, [allCoinObjects]);
+
+  const coinsMetadataQuery = useQuery({
+    queryKey: [
+      "getCoinMetadata",
+      collateralTokens.map((coin) => coin.coinType),
+    ],
+    queryFn: async () => {
+      return Promise.all(
+        collateralTokens.map((coin) =>
+          suiClient.getCoinMetadata({ coinType: coin.coinType })
+        )
+      );
+    },
+    enabled: !!collateralTokens?.length,
+    gcTime: 1000 * 60 * 60 * 24 * 1, // 1 day,
+    refetchOnWindowFocus: false,
+  });
+
+  const coinsMetadata = useMemo(
+    () =>
+      coinsMetadataQuery?.data?.reduce((acc, result, index) => {
+        if (result) {
+          acc[collateralTokens[index].coinType] = result;
+        }
+        return acc;
+      }, {} as Record<string, CoinMetadata>),
+    [collateralTokens, coinsMetadataQuery]
+  );
+
+  useEffect(() => {
+    const isFetching = allCoinObjectsFetching || allCoinObjectsLoading;
+    if (isFetching) return;
+
+    if (allCoinObjects.length === 0 && isLoading) {
+      setIsLoading(false);
+      return;
+    }
+
+    if (Object.keys(coinsMetadata || {}).length === 0) {
+      return;
+    }
+
+    if (updated) {
+      return;
+    }
+
+    // map assets from allCoinObjects
+    const assets: UserCoinAsset[] =
+      allCoinObjects.reduce((acc, coin) => {
+        const coinType = coin.coinType;
+        const rawBalance = new BigNumber(coin.balance || "0");
+        const coinMetadata = coinsMetadata[coinType];
+        const decimals = coinMetadata?.decimals || 6;
+        const domainType = coinType?.toLowerCase().includes(NDLP_COIN)
+          ? "lp"
+          : "collateral";
+
+        const tokenDisplay =
+          domainType === "collateral"
+            ? COIN_TYPES_CONFIG.collateral_tokens.find(
+                (token) => token.id === coinType
+              )
+            : LP_TOKEN_CONFIG;
+
+        const existingAsset = acc.find((asset) => asset.coin_type === coinType);
+
+        if (existingAsset) {
+          existingAsset.raw_balance = new BigNumber(existingAsset.raw_balance)
+            .plus(rawBalance)
+            .toString();
+        } else {
+          acc.push({
+            coin_type: coinType,
+            balance: "0",
+            raw_balance: rawBalance.toString(),
+            image_url: tokenDisplay?.image_url || coinMetadata?.iconUrl || "",
+            decimals: decimals,
+            display_name:
+              tokenDisplay?.display_name || coinMetadata?.name || "",
+            name: tokenDisplay?.display_name || coinMetadata?.name || "",
+            symbol: coinMetadata?.symbol || "",
+            domain_type: domainType,
+          });
+        }
+        return acc;
+      }, []) || [];
+
+    if (assets.length > 0) {
+      const updatedAssets = assets.map((asset) => {
+        const balance = getBalanceAmountForInput(
+          asset.raw_balance,
+          asset.decimals,
+          asset.decimals
+        ).toString();
+        return {
+          ...asset,
+          raw_balance: new BigNumber(asset.raw_balance).toString(),
+          balance: balance,
+        };
+      });
+
+      setAssets(updatedAssets);
+    }
+  }, [
+    allCoinObjects,
+    updated,
+    coinsMetadata,
+    setAssets,
+    allCoinObjectsLoading,
+    allCoinObjectsFetching,
+    isLoading,
+    setIsLoading,
+  ]);
+
+  useEffect(() => {
+    if (isRefetch) {
+      allCoinObjectsRefetch().then(() => {
+        setUpdated(false);
+      });
+    }
+  }, [isRefetch, allCoinObjectsRefetch, setUpdated]);
 };

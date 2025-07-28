@@ -2,35 +2,93 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { triggerWalletDisconnect } from "./wallet-disconnect";
 
-const checkTokenAboutToExpired = (token: string) => {
-  if (!token) return false;
-  const decoded = jwtDecode(token);
-  const currentTime = Date.now() / 1000;
-  return decoded?.exp < currentTime;
+// Refresh token state management
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (token: string | null) => void;
+  reject: (error: any) => void;
+}> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(token);
+    }
+  });
+
+  failedQueue = [];
 };
 
-const handleRefreshTokenAboutToExpired = async () => {
+const checkTokenAboutToExpired = (token: string | null) => {
+  if (!token) return true;
   try {
-    const refreshToken = localStorage.getItem("refresh_token");
-    if (!refreshToken) return;
-    let token = localStorage.getItem("access_token");
-    if (checkTokenAboutToExpired(token)) {
-      const refreshToken = localStorage.getItem("refresh_token");
-      const res = await axios.post(`${baseURL}/data-management/auth/refresh`, {
-        refresh_token: refreshToken,
-      });
-      if (res.status === 201 && res.data.data) {
-        const { access_token, refresh_token } = res.data.data;
-        token = access_token;
-        localStorage.setItem("access_token", access_token);
-        localStorage.setItem("refresh_token", refresh_token);
-      } else {
-        triggerWalletDisconnect();
-      }
-    }
-    return token;
-  } catch (error) {
+    const decoded = jwtDecode(token);
+    const currentTime = Date.now() / 1000;
+    // Check if token expires in the next 5 minutes (300 seconds)
+    return decoded?.exp < currentTime + 300;
+  } catch {
+    return true;
+  }
+};
+
+const refreshTokenRequest = async (): Promise<string | null> => {
+  const refreshToken = localStorage.getItem("refresh_token");
+
+  if (!refreshToken) {
+    throw new Error("No refresh token available");
+  }
+
+  const res = await axios.post(`${baseURL}/data-management/auth/refresh`, {
+    refresh_token: refreshToken,
+  });
+
+  if (res.status === 201 && res.data.data) {
+    const { access_token, refresh_token } = res.data.data;
+    localStorage.setItem("access_token", access_token);
+    localStorage.setItem("refresh_token", refresh_token);
+    return access_token;
+  } else {
+    throw new Error("Invalid refresh response");
+  }
+};
+
+const getValidToken = async (): Promise<string | null> => {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
     return null;
+  }
+
+  // If token is still valid, return it
+  if (!checkTokenAboutToExpired(token)) {
+    return token;
+  }
+
+  // If refresh is already in progress, queue this request
+  if (isRefreshing) {
+    return new Promise((resolve, reject) => {
+      failedQueue.push({ resolve, reject });
+    });
+  }
+
+  isRefreshing = true;
+
+  try {
+    const newToken = await refreshTokenRequest();
+    processQueue(null, newToken);
+    return newToken;
+  } catch (error) {
+    processQueue(error, null);
+    // Clear tokens and disconnect wallet on refresh failure
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("current-address");
+    triggerWalletDisconnect();
+    throw error;
+  } finally {
+    isRefreshing = false;
   }
 };
 
@@ -40,25 +98,25 @@ const http = axios.create({
   baseURL: baseURL,
   timeout: 60000,
 });
-// Request interceptor: add Authorization header if accessToken exists
+
+// Request interceptor: add Authorization header with valid token
 http.interceptors.request.use(
   async (config) => {
-    let token = localStorage.getItem("access_token");
-
-    const newToken = await handleRefreshTokenAboutToExpired();
-    if (newToken) {
-      token = newToken;
-    }
-
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const token = await getValidToken();
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      // If token refresh fails, continue without auth header
+      console.warn("Failed to get valid token:", error);
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Add a response interceptor
+// Response interceptor: handle 401 errors
 http.interceptors.response.use(
   (response) => {
     // Return JSON data
@@ -74,42 +132,23 @@ http.interceptors.response.use(
     const originalRequest = error.config as typeof error.config & {
       _retry?: boolean;
     };
+
     if (
       error.response?.status === 401 &&
       originalRequest &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
-      try {
-        const refreshToken = localStorage.getItem("refresh_token");
-        const res = await axios.post(
-          `${baseURL}/data-management/auth/refresh`,
-          { refresh_token: refreshToken }
-        );
-        if (res.status === 201 && res.data.data) {
-          const { access_token, refresh_token } = res.data.data;
-          localStorage.setItem("access_token", access_token);
-          localStorage.setItem("refresh_token", refresh_token);
-          // Update Authorization header and retry original request
-          if (originalRequest.headers) {
-            originalRequest.headers["Authorization"] = `Bearer ${access_token}`;
-          }
-        }
 
-        return axios(originalRequest);
+      try {
+        const token = await getValidToken();
+        if (token && originalRequest.headers) {
+          originalRequest.headers["Authorization"] = `Bearer ${token}`;
+          return axios(originalRequest);
+        }
       } catch (refreshError) {
-        if (refreshError.response.status === 401) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          localStorage.removeItem("current-address");
-          triggerWalletDisconnect();
-        }
-        if (refreshError.response.status === 401) {
-          return Promise.reject(
-            "Your session has expired. Please login again."
-          );
-        }
-        return Promise.reject(refreshError);
+        // Token refresh failed, redirect to login
+        return Promise.reject("Your session has expired. Please login again.");
       }
     }
 

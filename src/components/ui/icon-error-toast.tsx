@@ -7,7 +7,12 @@ type Props = {
 
 const IconErrorToast = (props: Props) => {
   return (
-    <div className={cn("flex justify-between items-center", props?.className)}>
+    <div
+      className={cn(
+        "flex justify-between items-center flex-shrink-0",
+        props?.className
+      )}
+    >
       <div className="flex justify-between items-center border border-4 border-[#303746] rounded-full animate-pulse-glow	">
         <svg
           xmlns="http://www.w3.org/2000/svg"

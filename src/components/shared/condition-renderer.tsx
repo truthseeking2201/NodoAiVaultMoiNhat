@@ -6,6 +6,7 @@ type Props = {
   fallback?: React.ReactNode;
   children: React.ReactNode;
   animate?: boolean;
+  duration?: number;
 };
 
 const ConditionRenderer = ({
@@ -13,6 +14,7 @@ const ConditionRenderer = ({
   fallback,
   children,
   animate = true,
+  duration = 0.3,
 }: Props) => {
   if (!animate) return when ? children : fallback;
   return (
@@ -24,7 +26,7 @@ const ConditionRenderer = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{
-            duration: 0.3,
+            duration,
             ease: "easeInOut",
           }}
         >
@@ -37,7 +39,7 @@ const ConditionRenderer = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{
-            duration: 0.3,
+            duration,
             ease: "easeInOut",
           }}
         >

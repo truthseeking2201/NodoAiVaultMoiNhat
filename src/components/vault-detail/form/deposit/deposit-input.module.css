@@ -1,0 +1,11 @@
+.deposit_input_wrapper {
+  border-radius: 12px 12px 0px 0px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 232, 201, 0.15) 0%,
+    rgba(249, 244, 233, 0.15) 25%,
+    rgba(227, 246, 255, 0.15) 60%,
+    rgba(201, 212, 255, 0.15) 100%
+  );
+  box-shadow: 0px 2px 4px 1px rgba(0, 0, 0, 0.05) inset;
+}

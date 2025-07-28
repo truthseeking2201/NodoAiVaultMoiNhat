@@ -1,3 +1,7 @@
+import { RATE_DENOMINATOR } from "@/config/vault-config";
+import { SCVaultConfig } from "@/types/vault-config.types";
+import BigNumber from "bignumber.js";
+
 export const truncateStringWithSeparator = (
   strVal: string | null | undefined,
   length: number,
@@ -48,4 +52,30 @@ export const calculateInterest = (
 
   // Return the interest rounded to 2 decimal places
   return Math.round(interest * 100) / 100;
+};
+
+export const calculateUserHoldings = (
+  vaultConfig: SCVaultConfig,
+  ndlpBalance: string,
+) => {
+  const vaultRate = +vaultConfig?.rate;
+
+  const rate = vaultRate / RATE_DENOMINATOR;
+
+  const holdings = new BigNumber(ndlpBalance).multipliedBy(rate).toNumber();
+
+  return holdings;
+};
+
+export const getNDLPTotalSupply = (
+  vaultConfig: SCVaultConfig,
+  decimals: number
+) => {
+  if (!vaultConfig) return "0";
+
+  return new BigNumber(
+    vaultConfig?.treasury_cap?.fields?.total_supply?.fields?.value
+  )
+    .dividedBy(new BigNumber(10).pow(decimals))
+    .toNumber();
 };

@@ -1,4 +1,8 @@
-import { useCurrentDepositVault, useGetVaultTokenPair } from "@/hooks";
+import {
+  useCurrentDepositVault,
+  useGetVaultConfig,
+  useGetVaultTokenPair,
+} from "@/hooks";
 
 import arrowDown from "@/assets/icons/arrow-down.svg";
 import { useCollateralLPRate } from "@/hooks/use-deposit-vault";
@@ -11,7 +15,9 @@ interface BalanceCardProps {
 export function BalanceCard({ className = "" }: BalanceCardProps) {
   const currentVault = useCurrentDepositVault();
   const { collateralToken, lpToken } = useGetVaultTokenPair();
-  const conversionRate = useCollateralLPRate(true, currentVault.vault_id);
+
+  const { vaultConfig } = useGetVaultConfig(currentVault.vault_id);
+  const conversionRate = useCollateralLPRate(true, vaultConfig);
 
   const ndlpAmount = lpToken?.balance || 0;
   const collateralTokenEquivalent = ndlpAmount * conversionRate;

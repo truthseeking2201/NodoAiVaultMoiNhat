@@ -20,12 +20,20 @@ export function Toaster() {
         action,
         icon,
         hideClose,
+        onClick,
         ...props
       }) {
         return (
           <Toast key={id} {...props} duration={props.duration}>
             {icon}
-            <div className="grid gap-1">
+            <div
+              className="grid gap-1"
+              onClick={(e: any) => {
+                if (onClick) {
+                  onClick(e);
+                }
+              }}
+            >
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (
                 <ToastDescription>{description}</ToastDescription>

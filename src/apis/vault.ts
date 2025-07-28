@@ -1,6 +1,8 @@
 import { DepositVaultConfig } from "@/types/vault-config.types";
 import http from "@/utils/http";
 
+const NODO_URL = import.meta.env.VITE_NODO_APP_URL;
+
 const URLS = {
   latestWithdrawal: `/data-management/external/withdrawals/latest`,
   executionWithdrawals: "/data-management/external/withdrawals",
@@ -8,24 +10,43 @@ const URLS = {
     `/data-management/external/vaults/${vault_id}/profit-data?lock_data=true`,
   withdrawalRequestsByUser:
     "/data-management/external/withdrawal-requests/by-user",
-  vault: (vault_id: string) =>
-    `/data-management/external/vaults/${vault_id}?type=simple`,
-  positionRequests: (page: number, limit: number, action_type?: string) => {
-    const baseUrl = `/data-management/external/position-requests?page=${page}&limit=${limit}`;
+  withdrawalRequestsMultiTokens:
+    "/data-management/external/withdrawal-requests/multi-tokens",
+  positionRequests: (page: number, limit: number, action_type?: string, vault_id?: string) => {
+    const baseUrl = `/data-management/external/position-requests?page=${page}&limit=${limit}&vault_id=${vault_id}`;
     return action_type && action_type !== ""
       ? `${baseUrl}&action_type=${action_type}`
       : baseUrl;
   },
   depositVaults: (accountAddress?: string) => {
-    let url = `/data-management/external/vaults`;
+    let url = `/data-management/external/vaults/list`;
     if (accountAddress && accountAddress !== "default") {
       url += `?wallet_address=${accountAddress}`;
     }
     return url;
   },
+  vaultAnalytics: (vaultId: string, type: string, range: string) =>
+    `${NODO_URL}/data-management/external/vaults/${vaultId}/histogram?histogram_type=${type}&histogram_range=${range}`,
+  vaultBasicDetails: (vaultId: string, walletAddress: string) => {
+    let url = `${NODO_URL}/data-management/external/vaults/${vaultId}/basic`;
+    if (walletAddress && walletAddress !== "default") {
+      url += `?wallet_address=${walletAddress}`;
+    }
+    return url;
+  },
+  estimateWithdraw: (
+    vaultId: string,
+    ndlp_amount: string,
+    payout_token: string
+  ) =>
+    `/data-management/external/vaults/${vaultId}/estimate-withdraw?ndlp_amount=${ndlp_amount}&payout_token=${payout_token}`,
+  estimateDeposit: (vaultId: string, amount: string, deposit_token: string) =>
+    `/data-management/external/vaults/${vaultId}/estimate-deposit?amount=${amount}&deposit_token=${deposit_token}`,
+  swapDepositInfo: (vaultId: string, token_address: string) =>
+    `/data-management/external/vaults/${vaultId}/swap-and-deposit-info?token_address=${token_address}`,
 };
 
-export const getLatestWithdrawal = () => {
+export const getLatestWithdrawal = (sender_address: string) => {
   return http.get(URLS.latestWithdrawal);
 };
 
@@ -43,17 +64,62 @@ export const getSignatureRedeem = (params: any) => {
   });
 };
 
-export const getVault = (vault_id: string) => {
-  return http.get(URLS.vault(vault_id)) as Promise<DepositVaultConfig>;
+export const getWithdrawalRequestsMultiTokens = (params: any) => {
+  return http.get(URLS.withdrawalRequestsMultiTokens, {
+    params,
+  });
 };
 
 export const getVaultsActivities = (payload: any) => {
-  const { page, limit, action_type } = payload;
-  return http.get(URLS.positionRequests(page, limit, action_type));
+  const { page, limit, action_type, vault_id } = payload;
+  return http.get(URLS.positionRequests(page, limit, action_type, vault_id));
 };
 
 export const getDepositVaults = (accountAddress?: string) => {
   return http.get(URLS.depositVaults(accountAddress)) as Promise<
     DepositVaultConfig[]
   >;
+};
+
+export const getVaultAnalytics = (
+  vaultId: string,
+  type: string,
+  range: string
+) => {
+  return http.get(URLS.vaultAnalytics(vaultId, type, range));
+};
+
+export const getVaultBasicDetails = (
+  vaultId: string,
+  walletAddress: string
+) => {
+  return http.get(URLS.vaultBasicDetails(vaultId, walletAddress));
+};
+
+export const getEstimateWithdraw = (
+  vaultId: string,
+  params: { ndlp_amount: string; payout_token: string }
+) => {
+  return http.get(
+    URLS.estimateWithdraw(vaultId, params.ndlp_amount, params.payout_token)
+  );
+};
+
+export const getEstimateDeposit = (
+  vaultId: string,
+  params: { amount: string; deposit_token: string }
+) => {
+  return http.get(
+    URLS.estimateDeposit(
+      vaultId,
+      params.amount,
+      encodeURIComponent(params.deposit_token)
+    )
+  );
+};
+
+export const getSwapDepositInfo = (vaultId: string, token_address: string) => {
+  return http.get(
+    URLS.swapDepositInfo(vaultId, encodeURIComponent(token_address))
+  );
 };

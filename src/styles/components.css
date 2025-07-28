@@ -4,11 +4,6 @@
     @apply bg-gradient-brand text-white transition-all duration-300 hover:shadow-brand;
   }
 
-  /* Input styling */
-  .deposit-input {
-    @apply bg-card border-white/10 text-white focus:border-brand-500 transition-all duration-300;
-  }
-
   /* Card styling */
   .deposit-card {
     @apply bg-white/[0.02] border border-white/[0.08] rounded-xl transition-all duration-300;

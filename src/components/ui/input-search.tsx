@@ -7,8 +7,9 @@ const InputSearch = React.forwardRef<
   HTMLInputElement,
   React.ComponentProps<"input"> & {
     onChange: (value: string) => void;
+    debounceTime?: number;
   }
->(({ className, type, onChange, ...props }, ref) => {
+>(({ className, type, onChange, debounceTime = 1000, ...props }, ref) => {
   const [value, setValue] = useState<string>("");
 
   const handleChangeValue = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +24,7 @@ const InputSearch = React.forwardRef<
   useEffect(() => {
     const handler = setTimeout(() => {
       onChange(value);
-    }, 1000); // wait 1000ms after user stops typing
+    }, debounceTime); // wait 1000ms after user stops typing
 
     return () => clearTimeout(handler); // clear timeout if value changes before 1000ms
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -51,10 +52,7 @@ const InputSearch = React.forwardRef<
             type="button"
             aria-label="Clear input"
           >
-            <X
-              size={12}
-              color="#989898"
-            />
+            <X size={12} color="#989898" />
           </button>
         )}
       </div>

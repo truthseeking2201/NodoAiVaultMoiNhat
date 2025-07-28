@@ -2,7 +2,6 @@ import React from "react";
 import { motion } from "framer-motion";
 import disconnectedImg from "../../assets/images/disconnected.png";
 import errorBg from "../../assets/images/bg-error.png";
-import RegisterForWhiteListButton from "../dashboard/request-whitelist-button/RegisterForWhiteListButton";
 
 interface Props {
   children: React.ReactNode;
