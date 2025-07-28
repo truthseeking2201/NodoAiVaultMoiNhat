@@ -37,6 +37,15 @@ export type DepositForm = {
   token: string;
 };
 
+const DEFAULT_DEPOSIT_TOKEN = {
+  symbol: USDC_CONFIG.symbol,
+  decimals: USDC_CONFIG.decimals,
+  balance: "0",
+  token_address: USDC_CONFIG.coinType,
+  min_deposit_amount: "0",
+  min_deposit_amount_usd: "0",
+};
+
 const DepositForm = ({ vault_id }: { vault_id: string }) => {
   const { openConnectWalletDialog, isConnected } = useWallet();
   const { assets, setRefetch } = useUserAssetsStore();
@@ -55,37 +64,32 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   const { deposit } = useDepositVault(vault_id);
   const { isAuthenticated } = useWallet();
 
-  const paymentTokens = useMemo(
-    () =>
-      vault?.tokens
-        ?.map((token) => {
-          const asset = assets.find(
-            (asset) => asset.coin_type === token?.token_address
-          );
+  const paymentTokens = useMemo(() => {
+    const tokens = vault?.tokens
+      ?.map((token) => {
+        const asset = assets.find(
+          (asset) => asset.coin_type === token?.token_address
+        );
 
-          return {
-            symbol: token?.token_symbol,
-            decimals: token.decimal,
-            balance: isAuthenticated ? asset?.balance || "0" : "0",
-            token_address: token?.token_address,
-            min_deposit_amount: token?.min_deposit_amount,
-            min_deposit_amount_usd: token?.min_deposit_amount_usd,
-          };
-        })
-        .sort((a, b) =>
-          new BigNumber(b.balance).minus(new BigNumber(a.balance)).toNumber()
-        ) || [
-        {
-          symbol: USDC_CONFIG.symbol,
-          decimals: USDC_CONFIG.decimals,
-          balance: "0",
-          token_address: USDC_CONFIG.coinType,
-          min_deposit_amount: "0",
-          min_deposit_amount_usd: "0",
-        },
-      ],
-    [vault, assets, isAuthenticated]
-  );
+        return {
+          symbol: token?.token_symbol,
+          decimals: token.decimal,
+          balance: isAuthenticated ? asset?.balance || "0" : "0",
+          token_address: token?.token_address,
+          min_deposit_amount: token?.min_deposit_amount,
+          min_deposit_amount_usd: token?.min_deposit_amount_usd,
+        };
+      })
+      .sort((a, b) =>
+        new BigNumber(b.balance).minus(new BigNumber(a.balance)).toNumber()
+      );
+
+    if (!tokens?.length) {
+      return [DEFAULT_DEPOSIT_TOKEN];
+    }
+
+    return tokens;
+  }, [vault, assets, isAuthenticated]);
 
   const lpToken = useGetLpToken(vault.vault_lp_token, vault_id);
 
@@ -136,7 +140,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   const estimatedDepositAmount = useMemo(() => {
     return +debounceAmount > 0
       ? debounceAmount
-      : new BigNumber(1).dividedBy(collateralToken.decimals).toString();
+      : new BigNumber(1).dividedBy(collateralToken?.decimals).toString();
   }, [debounceAmount, collateralToken]);
 
   const {
