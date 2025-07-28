@@ -308,6 +308,7 @@ export const useFetchAssets = () => {
     queryKey: ["allCoinObjects", address],
     queryFn: () => getAllCoinObjects(suiClient, address || ""),
     enabled: isAuthenticated && !!address,
+    staleTime: REFETCH_VAULT_DATA_INTERVAL,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
     refetchOnWindowFocus: true,
   });

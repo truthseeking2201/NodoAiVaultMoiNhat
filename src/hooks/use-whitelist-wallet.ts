@@ -19,7 +19,7 @@ export const useWhitelistWallet = () => {
     queryKey: ["walletDetails", walletAddress, walletProvider],
     queryFn: () => subscribeWhitelistRequest(walletAddress, walletProvider),
     enabled: !!walletAddress && !!walletProvider && isAuthenticated,
-    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   }) as UseQueryResult<WalletDetails>;
 
   const wlServer =

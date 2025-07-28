@@ -52,7 +52,7 @@ export function MyReferralsDashboardModal({
     },
     {
       title: "DATE JOINED",
-      classTitle: "w-2/6",
+      classTitle: "w-3/6",
       dataIndex: "dateJoin",
       keySort: "dateSort",
       render: (value: any) => (

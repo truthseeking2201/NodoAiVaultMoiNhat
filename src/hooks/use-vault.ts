@@ -85,7 +85,7 @@ export const useGetDepositVaults = () => {
   return useQuery({
     queryKey: ["deposit-vaults-data", address || "default"],
     queryFn: () => getDepositVaults(address),
-    staleTime: Infinity,
+    staleTime: REFETCH_VAULT_DATA_INTERVAL,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<DepositVaultConfig[], Error>;

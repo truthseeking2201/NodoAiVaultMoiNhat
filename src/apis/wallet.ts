@@ -19,10 +19,11 @@ export const subscribeWhitelistRequest = async (
   const res = (await http.get(URLS.walletDetails)) as any;
 
   if (res?.data === null) {
-    http.post(URLS.subscribe, {
+    await http.post(URLS.subscribe, {
       wallet_address: walletAddress,
       wallet_provider: walletProvider,
     });
+    return await http.get(URLS.walletDetails);
   }
   if (!res?.wallet_provider && walletProvider) {
     http.post(URLS.updateWalletProvider, {
