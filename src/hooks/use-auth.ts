@@ -4,6 +4,7 @@ import { useSignPersonalMessage } from "@mysten/dapp-kit";
 import { useMutation } from "@tanstack/react-query";
 import { useWallet } from "./use-wallet";
 import { useUserAssetsStore } from "./use-store";
+import { useGetDepositVaults } from "./use-vault";
 
 export const useLoginWallet = () => {
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
@@ -11,6 +12,8 @@ export const useLoginWallet = () => {
   const { mutateAsync: triggerLoginWallet } = useMutation({
     mutationFn: loginWallet,
   });
+
+  const { refetch: refetchDepositVaults } = useGetDepositVaults();
 
   const { setUpdated } = useUserAssetsStore();
 
@@ -35,6 +38,7 @@ export const useLoginWallet = () => {
       localStorage.setItem("refresh_token", data.refresh_token);
       setIsAuthenticated(true);
       setUpdated(false);
+      refetchDepositVaults();
       return true;
     } catch (error) {
       console.log(error);
