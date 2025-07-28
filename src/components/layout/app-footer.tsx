@@ -17,9 +17,7 @@ import { useLocation } from "react-router-dom";
 const Box = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex flex-1 p-px rounded-xl mx-auto bg-gradient-to-b from-[#FFDFD5CC] to-[#FFFFFF00] hover:opacity-80 transition-all duration-300">
-      <div
-        className="rounded-xl w-full flex-1 flex flex-col items-center p-6 bg-[#171717]"
-      >
+      <div className="rounded-xl w-full flex-1 flex flex-col items-center p-6 bg-[#171717]">
         {children}
       </div>
     </div>
@@ -81,9 +79,8 @@ export function AppFooter() {
               </div>
               <div>
                 <div className="mb-3">Strategic Integration Partners</div>
-                <div className="rounded-lg px-4 py-3 bg-white/15 flex items-center gap-4 h-[40px]">
+                <div className="rounded-lg px-4 py-3 bg-white/15 flex items-center gap-4 h-[40px] w-fit">
                   <img src={onramp} className="h-[30px] object-cover" />
-                  <img src={cns} className="h-[30px] object-cover" />
                 </div>
               </div>
             </div>
