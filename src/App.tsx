@@ -95,7 +95,12 @@ const App = () => (
     <Suspense fallback={<GlobalLoading />}>
       <QueryClientProvider client={queryClient}>
         <SuiClientProvider networks={networkConfig} defaultNetwork={"mainnet"}>
-          <WalletProvider autoConnect>
+          <WalletProvider
+            autoConnect
+            slushWallet={{
+              name: "NODO AI Vaults",
+            }}
+          >
             <ConfigWrapper>
               <TooltipProvider>
                 <Toaster />
