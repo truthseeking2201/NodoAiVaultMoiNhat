@@ -46,6 +46,8 @@ export function ConnectWalletModal({
   const { toast } = useToast();
   const { address } = useWallet();
   const [searchParams] = useSearchParams();
+  const showReferralCode =
+    localStorage.getItem("show-referral-code") === "true";
 
   const handleClosePopup = () => {
     onClose();
@@ -168,6 +170,11 @@ export function ConnectWalletModal({
     }
     if (isFirstConnect) {
       const walletDetail = await handleGetWalletDetail(successAddress);
+      if (walletDetail.is_skip_invitation_code) {
+        localStorage.setItem("show-referral-code", "false");
+      } else {
+        localStorage.setItem("show-referral-code", "true");
+      }
       if (walletDetail.invite_code) {
         // If the user is already signed up
         // toast({
@@ -324,7 +331,7 @@ export function ConnectWalletModal({
               isLoading={isLoading}
             />
           )}
-          {step === STEPS.INPUT_REFERRAL && (
+          {step === STEPS.INPUT_REFERRAL && showReferralCode && (
             <InputReferral
               onClose={handleClosePopup}
               onNextStep={(referralCode) => {
