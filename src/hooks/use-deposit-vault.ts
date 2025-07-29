@@ -14,6 +14,7 @@ import { Buffer } from "buffer";
 import { useMergeCoins } from "./use-merge-coins";
 import { useGetVaultConfig, useVaultBasicDetails } from "./use-vault";
 import { useWallet } from "./use-wallet";
+import { logger } from "@/utils/logger";
 
 type DepositCoin = {
   coin_type: string;
@@ -248,7 +249,7 @@ export const useDepositVault = (vaultId: string) => {
             const depositEvent = events.find((event) =>
               event.type.includes("vault::DepositWithSigTimeEvent")
             );
-            console.log("🚀 ~ depositEvent:", depositEvent);
+            logger.debug("🚀 ~ depositEvent:", depositEvent);
             // Pass the event data to your callback
             onDepositSuccessCallback?.({
               ...data,

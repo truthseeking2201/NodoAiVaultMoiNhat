@@ -26,10 +26,6 @@ const HeroBanner = ({
           {title}
         </h1>
         <p className="text-white text-base md:text-lg mb-1">{description}</p>
-        <p className="text-white text-base md:text-lg">
-          Available via <span className="font-bold">whitelist access</span>{" "}
-          only.
-        </p>
       </div>
     </section>
   );
