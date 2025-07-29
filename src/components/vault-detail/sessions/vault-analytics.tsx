@@ -25,10 +25,10 @@ const VaultAnalytics = ({
   vault,
 }: VaultAnalyticsProps) => {
   const [analyticsTab, setAnalyticsTab] = useState<string>(
-    ANALYTICS_TABS[0].value
+    ANALYTICS_TABS?.[0]?.value
   );
   const [analyticsRangeTab, setAnalyticsRangeTab] = useState<TimeFilter>(
-    PERIOD_TABS[0].value as TimeFilter
+    PERIOD_TABS?.[0]?.value as TimeFilter
   );
 
   // Fetch data for the selected analytics tab
@@ -77,14 +77,14 @@ const VaultAnalytics = ({
       {/* Content for the selected analytics tab */}
       <div className="min-h-[400px]">
         {/* Placeholder for actual content based on the selected tab */}
-        {analyticsTab === ANALYTICS_TABS[0].value && !isLoading && (
+        {analyticsTab === ANALYTICS_TABS?.[0]?.value && !isLoading && (
           <PositionPriceChart
             period={analyticsRangeTab}
             analyticsData={analyticsData}
             vault={vault}
           />
         )}
-        {analyticsTab === ANALYTICS_TABS[1].value && !isLoading && (
+        {analyticsTab === ANALYTICS_TABS?.[1]?.value && !isLoading && (
           <APYChart period={analyticsRangeTab} analyticsData={analyticsData} />
         )}
       </div>
