@@ -40,6 +40,12 @@ const VaultDetail = () => {
   const isDetailLoading = isLoadingVaultDetails || !vaultDetails;
 
   const navigate = useNavigate();
+  const { refetch: refetchDepositVaults } = useGetDepositVaults();
+
+  const handleBackToHome = () => {
+    refetchDepositVaults();    
+    navigate("/", { replace: true });
+  };
 
   const vaultInfo = useMemo(() => {
     return [
@@ -183,7 +189,7 @@ const VaultDetail = () => {
       <Button
         variant="outline"
         className="mb-4 border-white/30 text-sm"
-        onClick={() => navigate("/", { replace: true })}
+        onClick={handleBackToHome}
       >
         <ChevronLeft className="!w-6 !h-6" />
         AI Vaults

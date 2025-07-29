@@ -21,6 +21,9 @@ import { Copy, LogOut, RefreshCw, Wallet } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import { ConnectWalletModal } from "./connect-wallet-modal";
 import { useQueryClient } from "@tanstack/react-query";
+import { SUI_CONFIG, USDC_CONFIG } from "@/config";
+
+const DISPLAY_TOKENS = [USDC_CONFIG.coinType, SUI_CONFIG.coinType];
 
 export const ConnectWalletButton = memo(() => {
   const { toast } = useToast();
@@ -44,11 +47,11 @@ export const ConnectWalletButton = memo(() => {
 
   // get first for now due to we support usdc only
   const collateralToken = assets.find(
-    (asset) => asset.domain_type === "collateral" && asset.name === "USDC"
+    (asset) => asset.coin_type === USDC_CONFIG.coinType
   );
 
-  const displayTokens = assets.filter(
-    (asset) => asset.domain_type === "collateral"
+  const displayTokens = assets.filter((asset) =>
+    DISPLAY_TOKENS.includes(asset.coin_type)
   );
 
   useEffect(() => {
