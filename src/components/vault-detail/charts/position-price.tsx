@@ -154,14 +154,14 @@ const PositionPriceChart = ({
       const upper = Number(item.value.upper);
       const real = Number(item.value.real);
       let rangeMin = isConvertedToken
-        ? lower.toFixed(4)
-        : convertTokenBase(upper, true);
+        ? convertTokenBase(upper, true)
+        : lower.toFixed(4);
       let rangeMax = isConvertedToken
-        ? upper.toFixed(4)
-        : convertTokenBase(lower, true);
+        ? convertTokenBase(lower, true)
+        : upper.toFixed(4);
       let displayPrice = isConvertedToken
-        ? real.toFixed(4)
-        : convertTokenBase(real, true);
+        ? convertTokenBase(real, true)
+        : real.toFixed(4);
 
       if (real === 0 && result.length > 0) {
         displayPrice = lastDisplayPrice;
@@ -198,22 +198,22 @@ const PositionPriceChart = ({
   const currentPrice = useMemo(
     () =>
       isConvertedToken
-        ? Number(currentData?.value?.real)
-        : convertTokenBase(Number(currentData?.value?.real), true),
+        ? convertTokenBase(Number(currentData?.value?.real), true)
+        : Number(currentData?.value?.real),
     [isConvertedToken, currentData]
   );
   const minPrice = useMemo(
     () =>
       isConvertedToken
-        ? Number(currentData?.value?.lower)
-        : convertTokenBase(Number(currentData?.value?.lower), true),
+        ? convertTokenBase(Number(currentData?.value?.upper), true)
+        : Number(currentData?.value?.lower),
     [isConvertedToken, currentData]
   );
   const maxPrice = useMemo(
     () =>
       isConvertedToken
-        ? Number(currentData?.value?.upper)
-        : convertTokenBase(Number(currentData?.value?.upper), true),
+        ? convertTokenBase(Number(currentData?.value?.lower), true)
+        : Number(currentData?.value?.upper),
     [isConvertedToken, currentData]
   );
 
