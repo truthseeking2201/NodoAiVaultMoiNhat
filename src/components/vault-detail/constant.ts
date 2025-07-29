@@ -5,7 +5,7 @@ export const PERIOD_TABS = [
 
 export const ANALYTICS_TABS = [
   { value: "POSITION_PRICE", label: "Position Price" },
-  { value: "APY_YIELDS", label: "APY & Yields" },
+  // { value: "APY_YIELDS", label: "APY & Yields" },
 ];
 
 export const ACTIVITIES_TABS = [
