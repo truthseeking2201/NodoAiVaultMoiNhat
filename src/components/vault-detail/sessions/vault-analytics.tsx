@@ -47,13 +47,13 @@ const VaultAnalytics = ({
             value={analyticsTab}
             onValueChange={(value) => setAnalyticsTab(value)}
           >
-            <TabsList className="p-1 flex gap-1">
+            {/* <TabsList className="p-1 flex gap-1">
               {ANALYTICS_TABS.map((tab) => (
                 <TabsTrigger key={tab.value} value={tab.value}>
                   {tab.label}
                 </TabsTrigger>
               ))}
-            </TabsList>
+            </TabsList> */}
           </Tabs>
 
           <Tabs
