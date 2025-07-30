@@ -76,7 +76,13 @@ export default function VaultList() {
       return {
         ...vault,
         exchange_name: EXCHANGE_CODES_MAP[vault?.exchange_id].name,
-        user_holdings: Number(calculateUserHoldings(vaultConfig, ndlpBalance)),
+        user_holdings: Number(
+          calculateUserHoldings(
+            vaultConfig,
+            ndlpBalance,
+            vault?.user_pending_withdraw_ndlp
+          )
+        ),
       };
     });
   }, [data, vaultObjects, assets]);

@@ -32,12 +32,12 @@ const checkTokenAboutToExpired = (token: string | null) => {
     return true;
   }
 };
-
+const NOT_REFRESH_TOKEN_ERROR = "No refresh token available";
 const refreshTokenRequest = async (): Promise<string | null> => {
   const refreshToken = localStorage.getItem("refresh_token");
 
   if (!refreshToken) {
-    throw new Error("No refresh token available");
+    throw new Error(NOT_REFRESH_TOKEN_ERROR);
   }
 
   const res = await axios.post(`${baseURL}/data-management/auth/refresh`, {
@@ -125,15 +125,20 @@ http.interceptors.response.use(
   async (error) => {
     const err = (error.response && error.response.data) || error;
     const originalRequest = error.config as typeof error.config & {
-      _retry?: boolean;
+      _retryCount?: number;
     };
+
+    // Initialize retry count if not set
+    if (!originalRequest._retryCount) {
+      originalRequest._retryCount = 0;
+    }
 
     if (
       error.response?.status === 401 &&
       originalRequest &&
-      !originalRequest._retry
+      originalRequest._retryCount < 3
     ) {
-      originalRequest._retry = true;
+      originalRequest._retryCount++;
 
       try {
         const token = await getValidToken();
@@ -142,7 +147,10 @@ http.interceptors.response.use(
           return axios(originalRequest);
         }
       } catch (refreshError) {
-        if (refreshError?.response?.status === 401) {
+        if (
+          refreshError?.response?.status === 401 ||
+          refreshError?.message === NOT_REFRESH_TOKEN_ERROR
+        ) {
           // Clear tokens and disconnect wallet on refresh failure
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");

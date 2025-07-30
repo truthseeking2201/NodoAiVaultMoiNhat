@@ -1,4 +1,6 @@
+import { LP_TOKEN_CONFIG } from "@/config";
 import { RATE_DENOMINATOR } from "@/config/vault-config";
+import { getBalanceAmount } from "@/lib/number";
 import { SCVaultConfig } from "@/types/vault-config.types";
 import BigNumber from "bignumber.js";
 
@@ -57,14 +59,23 @@ export const calculateInterest = (
 export const calculateUserHoldings = (
   vaultConfig: SCVaultConfig,
   ndlpBalance: string,
+  user_pending_withdraw_ndlp: string
 ) => {
   const vaultRate = +vaultConfig?.rate;
 
   const rate = vaultRate / RATE_DENOMINATOR;
 
-  const holdings = new BigNumber(ndlpBalance).multipliedBy(rate).toNumber();
+  let holdings = new BigNumber(ndlpBalance);
 
-  return holdings;
+  if (user_pending_withdraw_ndlp) {
+    const pendingWithdraw = getBalanceAmount(
+      user_pending_withdraw_ndlp,
+      LP_TOKEN_CONFIG.decimals
+    );
+    holdings = holdings.plus(pendingWithdraw);
+  }
+
+  return holdings.multipliedBy(rate).toNumber();
 };
 
 export const getNDLPTotalSupply = (

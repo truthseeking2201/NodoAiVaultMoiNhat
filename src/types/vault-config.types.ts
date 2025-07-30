@@ -190,6 +190,7 @@ export type DepositVaultConfig = {
   };
   tokens: VaultPaymentToken[];
   ready?: boolean;
+  user_pending_withdraw_ndlp?: string;
 };
 
 export type VaultEstimateWithdraw = {
@@ -289,4 +290,5 @@ export type BasicVaultDetailsType = {
     exchange_id: number;
     pool: string;
   };
+  user_pending_withdraw_ndlp?: string;
 };

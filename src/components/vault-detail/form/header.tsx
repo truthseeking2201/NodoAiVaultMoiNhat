@@ -1,9 +1,5 @@
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
-import {
-  useGetLpToken,
-  useGetVaultConfig,
-  useWallet,
-} from "@/hooks";
+import { useGetLpToken, useGetVaultConfig, useWallet } from "@/hooks";
 import { useVaultBasicDetails } from "@/hooks/use-vault";
 import { cn, formatAmount } from "@/lib/utils";
 import { formatShortCurrency } from "@/utils/currency";
@@ -22,7 +18,8 @@ export const FormHeader = ({ vault_id }: { vault_id: string }) => {
   const ndlpTotalSupply = getNDLPTotalSupply(vaultConfig, lpToken?.decimals);
   const userHoldings = calculateUserHoldings(
     vaultConfig,
-    lpToken?.balance || "0"
+    lpToken?.balance || "0",
+    vaultDetails?.user_pending_withdraw_ndlp
   );
 
   const shareValue = useMemo(() => {
