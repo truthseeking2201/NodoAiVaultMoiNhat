@@ -133,7 +133,6 @@ export default function WithdrawVaultSection({
   useEffect(() => {
     const init = async () => {
       await initDataClaim();
-      await sleep(300);
       setReady(true);
       setLoading(false);
     };
