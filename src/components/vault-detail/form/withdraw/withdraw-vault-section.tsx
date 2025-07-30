@@ -41,7 +41,8 @@ export default function WithdrawVaultSection({
   const address = currentAccount?.address;
   const { setRefetch: refreshBalance } = useUserAssetsStore();
   const { refetch: refetchDepositVaults } = useGetDepositVaults();
-  const { data: vault } = useVaultBasicDetails(vault_id);
+  const { data: vault, refetch: refetchVaultBasicDetails } =
+    useVaultBasicDetails(vault_id);
   const lpToken = useGetLpToken(vault?.vault_lp_token, vault_id);
 
   const lpData = useMemo(() => {
@@ -111,6 +112,7 @@ export default function WithdrawVaultSection({
       if (res) {
         refreshBalance();
         refetchDepositVaults();
+        refetchVaultBasicDetails();
         break;
       }
     }
@@ -121,6 +123,7 @@ export default function WithdrawVaultSection({
     setLoading(true);
     await sleep(2000);
     const res = await initDataClaim();
+    refetchVaultBasicDetails();
     if (!res) {
       refreshBalance();
     }
@@ -153,10 +156,7 @@ export default function WithdrawVaultSection({
               className="flex items-center justify-center w-full font-semibold text-lg py-3"
             >
               <span>Connect Wallet</span>
-              <ArrowRight
-                size={16}
-                className="ml-2"
-              />
+              <ArrowRight size={16} className="ml-2" />
             </Web3Button>
           </div>
         )}

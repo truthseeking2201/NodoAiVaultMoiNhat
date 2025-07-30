@@ -20,6 +20,7 @@ import {
   useFetchAssets,
   useGetAllVaults,
   useGetDepositVaults,
+  useUserAssetsStore,
   useWallet,
 } from "./hooks";
 import Home from "./pages/home";
@@ -40,12 +41,14 @@ const useSetWalletDisconnectHandler = () => {
   const account = useCurrentAccount();
   const { mutate: disconnect } = useDisconnectWallet();
   const { setIsAuthenticated } = useWallet();
+  const { setAssets } = useUserAssetsStore();
 
   useEffect(() => {
     if (account?.address) {
       setWalletDisconnectHandler(() => {
         disconnect();
         setIsAuthenticated(false);
+        setAssets([]);
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("current-address");
@@ -53,7 +56,7 @@ const useSetWalletDisconnectHandler = () => {
         localStorage.removeItem("show-referral-code");
       });
     }
-  }, [account, disconnect, setIsAuthenticated]);
+  }, [account, disconnect, setIsAuthenticated, setAssets]);
 };
 
 const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
