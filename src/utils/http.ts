@@ -26,8 +26,8 @@ const checkTokenAboutToExpired = (token: string | null) => {
   try {
     const decoded = jwtDecode(token);
     const currentTime = Date.now() / 1000;
-    // Check if token expires in the next 5 minutes (300 seconds)
-    return decoded?.exp < currentTime + 300;
+    // Check if token expires in the next 1 minutes (60 seconds)
+    return decoded?.exp < currentTime + 60;
   } catch {
     return true;
   }
@@ -81,11 +81,6 @@ const getValidToken = async (): Promise<string | null> => {
     return newToken;
   } catch (error) {
     processQueue(error, null);
-    // Clear tokens and disconnect wallet on refresh failure
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("current-address");
-    triggerWalletDisconnect();
     throw error;
   } finally {
     isRefreshing = false;
@@ -147,8 +142,17 @@ http.interceptors.response.use(
           return axios(originalRequest);
         }
       } catch (refreshError) {
-        // Token refresh failed, redirect to login
-        return Promise.reject("Your session has expired. Please login again.");
+        if (refreshError?.response?.status === 401) {
+          // Clear tokens and disconnect wallet on refresh failure
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("current-address");
+          triggerWalletDisconnect();
+          return Promise.reject(
+            "Your session has expired. Please login again."
+          );
+        }
+        return Promise.reject(refreshError);
       }
     }
 
