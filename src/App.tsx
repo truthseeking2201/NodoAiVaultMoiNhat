@@ -22,6 +22,7 @@ import {
   useGetDepositVaults,
   useUserAssetsStore,
   useWallet,
+  useCriticalImagePrefetch,
 } from "./hooks";
 import Home from "./pages/home";
 import VaultDetail from "./pages/vault-detail";
@@ -65,6 +66,9 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
   useFetchAssets();
   useGetAllVaults(vaultIds);
   useSetWalletDisconnectHandler();
+
+  // Prefetch critical images for better UX
+  useCriticalImagePrefetch();
 
   useEffect(() => {
     if (data && !hasLoadedVaults) {
