@@ -259,8 +259,8 @@ const PositionPriceChart = ({
               {formatNumber(minPrice, 0, minPrice < 1 ? 6 : 4)}
               <span className="text-white/80 font-sans font-normal ml-2">
                 {isConvertedToken
-                  ? `${pair[0]}/${pair[1]}`
-                  : `${pair[1]}/${pair[0]}`}
+                  ? `${pair[1]}/${pair[0]}`
+                  : `${pair[0]}/${pair[1]}`}
               </span>
             </div>
           </div>
@@ -270,8 +270,8 @@ const PositionPriceChart = ({
               {formatNumber(currentPrice, 0, currentPrice < 1 ? 6 : 4)}
               <span className="text-white/80 font-sans font-normal ml-2">
                 {isConvertedToken
-                  ? `${pair[0]}/${pair[1]}`
-                  : `${pair[1]}/${pair[0]}`}
+                  ? `${pair[1]}/${pair[0]}`
+                  : `${pair[0]}/${pair[1]}`}
               </span>
             </div>
           </div>
@@ -289,8 +289,8 @@ const PositionPriceChart = ({
               {formatNumber(maxPrice, 0, maxPrice < 1 ? 6 : 4)}
               <span className="text-white/80 font-sans font-normal ml-2">
                 {isConvertedToken
-                  ? `${pair[0]}/${pair[1]}`
-                  : `${pair[1]}/${pair[0]}`}
+                  ? `${pair[1]}/${pair[0]}`
+                  : `${pair[0]}/${pair[1]}`}
               </span>
             </div>
           </div>
