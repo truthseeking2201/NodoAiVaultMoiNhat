@@ -161,8 +161,8 @@ export const ConnectWalletButton = memo(() => {
                     />
 
                     <span className="font-mono text-sm">
-                      {formatNumber(collateralToken?.balance || 0)}{" "}
-                      {collateralToken?.display_name}
+                      {formatNumber(collateralToken?.balance || 0, 0, 2)}{" "}
+                      {collateralToken?.display_name || "USDC"}
                     </span>
                   </div>
                 </div>

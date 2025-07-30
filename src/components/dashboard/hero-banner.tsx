@@ -1,5 +1,3 @@
-import HeroBannerImage from "@/assets/images/dashboard/hero-banner.png";
-
 type HeroBannerProps = {
   title?: string | React.ReactNode;
   description?: string | React.ReactNode;
@@ -13,7 +11,7 @@ const HeroBanner = ({
     <section
       className="relative w-full h-[260px] md:h-[340px] flex items-center overflow-hidden"
       style={{
-        backgroundImage: `url(${HeroBannerImage})`,
+        backgroundImage: `url(/banners/hero-banner.png)`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

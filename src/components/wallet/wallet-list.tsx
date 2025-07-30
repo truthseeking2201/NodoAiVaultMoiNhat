@@ -33,6 +33,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
     return {
       ...wallet,
       name: foundWallet?.name || wallet.name,
+      icon: wallet.icon || foundWallet?.icon,
     };
   }) as Wallet[];
 

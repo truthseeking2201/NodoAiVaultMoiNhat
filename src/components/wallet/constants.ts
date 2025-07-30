@@ -1,5 +1,3 @@
-import phantomWallet from "@/assets/images/phantom-wallet.png";
-import slushWallet from "@/assets/images/slush-wallet.png";
 // import newmoneyWallet from "@/assets/images/newmoney-wallet.png";
 
 const STEPS = {
@@ -20,7 +18,7 @@ const WALLETS = [
   {
     displayName: "Slush",
     name: "Slush",
-    icon: slushWallet,
+    icon: "/wallets/slush-wallet.png",
     description: "Connect to your Slush Wallet",
     extensionUrl:
       "https://chromewebstore.google.com/detail/slush-%E2%80%94-a-sui-wallet/opcgpfmipidbgpenhmajoajpbobppdil",
@@ -28,7 +26,7 @@ const WALLETS = [
   {
     displayName: "Phantom",
     name: "Phantom",
-    icon: phantomWallet,
+    icon: "/wallets/phantom-wallet.png",
     description: "Connect to your Phantom Wallet",
     extensionUrl: "https://phantom.app/download",
   },
