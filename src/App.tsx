@@ -53,7 +53,6 @@ const useSetWalletDisconnectHandler = () => {
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("current-address");
         localStorage.removeItem("whitelisted_address");
-        localStorage.removeItem("show-referral-code");
       });
     }
   }, [account, disconnect, setIsAuthenticated, setAssets]);
