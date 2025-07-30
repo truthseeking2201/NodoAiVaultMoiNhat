@@ -11,7 +11,7 @@ import { getMyReferral } from "@/apis/wallet";
 import { truncateStringWithSeparator } from "@/utils/helpers";
 import { formatDate } from "@/utils/date";
 import { showFormatNumber } from "@/lib/number";
-import { COIN_TYPES_CONFIG } from "@/config/coin-config";
+import { USDC_CONFIG } from "@/config/coin-config";
 import {
   TIME_FILTER,
   TIME_FILTER_OPTIONS_REFERRAL,
@@ -67,8 +67,8 @@ export function MyReferralsDashboardModal({
       render: (value: any) => (
         <div className="flex items-center font-mono	text-white">
           <img
-            src={COIN_TYPES_CONFIG.collateral_tokens[0].image_url}
-            alt={COIN_TYPES_CONFIG.collateral_tokens[0].display_name}
+            src={USDC_CONFIG.image_url}
+            alt={USDC_CONFIG.display_name}
             className="w-4 h-4 mr-1 flex-shrink-0"
           />
           {showFormatNumber(value || 0, 2, 2)}
@@ -231,7 +231,10 @@ export function MyReferralsDashboardModal({
               />
               {isInvalidAddress && (
                 <div className="text-red-error text-sm mt-1 flex items-center">
-                  <Info size={16} className="mr-2" />
+                  <Info
+                    size={16}
+                    className="mr-2"
+                  />
                   Invalid address
                 </div>
               )}
