@@ -1,7 +1,10 @@
 import * as Sentry from "@sentry/react";
 
 function initSentry() {
-  if (import.meta.env.VITE_APP_ENV !== "production") {
+  if (
+    import.meta.env.VITE_APP_ENV !== "production" ||
+    process.env.NODE_ENV !== "production"
+  ) {
     return;
   }
 
