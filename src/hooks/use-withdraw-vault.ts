@@ -128,9 +128,8 @@ export const useWithdrawVault = () => {
         const conversionRate = receiveAmount
           .dividedBy(withdrawAmount)
           .toNumber();
-        const now = Date.now().valueOf();
         const timeUnlock = Number(val?.countdown || 0);
-        const isClaim = val.is_ready && timeUnlock < now;
+        const isClaim = val.is_ready;
         const fee = 0;
 
         return {
