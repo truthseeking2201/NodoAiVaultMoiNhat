@@ -11,7 +11,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import Web3Button from "@/components/ui/web3-button";
-import { useUserAssetsStore, useWallet } from "@/hooks";
+import {
+  useNdlpAssetsStore,
+  useRefreshAssetsBalance,
+  useUserAssetsStore,
+  useWallet,
+} from "@/hooks";
 import { useToast } from "@/hooks/use-toast";
 import { formatNumber } from "@/lib/number";
 import { truncateStringWithSeparator } from "@/utils/helpers";
@@ -43,7 +48,9 @@ export const ConnectWalletButton = memo(() => {
     address,
   } = useWallet();
   const queryClient = useQueryClient();
-  const { assets, setRefetch, setAssets } = useUserAssetsStore();
+  const { assets, setAssets } = useUserAssetsStore();
+  const { setAssets: setNdlpAssets } = useNdlpAssetsStore();
+  const { refreshAllBalance } = useRefreshAssetsBalance();
 
   // get first for now due to we support usdc only
   const collateralToken = assets.find(
@@ -96,7 +103,7 @@ export const ConnectWalletButton = memo(() => {
       description: "Latest wallet data loaded",
       duration: 2000,
     });
-    setRefetch();
+    refreshAllBalance();
   };
 
   return (
@@ -313,6 +320,7 @@ export const ConnectWalletButton = memo(() => {
                         })
                         .then(() => {
                           setAssets([]);
+                          setNdlpAssets([]);
                         });
                     }}
                     className="w-full h-[40px]"

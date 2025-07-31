@@ -2,17 +2,19 @@ import {
   COIN_TYPES_CONFIG,
   LP_TOKEN_CONFIG,
   SUI_CONFIG,
+  USDC_CONFIG,
 } from "@/config/coin-config";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { getBalanceAmountForInput } from "@/lib/number";
 import { roundDownBalance } from "@/lib/utils";
 import { UserCoinAsset } from "@/types/coin.types";
+import { DepositVaultConfig } from "@/types/vault-config.types";
 import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
-import { SuiClient, CoinMetadata } from "@mysten/sui/client";
+import { CoinMetadata, SuiClient } from "@mysten/sui/client";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import BigNumber from "bignumber.js";
 import { useCallback, useEffect, useMemo } from "react";
-import { useUserAssetsStore } from "./use-store";
+import { useNdlpAssetsStore, useUserAssetsStore } from "./use-store";
 import { useCurrentDepositVault } from "./use-vault";
 import { useWallet } from "./use-wallet";
 
@@ -74,6 +76,27 @@ const getAllCoinObjects = async (suiClient: SuiClient, address: string) => {
       // map to full 32-byte address representation for sui coin type
       coinType:
         c.coinType === SUI_CONFIG.shortType ? SUI_CONFIG.coinType : c.coinType,
+    };
+  });
+};
+
+const getCoinsBalance = async (
+  suiClient: SuiClient,
+  address: string,
+  coinTypes: string[]
+) => {
+  const balances = await Promise.all(
+    coinTypes.map((coinType) =>
+      suiClient.getBalance({ owner: address, coinType })
+    )
+  );
+  return balances.map((balance) => {
+    return {
+      coinType:
+        balance.coinType == SUI_CONFIG.shortType
+          ? SUI_CONFIG.coinType
+          : balance.coinType,
+      totalBalance: balance.totalBalance,
     };
   });
 };
@@ -306,7 +329,11 @@ export const useFetchAssets = () => {
     refetch: allCoinObjectsRefetch,
   } = useQuery({
     queryKey: ["allCoinObjects", address],
-    queryFn: () => getAllCoinObjects(suiClient, address || ""),
+    queryFn: () =>
+      getCoinsBalance(suiClient, address || "", [
+        SUI_CONFIG.coinType,
+        USDC_CONFIG.coinType,
+      ]),
     enabled: isAuthenticated && !!address,
     staleTime: REFETCH_VAULT_DATA_INTERVAL,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
@@ -372,40 +399,23 @@ export const useFetchAssets = () => {
     const assets: UserCoinAsset[] =
       allCoinObjects.reduce((acc, coin) => {
         const coinType = coin.coinType;
-        const rawBalance = new BigNumber(coin.balance || "0");
         const coinMetadata = coinsMetadata[coinType];
         const decimals = coinMetadata?.decimals || 6;
-        const domainType = coinType?.toLowerCase().includes(NDLP_COIN)
-          ? "lp"
-          : "collateral";
 
-        const tokenDisplay =
-          domainType === "collateral"
-            ? COIN_TYPES_CONFIG.collateral_tokens.find(
-                (token) => token.id === coinType
-              )
-            : LP_TOKEN_CONFIG;
+        const tokenDisplay = COIN_TYPES_CONFIG.collateral_tokens.find(
+          (token) => token.id === coinType
+        );
 
-        const existingAsset = acc.find((asset) => asset.coin_type === coinType);
-
-        if (existingAsset) {
-          existingAsset.raw_balance = new BigNumber(existingAsset.raw_balance)
-            .plus(rawBalance)
-            .toString();
-        } else {
-          acc.push({
-            coin_type: coinType,
-            balance: "0",
-            raw_balance: rawBalance.toString(),
-            image_url: tokenDisplay?.image_url || coinMetadata?.iconUrl || "",
-            decimals: decimals,
-            display_name:
-              tokenDisplay?.display_name || coinMetadata?.name || "",
-            name: tokenDisplay?.display_name || coinMetadata?.name || "",
-            symbol: coinMetadata?.symbol || "",
-            domain_type: domainType,
-          });
-        }
+        acc.push({
+          coin_type: coinType,
+          balance: "0",
+          raw_balance: coin.totalBalance,
+          image_url: tokenDisplay?.image_url || coinMetadata?.iconUrl || "",
+          decimals: decimals,
+          display_name: tokenDisplay?.display_name || coinMetadata?.name || "",
+          name: tokenDisplay?.display_name || coinMetadata?.name || "",
+          symbol: coinMetadata?.symbol || "",
+        });
         return acc;
       }, []) || [];
 
@@ -443,4 +453,105 @@ export const useFetchAssets = () => {
       });
     }
   }, [isRefetch, allCoinObjectsRefetch, setUpdated]);
+};
+
+export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
+  const { setAssets, setUpdated, updated, isRefetch, isLoading, setIsLoading } =
+    useNdlpAssetsStore();
+  const { address, isAuthenticated } = useWallet();
+  const suiClient = useSuiClient();
+
+  const ndlpCoinTypes = useMemo(() => {
+    return vaults?.map((vault) => vault.vault_lp_token) || [];
+  }, [vaults]);
+
+  const {
+    data: allCoinObjectsNDLP = [],
+    isLoading: allCoinObjectsNDLPLoading,
+    isFetching: allCoinObjectsNDLPFetching,
+    refetch: allCoinObjectsNDLPRefetch,
+  } = useQuery({
+    queryKey: ["allCoinObjectsNDLP", address],
+    queryFn: () => getCoinsBalance(suiClient, address || "", ndlpCoinTypes),
+    enabled: isAuthenticated && !!address && ndlpCoinTypes.length > 0,
+    staleTime: REFETCH_VAULT_DATA_INTERVAL,
+    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
+    refetchOnWindowFocus: true,
+  });
+
+  useEffect(() => {
+    const isFetching = allCoinObjectsNDLPFetching || allCoinObjectsNDLPLoading;
+    if (isFetching) return;
+
+    if (allCoinObjectsNDLP.length === 0 && isLoading) {
+      setIsLoading(false);
+      return;
+    }
+
+    if (updated) {
+      return;
+    }
+
+    const assets: UserCoinAsset[] =
+      allCoinObjectsNDLP.reduce((acc, coin) => {
+        const coinType = coin.coinType;
+        const tokenDisplay = LP_TOKEN_CONFIG;
+        acc.push({
+          coin_type: coinType,
+          balance: "0",
+          raw_balance: coin.totalBalance,
+          image_url: tokenDisplay?.image_url || "",
+          decimals: LP_TOKEN_CONFIG.decimals,
+          display_name: tokenDisplay?.display_name || "",
+          name: tokenDisplay?.display_name || "",
+          symbol: tokenDisplay?.symbol || "",
+        });
+        return acc;
+      }, []) || [];
+
+    if (assets.length > 0) {
+      const updatedAssets = assets.map((asset) => {
+        const balance = getBalanceAmountForInput(
+          asset.raw_balance,
+          asset.decimals,
+          asset.decimals
+        ).toString();
+        return {
+          ...asset,
+          raw_balance: new BigNumber(asset.raw_balance).toString(),
+          balance: balance,
+        };
+      });
+
+      setAssets(updatedAssets);
+    }
+  }, [
+    allCoinObjectsNDLP,
+    updated,
+    setAssets,
+    allCoinObjectsNDLPFetching,
+    allCoinObjectsNDLPLoading,
+    isLoading,
+    setIsLoading,
+  ]);
+
+  useEffect(() => {
+    if (isRefetch) {
+      allCoinObjectsNDLPRefetch().then(() => {
+        setUpdated(false);
+      });
+    }
+  }, [isRefetch, allCoinObjectsNDLPRefetch, setUpdated]);
+};
+
+export const useRefreshAssetsBalance = () => {
+  const { setRefetch: setUserRefetch } = useUserAssetsStore();
+  const { setRefetch: setNdlpRefetch } = useNdlpAssetsStore();
+
+  const refreshAllBalance = useCallback(() => {
+    setUserRefetch();
+    setNdlpRefetch();
+  }, [setUserRefetch, setNdlpRefetch]);
+
+  return { refreshAllBalance };
 };

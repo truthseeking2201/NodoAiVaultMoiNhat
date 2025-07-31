@@ -56,6 +56,18 @@ interface UserAssetsState {
   setIsLoading: (value: boolean) => void;
 }
 
+interface NdlpAssetsState {
+  assets: UserCoinAsset[];
+  updated: boolean;
+  isRefetch: boolean;
+  isLoading: boolean;
+  updatedAt: number;
+  setAssets: (assets: UserCoinAsset[]) => void;
+  setRefetch: () => void;
+  setUpdated: (value: boolean) => void;
+  setIsLoading: (value: boolean) => void;
+}
+
 const userAssetsStore = create<UserAssetsState>()(
   persist(
     (set) => ({
@@ -90,6 +102,39 @@ const userAssetsStore = create<UserAssetsState>()(
   )
 );
 
+const ndlpAssetsStore = create<NdlpAssetsState>()(
+  persist(
+    (set) => ({
+      assets: [],
+      updated: false,
+      isRefetch: false,
+      isLoading: true,
+      updatedAt: 0,
+      setRefetch: () => set({ isRefetch: true }),
+      setUpdated: (value: boolean) => set({ updated: value }),
+      setAssets: (assets: UserCoinAsset[]) => {
+        set({
+          assets,
+          isRefetch: false,
+          isLoading: false,
+          updated: assets.length > 0 ? true : false,
+          updatedAt: Date.now(),
+        });
+      },
+      setDefaultAssets: (assets: UserCoinAsset[]) => set({ assets }),
+      setIsLoading: (value: boolean) => set({ isLoading: value }),
+    }),
+    {
+      name: "ndlp-assets",
+      partialize: (state) => ({
+        assets: state.assets,
+        updatedAt: state.updatedAt,
+      }),
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
+
 interface VaultObjectConfigState {
   vaultObjects: SCVaultConfig[];
   setVaultObjects: (vaults: SCVaultConfig[]) => void;
@@ -115,6 +160,29 @@ export const useUserAssetsStore = () => {
   const setRefetch = userAssetsStore((state) => state.setRefetch);
   const setUpdated = userAssetsStore((state) => state.setUpdated);
   const setIsLoading = userAssetsStore((state) => state.setIsLoading);
+
+  return {
+    assets,
+    updated,
+    setAssets,
+    isRefetch,
+    setRefetch,
+    isLoading,
+    setUpdated,
+    setIsLoading,
+  };
+};
+
+export const useNdlpAssetsStore = () => {
+  const assets = ndlpAssetsStore((state) => state.assets);
+  const setAssets = ndlpAssetsStore((state) => state.setAssets);
+  const updated = ndlpAssetsStore((state) => state.updated);
+  const isRefetch = ndlpAssetsStore((state) => state.isRefetch);
+  const isLoading = ndlpAssetsStore((state) => state.isLoading);
+  const setRefetch = ndlpAssetsStore((state) => state.setRefetch);
+  const setUpdated = ndlpAssetsStore((state) => state.setUpdated);
+  const setIsLoading = ndlpAssetsStore((state) => state.setIsLoading);
+
   return {
     assets,
     updated,
@@ -133,7 +201,7 @@ export const useGetCoinByType = (coinType: string) => {
 };
 
 export const useGetLpToken = (coinType: string, vaultId: string) => {
-  const assets = userAssetsStore((state) => state.assets);
+  const assets = ndlpAssetsStore((state) => state.assets);
   const asset = assets.find((asset) => asset.coin_type === coinType);
   const { data: vaultDetails } = useVaultBasicDetails(vaultId);
 
