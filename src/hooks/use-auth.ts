@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useWallet } from "./use-wallet";
 import { useUserAssetsStore } from "./use-store";
 import { useGetDepositVaults } from "./use-vault";
+import * as Sentry from "@sentry/react";
 
 export const useLoginWallet = () => {
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
@@ -37,6 +38,9 @@ export const useLoginWallet = () => {
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("refresh_token", data.refresh_token);
       setIsAuthenticated(true);
+      Sentry.setUser({
+        wallet_address: walletAddress,
+      });
       setUpdated(false);
       refetchDepositVaults();
       return true;
