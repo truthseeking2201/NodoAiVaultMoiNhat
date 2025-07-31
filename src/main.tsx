@@ -1,4 +1,5 @@
-import React from "react";
+// Sentry initialization should be imported first!
+import "./instrument";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";

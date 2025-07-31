@@ -28,6 +28,7 @@ import Home from "./pages/home";
 import VaultDetail from "./pages/vault-detail";
 import { setWalletDisconnectHandler } from "./utils/wallet-disconnect";
 import { ScrollToTopButton } from "@/components/ui/scroll-to-top-button";
+import * as Sentry from "@sentry/react";
 
 const NotFound = lazy(() =>
   import("./pages/not-found").catch((e) => {
@@ -50,6 +51,9 @@ const useSetWalletDisconnectHandler = () => {
         disconnect();
         setIsAuthenticated(false);
         setAssets([]);
+        Sentry.setUser({
+          wallet_address: "",
+        });
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("current-address");
