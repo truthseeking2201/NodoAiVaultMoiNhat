@@ -84,6 +84,20 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
     }
   }, [data]);
 
+  useEffect(() => {
+    const walletConnectionInfo = JSON.parse(
+      localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
+    );
+    const lastConnectedAccountAddress =
+      walletConnectionInfo?.state?.lastConnectedAccountAddress;
+
+    if (lastConnectedAccountAddress) {
+      Sentry.setUser({
+        wallet_address: lastConnectedAccountAddress,
+      });
+    }
+  }, []);
+
   if (isLoading && !hasLoadedVaults) {
     return <GlobalLoading />;
   }
