@@ -21,76 +21,19 @@ const versionFile = path.join(outputDir, "version.json");
 // Using a timestamp ensures uniqueness across deployments
 const version = new Date().toISOString();
 
-// Check for force-update based on branch name when merging to deployment branch
+// Get the latest commit message and check for force-update
 function shouldForceUpdate() {
   try {
-    const projectRoot = path.resolve(__dirname, "..");
-
-    // Get current branch name
-    const currentBranch = execSync("git rev-parse --abbrev-ref HEAD", {
-      encoding: "utf8",
-      cwd: projectRoot,
-    }).trim();
-
-    console.log(`🌿 Current branch: ${currentBranch}`);
-
-    // Check if we're on a deployment branch
-    const deploymentBranches = ["main", "develop", "uat", "staging"];
-    const isDeploymentBranch = deploymentBranches.includes(
-      currentBranch.toLowerCase()
-    );
-
-    if (!isDeploymentBranch) {
-      console.log(
-        `ℹ️  Not on a deployment branch, skipping force-update check`
-      );
-      return false;
-    }
-
-    // Get the latest commit message to check if it's a merge commit
+    // Get the latest commit message
     const commitMessage = execSync("git log -1 --pretty=%B", {
       encoding: "utf8",
-      cwd: projectRoot,
+      cwd: path.resolve(__dirname, ".."),
     }).trim();
 
-    console.log(`📝 Latest commit message: ${commitMessage}`);
-
-    // Check if this is a merge commit and extract source branch name
-    const mergePatterns = [
-      /Merge branch '([^']+)'/i, // Standard git merge: "Merge branch 'feature-branch'"
-      /Merge pull request #\d+ from [^/]+\/([^\s]+)/i, // GitHub PR: "Merge pull request #123 from user/branch-name"
-      /Merge branch '([^']+)' into/i, // Explicit merge: "Merge branch 'source' into target"
-    ];
-
-    for (const pattern of mergePatterns) {
-      const match = commitMessage.match(pattern);
-      if (match && match[1]) {
-        const sourceBranch = match[1];
-        console.log(`🔀 Detected merge from branch: ${sourceBranch}`);
-
-        // Check if source branch name contains "force-update"
-        const hasForceUpdate = sourceBranch
-          .toLowerCase()
-          .includes("force-update");
-        console.log(`🔍 Branch contains 'force-update': ${hasForceUpdate}`);
-
-        return hasForceUpdate;
-      }
-    }
-
-    // Fallback: check if commit message itself contains "force-update"
-    const messageHasForceUpdate = commitMessage
-      .toLowerCase()
-      .includes("force-update");
-    console.log(
-      `💬 Commit message contains 'force-update': ${messageHasForceUpdate}`
-    );
-
-    return messageHasForceUpdate;
+    // Check if commit message contains "force-update" (case insensitive)
+    return commitMessage.toLowerCase().includes("force-update");
   } catch (error) {
-    console.warn(
-      `⚠️  Could not determine force-update status: ${error.message}`
-    );
+    console.warn(`⚠️  Could not get commit message: ${error.message}`);
     return false;
   }
 }
