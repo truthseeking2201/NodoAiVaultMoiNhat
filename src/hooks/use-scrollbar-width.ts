@@ -15,7 +15,10 @@ export function useScrollbarWidth() {
     const scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
     setWidth(scrollbarWidth);
 
-    document.body.removeChild(scrollDiv);
+    // Safety check to ensure the element exists before removing it
+    if (scrollDiv.parentNode) {
+      document.body.removeChild(scrollDiv);
+    }
   }, []);
 
   return width;
