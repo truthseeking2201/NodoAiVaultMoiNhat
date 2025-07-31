@@ -8,6 +8,7 @@ import {
   useEstimateDeposit,
   useGetLpToken,
   useGetVaultConfig,
+  useRefreshAssetsBalance,
   useSwapDepositInfo,
   useUserAssetsStore,
   useVaultBasicDetails,
@@ -48,7 +49,8 @@ const DEFAULT_DEPOSIT_TOKEN = {
 
 const DepositForm = ({ vault_id }: { vault_id: string }) => {
   const { openConnectWalletDialog, isConnected } = useWallet();
-  const { assets, setRefetch } = useUserAssetsStore();
+  const { refreshAllBalance } = useRefreshAssetsBalance();
+  const { assets } = useUserAssetsStore();
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [depositStep, setDepositStep] = useState(1);
   const [depositSuccessData, setDepositSuccessData] =
@@ -200,7 +202,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
       });
       setLoading(false);
       setDepositStep(2);
-      setRefetch();
+      refreshAllBalance();
       clearTimeout(timeoutId);
     }, 1000);
   };

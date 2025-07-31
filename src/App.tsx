@@ -23,6 +23,8 @@ import {
   useUserAssetsStore,
   useWallet,
   useCriticalImagePrefetch,
+  useFetchNDLPAssets,
+  useNdlpAssetsStore,
 } from "./hooks";
 import Home from "./pages/home";
 import VaultDetail from "./pages/vault-detail";
@@ -44,13 +46,14 @@ const useSetWalletDisconnectHandler = () => {
   const { mutate: disconnect } = useDisconnectWallet();
   const { setIsAuthenticated } = useWallet();
   const { setAssets } = useUserAssetsStore();
-
+  const { setAssets: setNdlpAssets } = useNdlpAssetsStore();
   useEffect(() => {
     if (account?.address) {
       setWalletDisconnectHandler(() => {
         disconnect();
         setIsAuthenticated(false);
         setAssets([]);
+        setNdlpAssets([]);
         Sentry.setUser({
           wallet_address: "",
         });
@@ -60,7 +63,7 @@ const useSetWalletDisconnectHandler = () => {
         localStorage.removeItem("whitelisted_address");
       });
     }
-  }, [account, disconnect, setIsAuthenticated, setAssets]);
+  }, [account, disconnect, setIsAuthenticated, setAssets, setNdlpAssets]);
 };
 
 const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -68,6 +71,7 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
   const { isLoading, error, data } = useGetDepositVaults();
   const vaultIds = data?.map((vault) => vault.vault_id) || [];
   useFetchAssets();
+  useFetchNDLPAssets(data);
   useGetAllVaults(vaultIds);
   useSetWalletDisconnectHandler();
 

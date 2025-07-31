@@ -8,6 +8,7 @@ import WithdrawForm from "./withdraw-form";
 import {
   useGetDepositVaults,
   useGetLpToken,
+  useRefreshAssetsBalance,
   useVaultBasicDetails,
   useWallet,
 } from "@/hooks";
@@ -15,7 +16,6 @@ import {
   useWithdrawVault,
   useWithdrawVaultConfig,
 } from "@/hooks/use-withdraw-vault";
-import { useUserAssetsStore } from "@/hooks";
 
 import { sleep } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
@@ -40,7 +40,7 @@ export default function WithdrawVaultSection({
   const currentAccount = useCurrentAccount();
   const isConnected = !!currentAccount?.address;
   const address = currentAccount?.address;
-  const { setRefetch: refreshBalance } = useUserAssetsStore();
+  const { refreshAllBalance: refreshBalance } = useRefreshAssetsBalance();
   const { refetch: refetchDepositVaults } = useGetDepositVaults();
   const { data: vault, refetch: refetchVaultBasicDetails } =
     useVaultBasicDetails(vault_id);

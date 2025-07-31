@@ -1,12 +1,13 @@
 import { GradientSelect } from "@/components/ui/gradient-select";
+import { InputSearch } from "@/components/ui/input-search";
+import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import { TableRender } from "@/components/ui/table-render";
 import Web3Button from "@/components/ui/web3-button";
-import { InputSearch } from "@/components/ui/input-search";
 import { SORT_TYPE } from "@/config/constants-types";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import {
   useGetDepositVaults,
-  useUserAssetsStore,
+  useNdlpAssetsStore,
   useVaultObjectStore,
 } from "@/hooks";
 import { formatPercentage } from "@/lib/utils";
@@ -16,7 +17,6 @@ import { calculateUserHoldings } from "@/utils/helpers";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { VaultItem } from "./vault-item";
-import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 
 const OPTIONS_CHAINS = [
   { value: "all", label: "All Chains" },
@@ -53,7 +53,7 @@ export default function VaultList() {
   const [search, setSearch] = useState<string>("");
   const navigate = useNavigate();
   const { vaultObjects } = useVaultObjectStore();
-  const { assets } = useUserAssetsStore();
+  const { assets: ndlpAssets } = useNdlpAssetsStore();
 
   const [paramsSort, setParamsSort] = useState(() => {
     const sortKey = searchParams.get("sortKey") || "vault_apy";
@@ -70,7 +70,7 @@ export default function VaultList() {
         (vo) => vo.vault_id === vault.vault_id
       );
       const ndlpBalance =
-        assets.find((asset) => asset.coin_type === vault.vault_lp_token)
+        ndlpAssets.find((asset) => asset.coin_type === vault.vault_lp_token)
           ?.balance || "0";
 
       return {
@@ -85,7 +85,7 @@ export default function VaultList() {
         ),
       };
     });
-  }, [data, vaultObjects, assets]);
+  }, [data, vaultObjects, ndlpAssets]);
 
   // Filter logic: if 'all' is selected, show all; else filter by selected DEXs
   const filteredData = useMemo(
