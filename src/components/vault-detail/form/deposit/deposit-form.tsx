@@ -248,6 +248,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
           title="Deposit successful!"
           content={`${formatAmount({
             amount: Number(depositAmount),
+            precision: collateralToken?.decimals,
           })} ${collateralToken?.symbol} deposited — ${formatAmount({
             amount: actualNdlpAmount,
             precision: vault.vault_lp_token_decimals,
