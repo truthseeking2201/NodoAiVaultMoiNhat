@@ -1,7 +1,7 @@
 import Web3Button from "@/components/ui/web3-button";
 import { Spinner } from "@/components/ui/spinner";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import ClaimToken from "./claim-token";
 import WithdrawForm from "./withdraw-form";
 
@@ -31,6 +31,7 @@ export default function WithdrawVaultSection({
   const [dataClaim, setDataClaim] = useState<DataClaimType>();
   const [loading, setLoading] = useState(true);
   const [ready, setReady] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   /**
    * HOOKS
@@ -142,6 +143,27 @@ export default function WithdrawVaultSection({
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, configVault]);
+
+  useEffect(() => {
+    if (dataClaim && dataClaim.isClaim === false && !intervalRef.current) {
+      intervalRef.current = setInterval(() => {
+        initDataClaim();
+      }, 30000); // 30s
+    }
+
+    if ((!dataClaim || dataClaim?.isClaim === true) && intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataClaim]);
 
   /**
    * RENDER
