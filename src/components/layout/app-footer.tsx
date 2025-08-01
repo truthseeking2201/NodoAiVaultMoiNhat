@@ -146,7 +146,7 @@ export function AppFooter() {
             <Button
               asChild
               onClick={() => {
-                window.open("mailto:support@nodo.xyz", "_blank");
+                window.open("https://nodoxyz.zendesk.com/hc/en-us/requests/new", "_blank");
               }}
               className="cursor-pointer"
             >
