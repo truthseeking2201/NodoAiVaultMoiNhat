@@ -31,6 +31,7 @@ interface PositionPriceChartProps {
   period: string;
   analyticsData: any;
   vault: BasicVaultDetailsType;
+  onSwitchToWeekly: () => void;
 }
 
 /**
@@ -123,6 +124,7 @@ const PositionPriceChart = ({
   period,
   analyticsData,
   vault,
+  onSwitchToWeekly,
 }: PositionPriceChartProps) => {
   const [isConvertedToken, setIsConvertedToken] = useState(false);
 
@@ -134,25 +136,28 @@ const PositionPriceChart = ({
     if (period === PERIOD_TABS[1].value) {
       dataList = dataList.slice(-73);
     }
-    // Build chartData, filling zero values with previous non-zero data
-    const result = [];
-    let lastRangeMin = "";
-    let lastRangeMax = "";
-    let lastDisplayPrice = "";
-    let started = false;
-    for (const item of dataList) {
-      // Only start adding data after the first non-zero real value
+    const chartPoints = [];
+    let prevRangeMin = "";
+    let prevRangeMax = "";
+    let prevDisplayPrice = "";
+    let foundFirstValid = false;
+    for (let i = 0; i < dataList.length; i++) {
+      const dataPoint = dataList[i];
+      // Only skip leading zeroes
       if (
-        (!started && Number(item.value.real) === 0) ||
-        Number(item.value.lower) === 0 ||
-        Number(item.value.upper) === 0
-      )
+        !foundFirstValid &&
+        Number(dataPoint.value.real) === 0 &&
+        Number(dataPoint.value.lower) === 0 &&
+        Number(dataPoint.value.upper) === 0
+      ) {
         continue;
-      if (!started && Number(item.value.real) !== 0) started = true;
+      }
+      if (!foundFirstValid && Number(dataPoint.value.real) !== 0)
+        foundFirstValid = true;
 
-      const lower = Number(item.value.lower);
-      const upper = Number(item.value.upper);
-      const real = Number(item.value.real);
+      let lower = Number(dataPoint.value.lower);
+      let upper = Number(dataPoint.value.upper);
+      let real = Number(dataPoint.value.real);
       let rangeMin = isConvertedToken
         ? convertTokenBase(upper, true)
         : lower.toFixed(4);
@@ -163,36 +168,43 @@ const PositionPriceChart = ({
         ? convertTokenBase(real, true)
         : real.toFixed(4);
 
-      if (real === 0 && result.length > 0) {
-        displayPrice = lastDisplayPrice;
+      // For non-leading zeroes, use previous value
+      if (real === 0 && chartPoints.length > 0) {
+        displayPrice = prevDisplayPrice;
+        real = Number(prevDisplayPrice);
+      }
+      if (lower === 0 && chartPoints.length > 0) {
+        rangeMin = prevRangeMin;
+        lower = Number(prevRangeMin);
+      }
+      if (upper === 0 && chartPoints.length > 0) {
+        rangeMax = prevRangeMax;
+        upper = Number(prevRangeMax);
       }
 
-      if (lower === 0 && result.length > 0) {
-        rangeMin = lastRangeMin;
-      }
-
-      if (upper === 0 && result.length > 0) {
-        rangeMax = lastRangeMax;
-      }
-
-      result.push({
-        timestamp: item.value.date,
+      chartPoints.push({
+        timestamp: dataPoint.value.date,
+        value: {
+          real,
+          lower,
+          upper,
+        },
         displayPrice,
         rangeMax,
         rangeMin,
         range: [rangeMin, rangeMax],
       });
 
-      lastRangeMin = rangeMin.toString();
-      lastRangeMax = rangeMax.toString();
-      lastDisplayPrice = displayPrice.toString();
+      prevRangeMin = rangeMin.toString();
+      prevRangeMax = rangeMax.toString();
+      prevDisplayPrice = displayPrice.toString();
     }
-    return result;
+    return chartPoints;
   }, [analyticsData, period, isConvertedToken]);
 
   const currentData = useMemo(
-    () => analyticsData?.list?.[analyticsData?.list?.length - 1],
-    [analyticsData]
+    () => chartData?.[chartData.length > 0 ? chartData.length - 1 : 0],
+    [chartData]
   );
 
   const currentPrice = useMemo(
@@ -246,7 +258,12 @@ const PositionPriceChart = ({
   }, [chartData]);
 
   if (!chartData || chartData?.length === 0) {
-    return <EmptyChartState />;
+    // If weekly period is empty, show empty chart state
+    if (period === PERIOD_TABS[1].value) {
+      return <EmptyChartState />;
+    }
+    // If daily period is empty, call parent function to redirect to weekly
+    onSwitchToWeekly();
   }
 
   return (

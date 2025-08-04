@@ -3,9 +3,13 @@ export const PERIOD_TABS = [
   { value: "ONE_WEEK", label: "1W" },
 ];
 
+export const PERIOD_TABS_1W = [
+  { value: "ONE_WEEK", label: "1W" },
+];
+
 export const ANALYTICS_TABS = [
   { value: "POSITION_PRICE", label: "Position Price" },
-  // { value: "APY_YIELDS", label: "APY & Yields" },
+  { value: "APY_YIELDS", label: "APY & Yields" },
 ];
 
 export const ACTIVITIES_TABS = [
