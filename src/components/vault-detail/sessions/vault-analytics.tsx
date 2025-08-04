@@ -34,10 +34,8 @@ const VaultAnalytics = ({
   const [periodsOptions, setPeriodsOptions] = useState(PERIOD_TABS);
 
   const handleChangeAnalyticsTab = (value: string) => {
-    if (value === "APY_YIELDS") {
-      setAnalyticsRangeTab(PERIOD_TABS[0].value as TimeFilter);
-      setPeriodsOptions(PERIOD_TABS);
-    }
+    setPeriodsOptions(PERIOD_TABS);
+    setAnalyticsRangeTab(PERIOD_TABS[0].value as TimeFilter);
     setAnalyticsTab(value);
   };
 
@@ -46,12 +44,19 @@ const VaultAnalytics = ({
     queryKey: ["vaultAnalytics", analyticsTab, analyticsRangeTab],
     queryFn: () => getVaultAnalytics(vault_id, analyticsTab, analyticsRangeTab),
     enabled: !!analyticsTab && !!analyticsRangeTab,
+    gcTime: 0,
   });
 
   const handleSwitchToWeekly = () => {
     setAnalyticsRangeTab(PERIOD_TABS_1W[0].value as TimeFilter);
     setPeriodsOptions(PERIOD_TABS_1W);
   };
+
+  useEffect(() => {
+    setPeriodsOptions(PERIOD_TABS);
+    setAnalyticsRangeTab(PERIOD_TABS[0].value as TimeFilter);
+    setAnalyticsTab(ANALYTICS_TABS[0].value);
+  }, [vault_id]);
 
   return (
     <DetailWrapper
@@ -98,10 +103,15 @@ const VaultAnalytics = ({
             analyticsData={analyticsData}
             vault={vault}
             onSwitchToWeekly={handleSwitchToWeekly}
+            isLoading={isLoading}
           />
         )}
         {analyticsTab === ANALYTICS_TABS?.[1]?.value && !isLoading && (
-          <APYChart period={analyticsRangeTab} analyticsData={analyticsData} />
+          <APYChart
+            period={analyticsRangeTab}
+            analyticsData={analyticsData}
+            isLoading={isLoading}
+          />
         )}
       </div>
     </DetailWrapper>
