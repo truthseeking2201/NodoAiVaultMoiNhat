@@ -14,6 +14,8 @@ import { PERIOD_TABS } from "../constant";
 import { formatDate } from "@/utils/date";
 import { formatShortCurrency } from "@/utils/currency";
 import EmptyChartState from "@/components/ui/empty-chart-state";
+import ConditionRenderer from "@/components/shared/condition-renderer";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CustomTooltipProps {
   payload?: any[];
@@ -23,6 +25,7 @@ interface CustomTooltipProps {
 interface APYChartProps {
   period: string;
   analyticsData: any;
+  isLoading?: boolean;
 }
 
 /**
@@ -56,7 +59,7 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ payload, label }) => {
   );
 };
 
-const APYChart = ({ period, analyticsData }: APYChartProps) => {
+const APYChart = ({ period, analyticsData, isLoading }: APYChartProps) => {
   const chartData = useMemo(() => {
     const result = [];
     let lastApy = 0;
@@ -109,159 +112,164 @@ const APYChart = ({ period, analyticsData }: APYChartProps) => {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <ComposedChart
-        data={chartData}
-        margin={{ top: 30, right: 0, left: 0, bottom: 7 }}
-      >
-        <defs>
-          <linearGradient id="priceLineGradient" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#9DEBFF" />
-            <stop offset="100%" stopColor="#00FF5E" />
-          </linearGradient>
-          <radialGradient id="dotGradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#00FF5E" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#00FF5E" stopOpacity="0" />
-          </radialGradient>
-        </defs>
-        <XAxis
-          dataKey="timestamp"
-          tick={{
-            fontSize: 12,
-            fontFamily: "sans-serif",
-            fill: "#fff",
-            dominantBaseline: "hanging",
-          }}
-          axisLine={false}
-          tickLine={false}
-          tickFormatter={(value) =>
-            period === PERIOD_TABS[1].value
-              ? formatDate(value, "dd/MM")
-              : formatDate(value, "HH:mm")
-          }
-        />
-        <YAxis
-          yAxisId="left"
-          dataKey="apy"
-          tick={{ fontSize: 12, fontFamily: "monospace", fill: "#fff" }}
-          axisLine={false}
-          tickLine={false}
-          tickFormatter={(value) => `${value}%`}
-          label={{
-            value: "APY",
-            position: "top",
-            dx: 15,
-            offset: 20,
-            className: "font-mono text-white/80 text-xs",
-          }}
-        />
-        <YAxis
-          yAxisId="right"
-          orientation="right"
-          dataKey="totalCumulativeYields"
-          tick={{ fontSize: 12, fontFamily: "monospace", fill: "#fff" }}
-          axisLine={false}
-          tickLine={false}
-          tickFormatter={(value) => `${formatShortCurrency(value, 2)}`}
-          label={{
-            value: "USDC",
-            position: "top",
-            dx: -10,
-            offset: 20,
-            className: "font-mono text-white/80 text-xs",
-          }}
-        />
-        <Tooltip content={<CustomTooltip />} />
-        <Legend
-          content={
-            <div className="flex gap-[200px] px-4 py-2 justify-center">
-              <div className="flex items-center gap-2">
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: 100,
-                    height: 3,
-                    background:
-                      "linear-gradient(90deg, #9DEBFF 0%, #00FF5E 100%)",
-                    borderRadius: 1,
-                  }}
-                />
-                <span className="text-sm text-white font-bold">
-                  Cumulative Yields
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: 38,
-                    height: 12,
-                    background: "rgba(253, 235, 207, 0.6)",
-                    borderRadius: 2,
-                  }}
-                />
-                <span className="text-sm text-white font-bold">APY</span>
-              </div>
-            </div>
-          }
-        />
-        <Bar
-          yAxisId="left"
-          dataKey="apy"
-          fill="rgba(253, 235, 207, 0.6)"
-          opacity={0.7}
-          radius={[2, 2, 0, 0]}
-        />
-        <Line
-          yAxisId="right"
-          type="monotone"
-          dataKey="totalCumulativeYields"
-          stroke="url(#priceLineGradient)"
-          strokeWidth={2}
-          dot={({ cx, cy, index }) => {
-            if (isHasData && index === chartData.length - 1) {
-              return (
-                <Fragment key={index}>
-                  <circle
-                    cx={cx}
-                    cy={cy}
-                    r={16}
-                    fill="url(#dotGradient)"
+    <ConditionRenderer
+      when={!isLoading}
+      fallback={<Skeleton className="w-full h-[400px]" />}
+    >
+      <ResponsiveContainer width="100%" height={400}>
+        <ComposedChart
+          data={chartData}
+          margin={{ top: 30, right: 0, left: 0, bottom: 7 }}
+        >
+          <defs>
+            <linearGradient id="priceLineGradient" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#9DEBFF" />
+              <stop offset="100%" stopColor="#00FF5E" />
+            </linearGradient>
+            <radialGradient id="dotGradient" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#00FF5E" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#00FF5E" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <XAxis
+            dataKey="timestamp"
+            tick={{
+              fontSize: 12,
+              fontFamily: "sans-serif",
+              fill: "#fff",
+              dominantBaseline: "hanging",
+            }}
+            axisLine={false}
+            tickLine={false}
+            tickFormatter={(value) =>
+              period === PERIOD_TABS[1].value
+                ? formatDate(value, "dd/MM")
+                : formatDate(value, "HH:mm")
+            }
+          />
+          <YAxis
+            yAxisId="left"
+            dataKey="apy"
+            tick={{ fontSize: 12, fontFamily: "monospace", fill: "#fff" }}
+            axisLine={false}
+            tickLine={false}
+            tickFormatter={(value) => `${value}%`}
+            label={{
+              value: "APY",
+              position: "top",
+              dx: 15,
+              offset: 20,
+              className: "font-mono text-white/80 text-xs",
+            }}
+          />
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            dataKey="totalCumulativeYields"
+            tick={{ fontSize: 12, fontFamily: "monospace", fill: "#fff" }}
+            axisLine={false}
+            tickLine={false}
+            tickFormatter={(value) => `${formatShortCurrency(value, 2)}`}
+            label={{
+              value: "USDC",
+              position: "top",
+              dx: -10,
+              offset: 20,
+              className: "font-mono text-white/80 text-xs",
+            }}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend
+            content={
+              <div className="flex gap-[200px] px-4 py-2 justify-center">
+                <div className="flex items-center gap-2">
+                  <span
                     style={{
-                      filter: "blur(3px)",
-                      opacity: 0,
-                      animation: "fadeInDot 1s 1.25s forwards",
-                    }}
-                    className="animate-pulse"
-                  />
-                  <circle
-                    cx={cx}
-                    cy={cy}
-                    r={6}
-                    fill="#00FF5E"
-                    stroke="#fff"
-                    strokeWidth={1}
-                    style={{
-                      opacity: 0,
-                      animation: "fadeInDot 1s 1.25s forwards",
+                      display: "inline-block",
+                      width: 100,
+                      height: 3,
+                      background:
+                        "linear-gradient(90deg, #9DEBFF 0%, #00FF5E 100%)",
+                      borderRadius: 1,
                     }}
                   />
-                  <style>
-                    {`
+                  <span className="text-sm text-white font-bold">
+                    Cumulative Yields
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: 38,
+                      height: 12,
+                      background: "rgba(253, 235, 207, 0.6)",
+                      borderRadius: 2,
+                    }}
+                  />
+                  <span className="text-sm text-white font-bold">APY</span>
+                </div>
+              </div>
+            }
+          />
+          <Bar
+            yAxisId="left"
+            dataKey="apy"
+            fill="rgba(253, 235, 207, 0.6)"
+            opacity={0.7}
+            radius={[2, 2, 0, 0]}
+          />
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey="totalCumulativeYields"
+            stroke="url(#priceLineGradient)"
+            strokeWidth={2}
+            dot={({ cx, cy, index }) => {
+              if (isHasData && index === chartData.length - 1) {
+                return (
+                  <Fragment key={index}>
+                    <circle
+                      cx={cx}
+                      cy={cy}
+                      r={16}
+                      fill="url(#dotGradient)"
+                      style={{
+                        filter: "blur(3px)",
+                        opacity: 0,
+                        animation: "fadeInDot 1s 1.25s forwards",
+                      }}
+                      className="animate-pulse"
+                    />
+                    <circle
+                      cx={cx}
+                      cy={cy}
+                      r={6}
+                      fill="#00FF5E"
+                      stroke="#fff"
+                      strokeWidth={1}
+                      style={{
+                        opacity: 0,
+                        animation: "fadeInDot 1s 1.25s forwards",
+                      }}
+                    />
+                    <style>
+                      {`
                     @keyframes fadeInDot {
                     from { opacity: 0; }
                     to { opacity: 1; }
                     }
                   `}
-                  </style>
-                </Fragment>
-              );
-            }
-          }}
-          isAnimationActive={true}
-        />
-      </ComposedChart>
-    </ResponsiveContainer>
+                    </style>
+                  </Fragment>
+                );
+              }
+            }}
+            isAnimationActive={true}
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+    </ConditionRenderer>
   );
 };
 

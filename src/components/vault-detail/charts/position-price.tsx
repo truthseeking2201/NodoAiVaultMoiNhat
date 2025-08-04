@@ -19,6 +19,8 @@ import { formatNumber } from "@/lib/number";
 import { DynamicFontText } from "@/components/ui/dynamic-font-text";
 import { cn } from "@/lib/utils";
 import EmptyChartState from "@/components/ui/empty-chart-state";
+import ConditionRenderer from "@/components/shared/condition-renderer";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -32,6 +34,7 @@ interface PositionPriceChartProps {
   analyticsData: any;
   vault: BasicVaultDetailsType;
   onSwitchToWeekly: () => void;
+  isLoading?: boolean;
 }
 
 /**
@@ -125,6 +128,7 @@ const PositionPriceChart = ({
   analyticsData,
   vault,
   onSwitchToWeekly,
+  isLoading,
 }: PositionPriceChartProps) => {
   const [isConvertedToken, setIsConvertedToken] = useState(false);
 
@@ -267,186 +271,197 @@ const PositionPriceChart = ({
   }
 
   return (
-    <div className="w-full h-[400px]">
-      <div className="flex items-center justify-between mb-4 ">
-        <div className="flex items-center gap-4 w-full">
-          <div className="p-4 border border-[#2A2A2A] rounded-lg w-full bg-white/10">
-            <div className="text-white/80 text-sm">MIN PRICE</div>
-            <div className="font-mono font-semibold text-md text-white">
-              {formatNumber(minPrice, 0, minPrice < 1 ? 6 : 4)}
-              <span className="text-white/80 font-sans font-normal ml-2">
-                {isConvertedToken
-                  ? `${pair[1]}/${pair[0]}`
-                  : `${pair[0]}/${pair[1]}`}
-              </span>
+    <ConditionRenderer
+      when={!isLoading}
+      fallback={<Skeleton className="w-full h-[400px]" />}
+    >
+      <div className="w-full h-[400px]">
+        <div className="flex items-center justify-between mb-4 ">
+          <div className="flex items-center gap-4 w-full">
+            <div className="p-4 border border-[#2A2A2A] rounded-lg w-full bg-white/10">
+              <div className="text-white/80 text-sm">MIN PRICE</div>
+              <div className="font-mono font-semibold text-md text-white">
+                {formatNumber(minPrice, 0, minPrice < 1 ? 6 : 4)}
+                <span className="text-white/80 font-sans font-normal ml-2">
+                  {isConvertedToken
+                    ? `${pair[1]}/${pair[0]}`
+                    : `${pair[0]}/${pair[1]}`}
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="p-4 border border-[#2A2A2A] rounded-lg w-full bg-white/10">
-            <div className="text-white/80 text-sm">CURRENT PRICE</div>
-            <div className="font-mono font-semibold text-white">
-              {formatNumber(currentPrice, 0, currentPrice < 1 ? 6 : 4)}
-              <span className="text-white/80 font-sans font-normal ml-2">
-                {isConvertedToken
-                  ? `${pair[1]}/${pair[0]}`
-                  : `${pair[0]}/${pair[1]}`}
-              </span>
+            <div className="p-4 border border-[#2A2A2A] rounded-lg w-full bg-white/10">
+              <div className="text-white/80 text-sm">CURRENT PRICE</div>
+              <div className="font-mono font-semibold text-white">
+                {formatNumber(currentPrice, 0, currentPrice < 1 ? 6 : 4)}
+                <span className="text-white/80 font-sans font-normal ml-2">
+                  {isConvertedToken
+                    ? `${pair[1]}/${pair[0]}`
+                    : `${pair[0]}/${pair[1]}`}
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="p-4 border border-[#2A2A2A] rounded-lg relative w-full bg-white/10">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleSwapConversion}
-              className="absolute top-2 right-2 rounded-md h-7 w-7 bg-white/15"
-            >
-              <ArrowLeftRight className="h-4 w-4" />
-            </Button>
-            <div className="text-white/80 text-sm">MAX PRICE</div>
-            <div className="font-mono font-semibold text-white">
-              {formatNumber(maxPrice, 0, maxPrice < 1 ? 6 : 4)}
-              <span className="text-white/80 font-sans font-normal ml-2">
-                {isConvertedToken
-                  ? `${pair[1]}/${pair[0]}`
-                  : `${pair[0]}/${pair[1]}`}
-              </span>
+            <div className="p-4 border border-[#2A2A2A] rounded-lg relative w-full bg-white/10">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSwapConversion}
+                className="absolute top-2 right-2 rounded-md h-7 w-7 bg-white/15"
+              >
+                <ArrowLeftRight className="h-4 w-4" />
+              </Button>
+              <div className="text-white/80 text-sm">MAX PRICE</div>
+              <div className="font-mono font-semibold text-white">
+                {formatNumber(maxPrice, 0, maxPrice < 1 ? 6 : 4)}
+                <span className="text-white/80 font-sans font-normal ml-2">
+                  {isConvertedToken
+                    ? `${pair[1]}/${pair[0]}`
+                    : `${pair[0]}/${pair[1]}`}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <ResponsiveContainer width="100%" height={300}>
-        <ComposedChart data={chartData} barCategoryGap={6}>
-          <defs>
-            <linearGradient id="priceLineGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#9DEBFF" />
-              <stop offset="100%" stopColor="#00FF5E" />
-            </linearGradient>
-            <radialGradient id="dotGradient" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#00FF5E" stopOpacity="0.8" />
-              <stop offset="100%" stopColor="#00FF5E" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <XAxis
-            dataKey="timestamp"
-            tick={({ x, y, payload }) => (
-              <text
-                x={x + 4}
-                y={y + 8}
-                fontSize={12}
-                className="font-mono text-white/75"
-                fill="#fff"
-                textAnchor="middle"
+        <ResponsiveContainer width="100%" height={300}>
+          <ComposedChart data={chartData} barCategoryGap={6}>
+            <defs>
+              <linearGradient
+                id="priceLineGradient"
+                x1="0"
+                y1="0"
+                x2="1"
+                y2="0"
               >
-                {period === PERIOD_TABS[1].value
-                  ? formatDate(payload.value, "dd/MM HH:mm")
-                  : formatDate(payload.value, "HH:mm")}
-              </text>
-            )}
-            axisLine={false}
-            tickLine={false}
-          />
-          <YAxis
-            domain={([dataMin, dataMax]) => {
-              // Use the first chartData rangeMin as reference
-              const ref =
-                chartData.length > 0 ? Number(chartData[0].rangeMin) : 0;
-              const offset = checkOffset(ref);
-              const min = dataMin - offset > 0 ? dataMin - offset : 0;
-              const max = dataMax + offset;
-              return [min, max];
-            }}
-            axisLine={false}
-            tickLine={false}
-            tick={({ x, y, payload }) => {
-              let decimalPlaces = 2;
-              if (payload.value < 1) {
-                decimalPlaces = 6;
-              } else if (payload.value < Math.pow(10, 4)) {
-                decimalPlaces = 2;
-              } else {
-                decimalPlaces = 0;
-              }
-              return (
+                <stop offset="0%" stopColor="#9DEBFF" />
+                <stop offset="100%" stopColor="#00FF5E" />
+              </linearGradient>
+              <radialGradient id="dotGradient" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#00FF5E" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#00FF5E" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            <XAxis
+              dataKey="timestamp"
+              tick={({ x, y, payload }) => (
                 <text
-                  x={x}
-                  y={y}
+                  x={x + 4}
+                  y={y + 8}
                   fontSize={12}
-                  className="font-mono text-white"
+                  className="font-mono text-white/75"
                   fill="#fff"
-                  textAnchor="end"
+                  textAnchor="middle"
                 >
-                  {formatNumber(payload.value, 0, decimalPlaces)}
+                  {period === PERIOD_TABS[1].value
+                    ? formatDate(payload.value, "dd/MM HH:mm")
+                    : formatDate(payload.value, "HH:mm")}
                 </text>
-              );
-            }}
-          />
+              )}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              domain={([dataMin, dataMax]) => {
+                // Use the first chartData rangeMin as reference
+                const ref =
+                  chartData.length > 0 ? Number(chartData[0].rangeMin) : 0;
+                const offset = checkOffset(ref);
+                const min = dataMin - offset > 0 ? dataMin - offset : 0;
+                const max = dataMax + offset;
+                return [min, max];
+              }}
+              axisLine={false}
+              tickLine={false}
+              tick={({ x, y, payload }) => {
+                let decimalPlaces = 2;
+                if (payload.value < 1) {
+                  decimalPlaces = 6;
+                } else if (payload.value < Math.pow(10, 4)) {
+                  decimalPlaces = 2;
+                } else {
+                  decimalPlaces = 0;
+                }
+                return (
+                  <text
+                    x={x}
+                    y={y}
+                    fontSize={12}
+                    className="font-mono text-white"
+                    fill="#fff"
+                    textAnchor="end"
+                  >
+                    {formatNumber(payload.value, 0, decimalPlaces)}
+                  </text>
+                );
+              }}
+            />
 
-          <Legend content={<CustomLegend />} />
-          <Tooltip
-            content={<CustomTooltip isConvertedToken={isConvertedToken} />}
-          />
-          <Bar
-            dataKey="range"
-            fill="rgba(253, 235, 207, 0.6)"
-            opacity={0.7}
-            radius={[2, 2, 0, 0]}
-            barSize={period === PERIOD_TABS[1].value ? 8 : 12}
-          />
-          <Line
-            type="monotone"
-            dataKey="displayPrice"
-            stroke="url(#priceLineGradient)"
-            strokeWidth={2}
-            dot={false}
-            isAnimationActive={true}
-          />
-          {/* Custom last dot with gradient and blur */}
-          <Line
-            type="monotone"
-            dataKey="displayPrice"
-            stroke="none"
-            dot={({ cx, cy, index }) =>
-              index === lastPriceIndex ? (
-                <Fragment key={index}>
-                  <circle
-                    cx={cx}
-                    cy={cy}
-                    r={16}
-                    fill="url(#dotGradient)"
-                    style={{
-                      filter: "blur(3px)",
-                      opacity: 0,
-                      animation: "fadeInDot 1s 1.25s forwards",
-                    }}
-                    className="animate-pulse"
-                  />
-                  <circle
-                    cx={cx}
-                    cy={cy}
-                    r={6}
-                    fill="#00FF5E"
-                    stroke="#fff"
-                    strokeWidth={1}
-                    style={{
-                      opacity: 0,
-                      animation: "fadeInDot 1s 1.25s forwards",
-                    }}
-                  />
-                  <style>
-                    {`
+            <Legend content={<CustomLegend />} />
+            <Tooltip
+              content={<CustomTooltip isConvertedToken={isConvertedToken} />}
+            />
+            <Bar
+              dataKey="range"
+              fill="rgba(253, 235, 207, 0.6)"
+              opacity={0.7}
+              radius={[2, 2, 0, 0]}
+              barSize={period === PERIOD_TABS[1].value ? 8 : 12}
+            />
+            <Line
+              type="monotone"
+              dataKey="displayPrice"
+              stroke="url(#priceLineGradient)"
+              strokeWidth={2}
+              dot={false}
+              isAnimationActive={true}
+            />
+            {/* Custom last dot with gradient and blur */}
+            <Line
+              type="monotone"
+              dataKey="displayPrice"
+              stroke="none"
+              dot={({ cx, cy, index }) =>
+                index === lastPriceIndex ? (
+                  <Fragment key={index}>
+                    <circle
+                      cx={cx}
+                      cy={cy}
+                      r={16}
+                      fill="url(#dotGradient)"
+                      style={{
+                        filter: "blur(3px)",
+                        opacity: 0,
+                        animation: "fadeInDot 1s 1.25s forwards",
+                      }}
+                      className="animate-pulse"
+                    />
+                    <circle
+                      cx={cx}
+                      cy={cy}
+                      r={6}
+                      fill="#00FF5E"
+                      stroke="#fff"
+                      strokeWidth={1}
+                      style={{
+                        opacity: 0,
+                        animation: "fadeInDot 1s 1.25s forwards",
+                      }}
+                    />
+                    <style>
+                      {`
                     @keyframes fadeInDot {
                     from { opacity: 0; }
                     to { opacity: 1; }
                     }
                   `}
-                  </style>
-                </Fragment>
-              ) : null
-            }
-            isAnimationActive={true}
-          />
-        </ComposedChart>
-      </ResponsiveContainer>
-    </div>
+                    </style>
+                  </Fragment>
+                ) : null
+              }
+              isAnimationActive={true}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </ConditionRenderer>
   );
 };
 
