@@ -16,8 +16,8 @@ function initSentry() {
     sendDefaultPii: true,
 
     integrations: [Sentry.browserTracingIntegration()],
-    tracesSampleRate: 0.01, // 1% of transactions are sent to Sentry
-    sampleRate: 0.1, // 10% of events are sampled
+    // tracesSampleRate: 0.01, // 1% of transactions are sent to Sentry
+    // sampleRate: 0.1, // 10% of events are sampled
 
     // Filter out common non-critical errors
     beforeSend(event) {
