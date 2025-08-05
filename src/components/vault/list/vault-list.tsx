@@ -18,6 +18,12 @@ import { calculateUserHoldings } from "@/utils/helpers";
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { VaultItem } from "./vault-item";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const OPTIONS_CHAINS = [
   { value: "all", label: "All Chains" },
@@ -44,6 +50,41 @@ const OPTIONS_CHAINS = [
     ),
   },
 ];
+
+export type VaultItemData = DepositVaultConfig & {
+  exchange_name: string;
+  user_holdings: number;
+};
+const campaign_data = {
+  "SUI-USDC-cetus": {
+    usdc: 1250,
+    xp: 500000000,
+    startDate: "28/07/2025",
+    endDate: "15/08/2025",
+    snapshotDate: "14/08/2025, 3PM SGT",
+  },
+  "SUI-USDC-mmt": {
+    usdc: 2500,
+    xp: 500000000,
+    startDate: "28/07/2025",
+    endDate: "15/08/2025",
+    snapshotDate: "14/08/2025, 3PM SGT",
+  },
+  "DEEP-SUI-mmt": {
+    usdc: 1250,
+    xp: 500000000,
+    startDate: "28/07/2025",
+    endDate: "15/08/2025",
+    snapshotDate: "14/08/2025, 3PM SGT",
+  },
+  "WAL-SUI-mmt": {
+    usdc: 1250,
+    xp: 500000000,
+    startDate: "28/07/2025",
+    endDate: "15/08/2025",
+    snapshotDate: "14/08/2025, 3PM SGT",
+  },
+};
 
 export default function VaultList() {
   const { isLoading, data = [] } = useGetDepositVaults();
@@ -75,6 +116,10 @@ export default function VaultList() {
         ndlpAssets.find((asset) => asset.coin_type === vault.vault_lp_token)
           ?.balance || "0";
 
+      const campaignName = `${vault.vault_name}-${
+        EXCHANGE_CODES_MAP[vault?.exchange_id].code
+      }`;
+
       return {
         ...vault,
         exchange_name: EXCHANGE_CODES_MAP[vault?.exchange_id].name,
@@ -87,6 +132,7 @@ export default function VaultList() {
               )
             )
           : 0,
+        campaign_data: campaign_data[campaignName],
       };
     });
   }, [data, vaultObjects, ndlpAssets, isAuthenticated]);
@@ -235,6 +281,81 @@ export default function VaultList() {
         ),
       },
       {
+        title: "Rewards",
+        dataIndex: "rewards",
+        classTitle: "text-white/80 justify-end",
+        classCell: "align-middle justify-end",
+        render: (_: any, record: any) => {
+          return (
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center">
+                    <img src="/coins/usdc.png" alt="usdc" className="w-5 h-5" />
+                    <img
+                      src="/coins/xp.png"
+                      alt="xp"
+                      className="w-5 h-5 ml-[-4px]"
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3 max-w-[300px]">
+                  <div>
+                    <div className="text-sm bg-clip-text text-transparent bg-[linear-gradient(90deg,_#FFE8C9_0%,_#F9F4E9_25%,_#E3F6FF_60%,_#C9D4FF_100%)] mb-3 font-medium">
+                      TOTAL REWARD POOL
+                    </div>
+                    <hr />
+                    <div className="flex items-center gap-2 min-w-[200px] mb-1 mt-2">
+                      <img
+                        src="/coins/usdc.png"
+                        alt="usdc"
+                        className="w-5 h-5"
+                      />
+                      <span className="text-sm text-white font-mono font-normal">
+                        {record.campaign_data
+                          ? formatCurrency(
+                              record.campaign_data.usdc,
+                              0,
+                              0,
+                              0,
+                              "decimal",
+                              "USD"
+                            )
+                          : "--"}{" "}
+                        USDC
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 min-w-[200px] mb-1">
+                      <img src="/coins/xp.png" alt="NDLP" className="w-5 h-5" />
+                      <span className="text-sm  text-white font-mono font-normal">
+                        {record.campaign_data
+                          ? formatCurrency(
+                              record.campaign_data.xp,
+                              0,
+                              0,
+                              0,
+                              "decimal",
+                              "USD"
+                            )
+                          : "--"}{" "}
+                        XP Shares
+                      </span>
+                    </div>
+                    <div className="rounded-md bg-[#242424] p-2 mt-2 font-sans font-normal text-xs">
+                      All rewards will be distributed at the end of the
+                      campaign, based on your average deposit over the 14-day
+                      period and the duration your funds were kept in the vault.
+                      The larger your deposit and the longer it remains, the
+                      greater your share of the rewards per vault.
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          );
+        },
+      },
+      {
         title: "Action",
         dataIndex: "action",
         classTitle: "justify-end",
@@ -279,8 +400,14 @@ export default function VaultList() {
   }, [dexOptions]);
 
   return (
-    <div className="w-full mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-[#292929] px-6 py-4 rounded-b-none rounded-md">
+    <div className="w-full mx-auto max-md:px-3 max-md:py-3 max-md:rounded-lg max-md:pt-6 max-md:bg-[#121212]">
+      <div
+        className="text-white font-sans text-[22px] font-bold leading-normal tracking-[-1.2px] mb-6"
+        style={{ fontFamily: '"DM Sans"' }}
+      >
+        Live Vaults
+      </div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:bg-[#292929] md:px-6 md:py-4 rounded-b-none rounded-md">
         <InputSearch
           className="bg-black text-white placeholder:text-white/60 w-full md:w-80 rounded-lg px-4 py-2 border border-white/20 pl-9 focus-visible:ring-1 focus-visible:ring-white/70"
           placeholder="Search AI vaults..."
