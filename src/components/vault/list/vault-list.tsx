@@ -9,6 +9,7 @@ import {
   useGetDepositVaults,
   useNdlpAssetsStore,
   useVaultObjectStore,
+  useWallet,
 } from "@/hooks";
 import { formatPercentage } from "@/lib/utils";
 import { DepositVaultConfig } from "@/types/vault-config.types";
@@ -54,6 +55,7 @@ export default function VaultList() {
   const navigate = useNavigate();
   const { vaultObjects } = useVaultObjectStore();
   const { assets: ndlpAssets } = useNdlpAssetsStore();
+  const { isAuthenticated } = useWallet();
 
   const [paramsSort, setParamsSort] = useState(() => {
     const sortKey = searchParams.get("sortKey") || "vault_apy";
@@ -76,16 +78,18 @@ export default function VaultList() {
       return {
         ...vault,
         exchange_name: EXCHANGE_CODES_MAP[vault?.exchange_id].name,
-        user_holdings: Number(
-          calculateUserHoldings(
-            vaultConfig,
-            ndlpBalance,
-            vault?.user_pending_withdraw_ndlp
-          )
-        ),
+        user_holdings: isAuthenticated
+          ? Number(
+              calculateUserHoldings(
+                vaultConfig,
+                ndlpBalance,
+                vault?.user_pending_withdraw_ndlp
+              )
+            )
+          : 0,
       };
     });
-  }, [data, vaultObjects, ndlpAssets]);
+  }, [data, vaultObjects, ndlpAssets, isAuthenticated]);
 
   // Filter logic: if 'all' is selected, show all; else filter by selected DEXs
   const filteredData = useMemo(

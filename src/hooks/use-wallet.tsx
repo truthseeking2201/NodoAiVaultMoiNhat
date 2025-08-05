@@ -1,5 +1,5 @@
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { useEffect } from "react";
+import { useMemo } from "react";
 import { create } from "zustand";
 interface WalletState {
   isConnectWalletDialogOpen: boolean;
@@ -18,7 +18,13 @@ const useWalletStore = create<WalletState>((set) => ({
 
 export const useWallet = () => {
   const account = useCurrentAccount();
-  const address = account?.address;
+  const walletConnectionInfo = JSON.parse(
+    localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
+  );
+  const lastConnectedAccountAddress =
+    walletConnectionInfo?.state?.lastConnectedAccountAddress;
+
+  const address = account?.address || lastConnectedAccountAddress;
   const {
     isConnectWalletDialogOpen,
     setIsConnectWalletDialogOpen,
@@ -26,10 +32,12 @@ export const useWallet = () => {
     setIsAuthenticated,
   } = useWalletStore((state) => state);
 
-  useEffect(() => {
+  const calculateIsAuthenticated = useMemo(() => {
+    if (isAuthenticated) return true;
+
     const access_token = localStorage.getItem("access_token");
-    setIsAuthenticated(!!access_token && !!address);
-  }, [address, setIsAuthenticated]);
+    return !!access_token && !!address;
+  }, [address, isAuthenticated]);
 
   return {
     isConnected: !!account?.address,
@@ -37,7 +45,7 @@ export const useWallet = () => {
     openConnectWalletDialog: () => setIsConnectWalletDialogOpen(true),
     closeConnectWalletDialog: () => setIsConnectWalletDialogOpen(false),
     setIsAuthenticated,
-    isAuthenticated,
+    isAuthenticated: calculateIsAuthenticated,
     address: account?.address,
   };
 };

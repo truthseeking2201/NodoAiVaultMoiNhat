@@ -3,7 +3,7 @@ import { triggerWalletDisconnect } from "@/utils/wallet-disconnect";
 import { useSignPersonalMessage } from "@mysten/dapp-kit";
 import { useMutation } from "@tanstack/react-query";
 import { useWallet } from "./use-wallet";
-import { useUserAssetsStore } from "./use-store";
+import { useNdlpAssetsStore, useUserAssetsStore } from "./use-store";
 import { useGetDepositVaults } from "./use-vault";
 import * as Sentry from "@sentry/react";
 
@@ -17,6 +17,7 @@ export const useLoginWallet = () => {
   const { refetch: refetchDepositVaults } = useGetDepositVaults();
 
   const { setUpdated } = useUserAssetsStore();
+  const { setUpdated: setNdlpUpdated } = useNdlpAssetsStore();
 
   const { setIsAuthenticated } = useWallet();
 
@@ -42,10 +43,16 @@ export const useLoginWallet = () => {
         wallet_address: walletAddress,
       });
       setUpdated(false);
+      setNdlpUpdated(false);
       refetchDepositVaults();
       return true;
     } catch (error) {
       console.log(error);
+      Sentry.captureException(error, {
+        extra: {
+          walletAddress,
+        },
+      });
       triggerWalletDisconnect();
       return false;
     }
