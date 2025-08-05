@@ -6,3 +6,4 @@ export * from "./use-whitelist-wallet";
 export * from "./use-store";
 export * from "./use-auth";
 export * from "./use-image-prefetch";
+export * from "./use-ribbon";

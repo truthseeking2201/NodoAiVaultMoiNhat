@@ -2,13 +2,16 @@ import { Button } from "@/components/ui/button";
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
 import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ReferralTooltip from "../my-referrals/referral-tooltip";
 
 import Icon from "@/components/icon";
 import { useScrollbarWidth } from "@/hooks/use-scrollbar-width";
+import { Ribbon } from "@/components/shared/ribbon";
+import { cn } from "@/lib/utils";
+import { useRibbon } from "@/hooks/use-ribbon";
 
 const pageRoutes = [
   {
@@ -38,15 +41,40 @@ export function AppHeader() {
     };
   }, [walletDetails]);
 
+  const [visibleRibbon, setVisibleRibbon] = useRibbon();
+
+  const handleReadMore = () => {
+    window.open(
+      "https://docs.nodo.xyz/public/nodo-campaigns/nodo-ai-vault-genesis-yield-campaign-phase-1",
+      "_blank"
+    );
+  };
+
   return (
     <header
-      className={`fixed top-0 z-50 w-full backdrop-blur-md pt-4 pb-4 bg-transparent border-b border-white/10`}
-      style={{
-        paddingRight: `${scrollbarWidth}px`,
-      }}
+      className={cn(
+        "fixed top-0 z-50 w-full backdrop-blur-md  bg-transparent border-b border-white/10",
+        visibleRibbon ? "md:pb-4 pb-2" : "md:py-4 py-2"
+      )}
     >
+      <div className="bg-black">
+        <Ribbon
+          message={
+            <>
+              Up to 10,000 USDC + 2,000,000,000 XP Share Rewards. Read more
+              <ArrowRight className="inline ml-1 !h-4 !w-4" />
+            </>
+          }
+          onClick={handleReadMore}
+        />
+      </div>
       {/* Main header content */}
-      <div className="container flex items-center justify-between">
+      <div
+        className={cn(
+          "container flex items-center justify-between",
+          visibleRibbon ? `md:pt-4 pt-2` : ""
+        )}
+      >
         {/* Left side */}
         <div className="flex items-center gap-6 cursor-pointer">
           <div className="relative" onClick={() => navigate("/")}>
