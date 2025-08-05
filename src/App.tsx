@@ -1,5 +1,6 @@
 import { MainLayout } from "@/components/layout/main-layout";
 import { ErrorBoundary } from "@/components/shared/error-boundary";
+import { ScrollToTopButton } from "@/components/ui/scroll-to-top-button";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
@@ -10,6 +11,7 @@ import {
   WalletProvider,
 } from "@mysten/dapp-kit";
 import { getFullnodeUrl } from "@mysten/sui/client";
+import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { lazy, Suspense, useEffect, useRef } from "react";
@@ -17,20 +19,18 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import GlobalLoading from "./components/shared/global-loading";
 import ScrollToTop from "./components/ui/scroll-to-top";
 import {
+  useCriticalImagePrefetch,
   useFetchAssets,
+  useFetchNDLPAssets,
   useGetAllVaults,
   useGetDepositVaults,
+  useNdlpAssetsStore,
   useUserAssetsStore,
   useWallet,
-  useCriticalImagePrefetch,
-  useFetchNDLPAssets,
-  useNdlpAssetsStore,
 } from "./hooks";
 import Home from "./pages/home";
 import VaultDetail from "./pages/vault-detail";
 import { setWalletDisconnectHandler } from "./utils/wallet-disconnect";
-import { ScrollToTopButton } from "@/components/ui/scroll-to-top-button";
-import * as Sentry from "@sentry/react";
 
 const NotFound = lazy(() =>
   import("./pages/not-found").catch((e) => {
@@ -39,14 +39,13 @@ const NotFound = lazy(() =>
   })
 );
 
-let hasLoadedVaults = false;
-
 const useSetWalletDisconnectHandler = () => {
   const account = useCurrentAccount();
   const { mutate: disconnect } = useDisconnectWallet();
   const { setIsAuthenticated } = useWallet();
   const { setAssets } = useUserAssetsStore();
   const { setAssets: setNdlpAssets } = useNdlpAssetsStore();
+
   useEffect(() => {
     if (account?.address) {
       setWalletDisconnectHandler(() => {
@@ -68,7 +67,7 @@ const useSetWalletDisconnectHandler = () => {
 
 const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
   const initLoad = useRef(false);
-  const { isLoading, error, data } = useGetDepositVaults();
+  const { error, data } = useGetDepositVaults();
   const vaultIds = data?.map((vault) => vault.vault_id) || [];
   useFetchAssets();
   useFetchNDLPAssets(data);
@@ -77,12 +76,6 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
 
   // Prefetch critical images for better UX
   useCriticalImagePrefetch();
-
-  useEffect(() => {
-    if (data && !hasLoadedVaults) {
-      hasLoadedVaults = true;
-    }
-  }, [data]);
 
   useEffect(() => {
     const walletConnectionInfo = JSON.parse(
@@ -97,10 +90,6 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
       });
     }
   }, []);
-
-  if (isLoading && !hasLoadedVaults) {
-    return <GlobalLoading />;
-  }
 
   // show error when failed to fetch deposit vaults for first load
   if (error && !initLoad.current) {

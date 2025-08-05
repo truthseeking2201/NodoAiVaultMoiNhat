@@ -83,7 +83,7 @@ const userAssetsStore = create<UserAssetsState>()(
           assets,
           isRefetch: false,
           isLoading: false,
-          updated: assets.length > 0 ? true : false,
+          updated: true,
           updatedAt: Date.now(),
         });
       },
@@ -117,7 +117,7 @@ const ndlpAssetsStore = create<NdlpAssetsState>()(
           assets,
           isRefetch: false,
           isLoading: false,
-          updated: assets.length > 0 ? true : false,
+          updated: true,
           updatedAt: Date.now(),
         });
       },

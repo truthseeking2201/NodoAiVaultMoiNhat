@@ -314,14 +314,6 @@ export const ConnectWalletButton = memo(() => {
                     size="sm"
                     onClick={() => {
                       triggerWalletDisconnect();
-                      queryClient
-                        .invalidateQueries({
-                          queryKey: ["allCoinObjects", address],
-                        })
-                        .then(() => {
-                          setAssets([]);
-                          setNdlpAssets([]);
-                        });
                     }}
                     className="w-full h-[40px]"
                   >

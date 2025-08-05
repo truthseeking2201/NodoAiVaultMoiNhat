@@ -313,9 +313,6 @@ export const useGetVaultTokenPair = () => {
   return { collateralToken, lpToken };
 };
 
-// ndlp is NODO LP token
-const NDLP_COIN = "ndlp";
-
 export const useFetchAssets = () => {
   const { setAssets, setUpdated, updated, isRefetch, isLoading, setIsLoading } =
     useUserAssetsStore();
@@ -335,19 +332,14 @@ export const useFetchAssets = () => {
         USDC_CONFIG.coinType,
       ]),
     enabled: isAuthenticated && !!address,
-    staleTime: REFETCH_VAULT_DATA_INTERVAL,
-    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   });
 
   const collateralTokens = useMemo(() => {
-    // filter out ndlp coins by checking if coinType includes 'ndlp'
-    return allCoinObjects
-      .filter((coin) => !coin.coinType?.toLowerCase().includes(NDLP_COIN))
-      .filter(
-        (coin, index, self) =>
-          index === self.findIndex((t) => t.coinType === coin.coinType)
-      );
+    return allCoinObjects.filter(
+      (coin, index, self) =>
+        index === self.findIndex((t) => t.coinType === coin.coinType)
+    );
   }, [allCoinObjects]);
 
   const coinsMetadataQuery = useQuery({
@@ -453,6 +445,23 @@ export const useFetchAssets = () => {
       });
     }
   }, [isRefetch, allCoinObjectsRefetch, setUpdated]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isAuthenticated) {
+      interval = setInterval(() => {
+        allCoinObjectsRefetch().then(() => {
+          setUpdated(false);
+        });
+      }, REFETCH_VAULT_DATA_INTERVAL);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [allCoinObjectsRefetch, isAuthenticated, setUpdated]);
 };
 
 export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
@@ -474,9 +483,7 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
     queryKey: ["allCoinObjectsNDLP", address],
     queryFn: () => getCoinsBalance(suiClient, address || "", ndlpCoinTypes),
     enabled: isAuthenticated && !!address && ndlpCoinTypes.length > 0,
-    staleTime: REFETCH_VAULT_DATA_INTERVAL,
-    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -542,6 +549,23 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
       });
     }
   }, [isRefetch, allCoinObjectsNDLPRefetch, setUpdated]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isAuthenticated) {
+      interval = setInterval(() => {
+        allCoinObjectsNDLPRefetch().then(() => {
+          setUpdated(false);
+        });
+      }, REFETCH_VAULT_DATA_INTERVAL);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [allCoinObjectsNDLPRefetch, isAuthenticated, setUpdated]);
 };
 
 export const useRefreshAssetsBalance = () => {

@@ -152,9 +152,6 @@ http.interceptors.response.use(
           refreshError?.message === NOT_REFRESH_TOKEN_ERROR
         ) {
           // Clear tokens and disconnect wallet on refresh failure
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          localStorage.removeItem("current-address");
           triggerWalletDisconnect();
           return Promise.reject(
             "Your session has expired. Please login again."
@@ -165,6 +162,9 @@ http.interceptors.response.use(
     }
 
     if (error.response && error.response.status) {
+      if (error.response.status === 401) {
+        triggerWalletDisconnect();
+      }
       err.status = error.response.status;
     }
 
