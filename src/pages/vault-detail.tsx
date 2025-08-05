@@ -185,7 +185,7 @@ const VaultDetail = () => {
   };
 
   return (
-    <PageContainer backgroundImage={DetailsBackground} className="py-6">
+    <PageContainer backgroundImage={DetailsBackground} className="py-8">
       <Button
         variant="outline"
         className="mb-4 border-white/30 text-sm"
