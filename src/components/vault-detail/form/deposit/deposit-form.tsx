@@ -98,7 +98,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   const methods = useForm({
     defaultValues: {
       amount: "",
-      token: USDC_CONFIG.coinType,
+      token: paymentTokens[0]?.token_address || "",
     },
     mode: "onChange",
   });
@@ -107,9 +107,11 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
 
   const depositAmount = Number(methods.watch("amount"));
   const paymentToken = methods.watch("token");
-  const collateralToken = paymentTokens.find(
-    (token) => token.token_address.toLowerCase() === paymentToken?.toLowerCase()
-  );
+  const collateralToken =
+    paymentTokens.find(
+      (token) =>
+        token.token_address.toLowerCase() === paymentToken?.toLowerCase()
+    ) || paymentTokens[0];
 
   const { data: swapDepositInfo } = useSwapDepositInfo(
     vault_id,
