@@ -327,10 +327,11 @@ export const useFetchAssets = () => {
   } = useQuery({
     queryKey: ["allCoinObjects", address],
     queryFn: () =>
-      getCoinsBalance(suiClient, address || "", [
-        SUI_CONFIG.coinType,
-        USDC_CONFIG.coinType,
-      ]),
+      getCoinsBalance(
+        suiClient,
+        address || "",
+        COIN_TYPES_CONFIG.collateral_tokens.map((token) => token.id)
+      ),
     enabled: isAuthenticated && !!address,
     refetchOnWindowFocus: false,
   });
