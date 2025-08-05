@@ -6,6 +6,8 @@ import demoUIOfDesktop from "../../assets/images/demo-ui-nodo-ai-vault.png";
 import UseDesktopBanner from "../dashboard/use-desktop-banner";
 import { AppHeader } from "./app-header";
 import { AppFooter } from "./app-footer";
+import { useRibbon } from "@/hooks/use-ribbon";
+import { cn } from "@/lib/utils";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -14,6 +16,7 @@ interface MainLayoutProps {
 export function MainLayout({ children }: MainLayoutProps) {
   const { isChromeDesktop } = useIsChromeDesktop();
   const { isLg } = useBreakpoint();
+  const [visibleRibbon] = useRibbon();
 
   return (
     <div className="flex flex-col min-h-screen overflow-x-hidden main-bg">
@@ -61,7 +64,10 @@ export function MainLayout({ children }: MainLayoutProps) {
             <AppHeader />
             <div
               id="main-layout-content"
-              className="flex-1 overflow-y-auto pt-20"
+              className={cn(
+                "flex-1 overflow-y-auto ",
+                visibleRibbon ? "pt-[122px]" : "pt-20"
+              )}
               style={{ height: "calc(100vh - 77px)" }}
             >
               <div>
