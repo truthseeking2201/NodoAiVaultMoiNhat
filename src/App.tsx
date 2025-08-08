@@ -41,25 +41,31 @@ const NotFound = lazy(() =>
 
 const useSetWalletDisconnectHandler = () => {
   const account = useCurrentAccount();
-  const { mutate: disconnect } = useDisconnectWallet();
+  const { mutateAsync: disconnect } = useDisconnectWallet();
   const { setIsAuthenticated } = useWallet();
   const { setAssets } = useUserAssetsStore();
   const { setAssets: setNdlpAssets } = useNdlpAssetsStore();
 
   useEffect(() => {
     if (account?.address) {
-      setWalletDisconnectHandler(() => {
-        disconnect();
-        setIsAuthenticated(false);
-        setAssets([]);
-        setNdlpAssets([]);
-        Sentry.setUser({
-          wallet_address: "",
-        });
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("current-address");
-        localStorage.removeItem("whitelisted_address");
+      setWalletDisconnectHandler(async () => {
+        try {
+          await disconnect();
+          setIsAuthenticated(false);
+          setAssets([]);
+          setNdlpAssets([]);
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("current-address");
+          localStorage.removeItem("whitelisted_address");
+        } catch (error) {
+          console.error("Error disconnecting wallet:", error);
+          Sentry.captureException(error, {
+            extra: {
+              wallet_address: account?.address,
+            },
+          });
+        }
       });
     }
   }, [account, disconnect, setIsAuthenticated, setAssets, setNdlpAssets]);
