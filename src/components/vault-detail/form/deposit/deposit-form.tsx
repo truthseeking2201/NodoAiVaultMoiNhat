@@ -16,7 +16,7 @@ import {
 } from "@/hooks";
 import { useDepositVault } from "@/hooks/use-deposit-vault";
 import { useToast } from "@/hooks/use-toast";
-import { getBalanceAmountForInput, getDecimalAmount } from "@/lib/number";
+import { getBalanceAmountForInput } from "@/lib/number";
 import { formatAmount } from "@/lib/utils";
 import BigNumber from "bignumber.js";
 import debounce from "lodash-es/debounce";
@@ -26,6 +26,8 @@ import { FormProvider, useForm } from "react-hook-form";
 import ConversationRate from "../conversation-rate";
 import DepositInput from "./deposit-input";
 import DepositModal from "./deposit-modal";
+import { checkCanDeposit } from "@/apis";
+import ConditionRenderer from "@/components/shared/condition-renderer";
 
 export type DepositSuccessData = {
   digest: string;
@@ -60,6 +62,9 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     useVaultBasicDetails(vault_id);
   const { refetch: refetchVaultConfig } = useGetVaultConfig(vault_id);
   const [debounceAmount, setDebounceAmount] = useState<string>("0");
+  const [canDepositStatus, setCanDepositStatus] = useState<
+    "checking" | "can" | "cannot"
+  >("can");
 
   const { toast, dismiss } = useToast();
 
@@ -124,14 +129,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   useEffect(() => {
     const debouncedCb = debounce((formValue) => {
       if (collateralToken?.token_address) {
-        setDebounceAmount(
-          formValue.amount
-            ? getDecimalAmount(
-                formValue.amount,
-                collateralToken.decimals
-              ).toString()
-            : "0"
-        );
+        setDebounceAmount(formValue.amount);
       } else {
         setDebounceAmount("0");
       }
@@ -143,7 +141,11 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
 
   const estimatedDepositAmount = useMemo(() => {
     return +debounceAmount > 0
-      ? debounceAmount
+      ? getBalanceAmountForInput(
+          debounceAmount,
+          collateralToken?.decimals,
+          collateralToken?.decimals
+        ).toString()
       : new BigNumber(1).dividedBy(collateralToken?.decimals).toString();
   }, [debounceAmount, collateralToken]);
 
@@ -156,6 +158,27 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     amount: estimatedDepositAmount,
     deposit_token: collateralToken?.token_address,
   });
+
+  useEffect(() => {
+    if (paymentToken && +debounceAmount > 0 && vault_id) {
+      const handleCheckCanDeposit = async () => {
+        try {
+          setCanDepositStatus("checking");
+          const response = await checkCanDeposit(
+            vault_id,
+            paymentToken,
+            debounceAmount.toString()
+          );
+          if (response) {
+            setCanDepositStatus(response.can_deposit ? "can" : "cannot");
+          }
+        } catch (error) {
+          setCanDepositStatus("can");
+        }
+      };
+      handleCheckCanDeposit();
+    }
+  }, [paymentToken, vault_id, debounceAmount]);
 
   const conversionRate = useMemo(() => {
     if (!rate) {
@@ -276,6 +299,9 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
           <DepositInput
             paymentTokens={paymentTokens}
             currentToken={collateralToken}
+            onTokenChange={() => {
+              setDebounceAmount("0");
+            }}
           />
           {errors?.amount && (
             <div className="flex flex-row items-center bg-red-error/20 gap-2 py-2 px-4">
@@ -285,7 +311,6 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
               </span>
             </div>
           )}
-
           <div className="rounded-b-lg border border-white/0.15 p-4 mb-6">
             <div className=" bg-black flex items-center justify-between pb-2">
               <LabelWithTooltip
@@ -347,7 +372,12 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
           <Web3Button
             className="w-full rounded-lg py-3 font-semibold text-lg"
             type="button"
-            disabled={!rate || !collateralToken || isCalculating}
+            disabled={
+              !rate ||
+              !collateralToken ||
+              isCalculating ||
+              ["checking", "cannot"].includes(canDepositStatus)
+            }
             onClick={() => {
               if (!isConnected) {
                 openConnectWalletDialog();
@@ -358,6 +388,23 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
           >
             Deposit
           </Web3Button>
+          <ConditionRenderer when={canDepositStatus === "cannot"}>
+            <div className="font-bold text-xs mt-4 text-center">
+              <span
+                style={{
+                  background:
+                    "linear-gradient(90deg, #FFE8C9 0%, #F9F4E9 25%, #DDF7F1 60%, #B5F0FF 100%)",
+                  backgroundClip: "text",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                This vault has reached its cap to maintain optimal performance.
+              </span>{" "}
+              But don't miss out, other vaults are still open and filling up
+              fast.
+            </div>
+          </ConditionRenderer>
         </form>
       </div>
       <DepositModal
