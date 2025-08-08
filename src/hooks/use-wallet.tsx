@@ -46,6 +46,6 @@ export const useWallet = () => {
     closeConnectWalletDialog: () => setIsConnectWalletDialogOpen(false),
     setIsAuthenticated,
     isAuthenticated: calculateIsAuthenticated,
-    address: account?.address,
+    address,
   };
 };
