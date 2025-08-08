@@ -27,21 +27,21 @@ export const SUI_CONFIG = {
 
 export const COIN_TYPES_CONFIG = {
   collateral_tokens: [
-    // {
-    //   id: "0x876a4b7bce8aeaef60464c11f4026903e9afacab79b9b142686158aa86560b50::xbtc::XBTC",
-    //   image_url: "/coins/xbtc.png",
-    //   display_name: "xBTC",
-    // },
-    // {
-    //   id: "0x3e8e9423d80e1774a7ca128fccd8bf5f1f7753be658c5e645929037f7c819040::lbtc::LBTC",
-    //   image_url: "/coins/lbtc.png",
-    //   display_name: "LBTC",
-    // },
-    // {
-    //   id: "0xaafb102dd0902f5055cadecd687fb5b71ca82ef0e0285d90afde828ec58ca96b::btc::BTC",
-    //   image_url: "/coins/wbtc.png",
-    //   display_name: "wBTC",
-    // },
+    {
+      id: "0x876a4b7bce8aeaef60464c11f4026903e9afacab79b9b142686158aa86560b50::xbtc::XBTC",
+      image_url: "/coins/xbtc.png",
+      display_name: "xBTC",
+    },
+    {
+      id: "0x3e8e9423d80e1774a7ca128fccd8bf5f1f7753be658c5e645929037f7c819040::lbtc::LBTC",
+      image_url: "/coins/lbtc.png",
+      display_name: "LBTC",
+    },
+    {
+      id: "0xaafb102dd0902f5055cadecd687fb5b71ca82ef0e0285d90afde828ec58ca96b::btc::BTC",
+      image_url: "/coins/wbtc.png",
+      display_name: "wBTC",
+    },
     {
       id: "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
       image_url: "/coins/usdc.png",
