@@ -9,9 +9,14 @@ import { DepositToken } from "@/types/deposit-token.types";
 type DepositInputProps = {
   paymentTokens: DepositToken[];
   currentToken: DepositToken;
+  onTokenChange: (token: string) => void;
 };
 
-const DepositInput = ({ paymentTokens, currentToken }: DepositInputProps) => {
+const DepositInput = ({
+  paymentTokens,
+  currentToken,
+  onTokenChange,
+}: DepositInputProps) => {
   const { watch, setValue, control, clearErrors } =
     useFormContext<DepositForm>();
   const selectedToken = watch("token");
@@ -72,6 +77,7 @@ const DepositInput = ({ paymentTokens, currentToken }: DepositInputProps) => {
                 setValue("token", token);
                 setValue("amount", "");
                 clearErrors("amount");
+                onTokenChange(token);
               }}
               title="Select Token"
             />

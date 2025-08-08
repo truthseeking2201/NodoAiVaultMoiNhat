@@ -12,7 +12,12 @@ const URLS = {
     "/data-management/external/withdrawal-requests/by-user",
   withdrawalRequestsMultiTokens:
     "/data-management/external/withdrawal-requests/multi-tokens",
-  positionRequests: (page: number, limit: number, action_type?: string, vault_id?: string) => {
+  positionRequests: (
+    page: number,
+    limit: number,
+    action_type?: string,
+    vault_id?: string
+  ) => {
     const baseUrl = `/data-management/external/position-requests?page=${page}&limit=${limit}&vault_id=${vault_id}`;
     return action_type && action_type !== ""
       ? `${baseUrl}&action_type=${action_type}`
@@ -44,6 +49,8 @@ const URLS = {
     `/data-management/external/vaults/${vaultId}/estimate-deposit?amount=${amount}&deposit_token=${deposit_token}`,
   swapDepositInfo: (vaultId: string, token_address: string) =>
     `/data-management/external/vaults/${vaultId}/swap-and-deposit-info?token_address=${token_address}`,
+  checkCanDeposit: (vaultId: string, token_address: string, amount: string) =>
+    `/data-management/external/vaults/${vaultId}/check-deposit?deposit_token=${token_address}&deposit_amount=${amount}`,
 };
 
 export const getLatestWithdrawal = (sender_address: string) => {
@@ -122,4 +129,16 @@ export const getSwapDepositInfo = (vaultId: string, token_address: string) => {
   return http.get(
     URLS.swapDepositInfo(vaultId, encodeURIComponent(token_address))
   );
+};
+
+export const checkCanDeposit = (
+  vaultId: string,
+  token_address: string,
+  amount: string
+) => {
+  return http.get(
+    URLS.checkCanDeposit(vaultId, token_address, amount)
+  ) as Promise<{
+    can_deposit: boolean;
+  }>;
 };
