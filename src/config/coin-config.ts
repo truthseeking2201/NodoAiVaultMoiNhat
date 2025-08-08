@@ -67,6 +67,11 @@ export const COIN_TYPES_CONFIG = {
       image_url: "/coins/usdt.png",
       display_name: "USDT",
     },
+    {
+      id: "0x2b6602099970374cf58a2a1b9d96f005fccceb81e92eb059873baf420eb6c717::x_sui::X_SUI",
+      display_name: "x Staked SUI",
+      image_url: "/coins/x_sui.png",
+    },
     // TODO: add more collateral tokens here
   ],
 };

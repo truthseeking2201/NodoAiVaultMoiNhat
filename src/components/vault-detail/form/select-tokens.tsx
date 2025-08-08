@@ -37,7 +37,7 @@ const SelectTokens = ({
           <img
             src={`/coins/${currentToken?.symbol?.toLowerCase()}.png`}
             alt={currentToken?.symbol}
-            className="w-4 h-4 mr-1"
+            className="w-4 h-4 mr-1 rounded-xl"
           />
           <span className="text-white text-sm font-medium">
             {currentToken?.symbol}
@@ -86,7 +86,7 @@ const SelectTokens = ({
                   <img
                     src={`/coins/${token.symbol?.toLowerCase()}.png`}
                     alt={token.symbol}
-                    className="w-10 h-10 mr-3"
+                    className="w-10 h-10 mr-3 rounded-[20px]"
                   />
                   <span className="text-white text-base font-medium">
                     {token.symbol}
