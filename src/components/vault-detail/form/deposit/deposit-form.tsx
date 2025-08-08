@@ -16,7 +16,7 @@ import {
 } from "@/hooks";
 import { useDepositVault } from "@/hooks/use-deposit-vault";
 import { useToast } from "@/hooks/use-toast";
-import { getBalanceAmountForInput } from "@/lib/number";
+import { getBalanceAmountForInput, getDecimalAmount } from "@/lib/number";
 import { formatAmount } from "@/lib/utils";
 import BigNumber from "bignumber.js";
 import debounce from "lodash-es/debounce";
@@ -141,11 +141,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
 
   const estimatedDepositAmount = useMemo(() => {
     return +debounceAmount > 0
-      ? getBalanceAmountForInput(
-          debounceAmount,
-          collateralToken?.decimals,
-          collateralToken?.decimals
-        ).toString()
+      ? getDecimalAmount(debounceAmount, collateralToken?.decimals).toString()
       : new BigNumber(1).dividedBy(collateralToken?.decimals).toString();
   }, [debounceAmount, collateralToken]);
 
