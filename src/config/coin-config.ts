@@ -62,6 +62,11 @@ export const COIN_TYPES_CONFIG = {
       image_url: "/coins/wal.png",
       display_name: "WAL",
     },
+    {
+      id: "0x375f70cf2ae4c00bf37117d0c85a2c71545e6ee05c4a5c7d282cd66a4504b068::usdt::USDT",
+      image_url: "/coins/usdt.png",
+      display_name: "USDT",
+    },
     // TODO: add more collateral tokens here
   ],
 };
