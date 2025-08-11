@@ -58,32 +58,36 @@ const VaultHolding = ({
 
   return (
     <div className="flex flex-col justify-center gap-1">
-      <UserHoldingTooltip>
-        {item.user_holdings_show && !isOnlyWithdrawing && (
-          <RowItem
-            className={classRow}
-            classNameLabel={classLabel}
-            classNameValue={classValue}
-            label="Available:"
-          >
-            {item.user_holdings_show}
-          </RowItem>
-        )}
-        {item.rewards_earned_show && !isOnlyWithdrawing && (
-          <RowItem
-            classNameLabel={classLabel}
-            className={classRow}
-            classNameValue={cn(classValue, "text-green-increase")}
-            label="Rewards Earned:"
-          >
-            {item.is_loading_withdrawal ? (
-              <Skeleton className="w-[100px] h-5" />
-            ) : (
-              item.rewards_earned_show
+      {!isOnlyWithdrawing &&
+        (item.user_holdings_show || item.rewards_earned_show) && (
+          <UserHoldingTooltip>
+            {item.user_holdings_show && (
+              <RowItem
+                className={classRow}
+                classNameLabel={classLabel}
+                classNameValue={classValue}
+                label="Available:"
+              >
+                {item.user_holdings_show}
+              </RowItem>
             )}
-          </RowItem>
+            {item.rewards_earned_show && (
+              <RowItem
+                classNameLabel={classLabel}
+                className={classRow}
+                classNameValue={cn(classValue, "text-green-increase")}
+                label="Rewards Earned:"
+              >
+                {item.is_loading_withdrawal ? (
+                  <Skeleton className="w-[100px] h-5" />
+                ) : (
+                  item.rewards_earned_show
+                )}
+              </RowItem>
+            )}
+          </UserHoldingTooltip>
         )}
-      </UserHoldingTooltip>
+
       {item.is_loading_withdrawal && !isOnlyWithdrawing && (
         <RowItem
           classNameLabel={classLabel}
