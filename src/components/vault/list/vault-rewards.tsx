@@ -40,7 +40,9 @@ const campaigns_data = {
 };
 const VaultRewards = ({ item }: { item: VaultItemData }) => {
   const campaignData = useMemo(() => {
-    const campaignName = `${item.pool.pool_name}-${item.exchange_code}`;
+    let campaignName = `${item.pool.pool_name}-${item.exchange_code}`;
+    if (campaigns_data[campaignName]) return campaigns_data[campaignName];
+    campaignName = `${item.vault_name}-${item.exchange_code}`;
     return campaigns_data[campaignName];
   }, [item]);
 
