@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { VaultItemData } from "./vault-list";
 import {
   Tooltip,
@@ -38,12 +38,24 @@ const campaigns_data = {
     snapshotDate: "14/08/2025, 3PM SGT",
   },
 };
+
+const campaign_default = {
+  xp: 500000000,
+};
+
+const tokens = [
+  { value: "usdc", symbol: "USDC", image: "/coins/usdc.png" },
+  { value: "xp", symbol: "XP Shares", image: "/coins/xp.png" },
+];
+
 const VaultRewards = ({ item }: { item: VaultItemData }) => {
   const campaignData = useMemo(() => {
     let campaignName = `${item.pool.pool_name}-${item.exchange_code}`;
-    if (campaigns_data[campaignName]) return campaigns_data[campaignName];
+    if (campaigns_data[campaignName]) {
+      return campaigns_data[campaignName];
+    }
     campaignName = `${item.vault_name}-${item.exchange_code}`;
-    return campaigns_data[campaignName];
+    return campaigns_data[campaignName] || campaign_default;
   }, [item]);
 
   const [open, setOpen] = useState(false);
@@ -62,16 +74,17 @@ const VaultRewards = ({ item }: { item: VaultItemData }) => {
               setOpen(!open);
             }}
           >
-            <img
-              src="/coins/usdc.png"
-              alt="usdc"
-              className="w-6 h-6"
-            />
-            <img
-              src="/coins/xp.png"
-              alt="xp"
-              className="w-6 h-6 md:ml-[-4px]"
-            />
+            {tokens.map((token, index) => (
+              <React.Fragment key={`image-${index}`}>
+                {campaignData[token.value] && (
+                  <img
+                    src={token.image}
+                    alt={token.symbol}
+                    className="w-6 h-6 first:ml-0 md:ml-[-4px]"
+                  />
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </TooltipTrigger>
         <TooltipContent className="shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3 max-w-[300px]">
@@ -80,32 +93,24 @@ const VaultRewards = ({ item }: { item: VaultItemData }) => {
               TOTAL REWARD POOL
             </div>
             <hr />
-            <div className="flex items-center gap-2 min-w-[200px] mb-1 mt-2">
-              <img
-                src="/coins/usdc.png"
-                alt="usdc"
-                className="w-5 h-5"
-              />
-              <span className="text-sm text-white font-mono font-normal">
-                {campaignData
-                  ? showFormatNumber(campaignData.usdc, 2, 2, "$")
-                  : "--"}{" "}
-                USDC
-              </span>
-            </div>
-            <div className="flex items-center gap-2 min-w-[200px] mb-1">
-              <img
-                src="/coins/xp.png"
-                alt="NDLP"
-                className="w-5 h-5"
-              />
-              <span className="text-sm  text-white font-mono font-normal">
-                {campaignData
-                  ? showFormatNumber(campaignData.xp, 2, 2, "$")
-                  : "--"}{" "}
-                XP Shares
-              </span>
-            </div>
+
+            {tokens.map((token, index) => (
+              <React.Fragment key={`value-${index}`}>
+                {campaignData[token.value] && (
+                  <div className="flex items-center gap-2 min-w-[200px] mb-1 mt-2">
+                    <img
+                      src={token.image}
+                      alt={token.symbol}
+                      className="w-5 h-5"
+                    />
+                    <span className="text-sm text-white font-mono font-normal">
+                      {showFormatNumber(campaignData[token.value], 2, 2, "$")}{" "}
+                      {token.symbol}
+                    </span>
+                  </div>
+                )}
+              </React.Fragment>
+            ))}
             <div className="rounded-md bg-[#242424] p-2 mt-2 font-sans font-normal text-xs">
               All rewards will be distributed at the end of the campaign, based
               on your average deposit over the 14-day period and the duration
