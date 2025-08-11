@@ -3,27 +3,39 @@ import { InputSearch } from "@/components/ui/input-search";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import { TableRender } from "@/components/ui/table-render";
 import Web3Button from "@/components/ui/web3-button";
+import { ButtonGradient } from "@/components/ui/button-gradient";
 import { SORT_TYPE } from "@/config/constants-types";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import {
   useGetDepositVaults,
   useNdlpAssetsStore,
   useVaultObjectStore,
-  useWallet,
+  useGetVaultsWithdrawal,
 } from "@/hooks";
+import { cn } from "@/lib/utils";
+import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
 import { formatPercentage } from "@/lib/utils";
+import { showFormatNumber } from "@/lib/number";
 import { DepositVaultConfig } from "@/types/vault-config.types";
 import { formatCurrency } from "@/utils/currency";
 import { calculateUserHoldings } from "@/utils/helpers";
-import { useCallback, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useCallback, useMemo, useState, useRef, useEffect } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 import { VaultItem } from "./vault-item";
+import useBreakpoint from "@/hooks/use-breakpoint";
+import ConditionRenderer from "@/components/shared/condition-renderer";
+import VaultItemMobile from "./vault-item-mobile";
+import VaultHolding from "./vault-holding";
+import VaultRewards from "./vault-rewards";
+import { IconErrorToast } from "@/components/ui/icon-error-toast";
+import { IconCheckSuccess } from "@/components/ui/icon-check-success";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import UserHoldingTooltip from "./user-holding-tooltip";
 
 const OPTIONS_CHAINS = [
   { value: "all", label: "All Chains" },
@@ -51,61 +63,63 @@ const OPTIONS_CHAINS = [
   },
 ];
 
+type TokenPool = {
+  name: string;
+  image: string;
+};
+
+type Withdrawing = {
+  receive_amount_usd: string;
+  countdown: number;
+  is_ready: boolean;
+};
+
 export type VaultItemData = DepositVaultConfig & {
   exchange_name: string;
+  exchange_image: string;
+  exchange_code: string;
+  token_pools: TokenPool[];
   user_holdings: number;
-};
-const campaign_data = {
-  "SUI-USDC-cetus": {
-    usdc: 1250,
-    xp: 500000000,
-    startDate: "28/07/2025",
-    endDate: "15/08/2025",
-    snapshotDate: "14/08/2025, 3PM SGT",
-  },
-  "SUI-USDC-mmt": {
-    usdc: 2500,
-    xp: 500000000,
-    startDate: "28/07/2025",
-    endDate: "15/08/2025",
-    snapshotDate: "14/08/2025, 3PM SGT",
-  },
-  "DEEP-SUI-mmt": {
-    usdc: 1250,
-    xp: 500000000,
-    startDate: "28/07/2025",
-    endDate: "15/08/2025",
-    snapshotDate: "14/08/2025, 3PM SGT",
-  },
-  "WAL-SUI-mmt": {
-    usdc: 1250,
-    xp: 500000000,
-    startDate: "28/07/2025",
-    endDate: "15/08/2025",
-    snapshotDate: "14/08/2025, 3PM SGT",
-  },
+  user_holdings_show?: string | number;
+  total_value_usd_show?: string | number;
+  rewards_24h_usd_show?: string | number;
+  vault_apy_show?: string | number;
+  rewards_earned_show?: string;
+  is_loading_withdrawal: boolean;
+  withdrawing: Withdrawing | null;
 };
 
 export default function VaultList() {
   const { isLoading, data = [] } = useGetDepositVaults();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const {
+    isLoading: isLoadingWithdrawal,
+    data: dataWithdrawals = [],
+    refetch: refetchVaultsWithdrawal,
+  } = useGetVaultsWithdrawal();
+  const { toast } = useToast();
+  const { redeemWithVaultId } = useWithdrawVault();
+  const navigate = useNavigate();
+  const { vaultObjects } = useVaultObjectStore();
+  const { assets: ndlpAssets } = useNdlpAssetsStore();
+  const { isMd } = useBreakpoint();
 
   const [dex, setDex] = useState<string[]>(["all"]);
   const [chains, setChains] = useState<string[]>(["all"]);
   const [search, setSearch] = useState<string>("");
-  const navigate = useNavigate();
-  const { vaultObjects } = useVaultObjectStore();
-  const { assets: ndlpAssets } = useNdlpAssetsStore();
-  const { isAuthenticated } = useWallet();
-
-  const [paramsSort, setParamsSort] = useState(() => {
-    const sortKey = searchParams.get("sortKey") || "vault_apy";
-    const sortValue = searchParams.get("sortValue") || SORT_TYPE.desc;
-    return {
-      key: sortKey,
-      value: sortValue as typeof SORT_TYPE.desc,
-    };
+  const [idLoadingClaim, setIdLoadingClaim] = useState("");
+  const [idsClaimed, setIdsClaimed] = useState<string[]>([]);
+  const [paramsSort, setParamsSort] = useState({
+    vault_apy: SORT_TYPE.desc,
+    // total_value_usd: SORT_TYPE.desc,
+    // rewards_24h_usd: SORT_TYPE.desc,
+    // user_holdings: SORT_TYPE.desc,
+    keySort: "vault_apy",
   });
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showUsd = (num, emty = "--") => {
+    return num ? showFormatNumber(num, 2, 2, "$") : emty;
+  };
 
   const mapData = useMemo(() => {
     return data.map((vault) => {
@@ -115,27 +129,65 @@ export default function VaultList() {
       const ndlpBalance =
         ndlpAssets.find((asset) => asset.coin_type === vault.vault_lp_token)
           ?.balance || "0";
+      const user_holdings = Number(
+        calculateUserHoldings(
+          vaultConfig,
+          ndlpBalance,
+          vault?.user_pending_withdraw_ndlp
+        )
+      );
+      const vault_apy = Number(vault?.vault_apy || 0);
+      const exchange = EXCHANGE_CODES_MAP[vault?.exchange_id];
+      const tokens = vault.pool.pool_name.split("-");
 
-      const campaignName = `${vault.vault_name}-${
-        EXCHANGE_CODES_MAP[vault?.exchange_id].code
-      }`;
+      const withdrawal_vault = dataWithdrawals?.find(
+        (i) => vault.vault_id === i.vault_id
+      );
+      let withdrawal = null;
+      if (
+        withdrawal_vault &&
+        withdrawal_vault.withdrawals.length &&
+        !idsClaimed.includes(vault.vault_id)
+      ) {
+        const tmp = withdrawal_vault.withdrawals[0];
+        withdrawal = {
+          receive_amount_usd: showUsd(tmp.receive_amount_usd),
+          countdown: tmp.countdown,
+          is_ready: tmp.is_ready,
+        };
+      }
 
       return {
         ...vault,
-        exchange_name: EXCHANGE_CODES_MAP[vault?.exchange_id].name,
-        user_holdings: isAuthenticated
-          ? Number(
-              calculateUserHoldings(
-                vaultConfig,
-                ndlpBalance,
-                vault?.user_pending_withdraw_ndlp
-              )
-            )
-          : 0,
-        campaign_data: campaign_data[campaignName],
+        exchange_name: exchange.name,
+        exchange_image: exchange.image,
+        exchange_code: exchange.code,
+        user_holdings: user_holdings,
+        token_pools: tokens.map((i) => {
+          return { name: i, image: `/coins/${i?.toLowerCase()}.png` };
+        }),
+
+        user_holdings_show: showUsd(user_holdings),
+        total_value_usd_show: showUsd(vault?.total_value_usd),
+        rewards_24h_usd_show: showUsd(vault?.rewards_24h_usd),
+        vault_apy_show: vault?.vault_apy
+          ? formatPercentage(vault_apy < 0 ? 0 : vault_apy)
+          : "--",
+        rewards_earned_show: !Number(user_holdings)
+          ? "--"
+          : "+" + showUsd(withdrawal_vault?.user_reward_earned_usd || 0),
+        is_loading_withdrawal: isLoadingWithdrawal,
+        withdrawing: withdrawal,
       };
-    });
-  }, [data, vaultObjects, ndlpAssets, isAuthenticated]);
+    }) as VaultItemData[];
+  }, [
+    data,
+    vaultObjects,
+    ndlpAssets,
+    isLoadingWithdrawal,
+    dataWithdrawals,
+    idsClaimed,
+  ]);
 
   // Filter logic: if 'all' is selected, show all; else filter by selected DEXs
   const filteredData = useMemo(
@@ -153,10 +205,10 @@ export default function VaultList() {
 
   const sortedData = useMemo(() => {
     return filteredData.sort((a, b) => {
-      if (paramsSort.value === SORT_TYPE.asc) {
-        return a[paramsSort.key] - b[paramsSort.key];
+      if (paramsSort[paramsSort.keySort] === SORT_TYPE.asc) {
+        return a[paramsSort.keySort] - b[paramsSort.keySort];
       }
-      return b[paramsSort.key] - a[paramsSort.key];
+      return b[paramsSort.keySort] - a[paramsSort.keySort];
     });
   }, [filteredData, paramsSort]);
 
@@ -171,14 +223,44 @@ export default function VaultList() {
     [navigate]
   );
 
+  const onClaim = useCallback(
+    async (data: any) => {
+      setIdLoadingClaim(data.vault_id);
+      try {
+        const res: any = await redeemWithVaultId(data.vault_id);
+        toast({
+          title: "Withdraw successful!",
+          description: `${showFormatNumber(res?.receiveAmount || 0)} ${
+            res.receiveSymbol
+          } has been Withdrawn to your account. Check your wallet for Tx details`,
+          variant: "success",
+          duration: 5000,
+          icon: <IconCheckSuccess size={14} className="h-6 w-6" />,
+        });
+        setIdsClaimed([...idsClaimed, data.vault_id]);
+      } catch (error) {
+        console.log(error);
+        toast({
+          title: "Claim failed",
+          description: error?.message || error,
+          variant: "error",
+          duration: 5000,
+          icon: <IconErrorToast />,
+        });
+      }
+      setIdLoadingClaim("");
+    },
+    [redeemWithVaultId, toast, idsClaimed]
+  );
+
   const columns = useMemo(
     () => [
       {
         title: "AI Vaults",
         dataIndex: "vault_name",
-        classCell: "align-middle",
-        classTitle: "text-white/80 text-left w-[320px]", // 290px if 24h column is added
-        render: (_, record: DepositVaultConfig) => <VaultItem item={record} />,
+        classCell: "py-6",
+        classTitle: "text-white/80 text-left",
+        render: (_, record: VaultItemData) => <VaultItem item={record} />,
       },
       {
         title: (
@@ -190,21 +272,10 @@ export default function VaultList() {
           />
         ),
         dataIndex: "tvl",
-        classTitle: "w-[250px]",
-        classCell: "align-middle",
         keySort: "total_value_usd",
         render: (value: any, record: any) => (
           <span className="text-white font-medium font-mono text-base">
-            {record.total_value_usd
-              ? formatCurrency(
-                  record.total_value_usd,
-                  0,
-                  2,
-                  2,
-                  "currency",
-                  "USD"
-                )
-              : "--"}
+            {record.total_value_usd_show}
           </span>
         ),
       },
@@ -218,40 +289,25 @@ export default function VaultList() {
           />
         ),
         dataIndex: "apy",
-        classTitle: "text-white/80 text-left", // 120px if 24h column is added
-        classCell: "align-middle",
+        classTitle: "text-white/80 text-left",
         keySort: "vault_apy",
         render: (value: any, record: any) => (
-          <span className="text-[#64EBBC] font-medium font-mono text-base">
-            {record.vault_apy
-              ? `${formatPercentage(
-                  record.vault_apy < 0 ? 0 : record.vault_apy
-                )}`
-              : "--"}
+          <span className="text-green-increase font-medium font-mono text-base break-all">
+            {record.vault_apy_show}
           </span>
         ),
       },
-      // {
-      //   title: "24h Rewards",
-      //   dataIndex: "rewards",
-      //   classTitle: "text-white/80 text-left w-[140px]",
-      //   classCell: "align-middle",
-      //   keySort: "rewards_24h_usd",
-      //   render: (value: any, record: any) => (
-      //     <span className="text-white font-medium font-mono text-base">
-      //       {record.rewards_24h_usd
-      //         ? formatCurrency(
-      //             record.rewards_24h_usd,
-      //             0,
-      //             0,
-      //             2,
-      //             "currency",
-      //             "USD"
-      //           )
-      //         : "--"}
-      //     </span>
-      //   ),
-      // },
+      {
+        title: "24h Rewards",
+        dataIndex: "rewards",
+        classTitle: "text-white/80 text-left",
+        keySort: "rewards_24h_usd",
+        render: (value: any, record: any) => (
+          <span className="text-white font-medium font-mono text-base">
+            {record.rewards_24h_usd_show}
+          </span>
+        ),
+      },
       {
         title: (
           <LabelWithTooltip
@@ -262,106 +318,39 @@ export default function VaultList() {
           />
         ),
         dataIndex: "holdings",
-        classTitle: "text-white/80 justify-end", // 140px if 24h column is added
-        classCell: "align-middle justify-end", // 140px if 24h column is added
+        classTitle: "text-white/80",
         keySort: "user_holdings",
         render: (_: any, record: any) => (
-          <span className="text-white font-medium font-mono text-base">
-            {record.user_holdings
-              ? `${formatCurrency(
-                  record.user_holdings,
-                  0,
-                  2,
-                  2,
-                  "currency",
-                  "USD"
-                )}`
-              : "$--"}
-          </span>
+          <UserHoldingTooltip>
+            <div>
+              <div className="text-white font-medium font-mono text-base">
+                {record.user_holdings_show}
+              </div>
+              <div className="text-green-increase font-medium font-mono text-sm mt-1">
+                {record.rewards_earned_show}
+              </div>
+            </div>
+          </UserHoldingTooltip>
         ),
       },
       {
         title: "Rewards",
         dataIndex: "rewards",
-        classTitle: "text-white/80 justify-end",
-        classCell: "align-middle justify-end",
+        classTitle: "text-white/80 justify-start",
+        classCell: "justify-start",
         render: (_: any, record: any) => {
-          return (
-            <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center">
-                    <img src="/coins/usdc.png" alt="usdc" className="w-5 h-5" />
-                    <img
-                      src="/coins/xp.png"
-                      alt="xp"
-                      className="w-5 h-5 ml-[-4px]"
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent className="shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3 max-w-[300px]">
-                  <div>
-                    <div className="text-sm bg-clip-text text-transparent bg-[linear-gradient(90deg,_#FFE8C9_0%,_#F9F4E9_25%,_#E3F6FF_60%,_#C9D4FF_100%)] mb-3 font-medium">
-                      TOTAL REWARD POOL
-                    </div>
-                    <hr />
-                    <div className="flex items-center gap-2 min-w-[200px] mb-1 mt-2">
-                      <img
-                        src="/coins/usdc.png"
-                        alt="usdc"
-                        className="w-5 h-5"
-                      />
-                      <span className="text-sm text-white font-mono font-normal">
-                        {record.campaign_data
-                          ? formatCurrency(
-                              record.campaign_data.usdc,
-                              0,
-                              0,
-                              0,
-                              "decimal",
-                              "USD"
-                            )
-                          : "--"}{" "}
-                        USDC
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 min-w-[200px] mb-1">
-                      <img src="/coins/xp.png" alt="NDLP" className="w-5 h-5" />
-                      <span className="text-sm  text-white font-mono font-normal">
-                        {record.campaign_data
-                          ? formatCurrency(
-                              record.campaign_data.xp,
-                              0,
-                              0,
-                              0,
-                              "decimal",
-                              "USD"
-                            )
-                          : "--"}{" "}
-                        XP Shares
-                      </span>
-                    </div>
-                    <div className="rounded-md bg-[#242424] p-2 mt-2 font-sans font-normal text-xs">
-                      All rewards will be distributed at the end of the
-                      campaign, based on your average deposit over the 14-day
-                      period and the duration your funds were kept in the vault.
-                      The larger your deposit and the longer it remains, the
-                      greater your share of the rewards per vault.
-                    </div>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          );
+          return <VaultRewards item={record} />;
         },
       },
       {
         title: "Action",
         dataIndex: "action",
         classTitle: "justify-end",
-        classCell: "align-middle justify-end",
         render: (_: any, record: any) => (
-          <Web3Button onClick={() => handleRowClick(record)}>
+          <Web3Button
+            onClick={() => handleRowClick(record)}
+            className="w-[86px] ml-auto"
+          >
             Deposit
           </Web3Button>
         ),
@@ -370,17 +359,64 @@ export default function VaultList() {
     [handleRowClick]
   );
 
-  const handleSort = (key: string) => {
-    setParamsSort((prev) => {
-      if (prev.key === key) {
-        return {
-          key,
-          value: prev.value === SORT_TYPE.asc ? SORT_TYPE.desc : SORT_TYPE.asc,
-        };
-      }
-      return { key, value: SORT_TYPE.desc };
-    });
-  };
+  const rowsColspan = useMemo(
+    () => [
+      {
+        dataIndex: "withdrawing",
+        className: "!p-0",
+        checkHidden: (record: any) => {
+          return record?.withdrawing == null;
+        },
+        render: (value: any, record: any) => (
+          <div
+            className={cn(
+              "px-6 py-1.5 flex item-center justify-end",
+              value?.is_ready === true
+                ? "bg-green-increase/20"
+                : "bg-amber-600/20"
+            )}
+          >
+            <VaultHolding
+              item={record}
+              isOnlyWithdrawing={true}
+              reloadData={refetchVaultsWithdrawal}
+            />
+
+            <ButtonGradient
+              onClick={(e: React.FormEvent) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onClaim(record);
+              }}
+              variant="outline"
+              className="w-[86px] ml-[52px]"
+              classButtonInner={
+                value?.is_ready === true
+                  ? "bg-green-increase/20"
+                  : "bg-amber-600/20"
+              }
+              loading={idLoadingClaim === record.vault_id}
+              disabled={!!idLoadingClaim || value?.is_ready !== true}
+              hideContentOnLoading={true}
+            >
+              Claim
+            </ButtonGradient>
+          </div>
+        ),
+      },
+    ],
+    [refetchVaultsWithdrawal, onClaim, idLoadingClaim]
+  );
+
+  const handleSort = useCallback(
+    async (key) => {
+      const _params = { ...paramsSort, keySort: key };
+      _params[key] =
+        _params[key] == SORT_TYPE.desc ? SORT_TYPE.asc : SORT_TYPE.desc;
+      setParamsSort(_params);
+    },
+    [paramsSort]
+  );
 
   const optionDexs = useMemo(() => {
     return [
@@ -390,7 +426,7 @@ export default function VaultList() {
         label: EXCHANGE_CODES_MAP[item].name,
         icon: (
           <img
-            src={`/dexs/${EXCHANGE_CODES_MAP[item].code}.png`}
+            src={EXCHANGE_CODES_MAP[item].image}
             alt={EXCHANGE_CODES_MAP[item].name}
             className="w-5 h-5"
           />
@@ -399,21 +435,53 @@ export default function VaultList() {
     ];
   }, [dexOptions]);
 
+  useEffect(() => {
+    const hasClaim = mapData.find((i) => i?.withdrawing?.is_ready === false);
+
+    if (hasClaim) {
+      intervalRef.current = setInterval(() => {
+        refetchVaultsWithdrawal();
+      }, 30000); // 30s
+    }
+
+    if (!hasClaim && intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapData]);
+
   return (
-    <div className="w-full mx-auto max-md:px-3 max-md:py-3 max-md:rounded-lg max-md:pt-6 max-md:bg-[#121212]">
+    <div className="w-full mx-auto max-md:p-4 max-md:rounded-lg max-md:pt-6 max-md:bg-[#121212]">
+      {isMd && (
+        <div
+          className="text-white font-sans text-[22px] font-bold leading-normal tracking-[-1.2px] mb-6"
+          style={{ fontFamily: '"DM Sans"' }}
+        >
+          Live Vaults
+        </div>
+      )}
       <div
-        className="text-white font-sans text-[22px] font-bold leading-normal tracking-[-1.2px] mb-6"
-        style={{ fontFamily: '"DM Sans"' }}
+        className={cn(
+          "flex flex-col md:flex-row md:items-center md:justify-between rounded-t-md",
+          isMd ? "gap-4 bg-[#292929] px-6 py-4" : "gap-4"
+        )}
       >
-        Live Vaults
-      </div>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:bg-[#292929] md:px-6 md:py-4 rounded-b-none rounded-md">
-        <InputSearch
-          className="bg-black text-white placeholder:text-white/60 w-full md:w-80 rounded-lg px-4 py-2 border border-white/20 pl-9 focus-visible:ring-1 focus-visible:ring-white/70"
-          placeholder="Search AI vaults..."
-          onChange={(value) => setSearch(value)}
-          debounceTime={300}
-        />
+        <div className="w-full md:w-80 md:max-w-1/2">
+          <InputSearch
+            className="bg-black text-white placeholder:text-white/60 w-full rounded-lg px-4 py-2 border border-white/20 pl-9 focus-visible:ring-1 focus-visible:ring-white/70"
+            placeholder="Search AI vaults..."
+            onChange={(value) => setSearch(value)}
+            debounceTime={300}
+          />
+        </div>
         <div className="flex gap-3">
           <GradientSelect
             options={OPTIONS_CHAINS}
@@ -429,18 +497,62 @@ export default function VaultList() {
           />
         </div>
       </div>
-      <div className="rounded-md overflow-hidden bg-[#181818] border border-t-0 rounded-t-none border-[rgba(255, 255, 255, 0.20)]">
-        <TableRender
-          headerClassName="p-4 h-[70px] border-b"
-          data={sortedData}
-          columns={columns}
-          isLoading={isLoading}
-          labelNodata="No vaults found"
-          paramsSearch={paramsSort}
-          changeSort={handleSort}
-          onRowClick={handleRowClick}
-        />
-      </div>
+      <ConditionRenderer
+        when={isMd}
+        fallback={
+          <div className="pt-6">
+            <ConditionRenderer
+              when={sortedData?.length > 0}
+              fallback={
+                <ConditionRenderer
+                  when={isLoading}
+                  fallback={
+                    <div className="flex flex-col gap-4">
+                      <p className="text-white text-center text-sm">
+                        No vaults found
+                      </p>
+                    </div>
+                  }
+                >
+                  <div className="flex flex-col gap-4">
+                    {Array.from({ length: 2 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="h-[270px] bg-white/10 animate-pulse rounded w-full"
+                      />
+                    ))}
+                  </div>
+                </ConditionRenderer>
+              }
+            >
+              {sortedData.map((item) => (
+                <VaultItemMobile
+                  key={item.vault_id}
+                  item={item}
+                  idLoadingClaim={idLoadingClaim}
+                  reloadDataWithdraw={refetchVaultsWithdrawal}
+                  onRowClick={handleRowClick}
+                  onClaim={onClaim}
+                />
+              ))}
+            </ConditionRenderer>
+          </div>
+        }
+      >
+        <div className="rounded-md overflow-hidden bg-[#181818] border border-t-0 rounded-t-none border-[rgba(255, 255, 255, 0.20)]">
+          <TableRender
+            headerClassName="p-4 h-[70px] border-b"
+            data={sortedData}
+            columns={columns}
+            rowsColspan={rowsColspan}
+            isLoading={isLoading}
+            labelNodata="No vaults found"
+            paramsSearch={paramsSort}
+            changeSort={handleSort}
+            onRowClick={handleRowClick}
+          />
+        </div>
+      </ConditionRenderer>
     </div>
   );
 }

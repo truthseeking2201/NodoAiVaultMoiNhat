@@ -1,9 +1,12 @@
 import { useEffect, useState, useCallback, useId } from "react";
+import { cn } from "@/lib/utils";
 
 export function RefreshCountdownIcon({
+  className = "",
   seconds = 60,
   onRefresh,
 }: {
+  className?: string;
   seconds?: number;
   onRefresh: () => void;
 }) {
@@ -38,7 +41,10 @@ export function RefreshCountdownIcon({
 
   return (
     <div
-      className="relative w-6 h-6 flex items-center justify-center cursor-pointer"
+      className={cn(
+        "relative w-6 h-6 flex items-center justify-center cursor-pointer",
+        className
+      )}
       onClick={handleClick}
     >
       <svg

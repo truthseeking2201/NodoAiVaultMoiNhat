@@ -1,12 +1,16 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useConnectWallet, useWallets } from "@mysten/dapp-kit";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WALLETS } from "@/components/wallet/constants";
 import { useLoginWallet } from "@/hooks";
 import { useToast } from "@/hooks/use-toast";
+import { detectIsSlushApp, isMobileDevice } from "@/utils/helpers";
 import { IconErrorToast } from "../ui/icon-error-toast";
+import arrowBack from "@/assets/icons/arrow-back.svg";
+import ConditionRenderer from "../shared/condition-renderer";
+import ConnectWalletVideoModal from "./connect-wallet-video-modal";
 
 type Wallet = {
   name: string;
@@ -27,15 +31,23 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
   const { mutate: connect } = useConnectWallet();
   const loginWallet = useLoginWallet();
   const { toast } = useToast();
+  const [tutorialVideoOpen, setTutorialVideoOpen] = useState(false);
 
-  const allowWallets = WALLETS.map((wallet) => {
-    const foundWallet = wallets.find((w) => w.name === wallet.name);
-    return {
-      ...wallet,
-      name: foundWallet?.name || wallet.name,
-      icon: wallet.icon || foundWallet?.icon,
-    };
-  }) as Wallet[];
+  const allowWallets = useMemo(() => {
+    const isSlushApp = detectIsSlushApp();
+
+    if (isSlushApp) {
+      return [WALLETS.find((wallet) => wallet.name === "Slush")];
+    }
+    return WALLETS.map((wallet) => {
+      const foundWallet = wallets.find((w) => w.name === wallet.name);
+      return {
+        ...wallet,
+        name: foundWallet?.name || wallet.name,
+        icon: wallet.icon || foundWallet?.icon,
+      };
+    }) as Wallet[];
+  }, [wallets]);
 
   const handleReject = () => {
     setError(null);
@@ -85,6 +97,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
           }
         );
       } else {
+        setIsConnecting(false);
         window.open(selectedWallet.extensionUrl, "_blank");
       }
     } catch (error) {
@@ -98,7 +111,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
 
   return (
     <>
-      <div className="p-6 space-y-4 font-sans">
+      <div className="p-6 pb-1 space-y-4 font-sans">
         {error && (
           <Alert
             variant="destructive"
@@ -135,7 +148,35 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
             )}
           </Button>
         ))}
+
+        <ConditionRenderer when={isMobileDevice()}>
+          <div className="font-sans leading-5 text-xs p-3 rounded-lg border border-white/10 bg-[rgba(0,125,167,0.15)]">
+            To connect your wallet on mobile, open the{" "}
+            <span className="underline">ai.nodo.xyz</span> using the Slush or
+            Phantom app's DApp Browser.{" "}
+            <span className="text-white/60">
+              Mobile browsers such as Safari and Chrome do not support wallet
+              connections.
+            </span>
+            <hr className="bg-white/10 h-[1px] my-2" />
+            <div className="text-xs flex items-center justify-between">
+              Need help connecting?
+              <div
+                className="flex text-xs items-center gap-2 rounded-md font-sans bg-white/10 p-1 px-2 cursor-pointer"
+                onClick={() => setTutorialVideoOpen(true)}
+              >
+                <img src={arrowBack} alt="Arrow Back" className="w-6 h-6" />
+                Watch How
+              </div>
+            </div>
+          </div>
+          <ConnectWalletVideoModal
+            open={tutorialVideoOpen}
+            onOpenChange={() => setTutorialVideoOpen(false)}
+          />
+        </ConditionRenderer>
       </div>
+
       <div className="px-6 pt-2 text-center">
         {isConnecting && !connectedWallet && (
           <div className="flex items-center justify-center mb-3 text-amber-500">

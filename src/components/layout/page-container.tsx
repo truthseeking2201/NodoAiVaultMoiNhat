@@ -1,7 +1,7 @@
-
 import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import ConditionRenderer from "../shared/condition-renderer";
+import useBreakpoint from "@/hooks/use-breakpoint";
 
 interface PageContainerProps {
   children: React.ReactNode;
@@ -15,7 +15,7 @@ export function PageContainer({
   backgroundImage = "",
 }: PageContainerProps) {
   const [isReady, setIsReady] = useState(false);
-
+  const { isSm } = useBreakpoint();
   // Use requestAnimationFrame for smooth content appearance
   useEffect(() => {
     // Use requestAnimationFrame to delay content appearance until browser is ready to paint
@@ -41,8 +41,9 @@ export function PageContainer({
         >
           <main
             className={cn(
-              "flex-1 container mx-auto transition-opacity duration-300",
+              "flex-1 transition-opacity duration-300",
               isReady ? "opacity-100" : "opacity-0",
+              isSm ? "container mx-auto" : "px-4",
               className
             )}
           >
@@ -56,8 +57,9 @@ export function PageContainer({
   return (
     <main
       className={cn(
-        "flex-1 container mx-auto transition-opacity duration-300",
+        "flex-1 transition-opacity duration-300",
         isReady ? "opacity-100" : "opacity-0",
+        isSm ? "container mx-auto" : "px-4",
         className
       )}
     >

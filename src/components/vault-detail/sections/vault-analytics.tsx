@@ -9,10 +9,10 @@ import PositionPriceChart from "@/components/vault-detail/charts/position-price"
 import {
   ANALYTICS_TABS,
   PERIOD_TABS,
-  PERIOD_TABS_1W,
 } from "@/components/vault-detail/constant";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import { useQuery } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 type VaultAnalyticsProps = {
   vault_id: string;
@@ -31,12 +31,10 @@ const VaultAnalytics = ({
   const [analyticsRangeTab, setAnalyticsRangeTab] = useState<TimeFilter>(
     PERIOD_TABS?.[0]?.value as TimeFilter
   );
-  const [periodsOptions, setPeriodsOptions] = useState(PERIOD_TABS);
 
-  const handleChangeAnalyticsTab = (value: string) => {
-    setPeriodsOptions(PERIOD_TABS);
-    setAnalyticsRangeTab(PERIOD_TABS[0].value as TimeFilter);
-    setAnalyticsTab(value);
+  const [isEmpty, setIsEmpty] = useState(true);
+  const handleEmptyState = (empty: boolean) => {
+    setIsEmpty(empty);
   };
 
   // Fetch data for the selected analytics tab
@@ -47,25 +45,18 @@ const VaultAnalytics = ({
     gcTime: 0,
   });
 
-  const handleSwitchToWeekly = () => {
-    setAnalyticsRangeTab(PERIOD_TABS_1W[0].value as TimeFilter);
-    setPeriodsOptions(PERIOD_TABS_1W);
-  };
-
   useEffect(() => {
-    setPeriodsOptions(PERIOD_TABS);
-    setAnalyticsRangeTab(PERIOD_TABS[0].value as TimeFilter);
-    setAnalyticsTab(ANALYTICS_TABS[0].value);
-  }, [vault_id]);
+    setIsEmpty(false);
+  }, [analyticsTab, analyticsRangeTab]);
 
   return (
     <DetailWrapper
       title="Vault Analytics"
       titleComponent={
-        <div className="flex items-center gap-6">
+        <div className="flex items-center md:gap-6 gap-2 justify-between">
           <Tabs
             value={analyticsTab}
-            onValueChange={(value) => handleChangeAnalyticsTab(value)}
+            onValueChange={(value) => setAnalyticsTab(value)}
           >
             <TabsList className="p-1 flex gap-1">
               {ANALYTICS_TABS.map((tab) => (
@@ -81,7 +72,7 @@ const VaultAnalytics = ({
             onValueChange={(value) => setAnalyticsRangeTab(value as TimeFilter)}
           >
             <TabsList className="p-1 flex gap-1">
-              {periodsOptions.map((tab) => (
+              {PERIOD_TABS.map((tab) => (
                 <TabsTrigger key={tab.value} value={tab.value}>
                   {tab.label}
                 </TabsTrigger>
@@ -92,25 +83,26 @@ const VaultAnalytics = ({
       }
       className="!pb-0"
       isLoading={isDetailLoading}
-      loadingStyle="h-[400px] w-full mb-4"
+      loadingStyle={cn("w-full mb-4", isEmpty ? "h-fit" : "min-h-[400px]")}
     >
       {/* Content for the selected analytics tab */}
-      <div className="min-h-[400px]">
+      <div className={cn(isEmpty ? "h-fit" : "min-h-[400px]")}>
         {/* Placeholder for actual content based on the selected tab */}
-        {analyticsTab === ANALYTICS_TABS?.[0]?.value && !isLoading && (
+        {analyticsTab === ANALYTICS_TABS?.[0]?.value && (
           <PositionPriceChart
             period={analyticsRangeTab}
             analyticsData={analyticsData}
             vault={vault}
-            onSwitchToWeekly={handleSwitchToWeekly}
             isLoading={isLoading}
+            onEmptyStateChange={handleEmptyState}
           />
         )}
-        {analyticsTab === ANALYTICS_TABS?.[1]?.value && !isLoading && (
+        {analyticsTab === ANALYTICS_TABS?.[1]?.value && (
           <APYChart
             period={analyticsRangeTab}
             analyticsData={analyticsData}
             isLoading={isLoading}
+            onEmptyStateChange={handleEmptyState}
           />
         )}
       </div>

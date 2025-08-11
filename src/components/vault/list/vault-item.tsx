@@ -1,39 +1,39 @@
-import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import { cn } from "@/lib/utils";
-import { DepositVaultConfig } from "@/types/vault-config.types";
+import { VaultItemData } from "./vault-list";
 
-export const VaultItem = ({ item }: { item: DepositVaultConfig }) => {
+export const VaultItem = ({ item }: { item: VaultItemData }) => {
   const { windowWidth } = useBreakpoint();
   const isLargeScreen = windowWidth >= 1440;
-  const exchange_id = item?.exchange_id;
-  const exchange = EXCHANGE_CODES_MAP[exchange_id];
-  const tokens = item.pool.pool_name.split("-");
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-4 min-w-[180px] max-w-[240px] 2xl:max-w-none">
       <div className="flex items-center justify-center">
-        {tokens?.length > 0 &&
-          tokens.map((token, index) => (
+        {item.token_pools?.length > 0 &&
+          item.token_pools.map((token) => (
             <img
-              key={token}
-              src={`/coins/${token?.toLowerCase()}.png`}
-              alt={token}
+              key={token.name}
+              src={token.image}
+              alt={token.name}
               className={cn(
-                "rounded-full",
-                isLargeScreen ? "w-[36px] h-[36px]" : "w-[24px] h-[24px]"
+                "rounded-full flex-shrink-0",
+                isLargeScreen ? "w-[32px] h-[32px]" : "w-[24px] h-[24px]"
               )}
             />
           ))}
       </div>
-      <div className="m-4">
+      <div>
         <div className="font-semibold text-white text-base leading-tight mb-1">
           {item.vault_name}
         </div>
         <div className="flex gap-1 items-center text-base">
-          <img src={`/dexs/${exchange?.code}.png`} className="h-[12px]" />
+          <img
+            src={item.exchange_image}
+            alt={item.exchange_name}
+            className="h-[12px]"
+          />
           <div className={cn("font-sans font-semibold text-xs")}>
-            {exchange.name}
+            {item.exchange_name}
           </div>
         </div>
       </div>

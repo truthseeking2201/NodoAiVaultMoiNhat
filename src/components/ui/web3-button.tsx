@@ -7,6 +7,7 @@ export interface Web3ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
   loading?: boolean;
+  hideContentOnLoading?: boolean;
 }
 
 const Web3Button = React.forwardRef<HTMLButtonElement, Web3ButtonProps>(
@@ -17,6 +18,7 @@ const Web3Button = React.forwardRef<HTMLButtonElement, Web3ButtonProps>(
       loading = false,
       disabled,
       children,
+      hideContentOnLoading = false,
       ...props
     },
     ref
@@ -42,7 +44,7 @@ const Web3Button = React.forwardRef<HTMLButtonElement, Web3ButtonProps>(
         {loading ? (
           <div className="flex items-center gap-2">
             <Loader className="w-4 h-4 animate-spin" />
-            {children}
+            {!hideContentOnLoading && children}
           </div>
         ) : (
           children

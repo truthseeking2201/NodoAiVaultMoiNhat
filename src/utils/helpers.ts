@@ -90,3 +90,15 @@ export const getNDLPTotalSupply = (
     .dividedBy(new BigNumber(10).pow(decimals))
     .toNumber();
 };
+
+export const isMobileDevice = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+};
+
+export const detectIsSlushApp = () => {
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isSlushApp = /Slush|SlushWallet/i.test(userAgent);
+  return isSlushApp;
+};

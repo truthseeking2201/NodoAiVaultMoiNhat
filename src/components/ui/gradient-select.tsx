@@ -21,6 +21,7 @@ interface GradientSelectProps {
   value: string[];
   onChange: (value: string[]) => void;
   placeholder?: string;
+  buttonClassName?: string;
 }
 
 export const GradientSelect: React.FC<GradientSelectProps> = ({
@@ -28,6 +29,7 @@ export const GradientSelect: React.FC<GradientSelectProps> = ({
   value,
   onChange,
   placeholder = "Select...",
+  buttonClassName,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -47,9 +49,14 @@ export const GradientSelect: React.FC<GradientSelectProps> = ({
         <Button
           variant="outline"
           size="md"
-          className="min-w-40 flex items-center justify-between bg-[#181818] hover:bg-[#292929] text-white rounded-lg border border-white/20"
+          className={cn(
+            "max-md:w-full md:min-w-40 flex items-center justify-between md:bg-[#181818] md:hover:bg-[#292929] text-white rounded-lg border border-white/20 bg-[#000]",
+            buttonClassName
+          )}
         >
-          <span className="truncate text-left font-medium">{selectedNames}</span>
+          <span className="truncate text-left font-medium">
+            {selectedNames}
+          </span>
           <svg
             className="w-4 h-4 ml-2 opacity-60"
             fill="none"
@@ -66,7 +73,7 @@ export const GradientSelect: React.FC<GradientSelectProps> = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-auto min-w-[240px] bg-[#181818] border border-white/20 rounded-xl shadow-lg p-2"
+        className="w-auto md:min-w-[240px] bg-[#181818] border border-white/20 rounded-xl shadow-lg p-2"
         align="start"
         sideOffset={8}
       >

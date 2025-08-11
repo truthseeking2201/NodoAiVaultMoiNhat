@@ -1,4 +1,7 @@
-import { DepositVaultConfig } from "@/types/vault-config.types";
+import {
+  DepositVaultConfig,
+  WithdrawalRequests,
+} from "@/types/vault-config.types";
 import http from "@/utils/http";
 
 const NODO_URL = import.meta.env.VITE_NODO_APP_URL;
@@ -30,6 +33,13 @@ const URLS = {
     }
     return url;
   },
+  vaultsWithdrawal: (accountAddress?: string) => {
+    let url = `/data-management/external/vaults/withdrawals`;
+    if (accountAddress && accountAddress !== "default") {
+      url += `?wallet_address=${accountAddress}`;
+    }
+    return url;
+  },
   vaultAnalytics: (vaultId: string, type: string, range: string) =>
     `${NODO_URL}/data-management/external/vaults/${vaultId}/histogram?histogram_type=${type}&histogram_range=${range}`,
   vaultBasicDetails: (vaultId: string, walletAddress: string) => {
@@ -51,6 +61,8 @@ const URLS = {
     `/data-management/external/vaults/${vaultId}/swap-and-deposit-info?token_address=${token_address}`,
   checkCanDeposit: (vaultId: string, token_address: string, amount: string) =>
     `/data-management/external/vaults/${vaultId}/check-deposit?deposit_token=${token_address}&deposit_amount=${amount}`,
+  userHolding: (vaultId: string) =>
+    `/data-management/external/user/vault-stats?vault_id=${vaultId}`,
 };
 
 export const getLatestWithdrawal = (sender_address: string) => {
@@ -85,6 +97,12 @@ export const getVaultsActivities = (payload: any) => {
 export const getDepositVaults = (accountAddress?: string) => {
   return http.get(URLS.depositVaults(accountAddress)) as Promise<
     DepositVaultConfig[]
+  >;
+};
+
+export const getVaultsWithdrawal = (accountAddress?: string) => {
+  return http.get(URLS.vaultsWithdrawal(accountAddress)) as Promise<
+    WithdrawalRequests[]
   >;
 };
 
@@ -141,4 +159,8 @@ export const checkCanDeposit = (
   ) as Promise<{
     can_deposit: boolean;
   }>;
+};
+
+export const getUserHolding = (vaultId: string) => {
+  return http.get(URLS.userHolding(vaultId));
 };

@@ -1,55 +1,90 @@
-import HeroBannerImage2 from "@/assets/images/dashboard/hero-banner-2.png";
 import { GradientOutlinedButton } from "@/components/ui/gradient-outlined-button";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
+import CountUp from "@/components/ui/count-up";
 
 const HeroBannerSimple = () => {
+  const { isMobile } = useBreakpoint();
   const handleReadMore = () => {
     window.open(
       "https://docs.nodo.xyz/public/nodo-campaigns/nodo-ai-vault-genesis-yield-campaign-phase-1",
       "_blank"
     );
   };
-  
+
   return (
-    <section className="relative w-full h-[210px] flex items-center overflow-hidden rounded-xl mb-12">
+    <section className="relative w-full h-[210px] flex items-center overflow-hidden md:rounded-xl md:mb-12 mb-0">
       <img
-        src={HeroBannerImage2}
+        src={
+          isMobile
+            ? "/banners/hero-banner-mobile.png"
+            : "/banners/hero-banner.png"
+        }
         alt="Genesis Vault Campaign Banner"
-        className="absolute inset-0 w-full h-full object-cover rounded-xl z-0"
-        width={1720}
-        height={210}
+        className="absolute inset-0 w-full h-full object-cover  md:rounded-xl z-0"
+        width={isMobile ? "auto" : 1720}
+        height={isMobile ? 220 : 210}
         loading="eager"
         fetchPriority="high"
       />
-      <div className="relative z-20 flex flex-col justify-center h-full text-left max-w-[1000px]">
-        <div className="bg-clip-text text-transparent bg-[linear-gradient(90deg,_#FFE8C9_0%,_#F9F4E9_25%,_#E3F6FF_60%,_#C9D4FF_100%)] text-left font-dm-sans text-[28px] font-bold mb-4 px-12">
-          Claim your share in NODO’s Genesis vault campaign
+      <div className="relative z-20 flex flex-col gap-2 md:gap-4 justify-center h-full text-left md:w-[1000px] w-full">
+        <div className="bg-clip-text text-transparent bg-[linear-gradient(90deg,_#FFE8C9_0%,_#F9F4E9_25%,_#E3F6FF_60%,_#C9D4FF_100%)] text-left md:text-[28px] text-base font-bold md:px-12 px-4 md:py-1">
+          Claim your share in {isMobile && <br />} NODO’s Genesis vault campaign
         </div>
         <div
-          className="text-white font-dm-sans text-[28px] font-bold leading-[36px] tracking-[-0.9px] flex items-center py-1 w-fit px-10 mb-4"
+          className="text-white font-dm-sans text-[28px] font-bold leading-[36px] tracking-[-0.9px] flex md:flex-row flex-col items-center py-2 md:w-fit w-full md:px-10 px-4 "
           style={{
-            background:
-              "linear-gradient(90deg, rgba(255, 0, 166, 0.00) 0%, rgba(255, 0, 200, 0.60) 12%, rgba(255, 0, 255, 0.60) 25%, rgba(196, 0, 255, 0.60) 38%, rgba(74, 40, 255, 0.60) 50%, rgba(0, 47, 255, 0.60) 62%, rgba(0, 120, 255, 0.60) 75%, rgba(0, 196, 255, 0.60) 88%, rgba(0, 255, 255, 0.00) 100%)",
+            background: isMobile
+              ? "none"
+              : "linear-gradient(90deg, rgba(255, 0, 166, 0.00) 0%, rgba(255, 0, 200, 0.60) 12%, rgba(255, 0, 255, 0.60) 25%, rgba(196, 0, 255, 0.60) 38%, rgba(74, 40, 255, 0.60) 50%, rgba(0, 47, 255, 0.60) 62%, rgba(0, 120, 255, 0.60) 75%, rgba(0, 196, 255, 0.60) 88%, rgba(0, 255, 255, 0.00) 100%)",
           }}
         >
-          <img
-            src="/coins/usdc.png"
-            alt="USDC"
-            className="h-8 w-auto ml-2"
-            width="32"
-            height="32"
-          />
-          <span className="ml-2 mr-4 text-[32px]">10,000 USDC </span>
-          <span className="mr-4">+ </span>
-          <img
-            src="/coins/xp.png"
-            alt="XP"
-            className="h-8 w-auto"
-            width="32"
-            height="32"
-          />
-          <span className="ml-2 text-[32px]">2,000,000,000 XP Shares</span>
+          <div className="flex items-center justify-start w-full md:w-fit">
+            <img
+              src="/coins/usdc.png"
+              alt="USDC"
+              className="md:h-8 h-4 w-auto md:ml-2"
+              width={isMobile ? 16 : 32}
+              height={isMobile ? 16 : 32}
+            />
+            <div className="ml-2 mr-4 flex gap-2 items-center md:text-[32px] text-base  ">
+              <div className="md:w-[105px] w-[45px]">
+                <CountUp
+                  from={9100}
+                  to={10000}
+                  duration={3}
+                  delay={0}
+                  separator=","
+                />
+              </div>{" "}
+              USDC
+            </div>
+          </div>
+          {!isMobile && (
+            <span className="mr-4 md:text-[32px] text-base">+ </span>
+          )}
+          <div className="flex items-center gap-2 justify-start w-full md:w-fit">
+            <img
+              src="/coins/xp.png"
+              alt="XP"
+              className="md:h-8 h-4 w-auto"
+              width={isMobile ? 16 : 32}
+              height={isMobile ? 16 : 32}
+            />
+            <div className="flex gap-2 items-center md:text-[32px] text-base ">
+              <div className="md:w-[230px] w-[105px]">
+                <CountUp
+                  from={1999999000}
+                  to={2000000000}
+                  duration={3}
+                  delay={0}
+                  separator=","
+                />
+              </div>{" "}
+              XP Shares
+            </div>
+          </div>
         </div>
-        <div className="w-fit px-12">
+        <div className="w-fit md:px-12 px-4">
           <GradientOutlinedButton onClick={handleReadMore}>
             <span className="bg-gradient-to-r from-[#FFE8C9] via-[#E3F6FF] to-[#C9D4FF] text-transparent bg-clip-text flex items-center">
               Read More

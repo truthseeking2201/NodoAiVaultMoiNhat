@@ -330,6 +330,13 @@
   background: #000;
 }
 
+.gradient-3rd {
+  background: var(--3rd-gradient);
+  -webkit-background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
 .gradient-3rd-underline {
   background: var(--3rd-gradient);
   -webkit-background-clip: text;

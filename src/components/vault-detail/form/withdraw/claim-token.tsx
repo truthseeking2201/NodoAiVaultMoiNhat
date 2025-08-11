@@ -19,11 +19,18 @@ import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
 type Props = {
   data?: DataClaimType;
   balanceLp: string;
+  balanceLpUsd: string;
   onSuccess: () => void;
   reloadData: () => void;
 };
 
-const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
+const ClaimToken = ({
+  data,
+  balanceLp,
+  balanceLpUsd,
+  onSuccess,
+  reloadData,
+}: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   /**
    * HOOKS
@@ -37,9 +44,9 @@ const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
         <img
           src={data?.withdrawSymbolImage}
           alt={data.withdrawSymbol}
-          className="w-6 h-6 mr-2"
+          className="md:w-6 md:h-6 w-5 h-5 mr-2"
         />
-        <span className="font-mono text-lg font-bold text-gray-200">
+        <span className="font-mono text-sm md:text-lg font-bold text-gray-200">
           {data.withdrawSymbol}
         </span>
       </div>
@@ -53,6 +60,14 @@ const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
       </span>
     );
   }, [balanceLp, data]);
+
+  const balanceInputUsd = useMemo(() => {
+    return (
+      <span className="text-white/50 text-sm font-medium font-sans">
+        ${showFormatNumber(balanceLpUsd, 0, 2, "", true)}
+      </span>
+    );
+  }, [balanceLpUsd]);
 
   /**
    * FUNCTION
@@ -69,12 +84,8 @@ const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
         } has been Withdrawn to your account. Check your wallet for Tx details`,
         variant: "success",
         duration: 5000,
-        icon: (
-          <IconCheckSuccess
-            size={14}
-            className="h-6 w-6"
-          />
-        ),
+        icon: <IconCheckSuccess size={14} className="h-6 w-6" />,
+        hideClose: true,
       });
     } catch (error) {
       console.log(error);
@@ -95,9 +106,9 @@ const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
         <img
           src={AvgPaceIcon}
           alt="AvgPaceIcon"
-          className="w-4 h-4 mr-2"
+          className="w-3 h-3 md:w-4 md:h-4 mr-2"
         />
-        <div className="text-amber-600 text-sm font-mono font-medium">
+        <div className="text-amber-600 text-xs md:text-sm font-mono font-medium">
           {zeroPad(hours)}
           <span className="ai-hiden">:</span>
           {zeroPad(minutes)}
@@ -116,21 +127,19 @@ const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
    */
   return (
     <div className="">
-      <div className="font-body text-gray-400 !font-medium mb-2">
-        Withdraw Amount
-      </div>
-
       <FormattedNumberInput
         value={`${data.withdrawAmount}`}
         balanceInput={balanceInput}
+        balanceInputUsd={balanceInputUsd}
         rightInput={rightInput}
         disabled={true}
         onChange={() => {}}
+        label="Withdraw"
       />
 
-      <div className="p-4 border border-white/15 rounded-[12px] rounded-t-none">
+      <div className="p-4 border border-white/20 rounded-[12px] rounded-t-none">
         <RowItem
-          className="flex-col !justify-start !items-start"
+          className="flex-col !justify-start !items-start gap-0"
           classNameValue="w-full mt-2 font-mono text-gray-200 font-bold"
         >
           <RowItem.Label>
@@ -138,7 +147,7 @@ const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
               <div className="flex items-center">
                 <LabelWithTooltip
                   label="Est. Max Receive"
-                  labelClassName="text-gray-200 font-bold text-base"
+                  labelClassName="text-gray-200 font-bold text-sm md:text-base"
                   tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
                 />
                 <Countdown
@@ -149,18 +158,14 @@ const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
               </div>
             ) : (
               <div className="flex items-center">
-                <span className="text-gray-200 font-bold text-base">
+                <span className="text-gray-200 font-bold text-sm md:text-base">
                   Actual Receive
                 </span>
                 <div className="ml-2 flex items-center bg-green-ready/20 p-1 rounded-full">
-                  <div className="w-4 h-4 bg-green-ready rounded-full flex items-center justify-center">
-                    <Check
-                      className="text-black"
-                      strokeWidth="4"
-                      size={10}
-                    />
+                  <div className="md:w-4 md:h-4 w-3 h-3 bg-green-ready rounded-full flex items-center justify-center">
+                    <Check className="text-black" strokeWidth="4" size={10} />
                   </div>
-                  <span className="text-green-ready text-xs font-mono font-bold ml-1">
+                  <span className="text-green-ready text-[10px] md:text-xs font-mono font-bold ml-1">
                     READY
                   </span>
                 </div>
@@ -168,13 +173,26 @@ const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
             )}
           </RowItem.Label>
           <RowItem.Value>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-start md:justify-between md:flex-row-reverse">
+              <div className="flex items-center">
+                <img
+                  src={data?.receiveSymbolImage}
+                  alt={data?.receiveSymbol}
+                  className="w-6 h-6 mr-2 md:mr-1"
+                />
+                <div className="text-lg hidden md:block">
+                  {data?.receiveSymbol}
+                </div>
+              </div>
               <DynamicFontText
-                maxWidth={245}
+                maxWidth={300}
                 breakpoints={[
-                  { minLength: 0, fontSize: "text-[32px] leading-[42px]" },
-                  { minLength: 13, fontSize: "text-lg" },
-                  { minLength: 18, fontSize: "text-base" },
+                  {
+                    minLength: 0,
+                    fontSize: "text-[32px] leading-[42px] max-sm:text-lg",
+                  },
+                  { minLength: 13, fontSize: "text-lg max-sm:text-base" },
+                  { minLength: 18, fontSize: "text-base max-sm:text-sm" },
                 ]}
               >
                 {showFormatNumber(
@@ -183,14 +201,6 @@ const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
                   data.receiveDecimal || 6
                 )}
               </DynamicFontText>
-              <div className="flex items-center">
-                <img
-                  src={data?.receiveSymbolImage}
-                  alt={data?.receiveSymbol}
-                  className="w-6 h-6 mr-1"
-                />
-                <div className="text-lg">{data?.receiveSymbol}</div>
-              </div>
             </div>
           </RowItem.Value>
         </RowItem>
@@ -200,9 +210,11 @@ const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
           targetToken={{ symbol: data?.receiveSymbol }}
           rate={data.conversionRate}
         />
-        <RowItem className="mt-2">
+        <RowItem className="mt-2 flex-col md:flex-row justify-start items-start md:items-center md:justify-between gap-0">
           <RowItem.Label>
-            <span className="text-sm text-white/80">Transaction Fee</span>
+            <span className="text-13px md:text-sm text-white/80">
+              Transaction Fee
+            </span>
           </RowItem.Label>
           <RowItem.Value>
             <span className="text-sm">Free</span>
@@ -211,7 +223,7 @@ const ClaimToken = ({ data, balanceLp, onSuccess, reloadData }: Props) => {
       </div>
 
       <Web3Button
-        className="w-full font-semibold text-lg py-3 rounded-lg	flex items-center justify-center mt-4 mb-3"
+        className="w-full font-semibold py-3 rounded-lg	flex items-center justify-center mt-4 mb-3 text-base md:text-lg"
         onClick={onClaim}
         disabled={isLoading || !data.isClaim}
         loading={isLoading}

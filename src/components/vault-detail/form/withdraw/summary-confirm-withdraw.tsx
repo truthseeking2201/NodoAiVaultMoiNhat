@@ -19,22 +19,25 @@ const SummaryConfirmWithdraw = ({
 }: Props) => {
   return (
     <div className="p-4 border border-white/15 rounded-lg">
-      <RowItem label="Vault">
+      <RowItem
+        label="Vault"
+        classNameLabel="text-white/80"
+      >
         <div className="flex items-center gap-2">
-          <div className="relative flex">
+          <div className="relative flex max-md:text-sm">
             <img
               src={lpData.token_image}
               alt={lpData.token_symbol}
-              className=" absolute right-[18px] z-0"
+              className="absolute right-[18px] z-0"
             />
             <img
               src={lpData.quote_image}
               alt={lpData.quote_symbol}
-              className="w-6 h-6 z-10"
+              className="max-md:w-5 max-md:h-5 w-6 h-6 z-10"
             />
           </div>
 
-          <span className="font-mono text-lg text-white">
+          <span className="font-mono max-md:text-13px text-lg text-white">
             {lpData.vault_name}
           </span>
         </div>
@@ -42,15 +45,16 @@ const SummaryConfirmWithdraw = ({
       {lpData?.exchange && (
         <RowItem
           label="DEX"
-          className="mt-3"
+          className="mt-3 max-md:mt-2"
+          classNameLabel="max-md:text-13px"
         >
           <div className="flex items-center gap-1">
             <img
-              src={`/dexs/${lpData.exchange.code}.png`}
+              src={lpData.exchange.image}
               alt={lpData.exchange.name}
               className=" w-4 h-4 inline"
             />
-            <span className="font-sans text-base font-bold text-white">
+            <span className="font-sans max-md:text-sm text-base font-bold text-white">
               {lpData.exchange.name}
             </span>
           </div>
@@ -58,20 +62,23 @@ const SummaryConfirmWithdraw = ({
       )}
       <RowItem
         label="Amount"
-        className="mt-3"
+        className="mt-3 max-md:mt-2"
+        classNameLabel="max-md:text-13px"
       >
-        <div className="flex items-center">
+        <div className="flex items-center max-md:text-sm">
           <img
             src={lpData?.lp_image}
             alt="NODOAIx Token"
-            className="w-6 h-6 mr-2"
+            className="max-md:w-5 max-md:h-5 w-6 h-6 mr-2"
           />
           {showFormatNumber(summary?.amount || 0)} {lpData?.lp_symbol}
         </div>
       </RowItem>
       <RowItem
         label="Conversion Rate"
-        className="mt-3 tracking-tighter"
+        className="mt-3 max-md:mt-2 tracking-tighter max-md:text-sm"
+        classNameLabel="max-md:text-13px"
+        classNameValue="max-md:text-sm"
       >
         <span className="mr-1.5">1</span>
         {summary?.conversion_rate?.from_symbol}
@@ -81,11 +88,11 @@ const SummaryConfirmWithdraw = ({
       </RowItem>
       <hr className="w-full border-t border-white/15 mt-3 mb-3" />
 
-      <RowItem className="mt-3">
+      <RowItem className="mt-3 max-md:mt-2">
         <RowItem.Label>
           <LabelWithTooltip
             label="Est. Max Receive"
-            labelClassName="text-base text-gray-400 font-sans"
+            labelClassName="text-base text-white/80 font-sans max-md:text-xs"
             tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
             asChild={true}
           />
@@ -97,7 +104,7 @@ const SummaryConfirmWithdraw = ({
               alt={summary.tokenReceive?.token_symbol}
               className="w-6 h-6 mr-2"
             />
-            <span className="text-gray-200 font-bold">
+            <span className="text-gray-200 font-bold max-md:text-sm">
               {summary?.receive
                 ? `${showFormatNumber(summary.receive)} `
                 : "--"}
@@ -107,7 +114,9 @@ const SummaryConfirmWithdraw = ({
       </RowItem>
       <RowItem
         label="Transaction Fee"
-        className="mt-3"
+        className="mt-3 max-md:mt-2"
+        classNameLabel="max-md:text-xs"
+        classNameValue="max-md:text-sm"
       >
         Free
       </RowItem>

@@ -5,7 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { formatAmount } from "@/lib/utils";
+import useBreakpoint from "@/hooks/use-breakpoint";
+import { cn, formatAmount } from "@/lib/utils";
 import { DepositToken } from "@/types/deposit-token.types";
 import { ChevronDown, X } from "lucide-react";
 import { useState } from "react";
@@ -23,6 +24,7 @@ const SelectTokens = ({
   title,
   onSelectToken,
 }: SelectTokensProps) => {
+  const { isMd } = useBreakpoint();
   const currentToken = tokens.find(
     (token) => token.token_address.toLowerCase() === selectedToken.toLowerCase()
   );
@@ -39,7 +41,12 @@ const SelectTokens = ({
             alt={currentToken?.symbol}
             className="w-4 h-4 mr-1 rounded-xl"
           />
-          <span className="text-white text-sm font-medium">
+          <span
+            className={cn(
+              "text-white font-medium",
+              isMd ? "text-[13px]" : "text-sm"
+            )}
+          >
             {currentToken?.symbol}
           </span>
         </div>
@@ -47,7 +54,7 @@ const SelectTokens = ({
       </div>
       <DialogContent
         hideIconClose
-        className="p-0 border-white/12 rounded-xl w-[400px]"
+        className="p-0 border-white/12 rounded-2xl md:rounded-xl md:w-[400px]"
       >
         <DialogHeader>
           {typeof title === "string" ? (

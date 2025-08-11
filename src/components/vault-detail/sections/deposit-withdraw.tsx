@@ -10,7 +10,7 @@ const DepositWithdraw = ({
 }) => {
   return (
     <DetailWrapper
-      title="Your Holdings"
+      title="Manage Liquidity"
       isLoading={isDetailLoading}
       loadingStyle="h-[520px] w-full"
     >

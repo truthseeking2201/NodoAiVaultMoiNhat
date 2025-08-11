@@ -1,9 +1,11 @@
 import {
   getDepositVaults,
+  getVaultsWithdrawal,
   getEstimateDeposit,
   getEstimateWithdraw,
   getSwapDepositInfo,
   getVaultBasicDetails,
+  getUserHolding,
 } from "@/apis";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import {
@@ -13,6 +15,8 @@ import {
   VaultEstimateDeposit,
   VaultEstimateWithdraw,
   VaultSwapDepositInfo,
+  WithdrawalRequests,
+  VaultHoldingType,
 } from "@/types/vault-config.types";
 import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
@@ -89,6 +93,18 @@ export const useGetDepositVaults = () => {
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
     refetchOnWindowFocus: true,
   }) as UseQueryResult<DepositVaultConfig[], Error>;
+};
+
+export const useGetVaultsWithdrawal = () => {
+  const { address } = useWallet();
+
+  return useQuery({
+    queryKey: ["vaults-Withdrawal-data", address || "default"],
+    queryFn: () => getVaultsWithdrawal(address),
+    staleTime: 0,
+    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
+    refetchOnWindowFocus: !!address,
+  }) as UseQueryResult<WithdrawalRequests[], Error>;
 };
 
 export const useCurrentDepositVault = () => {
@@ -183,4 +199,21 @@ export const useSwapDepositInfo = (vaultId: string, token_address: string) => {
     },
     enabled: !!vaultId && !!token_address,
   });
+};
+
+export const useUserHolding = (vaultId: string, isAuthenticated: boolean) => {
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["user-holding", vaultId],
+    queryFn: async () => {
+      const response = await getUserHolding(vaultId);
+      return response as unknown as VaultHoldingType;
+    },
+    enabled: !!vaultId && isAuthenticated,
+  });
+
+  return {
+    data: !!vaultId && isAuthenticated ? data : null,
+    isLoading: !!vaultId && isAuthenticated ? isLoading : false,
+    refetch: !!vaultId && isAuthenticated ? refetch : () => {},
+  };
 };
