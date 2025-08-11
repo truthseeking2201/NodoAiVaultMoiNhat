@@ -1,5 +1,9 @@
+import arrowBack from "@/assets/icons/arrow-back.svg";
 import gradientLink from "@/assets/icons/gradient-arrow-link.svg";
+import successAnimationData from "@/assets/lottie/circle_checkmark_success.json";
+import ConditionRenderer from "@/components/shared/condition-renderer";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -8,15 +12,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import VideoModal from "@/components/ui/video-modal";
 import Web3Button from "@/components/ui/web3-button";
-import { formatAmount } from "@/lib/utils";
+import { ADD_NDLP_WALLET_TUTORIAL_LINK } from "@/config/constants";
+import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
+import useBreakpoint from "@/hooks/use-breakpoint";
+import { cn, formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import { truncateBetween } from "@/utils/truncate";
-import { X } from "lucide-react";
-import { DepositSuccessData } from "./deposit-form";
 import Lottie from "lottie-react";
-import successAnimationData from "@/assets/lottie/circle_checkmark_success.json";
-import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
+import { X } from "lucide-react";
+import { useState } from "react";
+import { DepositSuccessData } from "./deposit-form";
+import { useCurrentWallet } from "@mysten/dapp-kit";
 
 interface DepositModalProps {
   vault: BasicVaultDetailsType;
@@ -49,7 +57,7 @@ const GradientText = ({ text }: { text: string }) => {
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
       }}
-      className="font-bold text-sm"
+      className="font-bold text-base font-mono"
     >
       {text}
     </span>
@@ -72,7 +80,7 @@ const VaultInfo = ({
   return (
     <>
       <div className="flex items-center justify-between">
-        <span className="text-base text-[#9CA3AF]">Vault</span>
+        <span className="text-13px md:text-base text-[#9CA3AF]">Vault</span>
         <div className="flex items-center gap-2">
           <div className="relative flex">
             <img
@@ -87,19 +95,17 @@ const VaultInfo = ({
             />
           </div>
 
-          <span className="font-mono text-lg text-white">{valutName}</span>
+          <span className="font-mono text-sm md:text-lg text-white">
+            {valutName}
+          </span>
         </div>
       </div>
       {dex && (
         <div className="flex items-center justify-between">
-          <span className="text-base text-[#9CA3AF]">DEX</span>
+          <span className="text-13px md:text-base text-[#9CA3AF]">DEX</span>
           <div className="flex items-center gap-1">
-            <img
-              src={`/dexs/${dex.code}.png`}
-              alt={dex.name}
-              className=" w-4 h-4 inline"
-            />
-            <span className="font-sans text-base font-bold text-white">
+            <img src={dex.image} alt={dex.name} className=" w-4 h-4 inline" />
+            <span className="font-sans text-sm md:text-base font-bold text-white">
               {dex.name}
             </span>
           </div>
@@ -123,8 +129,12 @@ const DepositModal = (props: DepositModalProps) => {
     vault,
   } = props;
 
+  const [tutorialVideoOpen, setTutorialVideoOpen] = useState(false);
+
+  const { isMd } = useBreakpoint();
   const { symbol: collateralTokenName = "" } = collateralToken;
   const { amount, ndlp, conversionRate } = confirmData;
+  const { currentWallet } = useCurrentWallet();
 
   const formattedAmount = formatAmount({
     amount: amount,
@@ -146,19 +156,28 @@ const DepositModal = (props: DepositModalProps) => {
     onDeposit();
   };
 
+  const isHideNdlpSlushTutorial =
+    localStorage.getItem("hide_ndlp_slush_tutorial") === "true";
+
+  const [hideNdlpSlushTutorial, setHideNdlpSlushTutorial] = useState(false);
+
+  const handleHideNdlpSlushTutorial = (value: boolean) => {
+    setHideNdlpSlushTutorial(value);
+  };
+
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={onOpenChange}
-    >
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent
         hideIconClose
-        className="py-8 gap-6 bg-[#141517] border border-white/10"
+        className={cn(
+          "py-6 px-4 md:py-8 gap-6 bg-[#141517] rounded-2xl border-white/10",
+          depositStep === 2 && !isMd && "py-0"
+        )}
       >
         <DialogHeader className="flex flex-row justify-between items-center">
           {depositStep === 1 && (
             <>
-              <DialogTitle className="text-xl font-bold m-0">
+              <DialogTitle className="text-base md:text-xl font-bold m-0">
                 Confirm Your Deposit
               </DialogTitle>
               <DialogDescription className="sr-only">
@@ -169,10 +188,7 @@ const DepositModal = (props: DepositModalProps) => {
                 className="w-8 h-8 bg-white/5 p-2 text-gray-400 !mt-0"
                 onClick={onOpenChange}
               >
-                <X
-                  size={20}
-                  className="text-white"
-                />
+                <X size={20} className="text-white" />
               </Button>
             </>
           )}
@@ -185,15 +201,19 @@ const DepositModal = (props: DepositModalProps) => {
               exchangeId={vault?.exchange_id}
             />
             <div className="flex items-center justify-between">
-              <span className="text-base text-[#9CA3AF]">Amount</span>
-              <span className="font-mono text-lg text-white">
+              <span className="text-13px md:text-base text-[#9CA3AF]">
+                Amount
+              </span>
+              <span className="font-mono text-sm md:text-lg text-white">
                 {formattedAmount} {collateralTokenName}
               </span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-base text-[#9CA3AF]">Rate</span>
-              <span className="font-mono text-lg text-white">
+              <span className="text-13px md:text-base text-[#9CA3AF]">
+                Rate
+              </span>
+              <span className="font-mono text-sm md:text-lg text-white">
                 1 {collateralTokenName} ={" "}
                 {formatAmount({
                   amount: conversionRate,
@@ -204,8 +224,10 @@ const DepositModal = (props: DepositModalProps) => {
             </div>
             <div className="border-t border-white/15 my-2" />
             <div className="flex items-center justify-between">
-              <span className="text-base text-[#9CA3AF]">Est. Max Receive</span>
-              <div className="font-mono font-bold text-lg flex items-center gap-1">
+              <span className="text-13px md:text-base text-[#9CA3AF]">
+                Est. Max Receive
+              </span>
+              <div className="font-mono font-bold text-sm md:text-lg flex items-center gap-1">
                 <img
                   src="/coins/ndlp.png"
                   alt="NDLP"
@@ -224,13 +246,9 @@ const DepositModal = (props: DepositModalProps) => {
               autoplay={true}
               className="w-24 h-24 mx-auto"
             />
-            <h3 className="text-center text-xl font-bold my-2">
+            <h3 className="text-center text-lg md:text-xl font-bold mb-2">
               Deposit Successful!
             </h3>
-            <div className="font-sans text-center font-medium text-base mb-5 text-[#9CA3AF]">
-              Your deposit of {formattedAmount + " "} {collateralTokenName} to
-              Nodo AI Vault was successful.
-            </div>
             <div className="flex flex-col gap-3 p-4 border border-white/15 rounded-lg bg-white/5">
               <VaultInfo
                 poolName={vault?.pool?.pool_name}
@@ -238,14 +256,45 @@ const DepositModal = (props: DepositModalProps) => {
                 exchangeId={vault?.exchange_id}
               />
               <div className="flex items-center justify-between">
-                <span className="text-base text-[#9CA3AF]">Amount</span>
-                <span className="font-mono text-lg text-white">
+                <span className="text-13px md:text-base text-[#9CA3AF]">
+                  Amount
+                </span>
+                <span className="font-mono text-sm md:text-lg text-white">
                   {formattedAmount} {collateralTokenName}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-base text-[#9CA3AF]">Rate</span>
-                <span className="font-mono text-lg text-white">
+                <span className="text-13px md:text-base text-[#9CA3AF]">
+                  TxHash
+                </span>
+                <div className="flex justify-center items-center gap-2 mt-2">
+                  <img
+                    src={gradientLink}
+                    alt="Gradient Link"
+                    className="w-4 h-4"
+                  />
+
+                  <a
+                    href={suiScanUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#9CA3AF] hover:underline transition duration-300"
+                  >
+                    <GradientText
+                      text={`${truncateBetween(
+                        depositSuccessData?.digest || "",
+                        6,
+                        4
+                      )}`}
+                    />
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-13px md:text-base text-[#9CA3AF]">
+                  Conversion Rate
+                </span>
+                <span className="font-mono text-sm md:text-lg text-white">
                   1 {collateralTokenName} ={" "}
                   {formatAmount({
                     amount: depositSuccessData?.rateAfterSuccess,
@@ -262,7 +311,7 @@ const DepositModal = (props: DepositModalProps) => {
                     "linear-gradient(87deg, rgba(157, 235, 255, 0.22) -0.54%, rgba(0, 255, 94, 0.22) 97.84%)",
                 }}
               >
-                <div className="font-mono text-base font-medium flex items-center gap-1">
+                <div className="font-mono text-sm md:text-base font-medium flex items-center gap-1">
                   NDLP Received
                 </div>
                 <div className="flex items-center gap-1">
@@ -271,7 +320,7 @@ const DepositModal = (props: DepositModalProps) => {
                     alt="NDLP"
                     className="w-6 h-6 mr-1"
                   />
-                  <span className="font-mono font-bold text-lg text-white">
+                  <span className="font-mono font-bold text-sm md:text-lg text-white">
                     {formatAmount({
                       amount: depositSuccessData?.depositLpAmount,
                       precision: vault.vault_lp_token_decimals,
@@ -281,30 +330,41 @@ const DepositModal = (props: DepositModalProps) => {
                   </span>
                 </div>
               </div>
-
-              <div className="flex justify-center items-center gap-2 mt-2">
-                <img
-                  src={gradientLink}
-                  alt="Gradient Link"
-                  className="w-4 h-4"
-                />
-
-                <a
-                  href={suiScanUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#9CA3AF] hover:underline transition duration-300"
-                >
-                  <GradientText
-                    text={`Tx ${truncateBetween(
-                      depositSuccessData?.digest || "",
-                      6,
-                      6
-                    )}`}
-                  />
-                </a>
-              </div>
             </div>
+
+            <ConditionRenderer
+              when={
+                !isHideNdlpSlushTutorial || currentWallet?.name !== "Phantom"
+              }
+            >
+              <div className="flex flex-col gap-3 p-4 border border-white/15 rounded-lg bg-white/5 mt-4 font-medium leading-5">
+                Slush doesn't auto-display NDLP. You need to add it manually for
+                each vault:
+                <div className="text-sm font-normal font-sans mt-2 border border-b-white/20 pb-4">
+                  To show NDLP:
+                  <ul className="list-disc ml-8 mt-1">
+                    <li>Open Slush Wallet and search for “NDLP”</li>
+                    <li>Enable it and pin to your home screen </li>
+                  </ul>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={hideNdlpSlushTutorial}
+                      onCheckedChange={handleHideNdlpSlushTutorial}
+                    />
+                    Hide this next time
+                  </div>
+                  <div
+                    className="flex items-center gap-2 rounded-md font-sans text-sm bg-white/10 p-2 px-2 cursor-pointer"
+                    onClick={() => setTutorialVideoOpen(true)}
+                  >
+                    <img src={arrowBack} alt="Arrow Back" className="w-6 h-6" />
+                    Watch Tutorial
+                  </div>
+                </div>
+              </div>
+            </ConditionRenderer>
           </div>
         )}
         <DialogFooter>
@@ -313,28 +373,40 @@ const DepositModal = (props: DepositModalProps) => {
               <Button
                 onClick={onOpenChange}
                 variant="outline"
-                size="lg"
-                className="w-[50%] bg-white/5"
+                size={isMd ? "lg" : "default"}
+                className="w-[50%] bg-white/5 max-md:h-[40px] max-md:text-sm max-md:rounded-lg"
               >
                 Back
               </Button>
               <Web3Button
                 onClick={handleDeposit}
-                className="w-full rounded-lg"
+                className="md:w-full md:text-base text-sm max-sm:text-xs rounded-lg max-md:h-[40px] w-[50%]"
                 loading={loading}
+                hideContentOnLoading={loading && !isMd}
               >
                 Confirm Deposit
               </Web3Button>
             </div>
           )}
           {depositStep === 2 && (
-            <div className="w-full">
+            <div className="w-full max-md:pb-4">
               <Web3Button
-                onClick={onDone}
-                className="w-full rounded-lg font-semibold text-base py-3"
+                onClick={() => {
+                  if (hideNdlpSlushTutorial) {
+                    localStorage.setItem("hide_ndlp_slush_tutorial", "true");
+                  }
+                  onDone();
+                }}
+                className="w-full rounded-lg font-semibold text-base py-3 max-md:h-[40px]"
               >
                 Done
               </Web3Button>
+              <VideoModal
+                title="Show NDLP in Slush Wallet"
+                videoUrl={ADD_NDLP_WALLET_TUTORIAL_LINK}
+                open={tutorialVideoOpen}
+                onOpenChange={() => setTutorialVideoOpen(false)}
+              />
             </div>
           )}
         </DialogFooter>

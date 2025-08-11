@@ -40,7 +40,13 @@ const toastVariants = cva(
   }
 );
 
-const ToastProgressBar = ({ duration = 5000 }: { duration?: number }) => {
+const ToastProgressBar = ({
+  duration = 5000,
+  open = true,
+}: {
+  duration?: number;
+  open?: boolean;
+}) => {
   const [width, setWidth] = React.useState(0);
   const stepInterval = 100; // ~60fps for smooth animation
 
@@ -89,7 +95,7 @@ const Toast = React.forwardRef<
     >
       {props.children}
       {props.duration && variant === "success" && (
-        <ToastProgressBar duration={props.duration} />
+        <ToastProgressBar duration={props.duration} open={props.open} />
       )}
     </ToastPrimitives.Root>
   );

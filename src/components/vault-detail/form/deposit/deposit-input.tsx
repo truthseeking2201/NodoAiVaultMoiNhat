@@ -9,12 +9,14 @@ import { DepositToken } from "@/types/deposit-token.types";
 type DepositInputProps = {
   paymentTokens: DepositToken[];
   currentToken: DepositToken;
+  depositAmountUsd: number;
   onTokenChange: (token: string) => void;
 };
 
 const DepositInput = ({
   paymentTokens,
   currentToken,
+  depositAmountUsd,
   onTokenChange,
 }: DepositInputProps) => {
   const { watch, setValue, control, clearErrors } =
@@ -54,6 +56,7 @@ const DepositInput = ({
           value={value ? `${value}` : ""}
           amountAvailable={`${currentToken?.balance}`}
           maxDecimals={currentToken?.decimals}
+          label="Deposit"
           onChange={onChange}
           onBlur={onBlur}
           balanceInput={
@@ -68,6 +71,17 @@ const DepositInput = ({
                 {currentToken?.symbol}
               </span>
             </div>
+          }
+          balanceInputUsd={
+            <span className="text-white/50 text-sm font-medium font-sans">
+              $
+              {currentToken
+                ? formatAmount({
+                    amount: depositAmountUsd,
+                    precision: 2,
+                  })
+                : "--"}{" "}
+            </span>
           }
           rightInput={
             <SelectTokens

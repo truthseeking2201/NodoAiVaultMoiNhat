@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import {
   Table,
   TableHeader,
@@ -18,25 +18,34 @@ interface ColumnsTable {
   keySort?: string;
   dataIndex: string;
   classCell?: string;
+  classHead?: string;
   render?: (value?: any, record?: any) => ReactNode;
+}
+interface rowsColspanTable {
+  dataIndex: string;
+  className?: string;
+  checkHidden?: (record?: any) => boolean;
+  render: (value?: any, record?: any) => ReactNode;
 }
 
 interface TableRenderProps {
   data: any[];
   columns: ColumnsTable[];
+  rowsColspan?: rowsColspanTable[];
   labelNodata?: string;
   isLoading?: boolean;
   paramsSearch?: any;
-  changeSort?: (key: string) => void;
   classRowBody?: string;
   numRowLoading?: number;
   headerClassName?: string;
+  changeSort?: (key: string) => void;
   onRowClick?: (el: any) => void;
 }
 
 export function TableRender({
   data = [],
   columns = [],
+  rowsColspan = [],
   labelNodata = "No data",
   isLoading = false,
   paramsSearch = {},
@@ -46,6 +55,11 @@ export function TableRender({
   headerClassName = "",
   onRowClick = () => {},
 }: TableRenderProps) {
+  // const rows_colspan = useMemo(
+  //   () => rowsColspan.filter((col) => !col?.isColspan),
+  //   [rowsColspan]
+  // );
+
   /**
    * RENDER
    */
@@ -58,8 +72,8 @@ export function TableRender({
               key={`head-${index}`}
               className={cn(
                 "text-xs tracking-wide text-075 px-6",
-                el?.classTitle,
-                el.keySort ? "cursor-pointer" : ""
+                el.keySort ? "cursor-pointer" : "",
+                el?.classHead
               )}
               onClick={() => {
                 if (el.keySort) {
@@ -68,18 +82,25 @@ export function TableRender({
               }}
             >
               <div className={cn("flex items-center", el?.classTitle)}>
-                <span className="text-base">{el.title}</span>
-                {el.keySort && paramsSearch.key === el.keySort && (
+                {el.title &&
+                  (typeof el.title === "string" ? (
+                    <span className="text-xs md:text-base">{el.title}</span>
+                  ) : (
+                    el.title
+                  ))}
+
+                {el?.keySort && paramsSearch[el.keySort] && (
                   <Button
                     variant="icon"
                     size="none"
-                    className="ml-2"
+                    className="ml-1 md:ml-2"
+                    onClick={() => changeSort(el.keySort)}
                     disabled={isLoading}
                   >
-                    {paramsSearch.value == SORT_TYPE.desc ? (
-                      <ArrowDown className="w-4 h-4" />
+                    {paramsSearch[el.keySort] == SORT_TYPE.desc ? (
+                      <ArrowDown className="!w-4 !h-4 md:!w-5 md:!h-5" />
                     ) : (
-                      <ArrowUp className="w-4 h-4" />
+                      <ArrowUp className="!w-4 !h-4 md:!w-5 md:!h-5" />
                     )}
                   </Button>
                 )}
@@ -94,7 +115,7 @@ export function TableRender({
             .fill(0)
             .map((_, i) => (
               <TableRow
-                key={i}
+                key={`row-${i}`}
                 className={cn(
                   "hover:bg-white/5 font-medium border-b border-white/10",
                   classRowBody
@@ -103,13 +124,13 @@ export function TableRender({
                 {columns.map((column, index) => (
                   <TableCell
                     key={`loading-${index}`}
-                    className={cn("px-6 py-3 h-[97px]", column?.classCell)}
+                    className={cn(
+                      "px-6 py-3 h-[97px] align-middle",
+                      column?.classCell
+                    )}
                   >
                     <div
-                      className={cn(
-                        "h-5 bg-white/10 animate-pulse rounded",
-                        column?.classCell
-                      )}
+                      className={cn("h-5 bg-white/10 animate-pulse rounded")}
                     ></div>
                   </TableCell>
                 ))}
@@ -117,31 +138,53 @@ export function TableRender({
             ))
         ) : !isLoading && data.length > 0 ? (
           data.map((el, index) => (
-            <TableRow
-              key={`index-${index}`}
-              className={cn(
-                "hover:bg-white/5 cursor-pointer font-medium",
-                index !== data.length - 1 && "border-b border-white/10",
-                classRowBody
-              )}
-              onClick={() => onRowClick?.(el)}
-            >
-              {columns.map((column, ydx) => (
-                <TableCell
-                  key={`${index}-cell-${ydx}`}
-                  className={cn("px-6 py-3 h-[50.5px]", column?.classCell)}
-                >
-                  <div className={cn("flex items-center", column?.classCell)}>
+            <React.Fragment key={`row-group-${index}`}>
+              <TableRow
+                key={`index-${index}`}
+                className={cn(
+                  "hover:bg-white/5 cursor-pointer font-medium",
+                  index !== data.length - 1 && "border-b border-white/10",
+                  classRowBody
+                )}
+                onClick={() => onRowClick?.(el)}
+              >
+                {columns.map((column, ydx) => (
+                  <TableCell
+                    key={`${index}-cell-${ydx}`}
+                    className={cn(
+                      "px-6 py-3 h-[50.5px] align-middle",
+                      column?.classCell
+                    )}
+                  >
                     {column.render
                       ? column.render(el[column.dataIndex], el)
                       : el[column.dataIndex]}
-                  </div>
-                </TableCell>
+                  </TableCell>
+                ))}
+              </TableRow>
+
+              {/* rowsColspan */}
+
+              {rowsColspan?.map((row, ridx) => (
+                <TableRow
+                  key={`${index}-row-${ridx}`}
+                  className={cn(
+                    "hover:bg-inherit",
+                    row.checkHidden?.(el) ? "hidden" : ""
+                  )}
+                >
+                  <TableCell
+                    colSpan={columns.length}
+                    className={cn("px-6 py-1.5", row.className)}
+                  >
+                    {row.render(el[row.dataIndex], el)}
+                  </TableCell>
+                </TableRow>
               ))}
-            </TableRow>
+            </React.Fragment>
           ))
         ) : (
-          <TableRow>
+          <TableRow className="hover:bg-inherit">
             <TableCell
               colSpan={columns.length}
               className="text-center py-8 text-white/60 border-t border-white/10"

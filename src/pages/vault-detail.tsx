@@ -3,25 +3,36 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 
 import { PageContainer } from "@/components/layout/page-container";
-import DepositWithdraw from "@/components/vault-detail/sessions/deposit-withdraw";
-import HeaderDetail from "@/components/vault-detail/sessions/header-detail";
-import HelpfulInfo from "@/components/vault-detail/sessions/helpful-info";
-import StrategyExplanation from "@/components/vault-detail/sessions/strategy-explanation";
-import VaultActivities from "@/components/vault-detail/sessions/vault-activities";
-import VaultAnalytics from "@/components/vault-detail/sessions/vault-analytics";
-import VaultInfo from "@/components/vault-detail/sessions/vault-info";
+import DepositWithdraw from "@/components/vault-detail/sections/deposit-withdraw";
+import HeaderDetail from "@/components/vault-detail/sections/header-detail";
+import HelpfulInfo from "@/components/vault-detail/sections/helpful-info";
+import StrategyExplanation from "@/components/vault-detail/sections/strategy-explanation";
+import VaultActivities from "@/components/vault-detail/sections/vault-activities";
+import VaultAnalytics from "@/components/vault-detail/sections/vault-analytics";
+import VaultInfo from "@/components/vault-detail/sections/vault-info";
+import YourHoldings from "@/components/vault-detail/sections/your-holdings";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import { useGetDepositVaults, useVaultBasicDetails } from "@/hooks";
 import { formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import { useMemo } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
+import useBreakpoint from "@/hooks/use-breakpoint";
+import ConditionRenderer from "@/components/shared/condition-renderer";
+
+export type VaultInfo = {
+  label: string;
+  value: string;
+  prefix?: string;
+  suffix?: string;
+  tooltip?: any;
+};
 
 const VaultDetail = () => {
   const { vault_id } = useParams();
   const { data: vaultDetails, isLoading: isLoadingVaultDetails } =
     useVaultBasicDetails(vault_id);
-
+  const { isLg, isMd } = useBreakpoint();
   const {
     data: depositVaults,
     isLoading: isLoadingDepositVaults,
@@ -43,7 +54,7 @@ const VaultDetail = () => {
   const { refetch: refetchDepositVaults } = useGetDepositVaults();
 
   const handleBackToHome = () => {
-    refetchDepositVaults();    
+    refetchDepositVaults();
     navigate("/", { replace: true });
   };
 
@@ -182,13 +193,18 @@ const VaultDetail = () => {
   ] || {
     code: "",
     name: "",
+    image: "",
   };
 
   return (
-    <PageContainer backgroundImage={DetailsBackground} className="py-8">
+    <PageContainer
+      backgroundImage={DetailsBackground}
+      className="max-md:py-4 py-8"
+    >
       <Button
         variant="outline"
         className="mb-4 border-white/30 text-sm"
+        size={isMd ? "default" : "sm"}
         onClick={handleBackToHome}
       >
         <ChevronLeft className="!w-6 !h-6" />
@@ -202,44 +218,93 @@ const VaultDetail = () => {
         vaultDetails={vaultDetails}
         isDetailLoading={isDetailLoading}
       />
-      <div className="flex gap-8 mb-[76px]">
-        {/* Left sessions */}
-        <div className="flex-1">
-          <VaultAnalytics
-            vault_id={vault_id}
-            isDetailLoading={isDetailLoading}
-            vault={vaultDetails}
-          />
+      <ConditionRenderer
+        when={isLg}
+        fallback={
+          <div>
+            <YourHoldings
+              isDetailLoading={isDetailLoading}
+              vault_id={vault_id}
+              vault={vaultDetails}
+            />
+            <div className="mt-4" />
+            <DepositWithdraw
+              vault_id={vault_id}
+              isDetailLoading={isDetailLoading}
+            />
+            <div className="mt-4" />
+            <VaultAnalytics
+              vault_id={vault_id}
+              isDetailLoading={isDetailLoading}
+              vault={vaultDetails}
+            />
+            <div className="mt-4" />
+            <HelpfulInfo isDetailLoading={isDetailLoading} />
+            <div className="mt-4" />
+            <VaultActivities
+              isDetailLoading={isDetailLoading}
+              vault_id={vault_id}
+            />
+            <div className="mt-4" />
 
-          <div className="mt-6" />
-          <VaultActivities
-            isDetailLoading={isDetailLoading}
-            vault_id={vault_id}
-          />
+            <StrategyExplanation
+              vault={vaultDetails}
+              isDetailLoading={isDetailLoading}
+            />
 
-          <div className="mt-6" />
-          <StrategyExplanation
-            vault={vaultDetails}
-            isDetailLoading={isDetailLoading}
-          />
+            <div className="mt-4" />
+            <VaultInfo
+              vaultDetails={vaultDetails}
+              isDetailLoading={isDetailLoading}
+            />
+          </div>
+        }
+      >
+        <div className="flex gap-8 mb-[76px]">
+          {/* Left sessions */}
+          <div className="flex-1">
+            <VaultAnalytics
+              vault_id={vault_id}
+              isDetailLoading={isDetailLoading}
+              vault={vaultDetails}
+            />
 
-          <div className="mt-6" />
-          <VaultInfo
-            vaultDetails={vaultDetails}
-            isDetailLoading={isDetailLoading}
-          />
+            <div className="mt-6" />
+            <VaultActivities
+              isDetailLoading={isDetailLoading}
+              vault_id={vault_id}
+            />
+
+            <div className="mt-6" />
+            <StrategyExplanation
+              vault={vaultDetails}
+              isDetailLoading={isDetailLoading}
+            />
+
+            <div className="mt-6" />
+            <VaultInfo
+              vaultDetails={vaultDetails}
+              isDetailLoading={isDetailLoading}
+            />
+          </div>
+          {/* Right sessions */}
+          <div className="xl:w-[450px] w-[380px]">
+            <YourHoldings
+              isDetailLoading={isDetailLoading}
+              vault_id={vault_id}
+              vault={vaultDetails}
+            />
+            <div className="mt-6" />
+            <DepositWithdraw
+              vault_id={vault_id}
+              isDetailLoading={isDetailLoading}
+            />
+
+            <div className="mt-6" />
+            <HelpfulInfo isDetailLoading={isDetailLoading} />
+          </div>
         </div>
-        {/* Right sessions */}
-        <div className="xl:w-[450px] w-[380px]">
-          <DepositWithdraw
-            vault_id={vault_id}
-            isDetailLoading={isDetailLoading}
-          />
-
-          <div className="mt-6" />
-          <HelpfulInfo isDetailLoading={isDetailLoading} />
-        </div>
-      </div>
+      </ConditionRenderer>
     </PageContainer>
   );
 };

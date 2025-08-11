@@ -1,5 +1,7 @@
 // import newmoneyWallet from "@/assets/images/newmoney-wallet.png";
 
+import { isMobileDevice } from "@/utils/helpers";
+
 const STEPS = {
   CONNECT_WALLET: "connect_wallet",
   INPUT_REFERRAL: "input_referral",
@@ -20,8 +22,7 @@ const WALLETS = [
     name: "Slush",
     icon: "/wallets/slush-wallet.png",
     description: "Connect to your Slush Wallet",
-    extensionUrl:
-      "https://chromewebstore.google.com/detail/slush-%E2%80%94-a-sui-wallet/opcgpfmipidbgpenhmajoajpbobppdil",
+    extensionUrl: "https://slush.app/download",
   },
   {
     displayName: "Phantom",

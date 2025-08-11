@@ -7,7 +7,7 @@ import {
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { getBalanceAmountForInput } from "@/lib/number";
 import { roundDownBalance } from "@/lib/utils";
-import { UserCoinAsset } from "@/types/coin.types";
+import { NdlpAsset, UserCoinAsset } from "@/types/coin.types";
 import { DepositVaultConfig } from "@/types/vault-config.types";
 import { useSuiClient, useSuiClientQuery } from "@mysten/dapp-kit";
 import { CoinMetadata, SuiClient } from "@mysten/sui/client";
@@ -17,6 +17,8 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useNdlpAssetsStore, useUserAssetsStore } from "./use-store";
 import { useCurrentDepositVault } from "./use-vault";
 import { useWallet } from "./use-wallet";
+import { NdlpTokenPrice } from "./use-token-price";
+import { getNdlpPrices } from "@/apis/token";
 
 const getCoinObjects = async (
   suiClient: SuiClient,
@@ -97,6 +99,59 @@ const getCoinsBalance = async (
           ? SUI_CONFIG.coinType
           : balance.coinType,
       totalBalance: balance.totalBalance,
+    };
+  });
+};
+
+const getCoinsBalanceWithUsdPrice = async (
+  suiClient: SuiClient,
+  address: string,
+  coinTypes: string[],
+  vaults: DepositVaultConfig[]
+) => {
+  const vaultIds = vaults.map((vault) => vault.vault_id) || [];
+  const [balancesResult, ndlpPricesResult] = await Promise.allSettled([
+    Promise.all(
+      coinTypes.map((coinType) =>
+        suiClient.getBalance({ owner: address, coinType })
+      )
+    ),
+    getNdlpPrices(vaultIds),
+  ]);
+
+  const balances =
+    balancesResult.status === "fulfilled" ? balancesResult.value : [];
+
+  let ndlpPrices: NdlpTokenPrice[] = [];
+  if (ndlpPricesResult.status === "fulfilled") {
+    ndlpPrices = ndlpPricesResult.value as unknown as NdlpTokenPrice[];
+  } else {
+    console.error("Fail to get ndlp prices", ndlpPricesResult.reason);
+  }
+
+  return balances.map((balance) => {
+    const matchVault = vaults.find(
+      (vault) => vault.vault_lp_token === balance.coinType
+    );
+    const usdPrice =
+      ndlpPrices.find((price) => price.vault_id === matchVault?.vault_id)
+        ?.ndlp_price || 0;
+
+    return {
+      coinType:
+        balance.coinType == SUI_CONFIG.shortType
+          ? SUI_CONFIG.coinType
+          : balance.coinType,
+      totalBalance: balance.totalBalance,
+      usd_price: usdPrice,
+      vault: {
+        pool: {
+          pool_name: matchVault?.pool.pool_name,
+        },
+        exchange_id: matchVault?.exchange_id,
+        vault_name: matchVault?.vault_name,
+        vault_id: matchVault?.vault_id,
+      },
     };
   });
 };
@@ -482,7 +537,13 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
     refetch: allCoinObjectsNDLPRefetch,
   } = useQuery({
     queryKey: ["allCoinObjectsNDLP", address],
-    queryFn: () => getCoinsBalance(suiClient, address || "", ndlpCoinTypes),
+    queryFn: () =>
+      getCoinsBalanceWithUsdPrice(
+        suiClient,
+        address || "",
+        ndlpCoinTypes,
+        vaults
+      ),
     enabled: isAuthenticated && !!address && ndlpCoinTypes.length > 0,
     refetchOnWindowFocus: false,
   });
@@ -500,10 +561,11 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
       return;
     }
 
-    const assets: UserCoinAsset[] =
+    const assets: NdlpAsset[] =
       allCoinObjectsNDLP.reduce((acc, coin) => {
         const coinType = coin.coinType;
         const tokenDisplay = LP_TOKEN_CONFIG;
+
         acc.push({
           coin_type: coinType,
           balance: "0",
@@ -513,6 +575,8 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
           display_name: tokenDisplay?.display_name || "",
           name: tokenDisplay?.display_name || "",
           symbol: tokenDisplay?.symbol || "",
+          vault: coin.vault || null,
+          usd_price: coin.usd_price,
         });
         return acc;
       }, []) || [];
@@ -528,6 +592,11 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
           ...asset,
           raw_balance: new BigNumber(asset.raw_balance).toString(),
           balance: balance,
+          balance_usd: asset.usd_price
+            ? new BigNumber(balance)
+                .multipliedBy(new BigNumber(asset.usd_price))
+                .toString()
+            : "",
         };
       });
 
@@ -540,6 +609,7 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
     allCoinObjectsNDLPFetching,
     allCoinObjectsNDLPLoading,
     isLoading,
+    vaults,
     setIsLoading,
   ]);
 

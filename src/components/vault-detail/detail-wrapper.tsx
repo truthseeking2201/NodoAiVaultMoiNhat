@@ -34,7 +34,7 @@ export const DetailWrapper = ({
           <div
             className={cn(
               className,
-              "bg-black p-5 rounded-b-lg border border-white/15 border-t-0"
+              "bg-black rounded-b-lg border border-white/15 border-t-0 md:p-5 p-4"
             )}
           >
             <Skeleton className={cn("h-6 w-[200px]", loadingStyle)} />
@@ -42,16 +42,26 @@ export const DetailWrapper = ({
         </>
       ) : (
         <>
-          <div className="flex items-center justify-between p-5">
-            <div className="text-white text-lg font-semibold">{title}</div>
-            <div className="flex items-center gap-2">
-              {titleComponent && titleComponent}
+          <div
+            className={cn(
+              "md:flex block items-center justify-between md:flex-row flex-col gap-2 md:p-5 py-3 px-4"
+            )}
+          >
+            <div className={cn("text-white font-bold md:text-lg text-base")}>
+              {title}
             </div>
+            {titleComponent && (
+              <div
+                className={cn("md:flex items-center gap-2 block mt-4 md:mt-0")}
+              >
+                {titleComponent}
+              </div>
+            )}
           </div>
           <div
             className={cn(
               className,
-              "bg-black p-5 rounded-b-lg border border-white/15 border-t-0"
+              "bg-black md:p-5 p-4 rounded-b-lg border border-white/15 border-t-0"
             )}
           >
             {children}

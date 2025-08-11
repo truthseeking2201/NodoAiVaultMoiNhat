@@ -22,11 +22,20 @@ import { formatNumber } from "@/lib/number";
 import { truncateStringWithSeparator } from "@/utils/helpers";
 import { triggerWalletDisconnect } from "@/utils/wallet-disconnect";
 import { motion } from "framer-motion";
-import { Copy, LogOut, RefreshCw, Wallet } from "lucide-react";
+import { LogOut, RefreshCw, Wallet } from "lucide-react";
 import { memo, useEffect, useState } from "react";
 import { ConnectWalletModal } from "./connect-wallet-modal";
 import { useQueryClient } from "@tanstack/react-query";
 import { SUI_CONFIG, USDC_CONFIG } from "@/config";
+import ConditionRenderer from "../shared/condition-renderer";
+import useBreakpoint from "@/hooks/use-breakpoint";
+import { useCurrentWallet } from "@mysten/dapp-kit";
+import { WALLETS } from "./constants";
+import { NdlpTokens } from "./ndlp-tokens";
+import { CollateralTokens } from "./collateral-tokens";
+import { Copy } from "@/assets/icons";
+import DisconnectWalletIcon from "@/assets/icons/disconnect-wallet.svg";
+import { sleep } from "@/lib/utils";
 
 const DISPLAY_TOKENS = [USDC_CONFIG.coinType, SUI_CONFIG.coinType];
 
@@ -47,11 +56,16 @@ export const ConnectWalletButton = memo(() => {
     isConnected,
     address,
   } = useWallet();
+  const { currentWallet } = useCurrentWallet();
+  const walletIcon =
+    WALLETS.find((w) => w.name === currentWallet?.name)?.icon ||
+    currentWallet?.icon;
+
   const queryClient = useQueryClient();
   const { assets, setAssets } = useUserAssetsStore();
   const { setAssets: setNdlpAssets } = useNdlpAssetsStore();
   const { refreshAllBalance } = useRefreshAssetsBalance();
-
+  const { isMd } = useBreakpoint();
   // get first for now due to we support usdc only
   const collateralToken = assets.find(
     (asset) => asset.coin_type === USDC_CONFIG.coinType
@@ -79,7 +93,7 @@ export const ConnectWalletButton = memo(() => {
   }, [isAuthenticated]);
 
   const formatAddress = (address: string) => {
-    return truncateStringWithSeparator(address, 13, "...", 6);
+    return truncateStringWithSeparator(address, 13, "...", 5);
   };
 
   const handleCopyAddress = async () => {
@@ -94,16 +108,17 @@ export const ConnectWalletButton = memo(() => {
     }
   };
 
-  const refreshWalletData = () => {
+  const refreshWalletData = async () => {
     // Simulate refresh with animation
     setLastRefreshTime(Date.now());
+    refreshAllBalance();
+    await sleep(1000);
     toast({
       variant: "success",
       title: "Wallet refreshed",
       description: "Latest wallet data loaded",
       duration: 2000,
     });
-    refreshAllBalance();
   };
 
   return (
@@ -131,49 +146,66 @@ export const ConnectWalletButton = memo(() => {
               transition={{ duration: 0.3 }}
               className="relative"
             >
-              <Button
-                variant="outline"
-                className="border-white/20 bg-gradient-to-r from-white/[0.07] to-white/[0.03] backdrop-blur-sm hover:bg-white/10 transition-all  px-3 relative overflow-hidden h-11"
+              <ConditionRenderer
+                when={isMd}
+                fallback={
+                  <div className="rounded-md bg-[#1B1B1B] p-2">
+                    {walletIcon ? (
+                      <img
+                        src={walletIcon}
+                        alt="wallet-icon"
+                        className="w-5 h-5"
+                      />
+                    ) : (
+                      <Wallet className="mr-1 h-4 w-4" />
+                    )}
+                  </div>
+                }
               >
-                <div className="absolute inset-0 bg-noise opacity-5 pointer-events-none"></div>
-                {showPulse && (
-                  <motion.div
-                    className="absolute inset-0 rounded-lg border border-nova"
-                    animate={{
-                      opacity: [1, 0],
-                      scale: [1, 1.1],
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: 2,
-                      repeatType: "loop",
-                    }}
-                  />
-                )}
-                <div className="flex items-center">
-                  <span className="font-mono mr-2">
-                    {formatAddress(address || "")}
-                  </span>
-                  <div className="hidden sm:flex items-center text-white/80 bg-white/10 px-2 py-0.5 rounded-full text-xs">
+                <Button
+                  variant="outline"
+                  className="border-white/20 bg-gradient-to-r from-white/[0.07] to-white/[0.03] backdrop-blur-sm hover:bg-white/10 transition-all  px-3 relative overflow-hidden h-11"
+                >
+                  <div className="absolute inset-0 bg-noise opacity-5 pointer-events-none"></div>
+                  {showPulse && (
                     <motion.div
+                      className="absolute inset-0 rounded-lg border border-nova"
                       animate={{
-                        scale: [1, 1.1, 1],
+                        opacity: [1, 0],
+                        scale: [1, 1.1],
                       }}
                       transition={{
-                        duration: 2,
-                        repeat: Infinity,
+                        duration: 1.5,
+                        repeat: 2,
                         repeatType: "loop",
                       }}
-                      className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"
                     />
-
-                    <span className="font-mono text-sm">
-                      {formatNumber(collateralToken?.balance || 0, 0, 2)}{" "}
-                      {collateralToken?.display_name || "USDC"}
+                  )}
+                  <div className="flex items-center">
+                    <span className="font-mono mr-2">
+                      {formatAddress(address || "")}
                     </span>
+                    <div className="hidden sm:flex items-center text-white/80 bg-white/10 px-2 py-0.5 rounded-full text-xs">
+                      <motion.div
+                        animate={{
+                          scale: [1, 1.1, 1],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatType: "loop",
+                        }}
+                        className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"
+                      />
+
+                      <span className="font-mono text-sm">
+                        {formatNumber(collateralToken?.balance || 0, 0, 2)}{" "}
+                        {collateralToken?.display_name || "USDC"}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Button>
+                </Button>
+              </ConditionRenderer>
             </motion.div>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -192,124 +224,85 @@ export const ConnectWalletButton = memo(() => {
                 {/* Header */}
                 <div className="p-4 border-b border-white/10">
                   <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <svg width="0" height="0">
+                        <defs>
+                          <linearGradient
+                            id="wallet-gradient"
+                            x1="0%"
+                            y1="0%"
+                            x2="100%"
+                            y2="100%"
+                          >
+                            <stop offset="0%" stopColor="#FFE8C9" />
+                            <stop offset="25%" stopColor="#F9F4E9" />
+                            <stop offset="60%" stopColor="#E3F6FF" />
+                            <stop offset="100%" stopColor="#C9D4FF" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <img
+                        src={walletIcon}
+                        alt="wallet-icon"
+                        className="w-6 h-6"
+                      />
+
+                      <span className="font-mono text-[15px] font-medium text-white/80 block truncate ml-2 mr-3">
+                        {formatAddress(address || "")}
+                      </span>
+
+                      <Copy
+                        className="inline-block h-4 w-4 cursor-pointer"
+                        onClick={handleCopyAddress}
+                      />
+                    </div>
+
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-r from-[#FFE8C9] via-[#F9F4E9] via-[#E3F6FF] to-[#C9D4FF]">
-                        <div className="w-[31px] h-[31px] inline-flex items-center justify-center rounded-full bg-[#121620]/95">
-                          <Wallet
-                            className="w-4 h-4"
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 rounded-full hover:bg-white/10 border border-white/20"
+                        onClick={refreshWalletData}
+                      >
+                        <motion.div
+                          key={lastRefreshTime}
+                          animate={{ rotate: [0, 360] }}
+                          transition={{
+                            duration: 0.6,
+                            ease: "easeInOut",
+                          }}
+                        >
+                          <RefreshCw
+                            size={14}
                             style={{
                               stroke: "url(#wallet-gradient)",
                             }}
                           />
-                          <svg width="0" height="0">
-                            <defs>
-                              <linearGradient
-                                id="wallet-gradient"
-                                x1="0%"
-                                y1="0%"
-                                x2="100%"
-                                y2="100%"
-                              >
-                                <stop offset="0%" stopColor="#FFE8C9" />
-                                <stop offset="25%" stopColor="#F9F4E9" />
-                                <stop offset="60%" stopColor="#E3F6FF" />
-                                <stop offset="100%" stopColor="#C9D4FF" />
-                              </linearGradient>
-                            </defs>
-                          </svg>
-                        </div>
+                        </motion.div>
+                      </Button>
+                      <div
+                        className="rounded-full hover:bg-white/10 h-8 w-8 flex items-center justify-center cursor-pointer border border-white/20"
+                        onClick={() => {
+                          triggerWalletDisconnect();
+                        }}
+                      >
+                        <img
+                          src={DisconnectWalletIcon}
+                          alt="disconnect-wallet"
+                          className="w-4 h-4"
+                        />
                       </div>
-                      <span className="text-white font-medium">
-                        Connected Wallet
-                      </span>
                     </div>
-
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 rounded-full hover:bg-white/10"
-                            onClick={refreshWalletData}
-                          >
-                            <motion.div
-                              key={lastRefreshTime}
-                              animate={{ rotate: [0, 360] }}
-                              transition={{ duration: 0.6, ease: "easeInOut" }}
-                            >
-                              <RefreshCw
-                                size={14}
-                                style={{
-                                  stroke: "url(#wallet-gradient)",
-                                }}
-                              />
-                            </motion.div>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-xs">Refresh wallet data</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
                   </div>
                 </div>
 
                 <div className="p-4">
-                  {/* Address */}
-                  <div className="mb-4">
-                    <div className="text-xs text-white/50 mb-1.5">
-                      Wallet Address
-                    </div>
-                    <button
-                      onClick={handleCopyAddress}
-                      className="relative w-full text-left bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 hover:bg-white/5 transition-colors group"
-                    >
-                      <span className="font-mono text-xs text-white/80 block truncate pr-8">
-                        {formatAddress(address || "")}
-                      </span>
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/10 rounded-full p-[6px] group-hover:bg-white/20">
-                        <Copy
-                          className="w-3 h-3"
-                          style={{
-                            stroke: "url(#wallet-gradient)",
-                          }}
-                        />
-                      </div>
-                    </button>
-                  </div>
-
                   {/* Balances */}
-                  <div className="mb-4">
-                    <div className="text-xs text-white/50 mb-2">Balance</div>
-                    <div className="space-y-2">
-                      {displayTokens.map((asset) => (
-                        <div
-                          className="flex items-center justify-between p-2.5 bg-black/20 border border-white/5 rounded-lg"
-                          key={`${asset.display_name}`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <img
-                              src={asset.image_url}
-                              alt={asset.name}
-                              className="w-4 h-4"
-                            />
-                            <div>
-                              <div className="text-sm text-white font-medium">
-                                {asset.display_name}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="font-mono text-sm text-white">
-                            {asset.balance}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <CollateralTokens />
+                  <NdlpTokens />
 
                   {/* Disconnect Button */}
-                  <Button
+                  {/* <Button
                     variant="web3"
                     size="sm"
                     onClick={() => {
@@ -319,17 +312,17 @@ export const ConnectWalletButton = memo(() => {
                   >
                     <LogOut className="w-4 h-4" />
                     <span className="text-sm font-medium">Disconnect</span>
-                  </Button>
+                  </Button> */}
                 </div>
 
                 {/* Status Footer */}
-                <div className="text-[10px] border-t border-white/10 p-2 text-white/40 flex items-center justify-between">
+                {/* <div className="text-[10px] border-t border-white/10 p-2 text-white/40 flex items-center justify-between">
                   <div className="flex items-center gap-1">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                     <span>Secure Connection</span>
                   </div>
                   <div>Last checked: {riskAssessmentTime}</div>
-                </div>
+                </div> */}
               </div>
             </div>
           </DropdownMenuContent>

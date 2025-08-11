@@ -30,7 +30,7 @@ export const GradientOutlinedButton = ({
       >
         <Button
           className={cn(
-            "flex items-center justify-center rounded-lg px-4 py-2 bg-transparent border-none relative z-10",
+            "flex items-center justify-center rounded-lg md:px-4 px-2 md:py-2 py-1 bg-transparent border-none relative z-10",
             textClassName
           )}
           onClick={onClick}
@@ -38,7 +38,9 @@ export const GradientOutlinedButton = ({
             boxShadow: "none",
           }}
         >
-          <span className={cn("text-lg font-bold", textClassName)}>
+          <span
+            className={cn("md:text-lg text-[10px] font-bold", textClassName)}
+          >
             {children}
           </span>
         </Button>

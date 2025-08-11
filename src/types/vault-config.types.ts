@@ -291,4 +291,78 @@ export type BasicVaultDetailsType = {
     pool: string;
   };
   user_pending_withdraw_ndlp?: string;
+  max_drawdown?: string;
+  user_investment_usd?: number;
+};
+
+export type VaultHoldingType = {
+  vault_id: string;
+  user_wallet: string;
+  code: string;
+  timestamp: string;
+  user_ndlp_balance: number;
+  ndlp_price: number;
+  user_total_liquidity_usd: number;
+  user_total_rewards_usd: number;
+  user_total_deposit: number;
+  user_total_deposit_usd: number;
+  user_rewards_24h_usd: number;
+  user_shares_percent: number;
+  user_break_event_price: number;
+  user_vault_tokens: Array<{
+    token: string;
+    amount: number;
+    token_name: string;
+    token_symbol: string;
+  }>;
+  user_vault_rewards: Array<{
+    token: string;
+    amount: number;
+    token_name: string;
+    token_symbol: string;
+  }>;
+};
+
+export type WithdrawalRequestItem = {
+  id: string;
+  status: string;
+  sender: string;
+  ndlp_amount: string;
+  withdraw_amount: string;
+  ndlp_rate: number;
+  max_receive_amount: string;
+  receive_amount: string;
+  receive_amount_usd: string;
+  receive_amount_token_price: string;
+  user_receive_amount: string;
+  receive_amount_collateral: string;
+  update_status: string | null;
+  timestamp: number;
+  withdraw_at: string;
+  expired_at: string;
+};
+
+export type WithdrawalRequest = {
+  token: VaultPaymentToken;
+  requests: WithdrawalRequestItem[];
+  withdraw_time_requests: [1753256670662];
+  withdrawal_ndlp_amount: string;
+  is_ready: boolean;
+  receive_amount: string;
+  receive_amount_usd: string;
+  receive_amount_token_price: string;
+  withdraw_amount_requests: string[];
+  withdraw_amount_collateral_requests: string[];
+  expire_time: number;
+  sig_token: string;
+  countdown: number;
+  pks: string[];
+  signatures: string[];
+};
+
+export type WithdrawalRequests = {
+  id: string;
+  vault_id: string;
+  user_reward_earned_usd: string;
+  withdrawals: WithdrawalRequest[];
 };

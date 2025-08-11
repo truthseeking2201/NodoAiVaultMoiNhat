@@ -61,7 +61,7 @@ export function DialogOutsideClose({
 
         <div
           className={cn(
-            "max-h-[calc(100vh-120px)] overflow-auto border bg-black p-6 rounded-xl shadow-lg",
+            "max-h-[calc(100vh-120px)] overflow-auto border bg-black py-6 px-4 md:px-6 rounded-xl shadow-lg",
             className
           )}
         >

@@ -5,7 +5,7 @@ export const CRITICAL_IMAGES = {
   // Wallet icons
   wallets: ["/wallets/phantom-wallet.png", "/wallets/slush-wallet.png"],
 
-  bg: ["/bg-main.webp", "/banners/hero-banner.png"],
+  bg: ["/bg-main.webp", "/banners/hero-banner.png", "/banners/hero-banner-mobile.png"],
 
   // Chain icons
   chains: ["/chains/sui.png", "/chains/bsc.png"],

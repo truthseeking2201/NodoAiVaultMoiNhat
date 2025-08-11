@@ -1,6 +1,7 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Minus, Plus } from "lucide-react";
+import useBreakpoint from "@/hooks/use-breakpoint";
 
 const FORM_TABS = [
   { value: "deposit", label: "Deposit" },
@@ -14,9 +15,10 @@ export const FormTabs = ({
   tab: string;
   setTab: (tab: string) => void;
 }) => {
+  const { isMd } = useBreakpoint();
   return (
     <Tabs value={tab} onValueChange={(value) => setTab(value)}>
-      <TabsList className="flex gap-1 relative z-10">
+      <TabsList className="flex gap-1 relative z-10 w-full">
         {FORM_TABS.map((t) => {
           const isActive = tab === t.value;
           return (
@@ -36,17 +38,22 @@ export const FormTabs = ({
             >
               <span
                 className={cn("font-sans text-sm flex items-center", {
+                  "text-13px": !isMd,
                   "text-ai-dark font-bold ": isActive,
                   "text-white/50 hover:text-white/65": !isActive,
                 })}
               >
-                {isActive
-                  ? t.value === "deposit"
-                    ? <Plus className="w-4 h-4" />
-                    : <Minus className="w-4 h-4" />
-                  : t.value === "deposit"
-                  ? <Plus className="w-4 h-4" />
-                  : <Minus className="w-4 h-4" />}
+                {isActive ? (
+                  t.value === "deposit" ? (
+                    <Plus className="w-4 h-4" />
+                  ) : (
+                    <Minus className="w-4 h-4" />
+                  )
+                ) : t.value === "deposit" ? (
+                  <Plus className="w-4 h-4" />
+                ) : (
+                  <Minus className="w-4 h-4" />
+                )}
                 <span className="ml-1">{t.label}</span>
               </span>
             </TabsTrigger>

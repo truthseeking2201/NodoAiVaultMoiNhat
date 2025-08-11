@@ -1,4 +1,4 @@
-import { UserCoinAsset } from "@/types/coin.types";
+import { NdlpAsset, UserCoinAsset } from "@/types/coin.types";
 import { SCVaultConfig } from "@/types/vault-config.types";
 import { create } from "zustand";
 import { createJSONStorage, devtools } from "zustand/middleware";
@@ -57,7 +57,7 @@ interface UserAssetsState {
 }
 
 interface NdlpAssetsState {
-  assets: UserCoinAsset[];
+  assets: NdlpAsset[];
   updated: boolean;
   isRefetch: boolean;
   isLoading: boolean;
@@ -112,7 +112,7 @@ const ndlpAssetsStore = create<NdlpAssetsState>()(
       updatedAt: 0,
       setRefetch: () => set({ isRefetch: true }),
       setUpdated: (value: boolean) => set({ updated: value }),
-      setAssets: (assets: UserCoinAsset[]) => {
+      setAssets: (assets: NdlpAsset[]) => {
         set({
           assets,
           isRefetch: false,
@@ -121,7 +121,7 @@ const ndlpAssetsStore = create<NdlpAssetsState>()(
           updatedAt: Date.now(),
         });
       },
-      setDefaultAssets: (assets: UserCoinAsset[]) => set({ assets }),
+      setDefaultAssets: (assets: NdlpAsset[]) => set({ assets }),
       setIsLoading: (value: boolean) => set({ isLoading: value }),
     }),
     {
@@ -130,6 +130,7 @@ const ndlpAssetsStore = create<NdlpAssetsState>()(
         assets: state.assets,
         updatedAt: state.updatedAt,
       }),
+      version: 2,
       storage: createJSONStorage(() => localStorage),
     }
   )
@@ -219,11 +220,13 @@ export const useGetLpToken = (coinType: string, vaultId: string) => {
       ...token,
       ...LP_TOKEN_CONFIG,
       balance: "0",
+      usd_price: "0",
       decimals: vaultDetails?.vault_lp_token_decimals,
     };
   }
   return {
     ...LP_TOKEN_CONFIG,
     balance: "0",
+    usd_price: "0",
   };
 };

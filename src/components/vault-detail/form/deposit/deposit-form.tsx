@@ -17,7 +17,7 @@ import {
 import { useDepositVault } from "@/hooks/use-deposit-vault";
 import { useToast } from "@/hooks/use-toast";
 import { getBalanceAmountForInput, getDecimalAmount } from "@/lib/number";
-import { formatAmount } from "@/lib/utils";
+import { cn, formatAmount } from "@/lib/utils";
 import BigNumber from "bignumber.js";
 import debounce from "lodash-es/debounce";
 import { TriangleAlert } from "lucide-react";
@@ -28,6 +28,8 @@ import DepositInput from "./deposit-input";
 import DepositModal from "./deposit-modal";
 import { checkCanDeposit } from "@/apis";
 import ConditionRenderer from "@/components/shared/condition-renderer";
+import useBreakpoint from "@/hooks/use-breakpoint";
+import { useTokenPrices } from "@/hooks/use-token-price";
 
 export type DepositSuccessData = {
   digest: string;
@@ -47,6 +49,7 @@ const DEFAULT_DEPOSIT_TOKEN = {
   token_address: USDC_CONFIG.coinType,
   min_deposit_amount: "0",
   min_deposit_amount_usd: "0",
+  token_id: 0,
 };
 
 const DepositForm = ({ vault_id }: { vault_id: string }) => {
@@ -65,7 +68,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   const [canDepositStatus, setCanDepositStatus] = useState<
     "checking" | "can" | "cannot"
   >("can");
-
+  const { isMd } = useBreakpoint();
   const { toast, dismiss } = useToast();
 
   const { deposit } = useDepositVault(vault_id);
@@ -79,6 +82,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         );
 
         return {
+          token_id: token?.token_id,
           symbol: token?.token_symbol,
           decimals: token.decimal,
           balance: isAuthenticated ? asset?.balance || "0" : "0",
@@ -98,6 +102,12 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     return tokens;
   }, [vault, assets, isAuthenticated]);
 
+  const tokenIds = useMemo(() => {
+    return vault?.tokens?.map((token) => token?.token_id) || [];
+  }, [vault]);
+
+  const { data: tokenPrices } = useTokenPrices(tokenIds);
+
   const lpToken = useGetLpToken(vault.vault_lp_token, vault_id);
 
   const methods = useForm({
@@ -108,15 +118,26 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     mode: "onChange",
   });
 
-  const { watch, setValue } = methods;
+  const { watch, setValue, resetField } = methods;
 
   const depositAmount = Number(methods.watch("amount"));
   const paymentToken = methods.watch("token");
-  const collateralToken =
-    paymentTokens.find(
-      (token) =>
-        token.token_address.toLowerCase() === paymentToken?.toLowerCase()
-    ) || paymentTokens[0];
+  const collateralToken = useMemo(() => {
+    const foundToken =
+      paymentTokens.find(
+        (token) =>
+          token.token_address.toLowerCase() === paymentToken?.toLowerCase()
+      ) || paymentTokens[0];
+
+    return foundToken;
+  }, [paymentTokens, paymentToken]);
+
+  const depositAmountUsd = useMemo(() => {
+    const usd_price = tokenPrices?.[collateralToken?.token_id] || 0;
+    return new BigNumber(depositAmount || "0")
+      .multipliedBy(usd_price)
+      .toNumber();
+  }, [depositAmount, collateralToken, tokenPrices]);
 
   const { data: swapDepositInfo } = useSwapDepositInfo(
     vault_id,
@@ -175,6 +196,12 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
       handleCheckCanDeposit();
     }
   }, [paymentToken, vault_id, debounceAmount]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      resetField("amount");
+    }
+  }, [isAuthenticated, resetField]);
 
   const conversionRate = useMemo(() => {
     if (!rate) {
@@ -286,123 +313,126 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
 
   return (
     <FormProvider {...methods}>
-      <div className="mt-8">
-        <form onSubmit={methods.handleSubmit(onSubmit)}>
-          <div className="mb-2 font-sans text-base font-medium text-white/50">
-            Deposit Amount
+      <form onSubmit={methods.handleSubmit(onSubmit)}>
+        <DepositInput
+          paymentTokens={paymentTokens}
+          currentToken={collateralToken}
+          depositAmountUsd={depositAmountUsd}
+          onTokenChange={() => {
+            setDebounceAmount("0");
+          }}
+        />
+        {errors?.amount && (
+          <div className="flex flex-row items-center bg-red-error/20 gap-2 py-2 px-4">
+            <TriangleAlert className="w-4 h-4 text-red-error" />
+            <span className="text-red-error text-xs font-medium font-sans">
+              {errors.amount.message}
+            </span>
           </div>
+        )}
 
-          <DepositInput
-            paymentTokens={paymentTokens}
-            currentToken={collateralToken}
-            onTokenChange={() => {
-              setDebounceAmount("0");
-            }}
-          />
-          {errors?.amount && (
-            <div className="flex flex-row items-center bg-red-error/20 gap-2 py-2 px-4">
-              <TriangleAlert className="w-4 h-4 text-red-error" />
-              <span className="text-red-error text-xs font-medium font-sans">
-                {errors.amount.message}
-              </span>
-            </div>
-          )}
-          <div className="rounded-b-lg border border-white/0.15 p-4 mb-6">
-            <div className=" bg-black flex items-center justify-between pb-2">
-              <LabelWithTooltip
-                label="Est. Receive"
-                labelClassName="text-gray-200 text-base font-bold"
-                tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
+        <div className="rounded-b-lg border border-white/0.20 p-4 mb-3">
+          <div className=" bg-black flex items-center justify-between pb-2">
+            <LabelWithTooltip
+              label="Est. Receive"
+              labelClassName="text-gray-200 text-base font-bold md:text-base text-sm"
+              tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
+            />
+          </div>
+          <div className="flex md:flex-row md:justify-between text-gray-200 font-bold font-mono items-center mb-2 md:mb-3 justify-end flex-row-reverse">
+            <DynamicFontText
+              maxWidth={300}
+              breakpoints={[
+                { minLength: 0, fontSize: isMd ? "text-3xl" : "text-lg" },
+                { minLength: 15, fontSize: isMd ? "text-2xl" : "text-base" },
+                { minLength: 20, fontSize: isMd ? "text-xl" : "text-sm" },
+              ]}
+              defaultFontSize={isMd ? "text-2xl" : "text-xl"}
+            >
+              {ndlpAmount
+                ? ` ${formatAmount({
+                    amount: ndlpAmount,
+                    precision: vault.vault_lp_token_decimals,
+                    stripZero: true,
+                  })} `
+                : "--"}
+            </DynamicFontText>
+            <div
+              className={"flex items-center gap-2 font-bold text-sm md:text-lg"}
+            >
+              <img
+                src="/coins/ndlp.png"
+                alt="NDLP"
+                className="w-6 h-6 max-md:mr-2"
               />
+              {isMd && lpToken?.display_name}
             </div>
-            <div className="flex justify-between text-gray-200 text-base font-bold font-mono items-center mb-3">
-              <DynamicFontText
-                maxWidth={300}
-                breakpoints={[
-                  { minLength: 0, fontSize: "text-3xl" },
-                  { minLength: 15, fontSize: "text-2xl" },
-                  { minLength: 20, fontSize: "text-xl" },
-                ]}
-                defaultFontSize="text-2xl"
+          </div>
+          <hr className="w-full border-t border-white/15" />
+          <div className="flex flex-col gap-2 mt-3">
+            <ConversationRate
+              sourceToken={collateralToken}
+              targetToken={{
+                symbol: lpToken?.display_name,
+                decimals: lpToken?.decimals,
+              }}
+              rate={conversionRate}
+              isCalculating={isCalculating}
+              label="Rate"
+              onRefresh={refetchEstimateDeposit}
+            />
+            <div className="flex flex-col md:flex-row justify-start items-start md:items-center md:justify-between">
+              <div
+                className={cn(
+                  "font-sans text-sm text-white/80 md:text-sm max-md:mb-1.5 text-13px"
+                )}
               >
-                {ndlpAmount
-                  ? ` ${formatAmount({
-                      amount: ndlpAmount,
-                      precision: vault.vault_lp_token_decimals,
-                      stripZero: true,
-                    })} `
-                  : "--"}
-              </DynamicFontText>
-              <div className="flex items-center gap-2 text-lg font-bold">
-                <img src="/coins/ndlp.png" alt="NDLP" className="w-6 h-6" />
-                {lpToken?.display_name}
+                Network
               </div>
-            </div>
-            <hr className="w-full border-t border-white/15" />
-            <div className="flex flex-col gap-2 mt-3">
-              <ConversationRate
-                sourceToken={collateralToken}
-                targetToken={{
-                  symbol: lpToken?.display_name,
-                  decimals: lpToken?.decimals,
-                }}
-                rate={conversionRate}
-                isCalculating={isCalculating}
-                label="Rate"
-                onRefresh={refetchEstimateDeposit}
-              />
-              <div className="flex items-center justify-between">
-                <div className="font-sans text-sm text-white/80">Network</div>
-                <div className="text-sm font-mono text-white inline-flex items-center">
-                  <img
-                    src="/chains/sui.png"
-                    alt="SUI"
-                    className="w-6 h-6 mr-2"
-                  />
-                  SUI
-                </div>
+              <div className="text-sm font-mono text-white inline-flex items-center md:text-sm text-13px">
+                <img src="/chains/sui.png" alt="SUI" className="w-6 h-6 mr-2" />
+                SUI
               </div>
             </div>
           </div>
+        </div>
 
-          <Web3Button
-            className="w-full rounded-lg py-3 font-semibold text-lg"
-            type="button"
-            disabled={
-              !rate ||
-              !collateralToken ||
-              isCalculating ||
-              ["checking", "cannot"].includes(canDepositStatus)
+        <Web3Button
+          className="w-full rounded-lg py-3 font-semibold text-lg"
+          type="button"
+          disabled={
+            !rate ||
+            !collateralToken ||
+            isCalculating ||
+            ["checking", "cannot"].includes(canDepositStatus)
+          }
+          onClick={() => {
+            if (!isConnected) {
+              openConnectWalletDialog();
+            } else {
+              methods.handleSubmit(onSubmit)();
             }
-            onClick={() => {
-              if (!isConnected) {
-                openConnectWalletDialog();
-              } else {
-                methods.handleSubmit(onSubmit)();
-              }
-            }}
-          >
-            Deposit
-          </Web3Button>
-          <ConditionRenderer when={canDepositStatus === "cannot"}>
-            <div className="font-bold text-xs mt-4 text-center">
-              <span
-                style={{
-                  background:
-                    "linear-gradient(90deg, #FFE8C9 0%, #F9F4E9 25%, #DDF7F1 60%, #B5F0FF 100%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                This vault has reached its cap to maintain optimal performance.
-              </span>{" "}
-              But don't miss out, other vaults are still open and filling up
-              fast.
-            </div>
-          </ConditionRenderer>
-        </form>
-      </div>
+          }}
+        >
+          Deposit
+        </Web3Button>
+        <ConditionRenderer when={canDepositStatus === "cannot"}>
+          <div className="font-bold text-xs mt-4 text-center">
+            <span
+              style={{
+                background:
+                  "linear-gradient(90deg, #FFE8C9 0%, #F9F4E9 25%, #DDF7F1 60%, #B5F0FF 100%)",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              This vault has reached its cap to maintain optimal performance.
+            </span>{" "}
+            But don't miss out, other vaults are still open and filling up fast.
+          </div>
+        </ConditionRenderer>
+      </form>
       <DepositModal
         isOpen={isDepositModalOpen}
         depositStep={depositStep}

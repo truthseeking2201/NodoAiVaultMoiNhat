@@ -8,14 +8,15 @@ import {
   ResponsiveContainer,
   ComposedChart,
   Legend,
+  ReferenceLine,
 } from "recharts";
-
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 import { PERIOD_TABS } from "../constant";
 import { formatDate } from "@/utils/date";
 import { formatShortCurrency } from "@/utils/currency";
-import EmptyChartState from "@/components/ui/empty-chart-state";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import { Skeleton } from "@/components/ui/skeleton";
+import ChartNoData from "@/components/vault-detail/charts/empty-data.tsx";
 
 interface CustomTooltipProps {
   payload?: any[];
@@ -26,6 +27,7 @@ interface APYChartProps {
   period: string;
   analyticsData: any;
   isLoading?: boolean;
+  onEmptyStateChange?: (empty: boolean) => void;
 }
 
 /**
@@ -59,7 +61,31 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({ payload, label }) => {
   );
 };
 
-const APYChart = ({ period, analyticsData, isLoading }: APYChartProps) => {
+const renderReferenceLines = (isHasData, chartData) => {
+  if (!isHasData) return null;
+  const apyMax = Math.max(...chartData.map((d) => Number(d.apy)));
+  return Array.from({ length: 11 }, (_, i) => {
+    const ratio = (i + 1) * 0.1;
+    return (
+      <ReferenceLine
+        key={`apy-ref-${i}`}
+        yAxisId="left"
+        y={Math.round(apyMax * ratio)}
+        stroke="#fff"
+        strokeDasharray="3 4"
+        strokeWidth={0.15}
+      />
+    );
+  });
+};
+
+const APYChart = ({
+  period,
+  analyticsData,
+  isLoading,
+  onEmptyStateChange,
+}: APYChartProps) => {
+  const { isMobile } = useBreakpoint();
   const chartData = useMemo(() => {
     const result = [];
     let lastApy = 0;
@@ -107,8 +133,25 @@ const APYChart = ({ period, analyticsData, isLoading }: APYChartProps) => {
     );
   }, [chartData]);
 
-  if (!chartData || chartData?.length === 0) {
-    return <EmptyChartState />;
+  if ((!chartData || chartData?.length === 0) && !isLoading) {
+    onEmptyStateChange(true);
+    return (
+      <ChartNoData>
+        <div className="text-white/60 text-sm mb-6">
+          {period === PERIOD_TABS[0].value
+            ? `Chill out — we’re collecting 24-hour ${
+                isMobile && <br />
+              } performance data. The report will be${
+                isMobile && <br />
+              } available soon.`
+            : `Chill out — we’re collecting 7-day ${
+                isMobile && <br />
+              } performance data. The report will be${
+                isMobile && <br />
+              } available soon.`}
+        </div>
+      </ChartNoData>
+    );
   }
 
   return (
@@ -119,7 +162,12 @@ const APYChart = ({ period, analyticsData, isLoading }: APYChartProps) => {
       <ResponsiveContainer width="100%" height={400}>
         <ComposedChart
           data={chartData}
-          margin={{ top: 30, right: 0, left: 0, bottom: 7 }}
+          margin={{
+            top: isMobile ? 0 : 30,
+            right: isMobile ? -20 : 0,
+            left: isMobile ? -20 : 0,
+            bottom: isMobile ? 0 : 7,
+          }}
         >
           <defs>
             <linearGradient id="priceLineGradient" x1="0" y1="0" x2="1" y2="0">
@@ -134,7 +182,7 @@ const APYChart = ({ period, analyticsData, isLoading }: APYChartProps) => {
           <XAxis
             dataKey="timestamp"
             tick={{
-              fontSize: 12,
+              fontSize: isMobile ? 10 : 12,
               fontFamily: "sans-serif",
               fill: "#fff",
               dominantBaseline: "hanging",
@@ -150,7 +198,11 @@ const APYChart = ({ period, analyticsData, isLoading }: APYChartProps) => {
           <YAxis
             yAxisId="left"
             dataKey="apy"
-            tick={{ fontSize: 12, fontFamily: "monospace", fill: "#fff" }}
+            tick={{
+              fontSize: isMobile ? 10 : 12,
+              fontFamily: "monospace",
+              fill: "#fff",
+            }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(value) => `${value}%`}
@@ -166,7 +218,11 @@ const APYChart = ({ period, analyticsData, isLoading }: APYChartProps) => {
             yAxisId="right"
             orientation="right"
             dataKey="totalCumulativeYields"
-            tick={{ fontSize: 12, fontFamily: "monospace", fill: "#fff" }}
+            tick={{
+              fontSize: isMobile ? 10 : 12,
+              fontFamily: "monospace",
+              fill: "#fff",
+            }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(value) => `${formatShortCurrency(value, 2)}`}
@@ -178,22 +234,23 @@ const APYChart = ({ period, analyticsData, isLoading }: APYChartProps) => {
               className: "font-mono text-white/80 text-xs",
             }}
           />
+          {renderReferenceLines(isHasData, chartData)}
           <Tooltip content={<CustomTooltip />} />
           <Legend
             content={
-              <div className="flex gap-[200px] px-4 py-2 justify-center">
+              <div className="flex md:gap-[200px] gap-2 px-4 py-2 justify-center">
                 <div className="flex items-center gap-2">
                   <span
                     style={{
                       display: "inline-block",
-                      width: 100,
+                      width: isMobile ? 50 : 100,
                       height: 3,
                       background:
                         "linear-gradient(90deg, #9DEBFF 0%, #00FF5E 100%)",
                       borderRadius: 1,
                     }}
                   />
-                  <span className="text-sm text-white font-bold">
+                  <span className="md:text-sm text-[10px] text-white font-bold">
                     Cumulative Yields
                   </span>
                 </div>
@@ -201,13 +258,15 @@ const APYChart = ({ period, analyticsData, isLoading }: APYChartProps) => {
                   <span
                     style={{
                       display: "inline-block",
-                      width: 38,
-                      height: 12,
+                      width: isMobile ? 19 : 38,
+                      height: isMobile ? 6 : 12,
                       background: "rgba(253, 235, 207, 0.6)",
                       borderRadius: 2,
                     }}
                   />
-                  <span className="text-sm text-white font-bold">APY</span>
+                  <span className="md:text-sm text-[10px] text-white font-bold">
+                    APY
+                  </span>
                 </div>
               </div>
             }

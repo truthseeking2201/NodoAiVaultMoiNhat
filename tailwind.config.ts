@@ -16,7 +16,7 @@ export default {
       center: true,
       padding: "2rem",
       screens: {
-        "xl": "1280px",
+        xl: "1280px",
         "2xl": "1400px",
       },
     },
@@ -49,6 +49,7 @@ export default {
         },
         green: {
           ready: "#07D993",
+          increase: "#64EBBC",
         },
 
         // shadcn UI colors
@@ -85,6 +86,17 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+      },
+      opacity: {
+        "1": "0.01",
+        "2": "0.02",
+        "3": "0.03",
+        "4": "0.04",
+        "5": "0.05",
+        "6": "0.06",
+        "7": "0.07",
+        "8": "0.08",
+        "9": "0.09",
       },
       boxShadow: {},
       backgroundImage: {},
@@ -218,7 +230,8 @@ export default {
         "pulse-glow": "pulse-glow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
         "pulse-slow": "pulse-slow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
         float: "float 4s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
-        "bounce-gentle": "bounce-gentle 1.2s infinite cubic-bezier(0.4,0,0.2,1)",
+        "bounce-gentle":
+          "bounce-gentle 1.2s infinite cubic-bezier(0.4,0,0.2,1)",
         shine: "shine 5s linear infinite",
       },
       spacing: {
@@ -230,6 +243,14 @@ export default {
         xl: "2rem", // 32px
         "2xl": "2.5rem", // 40px
         "3xl": "3rem", // 48px
+      },
+      fontSize: {
+        "13px": "13px",
+      },
+      maxWidth: {
+        "1/4": "25%",
+        "1/2": "50%",
+        "3/4": "75%",
       },
     },
   },

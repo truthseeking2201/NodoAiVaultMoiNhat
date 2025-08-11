@@ -1,6 +1,5 @@
 import {
   Select,
-  SelectGroup,
   SelectItem,
   SelectContent,
   SelectTrigger,
@@ -36,18 +35,17 @@ export function SelectRender({
       <SelectTrigger className={cn("focus:ring-1", className)}>
         <SelectValue />
       </SelectTrigger>
-      <SelectGroup>
-        <SelectContent>
-          {options.map((option, idx) => (
-            <SelectItem
-              key={`select-item-${idx}`}
-              value={option.value}
-            >
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </SelectGroup>
+
+      <SelectContent>
+        {options.map((option, idx) => (
+          <SelectItem
+            key={`select-item-${idx}`}
+            value={option.value}
+          >
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
     </Select>
   );
 }

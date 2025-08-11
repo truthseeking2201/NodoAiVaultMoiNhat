@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCountdownIcon } from "@/components/ui/refresh-countdown-icon";
 import { RowItem } from "@/components/ui/row-item";
 import { showFormatNumber } from "@/lib/number";
+import { cn } from "@/lib/utils";
 import BigNumber from "bignumber.js";
 import { ArrowRightLeft, Loader } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -31,7 +32,6 @@ const ConversationRate = ({
   label,
 }: Props) => {
   const [isInverse, setIsInverse] = useState(false);
-
   const calculateRate = useMemo(() => {
     return isInverse ? new BigNumber(1).div(rate).toNumber() : rate;
   }, [isInverse, rate]);
@@ -40,9 +40,11 @@ const ConversationRate = ({
   const targetSymbol = isInverse ? sourceToken.symbol : targetToken.symbol;
 
   return (
-    <RowItem>
+    <RowItem className="max-md:justify-start max-md:items-start max-md:flex-col">
       <RowItem.Label>
-        <span className="text-sm text-white/80">{label || "Rate"}</span>
+        <span className={"text-white/80 text-13px md:text-sm"}>
+          {label || "Rate"}
+        </span>
       </RowItem.Label>
       <RowItem.Value>
         <div className="flex items-center">
@@ -51,11 +53,16 @@ const ConversationRate = ({
               <RefreshCountdownIcon
                 onRefresh={onRefresh}
                 key={sourceToken.symbol}
+                className="mr-2"
               />
             </ConditionRenderer>
           )}
 
-          <div className="flex items-center text-sm mr-2 ml-2 tracking-tighter">
+          <div
+            className={cn(
+              "flex items-center mr-2 tracking-tighter text-13px md:text-sm"
+            )}
+          >
             {/* 1 {sourceSymbol} ={" "}
             {calculateRate ? showFormatNumber(calculateRate, 0, 4) : "--"}{" "}
             {targetSymbol} */}

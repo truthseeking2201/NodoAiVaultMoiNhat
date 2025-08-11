@@ -12,13 +12,39 @@ import twitter from "@/assets/images/socials/twitter.png";
 import VersionChecker from "../shared/version-checker";
 import { Button } from "../ui/button";
 import { useLocation } from "react-router-dom";
+import useBreakpoint from "@/hooks/use-breakpoint";
+import { cn } from "@/lib/utils";
 // import footerBg from "@/assets/images/footer/footer-bg.svg";
+import { Link as RouterLink } from "react-router-dom";
+import Icon from "../icon";
 
 const Box = ({ children }: { children: React.ReactNode }) => {
+  const { isSm } = useBreakpoint();
   return (
-    <div className="flex flex-1 p-px rounded-xl mx-auto bg-gradient-to-b from-[#FFDFD5CC] to-[#FFFFFF00] hover:opacity-80 transition-all duration-300">
-      <div className="rounded-xl w-full flex-1 flex flex-col items-center p-6 bg-[#171717]">
+    <div
+      className={cn(
+        "flex flex-1 p-px rounded-xl mx-auto bg-gradient-to-b from-[#FFDFD5CC] to-[#FFFFFF00] hover:opacity-80 transition-all duration-300",
+        !isSm && "w-full"
+      )}
+    >
+      <div className="rounded-xl w-full flex-1 flex flex-col items-center p-6 max-md:p-4 bg-[#171717]">
         {children}
+      </div>
+    </div>
+  );
+};
+
+const Navigation = () => {
+  return (
+    <div className="max-md:mt-4">
+      <div className="text-white font-bold text-base">Navigation</div>
+      <div className="text-white/70 text-sm mt-4 font-sans text-right max-md:text-left hover:opacity-80 transition-all duration-300">
+        <div className="mb-2">
+          <Link href="https://docs.nodo.xyz">Docs</Link>
+        </div>
+        <div>
+          <Link href="mailto:support@nodo.xyz">Contact</Link>
+        </div>
       </div>
     </div>
   );
@@ -49,7 +75,7 @@ export function AppFooter() {
   const currentYear = new Date().getFullYear();
   const location = useLocation();
   const isHome = location.pathname === "/";
-
+  const { isMd } = useBreakpoint();
   return (
     <footer
       className={`${isHome ? "mt-[100px]" : ""}`}
@@ -58,7 +84,7 @@ export function AppFooter() {
           "linear-gradient(90deg, rgba(255, 232, 201, 0.08) 0%, rgba(249, 244, 233, 0.08) 25%, rgba(227, 246, 255, 0.08) 60%, rgba(201, 212, 255, 0.08) 100%)",
       }}
     >
-      <div className="max-w-[var(--layout-desktop-breakpoint-xl)] mx-auto px-9 pt-9 relative z-10">
+      <div className="max-w-[var(--layout-desktop-breakpoint-xl)] mx-auto px-9 pt-9 max-md:px-5 max-md:pt-10 relative z-10">
         <div className="flex justify-between ">
           <div>
             <img src="/nodo-logo-tm.png" className="h-[48px] mb-5" />
@@ -69,35 +95,41 @@ export function AppFooter() {
               maximizing capital efficiency, minimizing impermanent loss, and
               capturing trading fees across top decentralized exchanges.
             </div>
-            <div className="flex gap-6 font-mono text-xs mt-6">
+            {!isMd && <Navigation />}
+            <div className="flex max-md:flex-col gap-6 font-mono text-xs mt-6">
               <div>
-                <div className="mb-3">Audited by</div>
-                <div className="rounded-lg px-4 py-3 bg-white/15 flex items-center gap-4 h-[40px]">
-                  <img src={quillAudits} className="h-[20px]" />
-                  <img src={hashLockAudit} className="h-[20px]" />
+                <div className="mb-3 max-md:mb-2 max-md:text-xs">
+                  Audited by
+                </div>
+                <div className="rounded-lg px-4 max-md:px-3 max-md:py-2 py-3 bg-white/15 flex items-center gap-4 h-[40px] max-md:w-fit">
+                  <img src={quillAudits} className="h-[20px] max-md:h-[14px]" />
+                  <img
+                    src={hashLockAudit}
+                    className="h-[20px] max-md:h-[14px]"
+                  />
                 </div>
               </div>
               <div>
-                <div className="mb-3">Strategic Integration Partners</div>
+                <div className="mb-3 max-md:mb-2 max-md:text-xs">
+                  Strategic Integration Partners
+                </div>
                 <div className="rounded-lg px-4 py-3 bg-white/15 flex items-center gap-4 h-[40px] w-fit">
-                  <img src={onramp} className="h-[30px] object-cover" />
+                  <img
+                    src={onramp}
+                    className="h-[30px] max-md:h-[20px] object-cover"
+                  />
                 </div>
               </div>
             </div>
           </div>
-          <div>
-            <div className="text-white font-bold text-base">Navigation</div>
-            <div className="text-white/70 text-sm mt-4 font-sans text-right hover:opacity-80 transition-all duration-300">
-              <div className="mb-2">
-                <Link href="https://docs.nodo.xyz">Docs</Link>
-              </div>
-              <div>
-                <Link href="mailto:support@nodo.xyz">Contact</Link>
-              </div>
-            </div>
-          </div>
+          {isMd && <Navigation />}
         </div>
-        <div className="flex gap-6 mt-11 mb-12">
+        <div
+          className={cn(
+            "flex gap-6 mt-11 mb-12",
+            !isMd && "flex-col mt-6 gap-4"
+          )}
+        >
           <Box>
             <img src={globe} className="h-[48px]" />
             <div className="font-semibold text-white mt-4">Follow Us</div>
@@ -146,7 +178,10 @@ export function AppFooter() {
             <Button
               asChild
               onClick={() => {
-                window.open("https://nodoxyz.zendesk.com/hc/en-us/requests/new", "_blank");
+                window.open(
+                  "https://nodoxyz.zendesk.com/hc/en-us/requests/new",
+                  "_blank"
+                );
               }}
               className="cursor-pointer"
             >
@@ -175,41 +210,31 @@ export function AppFooter() {
         </div>
       </div>
 
-      <div className="border-t border-white/10 bg-transparent font-sans italic flex text-sm">
+      <div className="border-t border-white/10 bg-transparent font-sans md:italic flex text-sm">
         <div className="max-w-[var(--layout-desktop-breakpoint-xl)] mx-auto w-full px-9 py-4">
-          <div className="flex justify-between text-white/70">
+          <div className="flex max-md:flex-col max-md:items-center justify-between text-white/70">
             <div className="flex items-center">
-              <span className="mr-6">
+              <span className="max-md:mr-6">
                 ©{currentYear} NODO. All rights reserved
               </span>
-              {/* <div className="flex items-center gap-2 underline">
-                <Link href="https://app.nodo.xyz/Terms&Conditions.pdf">
-                  <span>T&C</span>
-                </Link>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="4"
-                  height="5"
-                  viewBox="0 0 4 5"
-                  fill="none"
-                >
-                  <circle
-                    opacity="0.7"
-                    cx="2"
-                    cy="2.51562"
-                    r="2"
-                    fill="white"
-                  />
-                </svg>
-                <Link href="https://app.nodo.xyz/PrivacyPolicy.pdf">
-                  <span>Privacy Policy</span>
-                </Link>
-              </div> */}
             </div>
-            <VersionChecker />
+            {isMd && <VersionChecker />}
           </div>
         </div>
       </div>
+
+      {!isHome && (
+        <div className="md:hidden">
+          <RouterLink
+            to={"/"}
+            className={`flex items-center justify-center gap-2 p-4 pb-5 transition-colors duration-200 bg-white/10 text-white`}
+          >
+            <Icon name={"Vault"} className="h-5" color="currentColor" />
+
+            <span className="font-medium text-sm">Vaults</span>
+          </RouterLink>
+        </div>
+      )}
     </footer>
   );
 }

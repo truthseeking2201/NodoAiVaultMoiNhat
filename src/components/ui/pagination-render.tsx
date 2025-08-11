@@ -37,7 +37,12 @@ export function PaginationRender({
    * RENDER
    */
   return (
-    <div className={cn("flex justify-between items-start", className)}>
+    <div
+      className={cn(
+        "flex justify-between items-start flex-col md:flex-row flex-wrap gap-3",
+        className
+      )}
+    >
       {hideShowing ? (
         <div></div>
       ) : (
@@ -51,7 +56,7 @@ export function PaginationRender({
       )}
       <div
         className={cn(
-          "flex justify-end items-center gap-2",
+          "flex justify-center md:justify-end items-center gap-2 w-full md:w-fit",
           disabled ? "pointer-events-none cursor-not-allowed	" : ""
         )}
       >
@@ -76,7 +81,7 @@ export function PaginationRender({
             <Button
               key={1}
               onClick={() => handlePageChange(1)}
-              variant="primary"
+              variant="web3"
               size="pagination"
             >
               1
@@ -86,7 +91,7 @@ export function PaginationRender({
               <Button
                 key={i + 1}
                 onClick={() => handlePageChange(i + 1)}
-                variant={current === i + 1 ? "primary" : "pagination-default"}
+                variant={current === i + 1 ? "web3" : "pagination-default"}
                 size="pagination"
               >
                 {i + 1}
@@ -103,7 +108,7 @@ export function PaginationRender({
                         key={page}
                         onClick={() => handlePageChange(page)}
                         variant={
-                          current === page ? "primary" : "pagination-default"
+                          current === page ? "web3" : "pagination-default"
                         }
                         size="pagination"
                       >
@@ -127,7 +132,7 @@ export function PaginationRender({
                         key={page}
                         onClick={() => handlePageChange(page)}
                         variant={
-                          current === page ? "primary" : "pagination-default"
+                          current === page ? "web3" : "pagination-default"
                         }
                         size="pagination"
                       >
@@ -145,7 +150,7 @@ export function PaginationRender({
                         key={page}
                         onClick={() => handlePageChange(page)}
                         variant={
-                          current === page ? "primary" : "pagination-default"
+                          current === page ? "web3" : "pagination-default"
                         }
                         size="pagination"
                       >

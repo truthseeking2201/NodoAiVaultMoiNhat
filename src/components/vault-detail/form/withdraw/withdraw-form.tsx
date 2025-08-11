@@ -36,6 +36,7 @@ import successAnimationData from "@/assets/lottie/circle_checkmark_success.json"
 
 type Props = {
   balanceLp: string;
+  balanceLpUsd: string;
   lpData: LpType;
   tokens: PaymentTokenType[];
   onSuccess: () => void;
@@ -46,6 +47,7 @@ interface IFormInput {
 
 export default function WithdrawForm({
   balanceLp,
+  balanceLpUsd,
   lpData,
   tokens,
   onSuccess,
@@ -78,15 +80,23 @@ export default function WithdrawForm({
     );
   }, [balanceLp, lpData.lp_symbol]);
 
+  const balanceInputUsd = useMemo(() => {
+    return (
+      <span className="text-white/50 text-sm font-medium font-sans">
+        $ {showFormatNumber(balanceLpUsd, 0, 2, "", true)}
+      </span>
+    );
+  }, [balanceLpUsd]);
+
   const rightInput = useMemo(() => {
     return (
       <div className="flex items-center">
         <img
           src={lpData.lp_image}
           alt={lpData.lp_symbol}
-          className="w-6 h-6 mr-2"
+          className="md:w-6 md:h-6 mr-2 w-5 h-5"
         />
-        <span className="font-mono text-lg font-bold text-gray-200">
+        <span className="font-mono text-sm md:text-lg font-bold text-gray-200">
           {lpData.lp_symbol}
         </span>
       </div>
@@ -206,9 +216,9 @@ export default function WithdrawForm({
   return (
     <div>
       <div
-        className={`deposit_input_v2_wrapper p-4 !rounded-lg flex items-center justify-between mb-6`}
+        className={`deposit_input_v2_wrapper p-4 !rounded-lg flex items-center justify-between mb-6 max-md:py-2`}
       >
-        <div className="text-gray-200 font-medium	font-sans text-base">
+        <div className="text-gray-200 font-medium	font-sans text-base max-md:text-13px">
           Select Payout Token
         </div>
         <SelectTokens
@@ -222,11 +232,6 @@ export default function WithdrawForm({
       </div>
       {/* form */}
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="flex justify-between">
-          <div className="font-body text-gray-400 !font-medium mb-2">
-            Withdraw Amount
-          </div>
-        </div>
         <Controller
           name="amount"
           control={control}
@@ -253,8 +258,10 @@ export default function WithdrawForm({
               value={value ? `${value}` : ""}
               amountAvailable={balanceLp}
               balanceInput={balanceInput}
+              balanceInputUsd={balanceInputUsd}
               rightInput={rightInput}
               maxDecimals={max_decimals}
+              label="Withdraw"
               onChange={onChange}
               onBlur={onBlur}
             />
@@ -268,26 +275,39 @@ export default function WithdrawForm({
         )}
 
         {/* Summary */}
-        <div className="p-4 border border-white/15 rounded-[12px] rounded-t-none">
+        <div className="p-4 border border-white/20 rounded-[12px] rounded-t-none">
           <RowItem
-            className="flex-col !justify-start !items-start"
+            className="flex-col !justify-start !items-start gap-0"
             classNameValue="w-full mt-2 font-mono text-gray-200 font-bold"
           >
             <RowItem.Label>
               <LabelWithTooltip
                 label="Est. Max Receive"
-                labelClassName="text-base text-gray-400 font-sans"
+                labelClassName="text-sm md:text-base text-gray-400 font-sans"
                 tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
               />
             </RowItem.Label>
             <RowItem.Value>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-start md:justify-between md:flex-row-reverse">
+                <div className="flex items-center">
+                  <img
+                    src={selectedToken?.image}
+                    alt={selectedToken?.token_symbol}
+                    className="w-6 h-6 mr-2"
+                  />
+                  <div className="text-lg max-sm:hidden">
+                    {selectedToken?.token_symbol}
+                  </div>
+                </div>
                 <DynamicFontText
                   maxWidth={245}
                   breakpoints={[
-                    { minLength: 0, fontSize: "text-[32px] leading-[42px]" },
-                    { minLength: 13, fontSize: "text-lg" },
-                    { minLength: 18, fontSize: "text-base" },
+                    {
+                      minLength: 0,
+                      fontSize: "text-[32px] leading-[42px] max-sm:text-lg",
+                    },
+                    { minLength: 13, fontSize: "text-lg max-sm:text-base" },
+                    { minLength: 18, fontSize: "text-base max-sm:text-sm" },
                   ]}
                 >
                   {summary?.receive
@@ -298,14 +318,6 @@ export default function WithdrawForm({
                       )} `
                     : "--"}
                 </DynamicFontText>
-                <div className="flex items-center">
-                  <img
-                    src={selectedToken?.image}
-                    alt={selectedToken?.token_symbol}
-                    className="w-6 h-6 mr-2"
-                  />
-                  <div className="text-lg">{selectedToken?.token_symbol}</div>
-                </div>
               </div>
             </RowItem.Value>
           </RowItem>
@@ -318,9 +330,11 @@ export default function WithdrawForm({
             onRefresh={summary.refreshRate}
           />
 
-          <RowItem className="mt-2">
+          <RowItem className="mt-2 flex-col md:flex-row justify-start items-start md:items-center md:justify-between gap-0">
             <RowItem.Label>
-              <span className="text-sm text-white/80">Transaction Fee</span>
+              <span className="text-13px md:text-sm text-white/80">
+                Transaction Fee
+              </span>
             </RowItem.Label>
             <RowItem.Value>
               <span className="text-sm">Free</span>
@@ -330,7 +344,7 @@ export default function WithdrawForm({
 
         <Web3Button
           type="submit"
-          className="w-full font-semibold text-lg py-3 mt-4 mb-3"
+          className="w-full font-semibold text-lg py-3 mt-4 mb-3 max-md:text-base"
           disabled={!summary.receive || !!summary.errorEstimateWithdraw}
         >
           Withdraw
@@ -346,11 +360,11 @@ export default function WithdrawForm({
       >
         <DialogContent
           hideIconClose
-          className="sm:max-w-[480px] bg-[#141517] border border-white/10 gap-6"
+          className="sm:max-w-[480px] bg-[#141517] max-md:rounded-2xl border border-white/10 gap-6 max-md:py-6 max-md:px-4"
         >
           {/* Header */}
           <DialogHeader className="flex flex-row justify-between items-center">
-            <DialogTitle className="text-xl font-bold m-0">
+            <DialogTitle className="text-base md:text-xl font-bold m-0">
               Confirm Your Withdrawal
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -373,18 +387,18 @@ export default function WithdrawForm({
           />
           <div className="mt-4">{BadgeCoolDown}</div>
           {/* Footer */}
-          <DialogFooter className="w-full flex sm:space-x-0">
+          <DialogFooter className="w-full flex sm:space-x-0 max-md:flex-row">
             <Button
               variant="outline"
               size="lg"
-              className="font-semibold px-2 h-13 mr-4 !rounded-lg w-[120px] bg-white/5"
+              className="font-semibold px-2 h-13 mr-4 !rounded-lg w-[120px] bg-white/5 max-md:text-xs"
               onClick={onCloseModalConfirm}
               disabled={isLoading}
             >
               Back
             </Button>
             <Web3Button
-              className="flex-1 font-semibold text-md py-3 rounded-lg	flex items-center justify-center"
+              className="flex-1 font-semibold text-md py-3 rounded-lg	flex items-center justify-center max-md:text-xs"
               onClick={onWithdraw}
               disabled={isLoading}
               loading={isLoading}
@@ -414,7 +428,7 @@ export default function WithdrawForm({
             <DialogTitle className="text-xl font-bold m-0 text-center">
               Withdrawal Request Confirmed!
             </DialogTitle>
-            <DialogDescription className="m-0 text-center text-base text-gray-400">
+            <DialogDescription className="m-0 text-center text-xs md:text-base text-gray-400">
               Your {showFormatNumber(summary?.amount)} {lpData.lp_symbol}{" "}
               withdrawal request from Vault {lpData.vault_name} has been
               confirmed. Funds will be available after the cooldown.
@@ -427,7 +441,7 @@ export default function WithdrawForm({
             configVault={configVault}
           />
           <Web3Button
-            className="w-full font-semibold text-base py-3 rounded-lg"
+            className="w-full font-semibold text-sm max-md:text-base py-3 rounded-lg"
             onClick={onCloseModalSuccess}
           >
             Done

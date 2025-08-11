@@ -104,7 +104,10 @@ http.interceptors.request.use(
       }
     } catch (error) {
       // If token refresh fails, continue without auth header
-      console.warn("Failed to get valid token:", error);
+      console.warn("Failed to get valid token:", error.status);
+      if (error?.status === 401) {
+        triggerWalletDisconnect();
+      }
     }
     return config;
   },
@@ -147,6 +150,7 @@ http.interceptors.response.use(
           return axios(originalRequest);
         }
       } catch (refreshError) {
+        console.log("🚀 ~ refreshError:", refreshError);
         if (
           refreshError?.response?.status === 401 ||
           refreshError?.message === NOT_REFRESH_TOKEN_ERROR

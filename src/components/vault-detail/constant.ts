@@ -18,3 +18,13 @@ export const ACTIVITIES_TABS = [
   { value: "ADD_LIQUIDITY", label: "Add" },
   { value: "REMOVE_LIQUIDITY", label: "Remove" },
 ];
+
+export const ITEMS_PER_PAGE = 5;
+export const ADD_LIQUIDITY_TYPES = [
+  "ADD_LIQUIDITY",
+  "OPEN",
+  "ADD_PROFIT_UPDATE_RATE",
+  "CLAIM_REWARDS",
+];
+export const REMOVE_LIQUIDITY_TYPES = ["REMOVE_LIQUIDITY", "CLOSE"];
+export const SWAP_TYPES = ["SWAP"];

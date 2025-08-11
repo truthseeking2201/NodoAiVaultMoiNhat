@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { cn } from "@/lib/utils";
 import { ReactNode, Children } from "react";
 
 type Props = {
@@ -34,7 +34,7 @@ const RowItem = (props: Props) => {
   if (!_value) _value = <>{props.children}</>;
 
   return (
-    <div className={clsx("flex justify-between items-center", _className)}>
+    <div className={cn("flex justify-between items-center gap-2", _className)}>
       <div className={_classNameLabel}>{_label}</div>
       <div className={_classNameValue}>{_value}</div>
     </div>

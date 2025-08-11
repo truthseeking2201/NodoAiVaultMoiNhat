@@ -34,8 +34,9 @@ export function MyReferralsDashboardModal({
   const columns = [
     {
       title: "ADDRESS",
-      classTitle: "w-3/6",
       dataIndex: "address",
+      classHead: "pr-2 md:pr-6 pl-0 md:pl-6",
+      classCell: "pr-2 md:pr-6 pl-0 md:pl-6",
       render: (value: any) => (
         <Button
           variant="icon"
@@ -44,7 +45,7 @@ export function MyReferralsDashboardModal({
           onClick={() => handleCopy(value)}
           disabled={isLoading}
         >
-          <span className="gradient-3rd-underline">
+          <span className="gradient-3rd-underline text-xs md:text-sm">
             {truncateStringWithSeparator(value, 13, "...", 6)}
           </span>
         </Button>
@@ -52,20 +53,25 @@ export function MyReferralsDashboardModal({
     },
     {
       title: "DATE JOINED",
-      classTitle: "w-3/6",
       dataIndex: "dateJoin",
       keySort: "dateSort",
+      classTitle: "min-w-[80px]",
+      classHead: "px-2 md:px-6",
+      classCell: "px-2 md:px-6",
       render: (value: any) => (
-        <span className="font-mono	text-075">{formatDate(value)}</span>
+        <span className="font-mono text-075 text-xs md:text-sm">
+          {formatDate(value)}
+        </span>
       ),
     },
     {
       title: "DEPOSIT",
-      classTitle: "w-1/6",
       dataIndex: "depositAmount",
       keySort: "depositSort",
+      classHead: "pr-0 md:pr-6 pl-2 md:pl-6",
+      classCell: "pr-0 md:pr-6 pl-2 md:pl-6",
       render: (value: any) => (
-        <div className="flex items-center font-mono	text-white">
+        <div className="flex items-center font-mono	text-white text-xs md:text-sm">
           <img
             src={USDC_CONFIG.image_url}
             alt={USDC_CONFIG.display_name}
@@ -148,6 +154,7 @@ export function MyReferralsDashboardModal({
       });
       setListRefer(data);
       setTotalRefer(response?.total || 0);
+      // setTotalRefer(100);
     } catch (error) {
       console.log(error);
       setListRefer([]);
@@ -218,16 +225,19 @@ export function MyReferralsDashboardModal({
       classNameDialog="md:max-w-[764px]"
     >
       <div className="grid gap-4 ">
-        <div className="p-0 relative flex flex-row items-start justify-between flex-wrap">
-          <div className="text-xl font-bold m-0">My Referral Dashboard</div>
+        <div className="p-0 relative flex flex-col md:flex-row items-start justify-between flex-wrap">
+          <div className="text-base md:text-xl font-bold m-0">
+            My Referral Dashboard
+          </div>
 
-          <div className="flex gap-3 w-2/3 !mt-0">
-            <div className="ml-auto max-w-60">
+          <div className="flex gap-3 w-full md:w-2/3 mt-4 md:mt-0 ">
+            <div className="ml-auto flex-1 md:max-w-60">
               <InputSearch
                 placeholder="Search address"
                 onChange={handleChangeAddress}
                 disabled={isLoading}
                 maxLength={66}
+                className="text-sm md:text-base"
               />
               {isInvalidAddress && (
                 <div className="text-red-error text-sm mt-1 flex items-center">
@@ -240,7 +250,7 @@ export function MyReferralsDashboardModal({
               )}
             </div>
             <SelectRender
-              className="max-w-40"
+              className="max-w-32 md:max-w-40"
               value={paramsRefer.timeSelect}
               options={TIME_FILTER_OPTIONS_REFERRAL}
               onChange={handleSelectTimeChange}

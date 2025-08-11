@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
         "Permissions-Policy":
           "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
         "Content-Security-Policy":
-          "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
+          "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; media-src 'self' https://d2g8s4wkah5pic.cloudfront.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self';",
         ...(isProduction && {
           "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
         }),

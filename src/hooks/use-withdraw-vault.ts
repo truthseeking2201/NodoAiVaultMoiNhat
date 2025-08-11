@@ -8,7 +8,7 @@ import {
 import { useGetVaultConfig, useEstimateWithdraw } from "./use-vault";
 import { Transaction } from "@mysten/sui/transactions";
 import { useMergeCoins } from "./use-merge-coins";
-import { RATE_DENOMINATOR } from "@/config/vault-config";
+import { RATE_DENOMINATOR, CLOCK } from "@/config/vault-config";
 import { getDecimalAmount, getBalanceAmount } from "@/lib/number";
 import { sleep } from "@/lib/utils";
 import LpType from "@/types/lp.type";
@@ -17,7 +17,9 @@ import BigNumber from "bignumber.js";
 import {
   executionProfitData,
   getWithdrawalRequestsMultiTokens,
+  getVaultBasicDetails,
 } from "@/apis/vault";
+import { BasicVaultDetailsType } from "@/types/vault-config.types";
 
 const _calcRateFee = (fee_bps) => {
   return BigNumber(fee_bps || 0)
@@ -336,14 +338,45 @@ export const useWithdrawVault = () => {
         transaction: tx,
       });
 
-      return result;
+      return { resultTx: result, dataSignatures };
     } catch (error) {
       console.error("Error in redeem:", error);
       throw error;
     }
   };
 
-  return { getRequestClaim, getLatestRequestClaim, withdraw, redeem };
+  const redeemWithVaultId = async (vault_id: string) => {
+    const response = await getVaultBasicDetails(vault_id, "");
+    const vault = response as unknown as BasicVaultDetailsType;
+
+    const lpData = {
+      package_id: vault.metadata.package_id,
+      vault_config_id: vault.metadata.vault_config_id,
+      vault_id: vault.vault_id,
+      lp_coin_type: vault.vault_lp_token,
+      lp_decimals: vault.vault_lp_token_decimals,
+      collateral_coin_type: vault.collateral_token,
+      clock: CLOCK,
+    };
+    const { dataSignatures }: any = await redeem(lpData);
+    const val = dataSignatures[0];
+    const receiveAmount = getBalanceAmount(
+      val?.receive_amount || 0,
+      val?.token?.decimal
+    );
+    return {
+      receiveAmount: receiveAmount.toNumber(),
+      receiveSymbol: val?.token?.token_symbol,
+    };
+  };
+
+  return {
+    getRequestClaim,
+    getLatestRequestClaim,
+    withdraw,
+    redeem,
+    redeemWithVaultId,
+  };
 };
 
 export const useWithdrawVaultConfig = (configLp: LpType) => {
@@ -412,11 +445,18 @@ export const useWithdrawEtsAmountReceive = (
         ? errorEstimateWithdraw
         : errorEstimateWithdraw?.message;
     }
+    if (isLoadingEstimateWithdraw) return "";
+
     if (Number(amountLp) && BigNumber(amount_receive).lt(min_amount_receive)) {
       return "Amount received is too small.";
     }
     return "";
-  }, [amountLp, amount_receive, errorEstimateWithdraw]);
+  }, [
+    amountLp,
+    amount_receive,
+    errorEstimateWithdraw,
+    isLoadingEstimateWithdraw,
+  ]);
 
   const conversion_rate = useMemo(() => {
     return {
@@ -435,68 +475,5 @@ export const useWithdrawEtsAmountReceive = (
     errorEstimateWithdraw: errorEstimate,
     isLoadingEstimateWithdraw,
     refreshRate: refetchEstimateWithdraw,
-  };
-};
-
-/**
- *
- * @param amountLp
- * @param configLp
- * @returns
- */
-const amountEstDefault = {
-  amount: 0,
-  receive: 0,
-  fee: 0,
-  rateFee: 0,
-};
-export const useEstWithdrawVault = (amountLp: number, configLp: LpType) => {
-  const [amountEst, setAmountEst] = useState(amountEstDefault);
-
-  const { vaultConfig } = useGetVaultConfig(configLp?.vault_id);
-
-  const configVault = useMemo(() => {
-    const fields = vaultConfig;
-    const rate = fields?.rate || "0";
-    const lpToTokenRateRaw = getDecimalAmount(1, configLp.lp_decimals)
-      .times(rate)
-      .dividedBy(RATE_DENOMINATOR);
-    const lpToTokenRate =
-      getBalanceAmount(
-        lpToTokenRateRaw,
-        configLp.collateral_decimals
-      )?.toNumber() || 0;
-
-    return {
-      withdraw: fields?.withdraw?.fields || {
-        fee_bps: "0",
-        min: "0",
-        total_fee: "0",
-      },
-      lock_duration_ms: fields?.lock_duration_ms || "0",
-      available_liquidity: fields?.available_liquidity || "0",
-      id_pending_redeems: fields?.pending_redeems?.fields?.id?.id || "",
-      rate,
-      lpToTokenRate,
-    };
-  }, [vaultConfig, configLp]);
-
-  const getEstWithdraw = useCallback(() => {
-    try {
-      const est = _getEstWithdraw(Number(amountLp), configLp, configVault);
-      setAmountEst(est);
-    } catch (error) {
-      setAmountEst(amountEstDefault);
-    }
-  }, [configVault, amountLp, configLp]);
-
-  useEffect(() => {
-    getEstWithdraw();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [configVault, amountLp]);
-
-  return {
-    configVault,
-    amountEst,
   };
 };

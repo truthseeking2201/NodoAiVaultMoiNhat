@@ -28,7 +28,7 @@ const HelpfulInfo = ({ isDetailLoading }: { isDetailLoading?: boolean }) => {
               <div className="text-white text-md ">What is NDLP?</div>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="flex flex-col gap-4 text-balance">
+          <AccordionContent className="flex flex-col gap-4 md:text-balance text-left">
             <div className="space-y-4">
               <p className="text-sm text-100 mb-6">
                 When you deposit into any NODO vault, you receive $NDLP Tokens
@@ -43,10 +43,10 @@ const HelpfulInfo = ({ isDetailLoading }: { isDetailLoading?: boolean }) => {
                   />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold mb-1 text-100 ">
+                  <div className="text-sm font-semibold mb-1">
                     Auto-Compounding
                   </div>
-                  <div className="text-sm text-white/70">
+                  <div className="md:text-sm text-xs text-white/70">
                     Exponential yield via autonomous reinvesting
                   </div>
                 </div>
@@ -64,7 +64,7 @@ const HelpfulInfo = ({ isDetailLoading }: { isDetailLoading?: boolean }) => {
                   <div className="text-sm font-semibold mb-1 text-100">
                     Exclusive Benefits
                   </div>
-                  <div className="text-sm text-white/70">
+                  <div className="md:text-sm text-xs text-white/70">
                     Priority access to premium AI features
                   </div>
                 </div>
@@ -82,7 +82,7 @@ const HelpfulInfo = ({ isDetailLoading }: { isDetailLoading?: boolean }) => {
                   <div className="text-sm font-semibold mb-1 text-100">
                     Limited Supply
                   </div>
-                  <div className="text-sm text-white/70">
+                  <div className="md:text-sm text-xs text-white/70">
                     Early adopters gain maximum potential.
                   </div>
                 </div>
@@ -107,7 +107,7 @@ const HelpfulInfo = ({ isDetailLoading }: { isDetailLoading?: boolean }) => {
                   <div className="text-sm font-semibold mb-1 text-100">
                     Deposit
                   </div>
-                  <div className="text-sm text-white/70">
+                  <div className="md:text-sm text-xs text-white/70">
                     Simply Enter NODO AI Vault, then receive $NDLP as your
                     collateral token
                   </div>
@@ -122,7 +122,7 @@ const HelpfulInfo = ({ isDetailLoading }: { isDetailLoading?: boolean }) => {
                   <div className="text-sm font-semibold mb-1 text-100">
                     AI Invest
                   </div>
-                  <div className="text-sm text-white/70">
+                  <div className="md:text-sm text-xs text-white/70">
                     AI auto-allocates to top LP pools for max yield.
                   </div>
                 </div>
@@ -140,7 +140,7 @@ const HelpfulInfo = ({ isDetailLoading }: { isDetailLoading?: boolean }) => {
                   <div className="text-sm font-semibold mb-1 text-100">
                     Earn & Withdraw
                   </div>
-                  <div className="text-sm text-white/70">
+                  <div className="md:text-sm text-xs text-white/70">
                     Earn yield + $NDLP. Withdraw $NDLP anytime
                   </div>
                 </div>

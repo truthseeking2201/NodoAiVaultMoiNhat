@@ -1,7 +1,6 @@
-
-import * as React from "react"
-import { Drawer as DrawerPrimitive } from "vaul"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Drawer as DrawerPrimitive } from "vaul";
+import { cn } from "@/lib/utils";
 
 const Drawer = ({
   shouldScaleBackground = true,
@@ -11,12 +10,12 @@ const Drawer = ({
     shouldScaleBackground={shouldScaleBackground}
     {...props}
   />
-)
-Drawer.displayName = "Drawer"
+);
+Drawer.displayName = "Drawer";
 
-const DrawerTrigger = DrawerPrimitive.Trigger
+const DrawerTrigger = DrawerPrimitive.Trigger;
 
-const DrawerPortal = DrawerPrimitive.Portal
+const DrawerPortal = DrawerPrimitive.Portal;
 
 const DrawerClose = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Close>,
@@ -30,8 +29,8 @@ const DrawerClose = React.forwardRef<
     )}
     {...props}
   />
-))
-DrawerClose.displayName = DrawerPrimitive.Close.displayName
+));
+DrawerClose.displayName = DrawerPrimitive.Close.displayName;
 
 const DrawerOverlay = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Overlay>,
@@ -45,32 +44,35 @@ const DrawerOverlay = React.forwardRef<
     )}
     {...props}
   />
-))
-DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName
+));
+DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
+    fullWidth?: boolean;
+  }
+>(({ className, children, fullWidth = false, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay />
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-y-0 right-0 z-50 flex h-full w-[420px] flex-col border bg-[#141517] bg-opacity-80 backdrop-blur-md pointer-events-auto rounded-l-[24px] border-white/[0.06] shadow-[0_16px_32px_-8px_rgba(0,0,0,0.6)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
+        "fixed inset-y-0 right-0 z-50 flex h-full flex-col border bg-[#141517] bg-opacity-80 backdrop-blur-md pointer-events-auto rounded-l-[24px] border-white/[0.06] shadow-[0_16px_32px_-8px_rgba(0,0,0,0.6)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
+        fullWidth ? "w-full" : "w-[420px]",
         className
       )}
       style={{
         transitionTimingFunction: "cubic-bezier(.22,1,.36,1)",
-        transitionDuration: "260ms"
+        transitionDuration: "260ms",
       }}
       {...props}
     >
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
-))
-DrawerContent.displayName = "DrawerContent"
+));
+DrawerContent.displayName = "DrawerContent";
 
 const DrawerHeader = ({
   className,
@@ -80,8 +82,8 @@ const DrawerHeader = ({
     className={cn("grid gap-1.5 p-4 text-center sm:text-left", className)}
     {...props}
   />
-)
-DrawerHeader.displayName = "DrawerHeader"
+);
+DrawerHeader.displayName = "DrawerHeader";
 
 const DrawerFooter = ({
   className,
@@ -91,8 +93,8 @@ const DrawerFooter = ({
     className={cn("mt-auto flex flex-col gap-2 p-4", className)}
     {...props}
   />
-)
-DrawerFooter.displayName = "DrawerFooter"
+);
+DrawerFooter.displayName = "DrawerFooter";
 
 const DrawerTitle = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Title>,
@@ -106,8 +108,8 @@ const DrawerTitle = React.forwardRef<
     )}
     {...props}
   />
-))
-DrawerTitle.displayName = DrawerPrimitive.Title.displayName
+));
+DrawerTitle.displayName = DrawerPrimitive.Title.displayName;
 
 const DrawerDescription = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Description>,
@@ -118,8 +120,8 @@ const DrawerDescription = React.forwardRef<
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
-))
-DrawerDescription.displayName = DrawerPrimitive.Description.displayName
+));
+DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
 export {
   Drawer,
@@ -132,4 +134,4 @@ export {
   DrawerFooter,
   DrawerTitle,
   DrawerDescription,
-}
+};

@@ -31,6 +31,7 @@ import {
 import Home from "./pages/home";
 import VaultDetail from "./pages/vault-detail";
 import { setWalletDisconnectHandler } from "./utils/wallet-disconnect";
+import { isMobileDevice } from "./utils/helpers";
 
 const NotFound = lazy(() =>
   import("./pages/not-found").catch((e) => {
@@ -40,35 +41,40 @@ const NotFound = lazy(() =>
 );
 
 const useSetWalletDisconnectHandler = () => {
-  const account = useCurrentAccount();
   const { mutateAsync: disconnect } = useDisconnectWallet();
   const { setIsAuthenticated } = useWallet();
   const { setAssets } = useUserAssetsStore();
   const { setAssets: setNdlpAssets } = useNdlpAssetsStore();
 
   useEffect(() => {
-    if (account?.address) {
-      setWalletDisconnectHandler(async () => {
-        try {
-          await disconnect();
-          setIsAuthenticated(false);
-          setAssets([]);
-          setNdlpAssets([]);
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("refresh_token");
-          localStorage.removeItem("current-address");
-          localStorage.removeItem("whitelisted_address");
-        } catch (error) {
-          console.error("Error disconnecting wallet:", error);
-          Sentry.captureException(error, {
-            extra: {
-              wallet_address: account?.address,
-            },
-          });
-        }
-      });
-    }
-  }, [account, disconnect, setIsAuthenticated, setAssets, setNdlpAssets]);
+    setWalletDisconnectHandler(async () => {
+      try {
+        await disconnect();
+        setIsAuthenticated(false);
+        setAssets([]);
+        setNdlpAssets([]);
+
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("current-address");
+        localStorage.removeItem("whitelisted_address");
+      } catch (error) {
+        const walletConnectionInfo = JSON.parse(
+          localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
+        );
+        console.error("Error disconnecting wallet:", error);
+        Sentry.captureException(error, {
+          extra: {
+            wallet_address:
+              walletConnectionInfo?.state?.lastConnectedAccountAddress,
+          },
+        });
+        localStorage.clear();
+        location.reload();
+        return;
+      }
+    });
+  }, [disconnect, setIsAuthenticated, setAssets, setNdlpAssets]);
 };
 
 const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -121,12 +127,16 @@ const App = () => (
         <SuiClientProvider networks={networkConfig} defaultNetwork={"mainnet"}>
           <WalletProvider
             autoConnect
-            slushWallet={{
-              name: "NODO AI Vaults",
-            }}
+            slushWallet={
+              isMobileDevice()
+                ? undefined
+                : {
+                    name: "NODO AI Vaults",
+                  }
+            }
           >
             <ConfigWrapper>
-              <TooltipProvider>
+              <TooltipProvider delayDuration={0}>
                 <Toaster />
                 {/* <VersionChecker /> */}
                 <BrowserRouter>

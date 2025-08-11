@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useState, useRef } from "react";
 import ClaimToken from "./claim-token";
 import WithdrawForm from "./withdraw-form";
+import WithdrawSkeleton from "./withdraw-skeleton";
 
 import {
   useGetDepositVaults,
@@ -16,7 +17,7 @@ import {
   useWithdrawVault,
   useWithdrawVaultConfig,
 } from "@/hooks/use-withdraw-vault";
-
+import BigNumber from "bignumber.js";
 import { sleep } from "@/lib/utils";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { CLOCK } from "@/config/vault-config";
@@ -29,7 +30,7 @@ export default function WithdrawVaultSection({
   vault_id: string;
 }) {
   const [dataClaim, setDataClaim] = useState<DataClaimType>();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -77,6 +78,12 @@ export default function WithdrawVaultSection({
       exchange,
     };
   }, [vault, lpToken]);
+
+  const balanceInputLpUsd = useMemo(() => {
+    return new BigNumber(lpToken?.balance || "0")
+      .multipliedBy(lpToken?.usd_price || "0")
+      .toString();
+  }, [lpToken?.balance, lpToken?.usd_price]);
 
   const tokens = useMemo(() => {
     const tmp = (vault as any)?.tokens || [];
@@ -138,7 +145,6 @@ export default function WithdrawVaultSection({
     const init = async () => {
       await initDataClaim();
       setReady(true);
-      setLoading(false);
     };
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -183,13 +189,14 @@ export default function WithdrawVaultSection({
           </div>
         )}
 
-        {!ready && <div className="min-h-[300px]"></div>}
+        {!ready && <WithdrawSkeleton />}
 
         {isConnected && (
           <>
             {dataClaim && ready && (
               <ClaimToken
                 balanceLp={lpToken?.balance || "0"}
+                balanceLpUsd={balanceInputLpUsd || "0"}
                 data={dataClaim}
                 onSuccess={onSuccessClaim}
                 reloadData={initDataClaim}
@@ -199,6 +206,7 @@ export default function WithdrawVaultSection({
             {!dataClaim && ready && (
               <WithdrawForm
                 balanceLp={lpToken?.balance || "0"}
+                balanceLpUsd={balanceInputLpUsd || "0"}
                 lpData={lpData}
                 tokens={tokens}
                 onSuccess={onSuccessWithdraw}
