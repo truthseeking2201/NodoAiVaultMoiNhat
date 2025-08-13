@@ -309,6 +309,7 @@ export type VaultHoldingType = {
   user_rewards_24h_usd: number;
   user_shares_percent: number;
   user_break_event_price: number;
+  user_total_withdraw_usd: number;
   user_vault_tokens: Array<{
     token: string;
     amount: number;

@@ -98,7 +98,7 @@ const YourHoldings = ({
   const { vaultConfig } = useGetVaultConfig(vault_id);
   const lpToken = useGetLpToken(vault?.vault_lp_token, vault_id);
 
-  const user_total_deposit_usd = calculateUserHoldings(
+  const user_total_liquidity_usd = calculateUserHoldings(
     vaultConfig,
     lpToken?.balance || "0",
     vault?.user_pending_withdraw_ndlp
@@ -107,13 +107,14 @@ const YourHoldings = ({
   const userHoldingData = useMemo(() => {
     return {
       ...data,
-      user_total_deposit_usd: user_total_deposit_usd || 0,
+      user_total_liquidity_usd: user_total_liquidity_usd || 0,
+      user_total_deposit_usd: data?.user_total_deposit_usd || 0,
       user_ndlp_balance: lpToken?.balance || 0,
       user_vault_rewards:
         data?.user_vault_rewards || vault?.reward_tokens || [],
       user_vault_tokens: data?.user_vault_tokens || vault?.tokens || [],
     };
-  }, [data, vault, lpToken, user_total_deposit_usd]);
+  }, [data, vault, lpToken, user_total_liquidity_usd]);
 
   const pieData = useMemo(() => {
     const totalAmountInUsd = userHoldingData?.user_vault_tokens?.reduce(
@@ -124,16 +125,19 @@ const YourHoldings = ({
       0
     );
     return (
-      userHoldingData?.user_vault_tokens?.map((item) => {
-        return {
-          name: item?.token_name,
-          token_symbol: item?.token_symbol,
-          value:
-            userHoldingData?.user_total_deposit_usd > 0
-              ? item?.amount_in_usd / totalAmountInUsd
-              : 0,
-        };
-      }) || []
+      userHoldingData?.user_vault_tokens
+        ?.slice()
+        .sort((a, b) => (b.amount_in_usd ?? 0) - (a.amount_in_usd ?? 0))
+        .map((item) => {
+          return {
+            name: item?.token_name,
+            token_symbol: item?.token_symbol,
+            value:
+              userHoldingData?.user_total_deposit_usd > 0
+                ? item?.amount_in_usd / totalAmountInUsd
+                : 0,
+          };
+        }) || []
     );
   }, [userHoldingData]);
 
@@ -151,17 +155,17 @@ const YourHoldings = ({
 
   useEffect(() => {
     if (isAuthenticated && userHoldingData) {
-      if (userHoldingData.user_total_deposit_usd > 0 && hasValue) {
+      if (user_total_liquidity_usd > 0 && hasValue) {
         setUserState("holding");
-      } else if (userHoldingData.user_total_deposit_usd > 0 && !hasValue) {
+      } else if (user_total_liquidity_usd > 0 && !hasValue) {
         setUserState("pending");
-      } else if (userHoldingData.user_total_deposit_usd === 0) {
+      } else if (user_total_liquidity_usd === 0) {
         setUserState("nonDeposit");
       }
     } else {
       setUserState("nonDeposit");
     }
-  }, [isAuthenticated, userHoldingData]);
+  }, [isAuthenticated, userHoldingData, user_total_liquidity_usd, hasValue]);
 
   useEffect(() => {
     refetch();
@@ -185,9 +189,9 @@ const YourHoldings = ({
             <div>
               <div className="text-white/60 text-xs mb-1">Total Liquidity</div>
               <div className="md:text-xl text-base font-mono font-semibold text-white">
-                {userHoldingData?.user_total_deposit_usd
+                {userHoldingData?.user_total_liquidity_usd
                   ? `$${formatNumber(
-                      userHoldingData?.user_total_deposit_usd,
+                      userHoldingData?.user_total_liquidity_usd,
                       0,
                       2
                     )}`
@@ -226,13 +230,11 @@ const YourHoldings = ({
           {expanded && (
             <div className="pt-4 flex flex-col gap-4">
               <HoldingCard>
+                <div className="text-white/60 md:text-sm text-[10px] mb-2">
+                  Estimated LP Breakdown (secure, updates in ~1h)
+                </div>
                 <div className="flex md:gap-4 gap-1 items-center">
                   <div className="flex-1">
-                    <div className="text-white/60 md:text-sm text-[10px] mb-2">
-                      {userState === "holding"
-                        ? "Estimated LP Breakdown"
-                        : "Estimated LP Breakdown (secure, updates in ~1h)"}
-                    </div>
                     <div
                       className="mdmax-h-[150px] max-h-[100px] overflow-auto pr-2"
                       style={{
@@ -456,7 +458,7 @@ const YourHoldings = ({
                   >
                     {userState === "holding" &&
                     userHoldingData?.user_total_rewards_usd ? (
-                      `+${formatNumber(
+                      `+$${formatNumber(
                         userHoldingData?.user_total_rewards_usd,
                         0,
                         userHoldingData?.user_total_rewards_usd < 1 ? 6 : 2
@@ -472,7 +474,7 @@ const YourHoldings = ({
                   Cashflow
                 </div>
                 <div className="flex items-center text-xs">
-                  <span className="text-white/80">Total Deposited</span>
+                  <span className="text-white/80">Total Deposits</span>
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
                   <span className="font-mono">
                     $
@@ -481,6 +483,22 @@ const YourHoldings = ({
                           userHoldingData?.user_total_deposit_usd,
                           0,
                           userHoldingData?.user_total_deposit_usd < 1 ? 6 : 2
+                        )
+                      : "0"}
+                  </span>
+                </div>
+                <div className="flex items-center text-xs mt-1">
+                  <span className="text-white/80">Total Withdrawals</span>
+                  <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
+                  <span className="font-mono">
+                    $
+                    {isAuthenticated
+                      ? formatNumber(
+                          userHoldingData?.user_total_withdraw_usd || 0,
+                          0,
+                          Number(userHoldingData?.user_total_withdraw_usd) < 1
+                            ? 6
+                            : 2
                         )
                       : "0"}
                   </span>

@@ -124,6 +124,7 @@ const VaultDetail = () => {
             value: !isLoadingVaultDetails
               ? formatAmount({
                   amount: vaultDetails?.nodo_share,
+                  precision: vaultDetails?.nodo_share < 1 ? 5 : 2,
                 })
               : "--",
             suffix: "%",
