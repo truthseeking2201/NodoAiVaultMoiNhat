@@ -1,8 +1,5 @@
-import {
-  useCurrentAccount,
-  useSignAndExecuteTransaction,
-  useSuiClient,
-} from "@mysten/dapp-kit";
+import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
+import { useWallet } from "./use-wallet";
 import { Transaction } from "@mysten/sui/transactions";
 
 interface UseMergeCoinsResult {
@@ -14,17 +11,17 @@ interface UseMergeCoinsResult {
 export const useMergeCoins = (): UseMergeCoinsResult => {
   const { mutateAsync: signAndExecuteTransaction, isPending } =
     useSignAndExecuteTransaction();
-  const account = useCurrentAccount();
+  const { address } = useWallet();
   const suiClient = useSuiClient();
 
   const mergeCoins = async (coinType: string): Promise<string | undefined> => {
-    if (!account?.address) {
+    if (!address) {
       throw new Error("No account connected");
     }
 
     try {
       const coins = await suiClient.getCoins({
-        owner: account.address,
+        owner: address,
         coinType,
       });
 

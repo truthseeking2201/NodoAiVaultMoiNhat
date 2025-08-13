@@ -22,7 +22,6 @@ import SelectTokens from "./select-tokens";
 import ConversationRate from "../conversation-rate";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import { showFormatNumber } from "@/lib/number";
-import { useCurrentAccount } from "@mysten/dapp-kit";
 import LpType from "@/types/lp.type";
 import PaymentTokenType from "@/types/payment-token.types";
 import { useToast } from "@/components/ui/use-toast";
@@ -31,6 +30,7 @@ import {
   useWithdrawVault,
   useWithdrawEtsAmountReceive,
 } from "@/hooks/use-withdraw-vault";
+import { useWallet } from "@/hooks/use-wallet";
 import Lottie from "lottie-react";
 import successAnimationData from "@/assets/lottie/circle_checkmark_success.json";
 
@@ -114,8 +114,7 @@ export default function WithdrawForm({
     reset,
     formState: { errors },
   } = useForm<IFormInput>({ mode: "all" });
-  const currentAccount = useCurrentAccount();
-  const address = currentAccount?.address;
+  const { address } = useWallet();
   const { toast } = useToast();
   const { withdraw } = useWithdrawVault();
   const { configVault } = useWithdrawVaultConfig(lpData);
@@ -269,7 +268,10 @@ export default function WithdrawForm({
         />
         {(errors?.amount?.message || summary?.errorEstimateWithdraw) && (
           <div className="py-2 px-4 bg-red-error/20 text-red-error text-sm flex items-center">
-            <Info size={18} className="mr-2" />
+            <Info
+              size={18}
+              className="mr-2"
+            />
             {errors?.amount?.message || summary?.errorEstimateWithdraw}
           </div>
         )}
@@ -375,7 +377,10 @@ export default function WithdrawForm({
               className="w-8 h-8 bg-white/5 text-gray-400 !mt-0"
               onClick={onCloseModalConfirm}
             >
-              <X size={20} className="text-white" />
+              <X
+                size={20}
+                className="text-white"
+              />
             </Button>
           </DialogHeader>
           {/* Content */}

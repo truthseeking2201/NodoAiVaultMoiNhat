@@ -1,10 +1,7 @@
 import { Buffer } from "buffer";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import {
-  useCurrentAccount,
-  useSignAndExecuteTransaction,
-  useSuiClient,
-} from "@mysten/dapp-kit";
+import { useWallet } from "./use-wallet";
+import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { useGetVaultConfig, useEstimateWithdraw } from "./use-vault";
 import { Transaction } from "@mysten/sui/transactions";
 import { useMergeCoins } from "./use-merge-coins";
@@ -75,7 +72,7 @@ const _getEstWithdraw = (
 export const useWithdrawVault = () => {
   const { mutateAsync: signAndExecuteTransaction } =
     useSignAndExecuteTransaction();
-  const account = useCurrentAccount();
+  const { address } = useWallet();
   const suiClient = useSuiClient();
 
   const { mergeCoins } = useMergeCoins();
@@ -194,7 +191,7 @@ export const useWithdrawVault = () => {
     token_receive: string
   ) => {
     try {
-      if (!account?.address) {
+      if (!address) {
         throw new Error("No account connected");
       }
       if (!token_receive) {
@@ -278,11 +275,11 @@ export const useWithdrawVault = () => {
    */
   const redeem = async (configLp: LpType) => {
     try {
-      if (!account?.address) {
+      if (!address) {
         throw new Error("No account connected");
       }
       const dataSignatures: any = await getWithdrawalRequestsMultiTokens({
-        wallet_address: account.address,
+        wallet_address: address,
         vault_id: configLp.vault_id,
       });
       if (!dataSignatures || !dataSignatures?.length) {
@@ -300,7 +297,7 @@ export const useWithdrawVault = () => {
         const _arguments: any = [
           tx.object(configLp.vault_config_id),
           tx.object(configLp.vault_id),
-          tx.pure.address(account.address),
+          tx.pure.address(address),
           tx.pure.address(dataSignature.sig_token),
           tx.pure("vector<u64>", dataSignature.withdraw_time_requests),
           tx.pure("vector<u64>", dataSignature.withdraw_amount_requests),

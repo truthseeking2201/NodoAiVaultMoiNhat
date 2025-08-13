@@ -19,7 +19,6 @@ import {
 } from "@/hooks/use-withdraw-vault";
 import BigNumber from "bignumber.js";
 import { sleep } from "@/lib/utils";
-import { useCurrentAccount } from "@mysten/dapp-kit";
 import { CLOCK } from "@/config/vault-config";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import DataClaimType from "@/types/data-claim.types.d";
@@ -37,10 +36,7 @@ export default function WithdrawVaultSection({
   /**
    * HOOKS
    */
-  const { openConnectWalletDialog } = useWallet();
-  const currentAccount = useCurrentAccount();
-  const isConnected = !!currentAccount?.address;
-  const address = currentAccount?.address;
+  const { openConnectWalletDialog, isConnected, address } = useWallet();
   const { refreshAllBalance: refreshBalance } = useRefreshAssetsBalance();
   const { refetch: refetchDepositVaults } = useGetDepositVaults();
   const { data: vault, refetch: refetchVaultBasicDetails } =
@@ -184,7 +180,10 @@ export default function WithdrawVaultSection({
               className="flex items-center justify-center w-full font-semibold text-lg py-3"
             >
               <span>Connect Wallet</span>
-              <ArrowRight size={16} className="ml-2" />
+              <ArrowRight
+                size={16}
+                className="ml-2"
+              />
             </Web3Button>
           </div>
         )}

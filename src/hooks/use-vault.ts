@@ -18,7 +18,7 @@ import {
   WithdrawalRequests,
   VaultHoldingType,
 } from "@/types/vault-config.types";
-import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
+import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { useDepositVaultStore, useVaultObjectStore } from "./use-store";

@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import {
   createNetworkConfig,
   SuiClientProvider,
-  useCurrentAccount,
   useDisconnectWallet,
   WalletProvider,
 } from "@mysten/dapp-kit";
@@ -124,7 +123,10 @@ const App = () => (
   <ErrorBoundary>
     <Suspense fallback={<GlobalLoading />}>
       <QueryClientProvider client={queryClient}>
-        <SuiClientProvider networks={networkConfig} defaultNetwork={"mainnet"}>
+        <SuiClientProvider
+          networks={networkConfig}
+          defaultNetwork={"mainnet"}
+        >
           <WalletProvider
             autoConnect
             slushWallet={
@@ -159,7 +161,10 @@ const App = () => (
                         </MainLayout>
                       }
                     />
-                    <Route path="*" element={<NotFound />} />
+                    <Route
+                      path="*"
+                      element={<NotFound />}
+                    />
                   </Routes>
                 </BrowserRouter>
               </TooltipProvider>
