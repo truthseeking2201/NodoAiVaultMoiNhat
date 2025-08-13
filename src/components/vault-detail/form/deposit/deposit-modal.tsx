@@ -334,7 +334,7 @@ const DepositModal = (props: DepositModalProps) => {
 
             <ConditionRenderer
               when={
-                !isHideNdlpSlushTutorial || currentWallet?.name !== "Phantom"
+                currentWallet?.name !== "Phantom" && !isHideNdlpSlushTutorial
               }
             >
               <div className="flex flex-col gap-3 p-4 border border-white/15 rounded-lg bg-white/5 mt-4 font-medium leading-5">
