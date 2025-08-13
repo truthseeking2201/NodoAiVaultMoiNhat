@@ -40,7 +40,7 @@ export const useWallet = () => {
   }, [address, isAuthenticated]);
 
   return {
-    isConnected: !!account?.address,
+    isConnected: !!address,
     isConnectWalletDialogOpen,
     openConnectWalletDialog: () => setIsConnectWalletDialogOpen(true),
     closeConnectWalletDialog: () => setIsConnectWalletDialogOpen(false),
