@@ -11,6 +11,7 @@ import {
   useNdlpAssetsStore,
   useVaultObjectStore,
   useGetVaultsWithdrawal,
+  useRefreshAssetsBalance,
 } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
@@ -42,13 +43,25 @@ const OPTIONS_CHAINS = [
   {
     value: "sui",
     label: "SUI",
-    icon: <img src="/chains/sui.png" alt="SUI" className="w-5 h-5" />,
+    icon: (
+      <img
+        src="/chains/sui.png"
+        alt="SUI"
+        className="w-5 h-5"
+      />
+    ),
   },
   {
     value: "bsc",
     label: "BSC",
     disabled: true,
-    icon: <img src="/chains/bsc.png" alt="BSC" className="w-5 h-5" />,
+    icon: (
+      <img
+        src="/chains/bsc.png"
+        alt="BSC"
+        className="w-5 h-5"
+      />
+    ),
     left: (
       <div
         className="text-white text-[10px] px-2"
@@ -101,6 +114,7 @@ export default function VaultList() {
   const navigate = useNavigate();
   const { vaultObjects } = useVaultObjectStore();
   const { assets: ndlpAssets } = useNdlpAssetsStore();
+  const { refreshAllBalance } = useRefreshAssetsBalance();
   const { isMd } = useBreakpoint();
 
   const [dex, setDex] = useState<string[]>(["all"]);
@@ -235,8 +249,16 @@ export default function VaultList() {
           } has been Withdrawn to your account. Check your wallet for Tx details`,
           variant: "success",
           duration: 5000,
-          icon: <IconCheckSuccess size={14} className="h-6 w-6" />,
+          icon: (
+            <IconCheckSuccess
+              size={14}
+              className="h-6 w-6"
+            />
+          ),
         });
+        setTimeout(() => {
+          refreshAllBalance();
+        }, 2000);
         setIdsClaimed([...idsClaimed, data.vault_id]);
       } catch (error) {
         console.log(error);
@@ -250,7 +272,7 @@ export default function VaultList() {
       }
       setIdLoadingClaim("");
     },
-    [redeemWithVaultId, toast, idsClaimed]
+    [redeemWithVaultId, refreshAllBalance, toast, idsClaimed]
   );
 
   const columns = useMemo(
