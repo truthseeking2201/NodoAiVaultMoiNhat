@@ -124,12 +124,16 @@ const YourHoldings = ({
           : sum,
       0
     );
+
     return (
       userHoldingData?.user_vault_tokens
         ?.slice()
         .sort((a, b) => (b.amount_in_usd ?? 0) - (a.amount_in_usd ?? 0))
         .map((item) => {
           return {
+            amount: item?.amount || 0,
+            amount_in_usd: item?.amount_in_usd || 0,
+            token_name: item?.token_name || "",
             name: item?.token_name,
             token_symbol: item?.token_symbol,
             value:
@@ -286,54 +290,52 @@ const YourHoldings = ({
                       )}
                       {userState === "holding" && (
                         <div className="flex flex-col gap-2">
-                          {userHoldingData?.user_vault_tokens?.map(
-                            (item, idx) => (
-                              <div
-                                key={item.token_name}
-                                className="flex md:items-center gap-1  w-full items-between "
-                              >
-                                <div className="flex items-center gap-2 flex-1">
-                                  <div
-                                    className={`mr-1 rounded-full w-1 h-8`}
-                                    style={{
-                                      background: COLORS[idx],
-                                    }}
-                                  />
-                                  <img
-                                    src={`/coins/${item.token_symbol.toLowerCase()}.png`}
-                                    className="w-[18px] h-[18px] inline-flex self-center"
-                                  />
-                                  <div className="flex flex-col items-end md:max-w-[110px] max-w-[100px] justify-end flex-1">
-                                    <div className="font-mono text-white md:text-sm text-xs">
-                                      {formatNumber(
-                                        item.amount,
-                                        0,
-                                        item.amount < 1 ? 6 : 2
-                                      )}
-                                    </div>
-                                    {item.amount_in_usd > 0 && (
-                                      <div className="text-white/40 md:text-sm text-xs font-mono">
-                                        ~$
-                                        {formatNumber(
-                                          item.amount_in_usd,
-                                          0,
-                                          item.amount_in_usd < 1 ? 6 : 2
-                                        )}
-                                      </div>
+                          {pieData?.map((item, idx) => (
+                            <div
+                              key={item.token_name}
+                              className="flex md:items-center gap-1  w-full items-between "
+                            >
+                              <div className="flex items-center gap-2 flex-1">
+                                <div
+                                  className={`mr-1 rounded-full w-1 h-8`}
+                                  style={{
+                                    background: COLORS[idx],
+                                  }}
+                                />
+                                <img
+                                  src={`/coins/${item.token_symbol.toLowerCase()}.png`}
+                                  className="w-[18px] h-[18px] inline-flex self-center"
+                                />
+                                <div className="flex flex-col items-end md:max-w-[110px] max-w-[100px] justify-end flex-1">
+                                  <div className="font-mono text-white md:text-sm text-xs">
+                                    {formatNumber(
+                                      item.amount,
+                                      0,
+                                      item.amount < 1 ? 6 : 2
                                     )}
                                   </div>
-                                </div>
-                                <div className="flex items-center justify-end md:text-sm text-xs md:max-w-[80px] w-[45px]">
-                                  {pieData.length > 0 &&
-                                    `${formatNumber(
-                                      pieData[idx].value * 100,
-                                      0,
-                                      2
-                                    )}%`}
+                                  {item.amount_in_usd > 0 && (
+                                    <div className="text-white/40 md:text-sm text-xs font-mono">
+                                      ~$
+                                      {formatNumber(
+                                        item.amount_in_usd,
+                                        0,
+                                        item.amount_in_usd < 1 ? 6 : 2
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
-                            )
-                          )}
+                              <div className="flex items-center justify-end md:text-sm text-xs md:max-w-[80px] w-[45px]">
+                                {pieData.length > 0 &&
+                                  `${formatNumber(
+                                    pieData[idx].value * 100,
+                                    0,
+                                    2
+                                  )}%`}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       )}
                     </div>
