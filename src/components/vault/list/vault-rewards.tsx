@@ -11,28 +11,28 @@ import { showFormatNumber } from "@/lib/number";
 const campaigns_data = {
   "SUI-USDC-cetus": {
     usdc: 1250,
-    xp: 500000000,
+    xp: 100000000,
     startDate: "28/07/2025",
     endDate: "15/08/2025",
     snapshotDate: "14/08/2025, 3PM SGT",
   },
   "SUI-USDC-mmt": {
     usdc: 2500,
-    xp: 500000000,
+    xp: 100000000,
     startDate: "28/07/2025",
     endDate: "15/08/2025",
     snapshotDate: "14/08/2025, 3PM SGT",
   },
   "DEEP-SUI-mmt": {
     usdc: 1250,
-    xp: 500000000,
+    xp: 100000000,
     startDate: "28/07/2025",
     endDate: "15/08/2025",
     snapshotDate: "14/08/2025, 3PM SGT",
   },
   "WAL-SUI-mmt": {
     usdc: 1250,
-    xp: 500000000,
+    xp: 100000000,
     startDate: "28/07/2025",
     endDate: "15/08/2025",
     snapshotDate: "14/08/2025, 3PM SGT",
@@ -40,11 +40,11 @@ const campaigns_data = {
 };
 
 const campaign_default = {
-  xp: 500000000,
+  xp: 100000000,
 };
 
 const tokens = [
-  { value: "usdc", symbol: "USDC", image: "/coins/usdc.png" },
+  // { value: "usdc", symbol: "USDC", image: "/coins/usdc.png" },
   { value: "xp", symbol: "XP Shares", image: "/coins/xp.png" },
 ];
 
