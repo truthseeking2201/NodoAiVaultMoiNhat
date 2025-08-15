@@ -61,8 +61,8 @@ const URLS = {
     `/data-management/external/vaults/${vaultId}/swap-and-deposit-info?token_address=${token_address}`,
   checkCanDeposit: (vaultId: string, token_address: string, amount: string) =>
     `/data-management/external/vaults/${vaultId}/check-deposit?deposit_token=${token_address}&deposit_amount=${amount}`,
-  userHolding: (vaultId: string) =>
-    `/data-management/external/user/vault-stats?vault_id=${vaultId}`,
+  userHolding: (vaultId: string, ndlp_balance: string) =>
+    `/data-management/external/user/vault-stats?vault_id=${vaultId}&ndlp_balance=${ndlp_balance}`,
 };
 
 export const getLatestWithdrawal = (sender_address: string) => {
@@ -161,6 +161,6 @@ export const checkCanDeposit = (
   }>;
 };
 
-export const getUserHolding = (vaultId: string) => {
-  return http.get(URLS.userHolding(vaultId));
+export const getUserHolding = (vaultId: string, ndlp_balance: string) => {
+  return http.get(URLS.userHolding(vaultId, ndlp_balance));
 };

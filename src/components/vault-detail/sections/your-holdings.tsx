@@ -92,7 +92,6 @@ const YourHoldings = ({
     "nonDeposit" | "pending" | "holding"
   >("nonDeposit");
 
-  const { data, refetch } = useUserHolding(vault_id, isAuthenticated);
   const { isMobile } = useBreakpoint();
 
   const { vaultConfig } = useGetVaultConfig(vault_id);
@@ -102,6 +101,12 @@ const YourHoldings = ({
     vaultConfig,
     lpToken?.balance || "0",
     vault?.user_pending_withdraw_ndlp
+  );
+  const ndlp_balance = lpToken?.balance || "0";
+  const { data, refetch } = useUserHolding(
+    vault_id,
+    ndlp_balance,
+    isAuthenticated
   );
 
   const userHoldingData = useMemo(() => {

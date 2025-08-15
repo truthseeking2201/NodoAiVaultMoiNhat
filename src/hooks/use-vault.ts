@@ -201,11 +201,11 @@ export const useSwapDepositInfo = (vaultId: string, token_address: string) => {
   });
 };
 
-export const useUserHolding = (vaultId: string, isAuthenticated: boolean) => {
+export const useUserHolding = (vaultId: string, ndlp_balance: string, isAuthenticated: boolean) => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["user-holding", vaultId],
     queryFn: async () => {
-      const response = await getUserHolding(vaultId);
+      const response = await getUserHolding(vaultId, ndlp_balance);
       return response as unknown as VaultHoldingType;
     },
     enabled: !!vaultId && isAuthenticated,
