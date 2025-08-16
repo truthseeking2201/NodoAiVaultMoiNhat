@@ -37,6 +37,7 @@ import successAnimationData from "@/assets/lottie/circle_checkmark_success.json"
 type Props = {
   balanceLp: string;
   balanceLpUsd: string;
+  lockDuration: number;
   lpData: LpType;
   tokens: PaymentTokenType[];
   onSuccess: () => void;
@@ -50,6 +51,7 @@ export default function WithdrawForm({
   balanceLpUsd,
   lpData,
   tokens,
+  lockDuration,
   onSuccess,
 }: Props) {
   const min_amount = 0.01;
@@ -64,7 +66,7 @@ export default function WithdrawForm({
   const BadgeCoolDown = useMemo(() => {
     return (
       <p className="m-0 text-white/70 font-normal text-xs text-center">
-        After confirming your withdrawal, please wait up to{" "}
+        After confirming your withdrawal, please wait{" "}
         <span className="text-apr-gradient font-black">{timeCoolDown}</span> for
         processing. Once ready, you can claim your funds back to your wallet.
       </p>
@@ -175,20 +177,22 @@ export default function WithdrawForm({
    */
 
   useEffect(() => {
-    const duration = Math.floor(
-      Number(configVault?.lock_duration_ms || 0) / 1000
-    );
+    const duration = Math.floor(Number(lockDuration));
     const hours = Math.floor(duration / 3600);
     const minutes = Math.floor((duration - hours * 3600) / 60);
     const getText = (num) => (num == 1 ? "" : "s");
     if (hours > 0) {
-      setTimeCoolDown(`${hours} hour${getText(hours)}`);
+      setTimeCoolDown(`5 mins to ${hours} hour${getText(hours)}`);
     } else if (minutes > 0) {
-      setTimeCoolDown(`${minutes} minute${getText(minutes)}`);
+      if (minutes > 5) {
+        setTimeCoolDown(`5 mins to ${minutes} mins`);
+      } else {
+        setTimeCoolDown(`${minutes} minute${getText(minutes)}`);
+      }
     } else {
       setTimeCoolDown(`${duration} second${getText(duration)}`);
     }
-  }, [configVault.lock_duration_ms]);
+  }, [lockDuration]);
 
   useEffect(() => {
     const debouncedCb = debounce((formValue) => {
@@ -390,7 +394,7 @@ export default function WithdrawForm({
             address={address}
             configVault={configVault}
           />
-          <div className="mt-4">{BadgeCoolDown}</div>
+          <div>{BadgeCoolDown}</div>
           {/* Footer */}
           <DialogFooter className="w-full flex sm:space-x-0 max-md:flex-row">
             <Button
