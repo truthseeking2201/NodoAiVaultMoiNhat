@@ -76,9 +76,10 @@ export function AppFooter() {
   const location = useLocation();
   const isHome = location.pathname === "/";
   const { isMd } = useBreakpoint();
+
   return (
     <footer
-      className={`${isHome ? "mt-[100px]" : ""}`}
+      className={`${isHome ? `${isMd ? "mt-[100px]" : "mt-[8px]"}` : ""}`}
       style={{
         background:
           "linear-gradient(90deg, rgba(255, 232, 201, 0.08) 0%, rgba(249, 244, 233, 0.08) 25%, rgba(227, 246, 255, 0.08) 60%, rgba(201, 212, 255, 0.08) 100%)",

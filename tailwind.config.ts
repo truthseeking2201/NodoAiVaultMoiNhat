@@ -32,6 +32,7 @@ export default {
         "text-primary": "#E5E7EB",
         "text-secondary": "#9CA3AF",
         "section-title": "#1C1C1C",
+        "section-description": "#838790",
 
         ai: {
           DEFAULT: "#FDEBCF",

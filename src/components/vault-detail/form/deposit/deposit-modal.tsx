@@ -338,12 +338,12 @@ const DepositModal = (props: DepositModalProps) => {
               }
             >
               <div className="flex flex-col gap-3 p-4 border border-white/15 rounded-lg bg-white/5 mt-4 font-medium leading-5">
-                Slush doesn't auto-display NDLP. You need to add it manually for
+                {currentWallet?.name} doesn't auto-display NDLP. You need to add it manually for
                 each vault:
                 <div className="text-sm font-normal font-sans mt-2 border border-b-white/20 pb-4">
                   To show NDLP:
                   <ul className="list-disc ml-8 mt-1">
-                    <li>Open Slush Wallet and search for “NDLP”</li>
+                    <li>Open {currentWallet?.name} and search for “NDLP”</li>
                     <li>Enable it and pin to your home screen </li>
                   </ul>
                 </div>

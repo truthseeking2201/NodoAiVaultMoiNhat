@@ -268,7 +268,7 @@ export function AppHeader() {
     <header
       className={cn(
         "fixed top-0 z-50 w-full backdrop-blur-md  bg-transparent border-b border-white/10",
-        visibleRibbon ? "md:pb-4 pb-2" : "md:py-4 py-2"
+        visibleRibbon ? "md:pb-4" : "md:py-4 py-2"
       )}
     >
       <div className="bg-black">
