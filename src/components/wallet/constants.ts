@@ -1,5 +1,3 @@
-// import newmoneyWallet from "@/assets/images/newmoney-wallet.png";
-
 import { isMobileDevice } from "@/utils/helpers";
 
 const STEPS = {
@@ -21,24 +19,57 @@ const WALLETS = [
     displayName: "Slush",
     name: "Slush",
     icon: "/wallets/slush-wallet.png",
-    description: "Connect to your Slush Wallet",
     extensionUrl: "https://slush.app/download",
   },
   {
     displayName: "Phantom",
     name: "Phantom",
     icon: "/wallets/phantom-wallet.png",
-    description: "Connect to your Phantom Wallet",
     extensionUrl: "https://phantom.app/download",
   },
-  // {
-  //   displayName: "Newmoney.ai",
-  //   name: "Newmoney",
-  //   icon: newmoneyWallet,
-  //   description: "Connect to your Newmoney Wallet",
-  //   extensionUrl:
-  //     "https://chromewebstore.google.com/detail/newmoneyai/coknkdplmddfgoggddpienehfhdgegna?pli=1",
-  // },
+  {
+    displayName: "Newmoney",
+    name: "Newmoney",
+    icon: "/wallets/newmoney-wallet.png",
+    extensionUrl:
+      "https://chromewebstore.google.com/detail/newmoneyai/coknkdplmddfgoggddpienehfhdgegna?pli=1",
+  },
+  {
+    displayName: "Suiet",
+    name: "Suiet",
+    icon: "/wallets/suiet-wallet.png",
+    extensionUrl: "https://chromewebstore.google.com/detail/suiet-sui-wallet/khpkpbbcccdmmclmpigdgddabeilkdpd",
+  },
+  {
+    displayName: "Backpack",
+    name: "Backpack",
+    icon: "/wallets/backpack-wallet.png",
+    extensionUrl: "https://chromewebstore.google.com/detail/backpack/aflkmfhebedbjioipglgcbcmnbpgliof",
+  },
+  {
+    displayName: "Binance",
+    name: "Binance Wallet",
+    icon: "/wallets/binance-wallet.png",
+    extensionUrl: "https://www.binance.com/en/binancewallet",
+  },
+  {
+    displayName: "OKX",
+    name: "OKX Wallet",
+    icon: "/wallets/okx-wallet.png",
+    extensionUrl: "https://chromewebstore.google.com/detail/okx-wallet/mcohilncbfahbmgdjkbpemcciiolgcge",
+  },
+  {
+    displayName: "Gate",
+    name: "Gate Wallet",
+    icon: "/wallets/gate-wallet.png",
+    extensionUrl: "https://chromewebstore.google.com/detail/gate-wallet/cpmkedoipcpimgecpmgpldfpohjplkpp?hl=en",
+  },
+  {
+    displayName: "Bitget",
+    name: "Bitget Wallet",
+    icon: "/wallets/bitget-wallet.png",
+    extensionUrl: "https://chromewebstore.google.com/detail/bitget-wallet-crypto-web3/jiidiaalihmmhddjgbnbgdfflelocpak",
+  },
 ];
 
 const WALLET_STATUS = {

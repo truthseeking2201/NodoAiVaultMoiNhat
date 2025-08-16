@@ -3,9 +3,23 @@ import { useCallback, useEffect, useState } from "react";
 // Critical images that should be prefetched for better UX
 export const CRITICAL_IMAGES = {
   // Wallet icons
-  wallets: ["/wallets/phantom-wallet.png", "/wallets/slush-wallet.png"],
+  wallets: [
+    "/wallets/phantom-wallet.png",
+    "/wallets/slush-wallet.png",
+    "/wallets/newmoney-wallet.png",
+    "/wallets/suiet-wallet.png",
+    "/wallets/backpack-wallet.png",
+    "/wallets/binance-wallet.png",
+    "/wallets/okx-wallet.png",
+    "/wallets/gate-wallet.png",
+    "/wallets/bitget-wallet.png",
+  ],
 
-  bg: ["/bg-main.webp", "/banners/hero-banner.png", "/banners/hero-banner-mobile.png"],
+  bg: [
+    "/bg-main.webp",
+    "/banners/hero-banner.png",
+    "/banners/hero-banner-mobile.png",
+  ],
 
   // Chain icons
   chains: ["/chains/sui.png", "/chains/bsc.png"],
@@ -16,6 +30,7 @@ export const CRITICAL_IMAGES = {
   // coins
   coins: [
     "/coins/x_sui.png",
+    "/coins/xsui.png",
     "/coins/deep.png",
     "/coins/wbtc.png",
     "/coins/cetus.png",
@@ -29,6 +44,7 @@ export const CRITICAL_IMAGES = {
     "/coins/wal.png",
     "/coins/stsui.png",
     "/coins/sui.png",
+    "/coins/xp.png",
   ],
 
   // dexs
@@ -40,6 +56,12 @@ export const CRITICAL_IMAGES = {
     "/dexes/mmt.png",
     "/dexes/pancake.png",
     "/dexes/kriya.png",
+  ],
+
+  banners: [
+    "/banners/hero-banner.png",
+    "/banners/hero-banner-mobile.png",
+    "/banners/welcome-icon.png",
   ],
 } as const;
 

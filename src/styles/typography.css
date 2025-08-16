@@ -202,5 +202,13 @@
     color: rgb(239, 68, 68); /* text-red-500 */
     margin-top: 0.25rem; /* mt-1 */
   }
+
+  .gradient-green-text {
+    background: linear-gradient(87deg, #9DEBFF -0.54%, #00FF5E 97.84%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
 }
 

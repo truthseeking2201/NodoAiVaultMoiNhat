@@ -11,7 +11,7 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const { isLg } = useBreakpoint();
+  const { isMd } = useBreakpoint();
   const [visibleRibbon] = useRibbon();
 
   return (
@@ -30,7 +30,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             id="main-layout-content"
             className={cn(
               "flex-1 overflow-y-auto ",
-              visibleRibbon ? (isLg ? "pt-[122px]" : "pt-[100px]") : "pt-[70px]"
+              visibleRibbon ? (isMd ? "pt-[122px]" : "pt-[93px]") : "pt-[70px]"
             )}
             style={{ height: "calc(100vh - 77px)" }}
           >

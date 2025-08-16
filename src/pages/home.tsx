@@ -28,7 +28,7 @@ export default function NodoAIVaults() {
   return (
     <>
       {!isMd && <HeroBanner />}
-      <PageContainer className="py-8">
+      <PageContainer className={`${isMd ? "py-8" : "py-6"}`}>
         {isMd && (
           <Suspense fallback={<Skeleton className="h-64 w-full" />}>
             <HeroBanner />

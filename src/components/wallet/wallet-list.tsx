@@ -11,12 +11,14 @@ import { IconErrorToast } from "../ui/icon-error-toast";
 import arrowBack from "@/assets/icons/arrow-back.svg";
 import ConditionRenderer from "../shared/condition-renderer";
 import ConnectWalletVideoModal from "./connect-wallet-video-modal";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 
 type Wallet = {
   name: string;
   icon: string;
   displayName: string;
   extensionUrl: string;
+  isInstalled: boolean;
 };
 
 type WalletListProps = {
@@ -31,23 +33,33 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
   const { mutate: connect } = useConnectWallet();
   const loginWallet = useLoginWallet();
   const { toast } = useToast();
+  const { isMd, isMobile } = useBreakpoint();
   const [tutorialVideoOpen, setTutorialVideoOpen] = useState(false);
 
   const allowWallets = useMemo(() => {
     const isSlushApp = detectIsSlushApp();
 
     if (isSlushApp) {
-      return [WALLETS.find((wallet) => wallet.name === "Slush")];
+      const slushWallet = WALLETS.find((wallet) => wallet.name === "Slush");
+      return slushWallet ? [{
+        ...slushWallet,
+        isInstalled: !!wallets.find(w => w.name === "Slush")
+      }] : [];
     }
-    return WALLETS.map((wallet) => {
-      const foundWallet = wallets.find((w) => w.name === wallet.name);
-      return {
-        ...wallet,
-        name: foundWallet?.name || wallet.name,
-        icon: wallet.icon || foundWallet?.icon,
-      };
-    }) as Wallet[];
-  }, [wallets]);
+    return WALLETS
+      .filter(wallet => !isMobile || wallet.name !== "Newmoney")
+      .map((wallet) => {
+        const foundWallet = wallets.find((w) => {
+          return w.name === wallet.name;
+        });
+        return {
+          ...wallet,
+          name: foundWallet?.name || wallet.name,
+          icon: wallet.icon || foundWallet?.icon,
+          isInstalled: !!foundWallet,
+        };
+      }) as Wallet[];
+  }, [wallets, isMobile]);
 
   const handleReject = () => {
     setError(null);
@@ -98,6 +110,9 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
         );
       } else {
         setIsConnecting(false);
+        setError(
+          `${selectedWallet.displayName} wallet is not detected. Please make sure it's installed and try again.`
+        );
         window.open(selectedWallet.extensionUrl, "_blank");
       }
     } catch (error) {
@@ -111,7 +126,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
 
   return (
     <>
-      <div className="p-6 pb-1 space-y-4 font-sans">
+      <div className={`${isMd ? "px-6" : "px-4 py-4"} space-y-4 font-sans`}>
         {error && (
           <Alert
             variant="destructive"
@@ -122,38 +137,47 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
           </Alert>
         )}
 
-        {allowWallets.map((wallet) => (
-          <Button
-            key={wallet.name}
-            variant="outline"
-            className={`w-full h-[56px] py-6 px-2 justify-start space-x-4 border-white/10 hover:bg-white/5 transition-all ${
-              connectedWallet === wallet.name
-                ? "bg-[#4DA1F9]/10 border-[#4DA1F9]/30"
-                : ""
-            }`}
-            onClick={() => handleConnect(wallet)}
-            disabled={isConnecting}
-          >
-            <div className="h-10 w-10 rounded-full flex items-center justify-center">
-              {wallet.icon && <img src={wallet.icon} alt={wallet.name} />}
-            </div>
-            <div className="text-left flex-1">
-              <div className="font-medium text-md">{wallet.displayName}</div>
-              <div className="text-xs text-white/60">
-                Connect to your {wallet.displayName} Wallet
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+          {allowWallets.map((wallet) => (
+            <Button
+              key={wallet.name}
+              variant="icon"
+              className={`${
+                isMd ? "h-[56px]" : "h-[44px]"
+              } py-4 px-2 justify-start space-x-1 hover:bg-white/5 transition-all ${
+                connectedWallet === wallet.name
+                  ? "bg-[#4DA1F9]/10 border-[#4DA1F9]/30"
+                  : ""
+              }`}
+              onClick={() => handleConnect(wallet)}
+              disabled={isConnecting}
+            >
+              <div className="h-8 w-8 rounded-full flex items-center justify-center">
+                {wallet.icon && <img src={wallet.icon} alt={wallet.name} />}
               </div>
-            </div>
-            {connectedWallet === wallet.name && isConnecting && (
-              <Loader2 className="h-5 w-5 text-[#4DA1F9] animate-spin" />
-            )}
-          </Button>
-        ))}
+              <div className="text-left flex-1">
+                <div className="font-medium text-md">{wallet.displayName}</div>
+              </div>
+              <div className="flex items-center gap-2">
+                {!wallet.isInstalled && wallet.name !== "Binance Wallet" && (
+                  <span className="text-xs px-2 py-1 text-section-description">
+                    Install
+                  </span>
+                )}
+                {connectedWallet === wallet.name && isConnecting && (
+                  <Loader2 className="h-5 w-5 text-[#4DA1F9] animate-spin" />
+                )}
+              </div>
+            </Button>
+          ))}
+        </div>
 
         <ConditionRenderer when={isMobileDevice()}>
           <div className="font-sans leading-5 text-xs p-3 rounded-lg border border-white/10 bg-[rgba(0,125,167,0.15)]">
             To connect your wallet on mobile, open the{" "}
-            <span className="underline">ai.nodo.xyz</span> using the Slush or
-            Phantom app's DApp Browser.{" "}
+            <span className="underline">ai.nodo.xyz</span> using the Slush,
+            Phantom, Suiet, Backpack, Binance, OKX, Gate, or Bitget app's DApp
+            Browser.{" "}
             <span className="text-white/60">
               Mobile browsers such as Safari and Chrome do not support wallet
               connections.
@@ -177,24 +201,24 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
         </ConditionRenderer>
       </div>
 
-      <div className="px-6 pt-2 text-center">
+      <div className="max-w-[280px] mx-auto pt-2 pb-4 text-center">
         {isConnecting && !connectedWallet && (
           <div className="flex items-center justify-center mb-3 text-amber-500">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             <span className="text-sm">Connecting...</span>
           </div>
         )}
-        <p className="text-xs text-white/60">
+        <span className="text-xs text-white/60 font-medium">
           By connecting your wallet, you agree to our{" "}
-          <a href="#" className="text-amber-500 hover:underline">
+          <a href="#" className="hover:underline gradient-green-text font-bold">
             Terms of Service
           </a>{" "}
           and{" "}
-          <a href="#" className="text-amber-500 hover:underline">
+          <a href="#" className="hover:underline gradient-green-text font-bold">
             Privacy Policy
           </a>
           .
-        </p>
+        </span>
       </div>
     </>
   );

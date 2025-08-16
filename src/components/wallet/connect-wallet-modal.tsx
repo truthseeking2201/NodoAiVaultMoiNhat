@@ -19,6 +19,7 @@ import SuccessReferral from "@/components/wallet/success-referral";
 import WalletList from "@/components/wallet/wallet-list";
 import { useWallet } from "@/hooks";
 import { useToast } from "@/hooks/use-toast";
+import useBreakpoint from "@/hooks/use-breakpoint";
 import { cn, sleep } from "@/lib/utils";
 import type { UserType } from "@/types/user";
 import { X } from "lucide-react";
@@ -45,6 +46,7 @@ export function ConnectWalletModal({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { address } = useWallet();
+  const { isMobile } = useBreakpoint();
   const [searchParams] = useSearchParams();
 
   const handleClosePopup = () => {
@@ -280,8 +282,9 @@ export function ConnectWalletModal({
             STEPS.REFERRAL_SUCCESS,
             STEPS.REFERRAL_CONFIRM,
           ].includes(step)
-            ? "sm:max-w-[425px]"
-            : "w-full"
+            ? "sm:max-w-[468px]"
+            : "w-full",
+          isMobile && "max-h-[80vh] flex flex-col"
         )}
         hideIconClose
         style={{
@@ -289,7 +292,10 @@ export function ConnectWalletModal({
             "0px 10px 15px -3px rgba(255, 255, 255, 0.10), 0px 4px 6px -4px rgba(255, 255, 255, 0.10)",
         }}
       >
-        <DialogHeader className="px-6 pt-6 pb-0 relative">
+        <DialogHeader className={cn(
+          "px-6 pt-6 pb-0 relative text-left",
+          isMobile && "flex-shrink-0"
+        )}>
           <button
             className="absolute right-6 top-6 rounded-full h-8 w-8 flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors"
             onClick={handleClosePopup}
@@ -303,49 +309,53 @@ export function ConnectWalletModal({
               <DialogTitle className="text-xl font-bold">
                 Connect Wallet
               </DialogTitle>
-              <DialogDescription className="text-white/60">
+              <DialogDescription className="sr-only">
                 Choose a wallet to connect to Nodo AI Yield Vault
               </DialogDescription>
             </>
           )}
         </DialogHeader>
-        {step === STEPS.CONNECT_WALLET && (
-          <WalletList
-            onConnectSuccess={(successAddress, resetConnection) =>
-              handleNextStep(null, successAddress, resetConnection)
-            }
-          />
-        )}
-        <div>
-          {step === STEPS.EXISTING_USER_CONFIRM && (
-            <ExistingUser
-              onNextStep={handleNextStep}
-              user={user}
-              isLoading={isLoading}
+        <div className={cn(
+          isMobile && "flex-1 overflow-y-auto"
+        )}>
+          {step === STEPS.CONNECT_WALLET && (
+            <WalletList
+              onConnectSuccess={(successAddress, resetConnection) =>
+                handleNextStep(null, successAddress, resetConnection)
+              }
             />
           )}
-          {step === STEPS.INPUT_REFERRAL && (
-            <InputReferral
-              onClose={handleClosePopup}
-              onNextStep={(referralCode) => {
-                handleNextStep();
-                setLinkRefCode(referralCode);
-              }}
-              isLoading={isLoading}
-            />
-          )}
-          {step === STEPS.REFERRAL_SUCCESS && (
-            <SuccessReferral
-              linkRefCode={linkRefCode}
-              onNextStep={handleNextStep}
-            />
-          )}
-          {step === STEPS.REFERRAL_CONFIRM && (
-            <ConfirmReferral
-              onNextStep={handleNextStep}
-              linkRefCode={linkRefCode}
-            />
-          )}
+          <div>
+            {step === STEPS.EXISTING_USER_CONFIRM && (
+              <ExistingUser
+                onNextStep={handleNextStep}
+                user={user}
+                isLoading={isLoading}
+              />
+            )}
+            {step === STEPS.INPUT_REFERRAL && (
+              <InputReferral
+                onClose={handleClosePopup}
+                onNextStep={(referralCode) => {
+                  handleNextStep();
+                  setLinkRefCode(referralCode);
+                }}
+                isLoading={isLoading}
+              />
+            )}
+            {step === STEPS.REFERRAL_SUCCESS && (
+              <SuccessReferral
+                linkRefCode={linkRefCode}
+                onNextStep={handleNextStep}
+              />
+            )}
+            {step === STEPS.REFERRAL_CONFIRM && (
+              <ConfirmReferral
+                onNextStep={handleNextStep}
+                linkRefCode={linkRefCode}
+              />
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -4,12 +4,6 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import Web3Button from "@/components/ui/web3-button";
 import {
   useNdlpAssetsStore,
@@ -22,8 +16,8 @@ import { formatNumber } from "@/lib/number";
 import { truncateStringWithSeparator } from "@/utils/helpers";
 import { triggerWalletDisconnect } from "@/utils/wallet-disconnect";
 import { motion } from "framer-motion";
-import { LogOut, RefreshCw, Wallet } from "lucide-react";
-import { memo, useEffect, useState } from "react";
+import { RefreshCw, Wallet } from "lucide-react";
+import { memo, useEffect, useState, useMemo } from "react";
 import { ConnectWalletModal } from "./connect-wallet-modal";
 import { useQueryClient } from "@tanstack/react-query";
 import { SUI_CONFIG, USDC_CONFIG } from "@/config";
@@ -57,23 +51,20 @@ export const ConnectWalletButton = memo(() => {
     address,
   } = useWallet();
   const { currentWallet } = useCurrentWallet();
-  const walletIcon =
-    WALLETS.find((w) => w.name === currentWallet?.name)?.icon ||
-    currentWallet?.icon;
 
-  const queryClient = useQueryClient();
-  const { assets, setAssets } = useUserAssetsStore();
-  const { setAssets: setNdlpAssets } = useNdlpAssetsStore();
+  const walletIcon = useMemo(() => {
+    return WALLETS.find((w) => w.name === currentWallet?.name)?.icon ||
+    currentWallet?.icon;
+  }, [currentWallet]);
+
+  const { assets } = useUserAssetsStore();
   const { refreshAllBalance } = useRefreshAssetsBalance();
   const { isMd } = useBreakpoint();
   // get first for now due to we support usdc only
-  const collateralToken = assets.find(
+  const collateralToken = useMemo(() => assets.find(
     (asset) => asset.coin_type === USDC_CONFIG.coinType
-  );
+  ), [assets]);
 
-  const displayTokens = assets.filter((asset) =>
-    DISPLAY_TOKENS.includes(asset.coin_type)
-  );
 
   useEffect(() => {
     // Update risk assessment time
