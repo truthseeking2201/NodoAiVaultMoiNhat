@@ -288,6 +288,7 @@ export type BasicVaultDetailsType = {
     vault_module: string;
     vault_config_id: string;
     exchange_id: number;
+    withdraw_interval: number;
     pool: string;
   };
   user_pending_withdraw_ndlp?: string;

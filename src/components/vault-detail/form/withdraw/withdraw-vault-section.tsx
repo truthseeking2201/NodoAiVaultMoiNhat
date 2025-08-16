@@ -208,6 +208,7 @@ export default function WithdrawVaultSection({
                 balanceLpUsd={balanceInputLpUsd || "0"}
                 lpData={lpData}
                 tokens={tokens}
+                lockDuration={vault?.metadata?.withdraw_interval || 3600}
                 onSuccess={onSuccessWithdraw}
               />
             )}
