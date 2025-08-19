@@ -25,7 +25,7 @@ export const DetailWrapper = ({
           <div
             className={cn(
               "flex items-center justify-between p-4",
-              titleComponent ? "h-[72px]" : "h-[60px]"
+              titleComponent ? "h-[81px]" : "h-[68px]"
             )}
           >
             <Skeleton className="w-[200px] h-6 " />
