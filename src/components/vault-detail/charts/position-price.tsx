@@ -44,7 +44,7 @@ interface PositionPriceChartProps {
 const CustomLegend = () => {
   const { isMobile } = useBreakpoint();
   return (
-    <div className="flex md:gap-[200px] gap-4 px-4 py-2 justify-center">
+    <div className="flex md:gap-[200px] gap-4 justify-center">
       <div className="flex items-center gap-2">
         <span
           style={{
@@ -300,7 +300,7 @@ const PositionPriceChart = ({
       fallback={<Skeleton className="w-full h-[400px]" />}
     >
       <div className="w-full h-[400px]">
-        <div className="flex items-center justify-between mb-4 ">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center md:gap-4 gap-2 w-full">
             <div className="md:p-4 p-3 border border-[#2A2A2A] rounded-lg w-full bg-white/10">
               <div className="text-white/80 md:text-sm text-[9px]">
@@ -355,13 +355,13 @@ const PositionPriceChart = ({
           </div>
         </div>
         <div
-          className="w-full rounded-[10.742px] border-[0.671px] border-white/5 md:p-2 p-1"
+          className="w-full rounded-[10.742px] border-[0.671px] border-white/5 p-1"
           style={{
             background:
               "linear-gradient(180deg, rgba(16,185,129,0.05) 0%, rgba(16,185,129,0.02) 33%, rgba(251,191,36,0.02) 33%, rgba(251,191,36,0.05) 66%, rgba(239,68,68,0.02) 66%, rgba(239,68,68,0.05) 100%), #0A0A0A",
           }}
         >
-          <ResponsiveContainer width="100%" height={278}>
+          <ResponsiveContainer width="100%" height={isMobile ? 278 : 300}>
             <ComposedChart
               data={chartData}
               barCategoryGap={6}

@@ -22,6 +22,7 @@ import VideoModal from "@/components/ui/video-modal";
 import { useState } from "react";
 import { RowItem } from "@/components/ui/row-item";
 import { CoinMetadata } from "@mysten/sui/client";
+import { cn } from "@/lib/utils";
 
 const MRowItem = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -150,7 +151,13 @@ const VaultInfoMobile = ({
               })}{" "}
               <span className="text-xs">
                 ({vaultDetails?.ndlp_price_change_7d > 0 ? "+" : ""}
-                <span className="text-[#64EBBC]">
+                <span
+                  className={cn(
+                    vaultDetails?.ndlp_price_change_7d > 0
+                      ? "text-[#64EBBC]"
+                      : "text-red-400"
+                  )}
+                >
                   {formatAmount({
                     amount: vaultDetails?.ndlp_price_change_7d,
                   })}
@@ -344,7 +351,13 @@ const VaultInfo = ({
                 })}
                 <span>
                   ({vaultDetails?.ndlp_price_change_7d > 0 ? "+" : ""}
-                  <span className="text-[#64EBBC]">
+                  <span
+                    className={cn(
+                      vaultDetails?.ndlp_price_change_7d > 0
+                        ? "text-[#64EBBC]"
+                        : "text-red-400"
+                    )}
+                  >
                     {formatAmount({
                       amount: vaultDetails?.ndlp_price_change_7d,
                     })}

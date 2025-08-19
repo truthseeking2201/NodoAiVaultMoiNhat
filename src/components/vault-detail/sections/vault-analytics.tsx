@@ -81,9 +81,8 @@ const VaultAnalytics = ({
           </Tabs>
         </div>
       }
-      className="!pb-0"
       isLoading={isDetailLoading}
-      loadingStyle={cn("w-full mb-4", isEmpty ? "h-fit" : "min-h-[400px]")}
+      loadingStyle={cn("w-full", isEmpty ? "h-fit" : "min-h-[400px]")}
     >
       {/* Content for the selected analytics tab */}
       <div className={cn(isEmpty ? "h-fit" : "min-h-[400px]")}>
