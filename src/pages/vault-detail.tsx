@@ -137,26 +137,26 @@ const VaultDetail = () => {
           : "--",
         prefix: "$",
       },
-      // {
-      //   label: "24h Rewards",
-      //   tooltip: [
-      //     {
-      //       label: "Daily Rate",
-      //       value: !isLoadingVaultDetails
-      //         ? formatAmount({
-      //             amount: vaultDetails?.rewards_24h_daily_rate,
-      //           })
-      //         : "--",
-      //       suffix: "%",
-      //     },
-      //   ],
-      //   value: !isLoadingVaultDetails
-      //     ? formatAmount({
-      //         amount: vaultDetails?.rewards_24h_usd,
-      //       })
-      //     : "--",
-      //   prefix: "$",
-      // },
+      {
+        label: "24h Rewards",
+        tooltip: [
+          {
+            label: "Daily Rate",
+            value: !isLoadingVaultDetails
+              ? formatAmount({
+                  amount: vaultDetails?.rewards_24h_daily_rate,
+                })
+              : "--",
+            suffix: "%",
+          },
+        ],
+        value: !isLoadingVaultDetails
+          ? formatAmount({
+              amount: vaultDetails?.rewards_24h_usd,
+            })
+          : "--",
+        prefix: "$",
+      },
       {
         label: "NDLP Price",
         tooltip: [

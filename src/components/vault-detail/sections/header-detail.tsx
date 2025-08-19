@@ -66,7 +66,7 @@ const Statistic = ({
             <div className="flex items-center gap-1">
               <div
                 className={cn(
-                  "text-white/80 text-xs text-right max-md:text-xs"
+                  "text-white/80 text-xs text-right max-md:text-xs whitespace-nowrap"
                 )}
               >
                 {info.label}
