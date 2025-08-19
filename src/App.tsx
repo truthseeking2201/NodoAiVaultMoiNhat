@@ -13,7 +13,7 @@ import { getFullnodeUrl } from "@mysten/sui/client";
 import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { lazy, Suspense, useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import GlobalLoading from "./components/shared/global-loading";
 import ScrollToTop from "./components/ui/scroll-to-top";
@@ -119,62 +119,67 @@ const { networkConfig } = createNetworkConfig({
 });
 //
 
-const App = () => (
-  <ErrorBoundary>
-    <Suspense fallback={<GlobalLoading />}>
-      <QueryClientProvider client={queryClient}>
-        <SuiClientProvider
-          networks={networkConfig}
-          defaultNetwork={"mainnet"}
-        >
-          <WalletProvider
-            autoConnect
-            slushWallet={
-              isMobileDevice()
-                ? undefined
-                : {
-                    name: "NODO AI Vaults",
-                  }
-            }
+const App = () => {
+  const [isWalletConnected, setIsWalletConnected] = useState(false);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setIsWalletConnected(true);
+    }, 1000);
+  }, []);
+
+  const slushWallet = useMemo(() => {
+    if (isMobileDevice() || !isWalletConnected) return undefined;
+    return {
+      name: "NODO AI Vaults",
+    };
+  }, [isWalletConnected]);
+
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<GlobalLoading />}>
+        <QueryClientProvider client={queryClient}>
+          <SuiClientProvider
+            networks={networkConfig}
+            defaultNetwork={"mainnet"}
           >
-            <ConfigWrapper>
-              <TooltipProvider delayDuration={0}>
-                <Toaster />
-                {/* <VersionChecker /> */}
-                <BrowserRouter>
-                  <ScrollToTop />
-                  <ScrollToTopButton />
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={
-                        <MainLayout>
-                          <Home />
-                        </MainLayout>
-                      }
-                    />
-                    <Route
-                      path="/vault/:vault_id"
-                      element={
-                        <MainLayout>
-                          <VaultDetail />
-                        </MainLayout>
-                      }
-                    />
-                    <Route
-                      path="*"
-                      element={<NotFound />}
-                    />
-                  </Routes>
-                </BrowserRouter>
-              </TooltipProvider>
-            </ConfigWrapper>
-          </WalletProvider>
-        </SuiClientProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </Suspense>
-  </ErrorBoundary>
-);
+            <WalletProvider autoConnect slushWallet={slushWallet}>
+              <ConfigWrapper>
+                <TooltipProvider delayDuration={0}>
+                  <Toaster />
+                  {/* <VersionChecker /> */}
+                  <BrowserRouter>
+                    <ScrollToTop />
+                    <ScrollToTopButton />
+                    <Routes>
+                      <Route
+                        path="/"
+                        element={
+                          <MainLayout>
+                            <Home />
+                          </MainLayout>
+                        }
+                      />
+                      <Route
+                        path="/vault/:vault_id"
+                        element={
+                          <MainLayout>
+                            <VaultDetail />
+                          </MainLayout>
+                        }
+                      />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </BrowserRouter>
+                </TooltipProvider>
+              </ConfigWrapper>
+            </WalletProvider>
+          </SuiClientProvider>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </Suspense>
+    </ErrorBoundary>
+  );
+};
 
 export default App;
