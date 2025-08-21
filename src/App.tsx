@@ -31,6 +31,8 @@ import Home from "./pages/home";
 import VaultDetail from "./pages/vault-detail";
 import { setWalletDisconnectHandler } from "./utils/wallet-disconnect";
 import { isMobileDevice } from "./utils/helpers";
+import { useToast } from "./hooks/use-toast";
+import { IconErrorToast } from "./components/ui/icon-error-toast";
 
 const NotFound = lazy(() =>
   import("./pages/not-found").catch((e) => {
@@ -77,7 +79,7 @@ const useSetWalletDisconnectHandler = () => {
 };
 
 const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
-  const initLoad = useRef(false);
+  const { toast } = useToast();
   const { error, data } = useGetDepositVaults();
   const vaultIds = data?.map((vault) => vault.vault_id) || [];
   useFetchAssets();
@@ -102,10 +104,17 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  // show error when failed to fetch deposit vaults for first load
-  if (error && !initLoad.current) {
-    throw new Error("Failed to fetch deposit vaults");
-  }
+  useEffect(() => {
+    if (error) {
+      Sentry.captureException(error);
+      toast({
+        title: error?.message || "Failed to fetch vaults",
+        variant: "error",
+        duration: 5000,
+        icon: <IconErrorToast />,
+      });
+    }
+  }, [error, toast]);
 
   return <>{children}</>;
 };
