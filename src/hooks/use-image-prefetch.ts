@@ -45,6 +45,7 @@ export const CRITICAL_IMAGES = {
     "/coins/stsui.png",
     "/coins/sui.png",
     "/coins/xp.png",
+    "/coins/xaum.png",
   ],
 
   // dexs
