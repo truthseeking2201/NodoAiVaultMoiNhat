@@ -196,7 +196,17 @@ const YourHoldings = ({
         <div className="pb-0">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-white/60 text-xs mb-1">Total Liquidity</div>
+              <LabelWithTooltip
+                hasIcon={false}
+                label="Total Liquidity"
+                tooltipContent={
+                  <div className="text-white/80 text-xs font-sans">
+                    Total User Liquidity Value at the current market price
+                  </div>
+                }
+                labelClassName="text-white/60 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
+              />
+
               <div className="md:text-xl text-base font-mono font-semibold text-white">
                 {userHoldingData?.user_total_liquidity_usd
                   ? `$${formatNumber(
@@ -239,9 +249,17 @@ const YourHoldings = ({
           {expanded && (
             <div className="pt-4 flex flex-col gap-4">
               <HoldingCard>
-                <div className="text-white/60 md:text-sm text-[10px] mb-2">
-                  Estimated LP Breakdown (secure, updates in ~1h)
-                </div>
+                <LabelWithTooltip
+                  hasIcon={false}
+                  label="Estimated LP Breakdown (secure, updates in ~1h)"
+                  tooltipContent={
+                    <div className="text-white/80 text-xs font-sans">
+                      Breakdown of underlying tokens based on the user’s
+                      ownership share in the vault
+                    </div>
+                  }
+                  labelClassName="text-white/60 md:text-sm text-[10px] mb-2 underline underline-offset-4 decoration-dotted decoration-gray-600"
+                />
                 <div className="flex md:gap-4 gap-1 items-center">
                   <div className="flex-1">
                     <div
@@ -382,9 +400,16 @@ const YourHoldings = ({
               </HoldingCard>
               <div className="flex gap-4">
                 <HoldingCard>
-                  <div className="text-white/60 md:text-xs text-[10px] mb-1">
-                    NDLP Balance
-                  </div>
+                  <LabelWithTooltip
+                    hasIcon={false}
+                    label="NDLP Balance"
+                    tooltipContent={
+                      <div className="text-white/80 text-xs font-sans">
+                        Your current NDLP position in this vault (Unit USD)
+                      </div>
+                    }
+                    labelClassName="text-white/60 md:text-xs text-[10px] mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
+                  />
                   <div className="font-mono text-white md:text-xl text-sm">
                     {userHoldingData?.user_ndlp_balance && isAuthenticated
                       ? formatNumber(
@@ -480,8 +505,17 @@ const YourHoldings = ({
                 <div className="text-white text-sm font-bold mb-1">
                   Cashflow
                 </div>
-                <div className="flex items-center text-xs">
-                  <span className="text-white/80">Total Deposits</span>
+                <div className="flex items-center ">
+                  <LabelWithTooltip
+                    hasIcon={false}
+                    label="Total Deposits"
+                    tooltipContent={
+                      <div className="text-white/80 text-xs font-sans">
+                        Total amount you’ve deposited into this vault.
+                      </div>
+                    }
+                    labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
+                  />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
                   <span className="font-mono">
                     $
@@ -494,8 +528,17 @@ const YourHoldings = ({
                       : "0"}
                   </span>
                 </div>
-                <div className="flex items-center text-xs mt-1">
-                  <span className="text-white/80">Total Withdrawals</span>
+                <div className="flex items-center">
+                  <LabelWithTooltip
+                    hasIcon={false}
+                    label="Total Withdrawals"
+                    tooltipContent={
+                      <div className="text-white/80 text-xs font-sans">
+                        Total amount you’ve withdrawn from this vault.
+                      </div>
+                    }
+                    labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
+                  />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
                   <span className="font-mono">
                     $
@@ -510,8 +553,19 @@ const YourHoldings = ({
                       : "0"}
                   </span>
                 </div>
-                <div className="flex items-center text-xs mt-1">
-                  <span className="text-white/80">24h Rewards</span>
+                <div className="flex items-center text-xs">
+                  <LabelWithTooltip
+                    hasIcon={false}
+                    label="24h Rewards"
+                    tooltipContent={
+                      <div className="text-white/80 text-xs font-sans">
+                        Rewards you earned in the last 24 hours. Calculated from
+                        recent fee events and your share of the pool. Updates
+                        every 1 hour.
+                      </div>
+                    }
+                    labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
+                  />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
                   <span className="font-mono">
                     {isAuthenticated ? (
@@ -535,7 +589,17 @@ const YourHoldings = ({
                   Position
                 </div>
                 <div className="flex items-center text-xs ">
-                  <span className="text-white/80">Share in Vault</span>
+                  <LabelWithTooltip
+                    hasIcon={false}
+                    label="Share in Vault"
+                    tooltipContent={
+                      <div className="text-white/80 text-xs font-sans">
+                        Your ownership percentage of this vault. Updates with
+                        NDLP balance changes.
+                      </div>
+                    }
+                    labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
+                  />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
                   <span className="font-mono">
                     {isAuthenticated
@@ -550,14 +614,16 @@ const YourHoldings = ({
                 </div>
                 <div className="flex items-center text-xs mt-1">
                   <LabelWithTooltip
+                    hasIcon={false}
                     label="Break-Even Price"
                     tooltipContent={
                       <div className="text-white/80 text-xs max-w-[200px] font-sans">
-                        Your average entry price across all deposits. When NDLP
-                        price exceeds this level, your position is profitable.
+                        NDLP price where you can withdraw your deposits without
+                        profit or loss. Recalculated after each deposit or full
+                        withdrawal.
                       </div>
                     }
-                    labelClassName="text-white/80 text-xs font-sans"
+                    labelClassName="text-white/80 text-xs font-sans underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
                   <span className="font-mono">

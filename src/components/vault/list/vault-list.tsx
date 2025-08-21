@@ -31,11 +31,6 @@ import VaultHolding from "./vault-holding";
 import VaultRewards from "./vault-rewards";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { IconCheckSuccess } from "@/components/ui/icon-check-success";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import UserHoldingTooltip from "./user-holding-tooltip";
 
 const OPTIONS_CHAINS = [
@@ -278,7 +273,14 @@ export default function VaultList() {
   const columns = useMemo(
     () => [
       {
-        title: "AI Vaults",
+        title: (
+          <LabelWithTooltip
+            hasIcon={false}
+            label="AI Vaults"
+            labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
+            tooltipContent="Trading pair and DEX name"
+          />
+        ),
         dataIndex: "vault_name",
         classCell: "py-6",
         classTitle: "text-white/80 text-left",
@@ -289,8 +291,16 @@ export default function VaultList() {
           <LabelWithTooltip
             hasIcon={false}
             label="TVL"
-            labelClassName="text-white/80 text-left text-[16px]"
-            tooltipContent="Total Value Locked - the combined USD value of all assets currently managed by this vault's AI strategy."
+            labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
+            tooltipContent={
+              <div className="text-xs">
+                Total USD value of all vault assets. Updates live.{" "}
+                <span className="text-[#FFBD24] font-bold text-xs">
+                  {" "}
+                  (USD equivalent)
+                </span>
+              </div>
+            }
           />
         ),
         dataIndex: "tvl",
@@ -306,8 +316,8 @@ export default function VaultList() {
           <LabelWithTooltip
             hasIcon={false}
             label="APY"
-            labelClassName="text-white/80 text-left text-[16px]"
-            tooltipContent="Projected annual returns with compounding. Based on current 24-hour fee generation and AI rebalancing performance."
+            labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
+            tooltipContent="Your real yearly return with hourly compounding, based on the average APR of the last 7 days. Updates every 1 hour."
           />
         ),
         dataIndex: "apy",
@@ -320,9 +330,26 @@ export default function VaultList() {
         ),
       },
       {
-        title: "24h Rewards",
+        title: (
+          <LabelWithTooltip
+            hasIcon={false}
+            label="24h Rewards"
+            labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
+            tooltipContent={
+              <div className="text-xs">
+                Total LP fees and token incentives earned by the vault in the
+                last 24 hours
+                <span className="text-[#FFBD24] font-bold text-xs">
+                  {" "}
+                  (SUI equivalent)
+                </span>
+                . Updates every 1 hour.
+              </div>
+            }
+          />
+        ),
         dataIndex: "rewards",
-        classTitle: "text-white/80 text-left",
+        classTitle: "text-white/80 text-left w-[100px]",
         keySort: "rewards_24h_usd",
         render: (value: any, record: any) => (
           <span className="text-white font-medium font-mono text-base">
@@ -335,12 +362,22 @@ export default function VaultList() {
           <LabelWithTooltip
             hasIcon={false}
             label="Your Holdings"
-            labelClassName="text-white/80 text-left text-[16px]"
-            tooltipContent="Your current investment value in this vault. Updates in real-time based on vault performance and NDLP price."
+            labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
+            tooltipContent={
+              <div className="text-xs">
+                The total value of your position in the vault, including both
+                principal and accrued rewards
+                <span className="text-[#FFBD24] font-bold text-xs">
+                  {" "}
+                  (USD equivalent)
+                </span>
+                . Updates every 1 hour.
+              </div>
+            }
           />
         ),
         dataIndex: "holdings",
-        classTitle: "text-white/80",
+        classTitle: "text-white/80 w-[110px]",
         keySort: "user_holdings",
         render: (_: any, record: any) => (
           <UserHoldingTooltip>
@@ -356,7 +393,14 @@ export default function VaultList() {
         ),
       },
       {
-        title: "Rewards",
+        title: (
+          <LabelWithTooltip
+            hasIcon={false}
+            label="Rewards"
+            labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
+            tooltipContent="Total rewards earned in this vault are automatically compounded into your liquidity and updated every hour."
+          />
+        ),
         dataIndex: "rewards",
         classTitle: "text-white/80 justify-start",
         classCell: "justify-start",
