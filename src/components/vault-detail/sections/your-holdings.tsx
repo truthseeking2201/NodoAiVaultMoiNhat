@@ -254,8 +254,7 @@ const YourHoldings = ({
                   label="Estimated LP Breakdown (secure, updates in ~1h)"
                   tooltipContent={
                     <div className="text-white/80 text-xs font-sans">
-                      Breakdown of underlying tokens based on the user’s
-                      ownership share in the vault
+                      Breakdown of underlying tokens based on the your ownership share in the vault
                     </div>
                   }
                   labelClassName="text-white/60 md:text-sm text-[10px] mb-2 underline underline-offset-4 decoration-dotted decoration-gray-600"
