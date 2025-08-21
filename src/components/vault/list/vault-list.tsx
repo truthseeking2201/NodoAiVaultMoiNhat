@@ -341,7 +341,7 @@ export default function VaultList() {
                 last 24 hours
                 <span className="text-[#FFBD24] font-bold text-xs">
                   {" "}
-                  (SUI equivalent)
+                  (USD equivalent)
                 </span>
                 . Updates every 1 hour.
               </div>
