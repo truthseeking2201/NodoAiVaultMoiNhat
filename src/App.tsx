@@ -86,7 +86,6 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
   useFetchNDLPAssets(data);
   useGetAllVaults(vaultIds);
   useSetWalletDisconnectHandler();
-
   // Prefetch critical images for better UX
   useCriticalImagePrefetch();
 

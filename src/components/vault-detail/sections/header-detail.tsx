@@ -13,6 +13,7 @@ import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { VaultInfo } from "@/pages/vault-detail";
+import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 
 type VaultInfoProps = {
   vault: any;
@@ -64,59 +65,22 @@ const Statistic = ({
         <div key={info.label} className="w-full">
           <div className="flex items-center gap-1 justify-end mb-1 max-md:justify-between max-md:w-full">
             <div className="flex items-center gap-1">
-              <div
-                className={cn(
-                  "text-white/80 text-xs text-right max-md:text-xs whitespace-nowrap"
-                )}
-              >
-                {info.label}
-              </div>
-              {info?.tooltip?.length > 0 && (
-                <TooltipProvider delayDuration={0}>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <HelpCircle className="h-3 w-3 text-white/80" />
-                    </TooltipTrigger>
-                    <TooltipContent className="shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3">
-                      {info?.tooltip?.map((tooltipItem: any, index: number) => (
-                        <div
-                          key={`${info.label}-${index}`}
-                          className="flex items-center justify-between gap-2 min-w-[200px] mb-1"
-                        >
-                          <div className="text-xs text-white/80">
-                            {tooltipItem.label}
-                          </div>
-                          {tooltipItem.isHighlighted ? (
-                            <div
-                              className={cn(
-                                "text-sm font-mono flex items-center",
-                                tooltipItem.isIncreasing
-                                  ? "text-[#64EBBC]"
-                                  : "text-red-400"
-                              )}
-                            >
-                              {tooltipItem.isIncreasing ? (
-                                <ArrowIncreasing />
-                              ) : (
-                                <ArrowDecreasing />
-                              )}
-                              {tooltipItem.prefix || ""}
-                              {tooltipItem.value}
-                              {tooltipItem.suffix || ""}
-                            </div>
-                          ) : (
-                            <div className="text-sm font-semibold text-white font-mono">
-                              {tooltipItem.prefix || ""}
-                              {tooltipItem.value}
-                              {tooltipItem.suffix || ""}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <div
+                      className={cn(
+                        "text-white/80 text-xs text-right max-md:text-xs underline underline-offset-8 decoration-dotted decoration-gray-600 whitespace-nowrap"
+                      )}
+                    >
+                      {info.label}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3 max-w-[229px] text-white/80 text-xs">
+                    {info.tooltip}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
 
             <ConditionRenderer when={isMobile}>

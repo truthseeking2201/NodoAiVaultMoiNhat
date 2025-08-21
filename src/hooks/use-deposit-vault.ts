@@ -25,6 +25,7 @@ type DepositArgs = {
   coin: DepositCoin;
   amount: number;
   swapDepositInfo: VaultSwapDepositInfo;
+  collateralToken: string;
   onDepositSuccessCallback?: (data: any) => void;
 };
 
@@ -37,9 +38,10 @@ const MODULE_ADAPTERS = {
 const buildTarget = (
   coin: DepositCoin,
   vaultPackageId: string,
-  swapDepositInfo: VaultSwapDepositInfo
+  swapDepositInfo: VaultSwapDepositInfo,
+  collateralToken: string
 ) => {
-  if (coin.coin_type === USDC_CONFIG.coinType) {
+  if (coin.coin_type === collateralToken) {
     return `${vaultPackageId}::vault::deposit_with_sigs_credit_time`;
   }
   if (!swapDepositInfo) {
@@ -104,6 +106,7 @@ export const useDepositVault = (vaultId: string) => {
     coin,
     amount,
     swapDepositInfo,
+    collateralToken,
     onDepositSuccessCallback,
   }: DepositArgs) => {
     try {
@@ -175,7 +178,7 @@ export const useDepositVault = (vaultId: string) => {
       const slippageBps = 300; // 3%
       let _arguments: any = [];
       let _typeArguments: any = [];
-      if (coin.coin_type === USDC_CONFIG.coinType) {
+      if (coin.coin_type === collateralToken) {
         _arguments = [
           tx.object(vaultConfig.metadata.vault_config_id),
           tx.object(vaultConfig.vault_id),
@@ -221,7 +224,12 @@ export const useDepositVault = (vaultId: string) => {
         }
       }
 
-      const target = buildTarget(coin, packageId, swapDepositInfo);
+      const target = buildTarget(
+        coin,
+        packageId,
+        swapDepositInfo,
+        collateralToken
+      );
       tx.moveCall({
         target,
         arguments: _arguments,

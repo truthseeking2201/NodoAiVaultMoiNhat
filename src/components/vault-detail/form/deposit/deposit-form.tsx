@@ -30,6 +30,8 @@ import { checkCanDeposit } from "@/apis";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { useTokenPrices } from "@/hooks/use-token-price";
+import { useRiskDisclosure } from "@/hooks/use-risk-disclosure";
+import RiskDisclosuresPopup from "./risk-disclosure-popup.tsx";
 
 export type DepositSuccessData = {
   digest: string;
@@ -73,6 +75,9 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
 
   const { deposit } = useDepositVault(vault_id);
   const { isAuthenticated } = useWallet();
+
+  const { visibleDisclaimer, setVisibleDisclaimer } = useRiskDisclosure();
+  const [isOpenRiskDisclosure, setIsOpenRiskDisclosure] = useState(false);
 
   const paymentTokens = useMemo(() => {
     const tokens = vault?.tokens
@@ -141,7 +146,8 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
 
   const { data: swapDepositInfo } = useSwapDepositInfo(
     vault_id,
-    collateralToken?.symbol?.toLowerCase() !== USDC_CONFIG.symbol.toLowerCase()
+    collateralToken?.token_address?.toLowerCase() !==
+      vault?.collateral_token?.toLowerCase()
       ? collateralToken?.token_address || ""
       : ""
   );
@@ -224,6 +230,15 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   const errors = methods.formState.errors;
 
   const onSubmit = (data: DepositForm) => {
+    if (visibleDisclaimer) {
+      setIsOpenRiskDisclosure(true);
+    } else {
+      setIsDepositModalOpen(true);
+    }
+  };
+
+  const handleReadDisclaimer = () => {
+    setVisibleDisclaimer();
     setIsDepositModalOpen(true);
   };
 
@@ -266,6 +281,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         coin: depositCoin,
         amount: depositAmount,
         swapDepositInfo,
+        collateralToken: vault?.collateral_token,
         onDepositSuccessCallback: handleDepositSuccessCallback,
       });
     } catch (error) {
@@ -433,6 +449,11 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
           </div>
         </ConditionRenderer>
       </form>
+      <RiskDisclosuresPopup
+        isOpen={isOpenRiskDisclosure}
+        setIsOpen={setIsOpenRiskDisclosure}
+        setVisibleDisclaimer={handleReadDisclaimer}
+      />
       <DepositModal
         isOpen={isDepositModalOpen}
         depositStep={depositStep}

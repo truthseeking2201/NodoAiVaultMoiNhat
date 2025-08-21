@@ -62,35 +62,8 @@ const VaultDetail = () => {
     return [
       {
         label: "APY",
-        // tooltip: [
-        //   {
-        //     label: "DEX APR",
-        //     value: !isLoadingVaultDetails
-        //       ? formatAmount({
-        //           amount: vaultDetails?.pool_apr,
-        //         })
-        //       : "--",
-        //     suffix: "%",
-        //   },
-        //   {
-        //     label: "NODO APR",
-        //     value: !isLoadingVaultDetails
-        //       ? formatAmount({
-        //           amount: vaultDetails?.vault_apr,
-        //         })
-        //       : "--",
-        //     suffix: "%",
-        //   },
-        //   {
-        //     label: "NODO APY",
-        //     value: !isLoadingVaultDetails
-        //       ? formatAmount({
-        //           amount: vaultDetails?.vault_apy,
-        //         })
-        //       : "--",
-        //     suffix: "%",
-        //   },
-        // ],
+        tooltip:
+          "Your real yearly return with hourly compounding, based on the average APR of the last 7 days. Updates every 1 hour.",
         value: !isLoadingVaultDetails
           ? formatAmount({
               amount: vaultDetails?.vault_apy,
@@ -100,36 +73,7 @@ const VaultDetail = () => {
       },
       {
         label: "TVL",
-        tooltip: [
-          {
-            label: "DEX TVL",
-            value: !isLoadingVaultDetails
-              ? formatAmount({
-                  amount: vaultDetails?.pool_total_value_usd,
-                })
-              : "--",
-            prefix: "$",
-          },
-          {
-            label: "NODO TVL",
-            value: !isLoadingVaultDetails
-              ? formatAmount({
-                  amount: vaultDetails?.total_value_usd,
-                })
-              : "--",
-            prefix: "$",
-          },
-          {
-            label: "NODO Shares",
-            value: !isLoadingVaultDetails
-              ? formatAmount({
-                  amount: vaultDetails?.nodo_share,
-                  precision: vaultDetails?.nodo_share < 1 ? 5 : 2,
-                })
-              : "--",
-            suffix: "%",
-          },
-        ],
+        tooltip: "Total Liquidity Value at the current market price",
         value: !isLoadingVaultDetails
           ? formatAmount({
               amount: vaultDetails?.total_value_usd,
@@ -139,17 +83,8 @@ const VaultDetail = () => {
       },
       {
         label: "24h Rewards",
-        tooltip: [
-          {
-            label: "Daily Rate",
-            value: !isLoadingVaultDetails
-              ? formatAmount({
-                  amount: vaultDetails?.rewards_24h_daily_rate,
-                })
-              : "--",
-            suffix: "%",
-          },
-        ],
+        tooltip:
+          "Total LP fees and token incentives earned by the vault in the last 24 hours. Updates every 1 hour.",
         value: !isLoadingVaultDetails
           ? formatAmount({
               amount: vaultDetails?.rewards_24h_usd,
@@ -159,19 +94,8 @@ const VaultDetail = () => {
       },
       {
         label: "NDLP Price",
-        tooltip: [
-          {
-            label: "7D % Change",
-            value: !isLoadingVaultDetails
-              ? formatAmount({
-                  amount: vaultDetails?.ndlp_price_change_7d,
-                })
-              : "--",
-            suffix: "%",
-            isHighlighted: true,
-            isIncreasing: vaultDetails?.ndlp_price_change_7d > 0,
-          },
-        ],
+        tooltip:
+          "Price of 1 NDLP token based on the vault’s total value. (Unit USD)",
         value: !isLoadingVaultDetails
           ? formatAmount({
               amount: vaultDetails?.ndlp_price,
