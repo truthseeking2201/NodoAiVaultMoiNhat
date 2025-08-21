@@ -72,6 +72,11 @@ export const COIN_TYPES_CONFIG = {
       display_name: "x Staked SUI",
       image_url: "/coins/x_sui.png",
     },
+    {
+      id: "0x9d297676e7a4b771ab023291377b2adfaa4938fb9080b8d12430e4b108b836a9::xaum::XAUM",
+      display_name: "XAUM",
+      image_url: "/coins/xaum.png",
+    },
     // TODO: add more collateral tokens here
   ],
 };
