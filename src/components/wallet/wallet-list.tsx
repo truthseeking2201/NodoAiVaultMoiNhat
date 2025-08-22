@@ -94,6 +94,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
                 handleReject();
                 return;
               }
+              localStorage.setItem("last_wallet", foundWallet.name);
               onConnectSuccess(address, () => {
                 setConnectedWallet(null);
                 setIsConnecting(false);

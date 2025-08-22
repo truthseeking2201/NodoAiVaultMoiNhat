@@ -33,6 +33,7 @@ import { setWalletDisconnectHandler } from "./utils/wallet-disconnect";
 import { isMobileDevice } from "./utils/helpers";
 import { useToast } from "./hooks/use-toast";
 import { IconErrorToast } from "./components/ui/icon-error-toast";
+import { useStableAutoConnect } from "./hooks/use-stable-auto-connect";
 
 const NotFound = lazy(() =>
   import("./pages/not-found").catch((e) => {
@@ -59,6 +60,7 @@ const useSetWalletDisconnectHandler = () => {
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("current-address");
         localStorage.removeItem("whitelisted_address");
+        localStorage.removeItem("last_wallet");
       } catch (error) {
         const walletConnectionInfo = JSON.parse(
           localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
@@ -88,6 +90,7 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
   useSetWalletDisconnectHandler();
   // Prefetch critical images for better UX
   useCriticalImagePrefetch();
+  useStableAutoConnect();
 
   useEffect(() => {
     const walletConnectionInfo = JSON.parse(
