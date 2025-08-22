@@ -15,10 +15,16 @@ function initSentry() {
     // https://docs.sentry.io/platforms/javascript/guides/react/configuration/options/#sendDefaultPii
     sendDefaultPii: true,
 
-    integrations: [Sentry.browserTracingIntegration()],
-    // tracesSampleRate: 0.01, // 1% of transactions are sent to Sentry
-    // sampleRate: 0.1, // 10% of events are sampled
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration(),
+    ],
+    tracesSampleRate: 1.0, // 100% of transactions are sent to Sentry
+    sampleRate: 1.0, // 100% of events are sampled
 
+    // Session Replay
+    replaysSessionSampleRate: 1.0,
+    replaysOnErrorSampleRate: 1.0,
     // Filter out common non-critical errors
     beforeSend(event) {
       // Filter out browser extension errors
