@@ -7,31 +7,32 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { showFormatNumber } from "@/lib/number";
+import { formatShortCurrency } from "@/utils/currency";
 
 const campaigns_data = {
   "SUI-USDC-cetus": {
-    usdc: 1250,
+    usdc: 1500,
     xp: 100000000,
     startDate: "28/07/2025",
     endDate: "15/08/2025",
     snapshotDate: "14/08/2025, 3PM SGT",
   },
   "SUI-USDC-mmt": {
-    usdc: 2500,
+    usdc: 1500,
     xp: 100000000,
     startDate: "28/07/2025",
     endDate: "15/08/2025",
     snapshotDate: "14/08/2025, 3PM SGT",
   },
   "DEEP-SUI-mmt": {
-    usdc: 1250,
+    // usdc: 1250,
     xp: 100000000,
     startDate: "28/07/2025",
     endDate: "15/08/2025",
     snapshotDate: "14/08/2025, 3PM SGT",
   },
   "WAL-SUI-mmt": {
-    usdc: 1250,
+    // usdc: 1250,
     xp: 100000000,
     startDate: "28/07/2025",
     endDate: "15/08/2025",
@@ -44,7 +45,7 @@ const campaign_default = {
 };
 
 const tokens = [
-  // { value: "usdc", symbol: "USDC", image: "/coins/usdc.png" },
+  { value: "usdc", symbol: "USDC", image: "/coins/usdc.png" },
   { value: "xp", symbol: "XP Shares", image: "/coins/xp.png" },
 ];
 
@@ -104,7 +105,7 @@ const VaultRewards = ({ item }: { item: VaultItemData }) => {
                       className="w-5 h-5"
                     />
                     <span className="text-sm text-white font-mono font-normal">
-                      {showFormatNumber(campaignData[token.value], 2, 2, "$")}{" "}
+                      {formatShortCurrency(campaignData[token.value], 2)}{" "}
                       {token.symbol}
                     </span>
                   </div>
