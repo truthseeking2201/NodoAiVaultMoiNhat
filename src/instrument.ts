@@ -23,7 +23,7 @@ function initSentry() {
     sampleRate: 1.0, // 100% of events are sampled
 
     // Session Replay
-    replaysSessionSampleRate: 1.0,
+    replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
     // Filter out common non-critical errors
     beforeSend(event) {
