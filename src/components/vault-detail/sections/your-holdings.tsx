@@ -22,6 +22,7 @@ import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { calculateUserHoldings } from "@/utils/helpers";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 
 type YourHoldingProps = {
@@ -245,16 +246,24 @@ const YourHoldings = ({
             </Button>
           </div>
         </div>
-        <div>
+
+        <AnimatePresence initial={false}>
           {expanded && (
-            <div className="pt-4 flex flex-col gap-4">
+            <motion.div
+              className="pt-4 flex flex-col gap-4"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              key="box"
+            >
               <HoldingCard>
                 <LabelWithTooltip
                   hasIcon={false}
                   label="Estimated LP Breakdown (secure, updates in ~1h)"
                   tooltipContent={
                     <div className="text-white/80 text-xs font-sans">
-                      Breakdown of underlying tokens based on the your ownership share in the vault
+                      Breakdown of underlying tokens based on the your ownership
+                      share in the vault
                     </div>
                   }
                   labelClassName="text-white/60 md:text-sm text-[10px] mb-2 underline underline-offset-4 decoration-dotted decoration-gray-600"
@@ -285,7 +294,10 @@ const YourHoldings = ({
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <span className="bg-[#23272F] text-[#6AD6FF] px-2 py-1 rounded text-xs">
-                                        Calculating...
+                                        Calculating
+                                        <span className="animate-fade-in-out inline-block">.</span>
+                                        <span className="animate-fade-in-out inline-block delay-100">.</span>
+                                        <span className="animate-fade-in-out inline-block delay-200">.</span>
                                       </span>
                                     </TooltipTrigger>
                                     <TooltipContent
@@ -495,7 +507,16 @@ const YourHoldings = ({
                         userHoldingData?.user_total_rewards_usd < 1 ? 6 : 2
                       )}`
                     ) : (
-                      <span className="text-[#00FFB2]">Farming...</span>
+                      <span className="text-[#00FFB2]">
+                        <span className="font-medium">Farming</span>
+                        <span className="animate-fade-in-out inline-block">.</span>
+                        <span className="animate-fade-in-out inline-block delay-100">
+                          .
+                        </span>
+                        <span className="animate-fade-in-out inline-block delay-200">
+                          .
+                        </span>
+                      </span>
                     )}
                   </div>
                 </HoldingCard>
@@ -637,9 +658,9 @@ const YourHoldings = ({
                   </span>
                 </div>
               </HoldingCard>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
       </ConditionRenderer>
     </DetailWrapper>
   );
