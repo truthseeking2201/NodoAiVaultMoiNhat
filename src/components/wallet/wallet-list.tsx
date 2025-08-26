@@ -25,8 +25,7 @@ type WalletListProps = {
   onConnectSuccess: (address: string, resetConnection?: () => void) => void;
 };
 
-const FAIL_TO_LOGIN_MESSAGE =
-  "Failed to verify your wallet signature. Please try again.";
+const FAIL_TO_LOGIN_MESSAGE = "Failed to verify your wallet signature.";
 const FAIL_TO_OPEN_NEW_WINDOW_MESSAGE = "Failed to open new window";
 
 const WalletList = ({ onConnectSuccess }: WalletListProps) => {
@@ -100,7 +99,7 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
 
                 toast({
                   title: failToLoginMessage,
-                  description: isWindowsBlocked && (
+                  description: isWindowsBlocked ? (
                     <div>
                       <div className="text-sm font-normal font-sans">
                         Quick fix:
@@ -125,6 +124,8 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
                         to download extension for your browser
                       </div>
                     </div>
+                  ) : (
+                    <div>{response.message}</div>
                   ),
                   variant: "error",
                   duration: isWindowsBlocked ? 20000 : 5000,

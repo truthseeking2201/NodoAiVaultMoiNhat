@@ -11,6 +11,8 @@ export const loginWallet = async (payload: {
   timestamp: number;
   address: string;
 }) => {
-  const res = await axios.post(`${baseURL}${URLS.login}`, payload);
+  const res = await axios.post(`${baseURL}${URLS.login}`, payload, {
+    timeout: 10000,
+  });
   return res.data?.data;
 };
