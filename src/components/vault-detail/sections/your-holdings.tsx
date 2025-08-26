@@ -295,9 +295,15 @@ const YourHoldings = ({
                                     <TooltipTrigger asChild>
                                       <span className="bg-[#23272F] text-[#6AD6FF] px-2 py-1 rounded text-xs">
                                         Calculating
-                                        <span className="animate-fade-in-out inline-block">.</span>
-                                        <span className="animate-fade-in-out inline-block delay-100">.</span>
-                                        <span className="animate-fade-in-out inline-block delay-200">.</span>
+                                        <span className="animate-fade-in-out inline-block">
+                                          .
+                                        </span>
+                                        <span className="animate-fade-in-out inline-block delay-100">
+                                          .
+                                        </span>
+                                        <span className="animate-fade-in-out inline-block delay-200">
+                                          .
+                                        </span>
                                       </span>
                                     </TooltipTrigger>
                                     <TooltipContent
@@ -509,11 +515,16 @@ const YourHoldings = ({
                     ) : (
                       <span className="text-[#00FFB2]">
                         <span className="font-medium">Farming</span>
-                        <span className="animate-fade-in-out inline-block">.</span>
+                        <span className="animate-fade-in-out inline-block">
+                          .
+                        </span>
                         <span className="animate-fade-in-out inline-block delay-100">
                           .
                         </span>
                         <span className="animate-fade-in-out inline-block delay-200">
+                          .
+                        </span>
+                        <span className="animate-fade-in-out inline-block delay-300">
                           .
                         </span>
                       </span>
@@ -596,7 +607,18 @@ const YourHoldings = ({
                           userHoldingData?.user_rewards_24h_usd < 1 ? 6 : 2
                         )}`
                       ) : (
-                        <span className="text-[#00FFB2]">Farming...</span>
+                        <span className="text-[#00FFB2]">
+                          <span>Farming</span>
+                          <span className="animate-fade-in-out inline-block delay-100">
+                            .
+                          </span>
+                          <span className="animate-fade-in-out inline-block delay-200">
+                            .
+                          </span>
+                          <span className="animate-fade-in-out inline-block delay-300">
+                            .
+                          </span>
+                        </span>
                       )
                     ) : (
                       "0"
