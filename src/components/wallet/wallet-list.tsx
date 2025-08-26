@@ -25,6 +25,10 @@ type WalletListProps = {
   onConnectSuccess: (address: string, resetConnection?: () => void) => void;
 };
 
+const FAIL_TO_LOGIN_MESSAGE =
+  "Failed to verify your wallet signature. Please try again.";
+const FAIL_TO_OPEN_NEW_WINDOW_MESSAGE = "Failed to open new window";
+
 const WalletList = ({ onConnectSuccess }: WalletListProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -41,24 +45,28 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
 
     if (isSlushApp) {
       const slushWallet = WALLETS.find((wallet) => wallet.name === "Slush");
-      return slushWallet ? [{
-        ...slushWallet,
-        isInstalled: !!wallets.find(w => w.name === "Slush")
-      }] : [];
+      return slushWallet
+        ? [
+            {
+              ...slushWallet,
+              isInstalled: !!wallets.find((w) => w.name === "Slush"),
+            },
+          ]
+        : [];
     }
-    return WALLETS
-      .filter(wallet => !isMobile || wallet.name !== "Newmoney")
-      .map((wallet) => {
-        const foundWallet = wallets.find((w) => {
-          return w.name === wallet.name;
-        });
-        return {
-          ...wallet,
-          name: foundWallet?.name || wallet.name,
-          icon: wallet.icon || foundWallet?.icon,
-          isInstalled: !!foundWallet,
-        };
-      }) as Wallet[];
+    return WALLETS.filter(
+      (wallet) => !isMobile || wallet.name !== "Newmoney"
+    ).map((wallet) => {
+      const foundWallet = wallets.find((w) => {
+        return w.name === wallet.name;
+      });
+      return {
+        ...wallet,
+        name: foundWallet?.name || wallet.name,
+        icon: wallet.icon || foundWallet?.icon,
+        isInstalled: !!foundWallet,
+      };
+    }) as Wallet[];
   }, [wallets, isMobile]);
 
   const handleReject = () => {
@@ -81,14 +89,45 @@ const WalletList = ({ onConnectSuccess }: WalletListProps) => {
           {
             onSuccess: async (data) => {
               const address = data.accounts[0].address;
-              const isLoginSuccess = await loginWallet(address);
-              if (!isLoginSuccess) {
+              const response = await loginWallet(address);
+              if (!response?.success) {
+                const isWindowsBlocked =
+                  response.message === FAIL_TO_OPEN_NEW_WINDOW_MESSAGE;
+
+                const failToLoginMessage = isWindowsBlocked
+                  ? FAIL_TO_OPEN_NEW_WINDOW_MESSAGE
+                  : FAIL_TO_LOGIN_MESSAGE;
+
                 toast({
-                  title: "Login failed",
-                  description:
-                    "Failed to verify your wallet signature. Please try again.",
+                  title: failToLoginMessage,
+                  description: isWindowsBlocked && (
+                    <div>
+                      <div className="text-sm font-normal font-sans">
+                        Quick fix:
+                      </div>
+                      <ol className="list-decimal ml-8 mt-1">
+                        <li>
+                          Look for the popup blocked icon in your address bar on
+                          the top right corner and click "Allow"
+                        </li>
+                        <li>Reload the page and try again</li>
+                      </ol>
+                      <div className="text-sm font-normal font-sans mt-1">
+                        If the issue persists, please click{" "}
+                        <a
+                          href={selectedWallet.extensionUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          here
+                        </a>{" "}
+                        to download extension for your browser
+                      </div>
+                    </div>
+                  ),
                   variant: "error",
-                  duration: 5000,
+                  duration: isWindowsBlocked ? 20000 : 5000,
                   icon: <IconErrorToast />,
                 });
                 handleReject();

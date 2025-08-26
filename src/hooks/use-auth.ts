@@ -45,7 +45,9 @@ export const useLoginWallet = () => {
       setUpdated(false);
       setNdlpUpdated(false);
       refetchDepositVaults();
-      return true;
+      return {
+        success: true,
+      };
     } catch (error) {
       console.log(error);
       Sentry.captureException(error, {
@@ -54,7 +56,10 @@ export const useLoginWallet = () => {
         },
       });
       triggerWalletDisconnect();
-      return false;
+      return {
+        success: false,
+        message: error.message,
+      };
     }
   };
 };
