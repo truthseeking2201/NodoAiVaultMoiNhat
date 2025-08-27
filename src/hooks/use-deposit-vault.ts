@@ -163,7 +163,7 @@ export const useDepositVault = (vaultId: string) => {
       );
 
       const baseParams = [
-        tx.pure.u64(profitData.vault_value_usd),
+        tx.pure.u64(profitData.vault_value),
         tx.pure.u64(new BigNumber(profitData.profit_amount).abs().toString()),
         tx.pure.bool(profitData.negative),
         tx.pure.u64(profitData.expire_time),
@@ -418,7 +418,7 @@ export const useDepositDualVault = (vaultId: string) => {
         tx.pure.u128(slippageBps),
         tx.pure.u32(tick_lower),
         tx.pure.u32(tick_upper),
-        tx.pure.u64(profitData.vault_value_usd),
+        tx.pure.u64(profitData.vault_value),
         tx.pure.u64(new BigNumber(profitData.profit_amount).abs().toString()),
         tx.pure.bool(profitData.negative),
         tx.pure.u64(profitData.expire_time),
