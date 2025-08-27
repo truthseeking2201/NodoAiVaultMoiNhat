@@ -81,7 +81,7 @@ export const RowTokens = ({
           className="w-[18px] h-[18px] inline-flex items-center"
         />
         <span className="font-mono text-xs text-white">
-          {formatCurrency(tokens?.[0]?.amount || 0, tokens?.[0]?.decimal, 0, 2)}{" "}
+          {formatCurrency(tokens?.[0]?.amount || 0, tokens?.[0]?.decimal, 0, 4)}{" "}
           <span className="font-mono text-[10px] text-white/70">
             {tokens?.[0]?.token_symbol}
           </span>
