@@ -75,7 +75,7 @@ export const LabelWithTooltip = ({
                   className={cn(
                     labelClassName,
                     type === "underline" &&
-                      "underline underline-offset-4 decoration-dotted decoration-gray-600"
+                      "underline underline-offset-8 decoration-dotted decoration-gray-600"
                   )}
                 >
                   {label}

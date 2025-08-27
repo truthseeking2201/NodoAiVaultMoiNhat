@@ -182,9 +182,10 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   }, [watch, collateralToken]);
 
   const estimatedDepositAmount = useMemo(() => {
-    return +debounceAmount > 0
-      ? getDecimalAmount(debounceAmount, collateralToken?.decimals).toString()
-      : new BigNumber(1).dividedBy(collateralToken?.decimals).toString();
+    return getDecimalAmount(
+      debounceAmount && +debounceAmount > 0 ? debounceAmount : 1,
+      collateralToken?.decimals
+    ).toString();
   }, [debounceAmount, collateralToken]);
 
   const {
