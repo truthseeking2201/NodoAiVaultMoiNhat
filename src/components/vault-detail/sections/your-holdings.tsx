@@ -188,12 +188,13 @@ const YourHoldings = ({
       }
       isLoading={isDetailLoading}
       loadingStyle="h-[68px] w-full"
+      className={cn(!expanded && '!pb-0')}
     >
       <ConditionRenderer
         when={userState !== "nonDeposit"}
         fallback={<UnSignedHolding />}
       >
-        <div className="pb-0">
+        <div className="pb-4">
           <div className="flex items-center justify-between">
             <div>
               <LabelWithTooltip
@@ -249,7 +250,7 @@ const YourHoldings = ({
         <AnimatePresence initial={false}>
           {expanded && (
             <motion.div
-              className="pt-4 flex flex-col gap-4"
+              className="flex flex-col gap-4"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
