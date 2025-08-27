@@ -203,7 +203,7 @@ export default function WithdrawForm({
 
   useEffect(() => {
     if (!tokens.length) return;
-    const token_usdc = tokens.find((i) => i.token_symbol == "USDC");
+    const token_usdc = tokens.find((i) => i.token_symbol == "SUI");
     if (token_usdc) {
       setSelectedToken(token_usdc);
     } else {
