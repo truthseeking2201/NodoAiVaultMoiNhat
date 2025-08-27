@@ -21,6 +21,7 @@ interface LabelWithTooltipProps {
   type?: "info" | "help";
   asChild?: boolean;
   hasIcon?: boolean;
+  propsTooltipContent?: any;
 }
 
 const iconMap = {
@@ -40,6 +41,7 @@ export const LabelWithTooltip = ({
   type = "info",
   asChild = false,
   hasIcon = true,
+  propsTooltipContent = {},
 }: LabelWithTooltipProps) => {
   const computedIcon = iconMap[type] || <InfoIcon />;
   return (
@@ -53,7 +55,10 @@ export const LabelWithTooltip = ({
               <>
                 <div className={labelClassName}>{label}</div>
                 <ConditionRenderer when={!!tooltipContent}>
-                  <TooltipTrigger asChild={asChild} type="button">
+                  <TooltipTrigger
+                    asChild={asChild}
+                    type="button"
+                  >
                     <span>
                       {computedIcon &&
                         React.cloneElement(computedIcon, {
@@ -74,7 +79,10 @@ export const LabelWithTooltip = ({
             )}
           </div>
           <ConditionRenderer when={!!tooltipContent}>
-            <TooltipContent className={contentClassName}>
+            <TooltipContent
+              className={contentClassName}
+              {...propsTooltipContent}
+            >
               {typeof tooltipContent === "string" ? (
                 <div className="text-white/80 text-xs">{tooltipContent}</div>
               ) : (

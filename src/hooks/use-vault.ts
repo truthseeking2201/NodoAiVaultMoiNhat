@@ -3,6 +3,7 @@ import {
   getVaultsWithdrawal,
   getEstimateDeposit,
   getEstimateWithdraw,
+  getEstimateWithdrawDual,
   getSwapDepositInfo,
   getVaultBasicDetails,
   getUserHolding,
@@ -14,6 +15,7 @@ import {
   SCVaultConfig,
   VaultEstimateDeposit,
   VaultEstimateWithdraw,
+  VaultEstimateWithdrawDual,
   VaultSwapDepositInfo,
   WithdrawalRequests,
   VaultHoldingType,
@@ -135,6 +137,8 @@ export const useVaultBasicDetails = (vaultId: string) => {
     enabled: !!vaultId,
     refetchOnWindowFocus: true,
     retry: 1,
+    staleTime: 60000,
+    refetchInterval: 60000,
   });
 };
 
@@ -149,6 +153,22 @@ export const useEstimateWithdraw = (
       return response as unknown as VaultEstimateWithdraw;
     },
     enabled: !!vaultId && !!params.payout_token,
+    refetchOnWindowFocus: true,
+  });
+};
+
+export const useEstimateWithdrawDual = (
+  vaultId: string,
+  ndlp_amount: string,
+  enabled: boolean
+) => {
+  return useQuery<VaultEstimateWithdrawDual, Error>({
+    queryKey: ["vault-estimate-withdraw-dual", vaultId, ndlp_amount],
+    queryFn: async () => {
+      const response = await getEstimateWithdrawDual(vaultId, ndlp_amount);
+      return response as unknown as VaultEstimateWithdrawDual;
+    },
+    enabled: enabled,
     refetchOnWindowFocus: true,
   });
 };
@@ -201,7 +221,11 @@ export const useSwapDepositInfo = (vaultId: string, token_address: string) => {
   });
 };
 
-export const useUserHolding = (vaultId: string, ndlp_balance: string, isAuthenticated: boolean) => {
+export const useUserHolding = (
+  vaultId: string,
+  ndlp_balance: string,
+  isAuthenticated: boolean
+) => {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["user-holding", vaultId],
     queryFn: async () => {

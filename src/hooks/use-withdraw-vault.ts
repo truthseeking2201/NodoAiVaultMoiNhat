@@ -1,14 +1,23 @@
 import { Buffer } from "buffer";
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import { useWallet } from "./use-wallet";
 import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
-import { useGetVaultConfig, useEstimateWithdraw } from "./use-vault";
+import {
+  useGetVaultConfig,
+  useEstimateWithdraw,
+  useEstimateWithdrawDual,
+} from "./use-vault";
 import { Transaction } from "@mysten/sui/transactions";
 import { useMergeCoins } from "./use-merge-coins";
 import { RATE_DENOMINATOR, CLOCK } from "@/config/vault-config";
-import { getDecimalAmount, getBalanceAmount } from "@/lib/number";
-import { sleep } from "@/lib/utils";
-import LpType from "@/types/lp.type";
+import {
+  getDecimalAmount,
+  getBalanceAmount,
+  showFormatNumber,
+} from "@/lib/number";
+import { sleep, getImage } from "@/lib/utils";
+import LpType, { TokenType } from "@/types/lp.type";
 import DataClaimType from "@/types/data-claim.types.d";
 import BigNumber from "bignumber.js";
 import {
@@ -16,65 +25,23 @@ import {
   getWithdrawalRequestsMultiTokens,
   getVaultBasicDetails,
 } from "@/apis/vault";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
+import { IconCheckSuccess } from "@/components/ui/icon-check-success";
+import { IconErrorToast } from "@/components/ui/icon-error-toast";
 
-const _calcRateFee = (fee_bps) => {
-  return BigNumber(fee_bps || 0)
-    .dividedBy(100)
-    .toNumber();
-};
-const _calcPercent = (amount, fee_bps) => {
-  return BigNumber(amount).times(fee_bps).div(10000).toNumber();
-};
-
-const _getEstWithdraw = (
-  amountLp: number,
-  configLp: LpType,
-  configVault: any
-) => {
-  try {
-    if (
-      !Number(amountLp) ||
-      Number(amountLp) <= 0 ||
-      !configLp ||
-      !configVault
-    ) {
-      return null;
-    }
-    const rawAmount = getDecimalAmount(amountLp, configLp.lp_decimals);
-    const amount = rawAmount
-      .times(configVault.rate)
-      .dividedBy(RATE_DENOMINATOR);
-
-    const fee = amount.times(configVault.withdraw.fee_bps).dividedBy(10000);
-    const receiveAmount = amount.minus(fee);
-
-    // convert amount to show
-    const _receiveAmount =
-      getBalanceAmount(
-        receiveAmount,
-        configLp.collateral_decimals
-      )?.toNumber() || 0;
-    const _fee =
-      getBalanceAmount(fee, configLp.collateral_decimals)?.toNumber() || 0;
-
-    return {
-      amount: amountLp,
-      receive: _receiveAmount,
-      fee: _fee,
-      rateFee: _calcRateFee(configVault.withdraw.fee_bps),
-    };
-  } catch (error) {
-    return null;
-  }
-};
+const successIcon: React.ReactNode = React.createElement(IconCheckSuccess, {
+  size: 14,
+  className: "h-6 w-6",
+});
+const errorIcon: React.ReactNode = React.createElement(IconErrorToast);
 
 export const useWithdrawVault = () => {
   const { mutateAsync: signAndExecuteTransaction } =
     useSignAndExecuteTransaction();
   const { address } = useWallet();
   const suiClient = useSuiClient();
-
+  const { toast } = useToast();
   const { mergeCoins } = useMergeCoins();
 
   /**
@@ -115,43 +82,50 @@ export const useWithdrawVault = () => {
       }
 
       return dataRequest?.map((val) => {
+        const tokenWithdraw = {
+          token_symbol: configLp.lp_symbol,
+          token_address: configLp.lp_coin_type,
+          decimal: configLp.lp_decimals,
+          image: configLp.lp_image,
+        };
         const withdrawAmount = getBalanceAmount(
           val?.withdrawal_ndlp_amount || 0,
-          configLp.lp_decimals
+          tokenWithdraw.decimal
         )?.toNumber();
-        const receiveAmount = getBalanceAmount(
-          val?.receive_amount || 0,
-          val?.token?.decimal
-        );
-        const receiveSymbol = val?.token?.token_symbol;
-        const conversionRate = receiveAmount
-          .dividedBy(withdrawAmount)
-          .toNumber();
-        const timeUnlock = Number(val?.countdown || 0);
-        const isClaim = val.is_ready;
-        const fee = 0;
+        let receive_amounts = val?.receive_amounts;
+        if (receive_amounts?.length == 1 && Number(receive_amounts[0]) == 0) {
+          // for old request
+          receive_amounts = [val.receive_amount];
+        }
+        const tokenReceives = val?.receive_tokens?.map((token, idx) => {
+          return {
+            ...token,
+            image: getImage(token.token_symbol),
+            amount: getBalanceAmount(
+              receive_amounts[idx] || 0,
+              token?.decimal
+            ).toNumber(),
+          };
+        });
+        const conversionRate = {
+          from_symbol: tokenWithdraw.token_symbol,
+          to_symbol: tokenReceives[0].to_symbol,
+          rate: new BigNumber(tokenReceives[0].amount)
+            .dividedBy(withdrawAmount)
+            .toNumber(),
+        };
 
         return {
-          id: 1,
-          timeUnlock: timeUnlock,
-          isClaim: isClaim,
-          withdrawAmount: withdrawAmount,
-          withdrawSymbol: configLp.lp_symbol,
-          withdrawSymbolImage: configLp.lp_image,
-          receiveAmountRaw: receiveAmount.toNumber(),
-          receiveAmount: receiveAmount.minus(fee).toNumber(),
-          receiveSymbol: receiveSymbol,
-          receiveSymbolImage: `/coins/${receiveSymbol?.toLowerCase()}.png`,
-          receiveDecimal: val?.token?.decimal || 9,
-          feeAmount: fee,
-          feeSymbol: configLp.collateral_symbol,
-          feeRate: 0,
+          timeUnlock: Number(val?.countdown || 0),
+          isClaim: val.is_ready,
+          tokenWithdraw: { ...tokenWithdraw, amount: withdrawAmount },
+          tokenReceives: tokenReceives,
           conversionRate: conversionRate,
           configLp: configLp,
         };
       });
     } catch (error) {
-      console.log("-----getRequestClaim-error", error);
+      console.error("Error withdrawal request:", error);
       return [];
     }
   };
@@ -188,13 +162,13 @@ export const useWithdrawVault = () => {
   const withdraw = async (
     amountLp: number,
     configLp: LpType,
-    token_receive: string
+    tokenReceives: TokenType[]
   ) => {
     try {
       if (!address) {
         throw new Error("No account connected");
       }
-      if (!token_receive) {
+      if (!tokenReceives || !tokenReceives?.length) {
         throw new Error("No payout token selected");
       }
 
@@ -247,11 +221,15 @@ export const useWithdrawVault = () => {
       const typeArguments = [
         configLp.collateral_coin_type,
         configLp.lp_coin_type,
-        token_receive,
+        ...tokenReceives.map((i) => i.token_address),
       ];
 
+      const method_name =
+        tokenReceives.length == 1
+          ? "withdraw_with_sigs_credit_time"
+          : "withdraw_dual_token";
       tx.moveCall({
-        target: `${configLp.package_id}::vault::withdraw_with_sigs_credit_time`,
+        target: `${configLp.package_id}::vault::${method_name}`,
         arguments: _arguments,
         typeArguments: typeArguments,
       });
@@ -264,7 +242,14 @@ export const useWithdrawVault = () => {
       return result;
     } catch (error) {
       console.error("Error in withdraw:", error);
-      throw error;
+      toast({
+        title: "Withdraw failed",
+        description: error?.message || error,
+        variant: "error",
+        duration: 5000,
+        icon: errorIcon,
+      });
+      return null;
     }
   };
 
@@ -293,14 +278,25 @@ export const useWithdrawVault = () => {
         if (!dataSignature?.signatures?.length) {
           continue;
         }
+        const token_addresses = dataSignature?.receive_tokens.map(
+          (i) => i.token_address
+        );
+        const is_dual = token_addresses.length > 1;
 
         const _arguments: any = [
           tx.object(configLp.vault_config_id),
           tx.object(configLp.vault_id),
           tx.pure.address(address),
-          tx.pure.address(dataSignature.sig_token),
+          !is_dual
+            ? tx.pure.address(dataSignature.sig_token)
+            : tx.pure("vector<vector<string>>", [
+                token_addresses.map((i) => i.replace(/^0x/, "")),
+              ]),
           tx.pure("vector<u64>", dataSignature.withdraw_time_requests),
-          tx.pure("vector<u64>", dataSignature.withdraw_amount_requests),
+          tx.pure(
+            !is_dual ? "vector<u64>" : "vector<vector<u64>>",
+            dataSignature.withdraw_amount_requests
+          ),
           tx.pure(
             "vector<u64>",
             dataSignature.withdraw_amount_collateral_requests
@@ -318,53 +314,93 @@ export const useWithdrawVault = () => {
           ),
           tx.object(configLp.clock),
         ];
+
         const typeArguments = [
           configLp.collateral_coin_type,
           configLp.lp_coin_type,
-          dataSignature.token.token_address,
+          ...token_addresses,
         ];
+        const method_name = !is_dual
+          ? "redeem_with_sigs_verify_token"
+          : "redeem_token_dual";
 
         tx.moveCall({
-          target: `${configLp.package_id}::vault::redeem_with_sigs_verify_token`,
+          target: `${configLp.package_id}::vault::${method_name}`,
           arguments: _arguments,
           typeArguments: typeArguments,
         });
       }
-
       const result = await signAndExecuteTransaction({
         transaction: tx,
       });
 
-      return { resultTx: result, dataSignatures };
+      const val = dataSignatures[0];
+      let receive_amounts = val?.receive_amounts;
+      if (receive_amounts?.length == 1 && Number(receive_amounts[0]) == 0) {
+        // for old request
+        receive_amounts = [val.receive_amount];
+      }
+      const receives = val?.receive_tokens?.map((token, idx) => {
+        const amount = getBalanceAmount(
+          receive_amounts[idx] || 0,
+          token?.decimal
+        ).toNumber();
+        const symbol = token?.token_symbol;
+        return `${showFormatNumber(amount)} ${symbol}`;
+      });
+      const receives_text = receives.join(" and ");
+
+      toast({
+        title: "Withdraw successful!",
+        description:
+          receives.length > 1
+            ? `${receives_text} have been sent to your wallet. Check your wallet for transaction details`
+            : `${receives_text} has been Withdrawn to your account. Check your wallet for Tx details`,
+        variant: "success",
+        duration: 5000,
+        hideClose: true,
+        icon: successIcon,
+      });
+
+      return result;
     } catch (error) {
       console.error("Error in redeem:", error);
-      throw error;
+      toast({
+        title: "Claim failed",
+        description: error?.message || error,
+        variant: "error",
+        duration: 5000,
+        icon: errorIcon,
+      });
+      return null;
     }
   };
 
   const redeemWithVaultId = async (vault_id: string) => {
-    const response = await getVaultBasicDetails(vault_id, "");
-    const vault = response as unknown as BasicVaultDetailsType;
+    try {
+      const response = await getVaultBasicDetails(vault_id, "");
+      const vault = response as unknown as BasicVaultDetailsType;
 
-    const lpData = {
-      package_id: vault.metadata.package_id,
-      vault_config_id: vault.metadata.vault_config_id,
-      vault_id: vault.vault_id,
-      lp_coin_type: vault.vault_lp_token,
-      lp_decimals: vault.vault_lp_token_decimals,
-      collateral_coin_type: vault.collateral_token,
-      clock: CLOCK,
-    };
-    const { dataSignatures }: any = await redeem(lpData);
-    const val = dataSignatures[0];
-    const receiveAmount = getBalanceAmount(
-      val?.receive_amount || 0,
-      val?.token?.decimal
-    );
-    return {
-      receiveAmount: receiveAmount.toNumber(),
-      receiveSymbol: val?.token?.token_symbol,
-    };
+      const lpData = {
+        package_id: vault.metadata.package_id,
+        vault_config_id: vault.metadata.vault_config_id,
+        vault_id: vault.vault_id,
+        lp_coin_type: vault.vault_lp_token,
+        lp_decimals: vault.vault_lp_token_decimals,
+        collateral_coin_type: vault.collateral_token,
+        clock: CLOCK,
+      };
+      return redeem(lpData);
+    } catch (error) {
+      toast({
+        title: "Claim failed",
+        description: error?.message || error,
+        variant: "error",
+        duration: 5000,
+        icon: errorIcon,
+      });
+      return null;
+    }
   };
 
   return {
@@ -412,10 +448,18 @@ export const useWithdrawVaultConfig = (configLp: LpType) => {
 
 export const useWithdrawEtsAmountReceive = (
   lpData: LpType,
-  tokenReceive: any,
-  amountLp: number
+  amountLp: number,
+  tokenReceives: TokenType[]
 ) => {
   const min_amount_receive = 0.000001;
+
+  const tokenReceive = useMemo(() => {
+    return tokenReceives?.length ? tokenReceives[0] : null;
+  }, [tokenReceives]);
+
+  const isDual = useMemo(() => {
+    return tokenReceives.length > 1;
+  }, [tokenReceives]);
 
   const {
     data: dataEst,
@@ -424,10 +468,23 @@ export const useWithdrawEtsAmountReceive = (
     isLoading: isLoadingEstimateWithdraw,
   } = useEstimateWithdraw(lpData?.vault_id, {
     ndlp_amount: getDecimalAmount(1, lpData.lp_decimals).toString(),
-    payout_token: tokenReceive?.token_address
-      ? encodeURIComponent(tokenReceive?.token_address)
-      : null,
+    payout_token:
+      !isDual && tokenReceive?.token_address
+        ? encodeURIComponent(tokenReceive?.token_address)
+        : null,
   });
+
+  const {
+    data: dataEstDual,
+    refetch: refetchEstimateWithdrawDual,
+    error: errorEstimateWithdrawDual,
+    isLoading: isLoadingEstimateWithdrawDual,
+  } = useEstimateWithdrawDual(
+    lpData?.vault_id,
+    getDecimalAmount(amountLp || 1, lpData.lp_decimals).toString(),
+    !!amountLp && isDual
+  );
+
   const rate_lp_per_token_receive = useMemo(() => {
     return dataEst?.ndlp_per_payout_rate || 0;
   }, [dataEst]);
@@ -436,23 +493,57 @@ export const useWithdrawEtsAmountReceive = (
     return BigNumber(amountLp).times(rate_lp_per_token_receive).toNumber();
   }, [amountLp, rate_lp_per_token_receive]);
 
+  const receives = useMemo<TokenType[]>(() => {
+    if (!isDual) {
+      const _amount = BigNumber(amountLp)
+        .times(rate_lp_per_token_receive)
+        .toNumber();
+      return tokenReceives.map((token) => {
+        return { ...token, amount: _amount };
+      });
+    } else {
+      // dual
+      return tokenReceives.map((token, idx) => {
+        const _amount =
+          idx === 0 ? dataEstDual?.amount_a : dataEstDual?.amount_b;
+        return {
+          ...token,
+          amount: getBalanceAmount(_amount, token.decimal)?.toNumber(),
+        };
+      });
+    }
+  }, [amountLp, tokenReceives, isDual, dataEstDual, rate_lp_per_token_receive]);
+
   const errorEstimate = useMemo(() => {
-    if (errorEstimateWithdraw) {
+    if (errorEstimateWithdraw && !isDual) {
       return typeof errorEstimateWithdraw === "string"
         ? errorEstimateWithdraw
         : errorEstimateWithdraw?.message;
     }
-    if (isLoadingEstimateWithdraw) return "";
-
-    if (Number(amountLp) && BigNumber(amount_receive).lt(min_amount_receive)) {
-      return "Amount received is too small.";
+    if (errorEstimateWithdrawDual && isDual) {
+      return typeof errorEstimateWithdrawDual === "string"
+        ? errorEstimateWithdrawDual
+        : errorEstimateWithdrawDual?.message;
     }
+    if (isLoadingEstimateWithdraw && !isDual) return "";
+    if (isLoadingEstimateWithdrawDual && isDual) return "";
+
+    for (let index = 0; index < receives.length; index++) {
+      const amount = receives[index]?.amount;
+      if (Number(amountLp) && BigNumber(amount).lt(min_amount_receive)) {
+        return "Amount received is too small.";
+      }
+    }
+
     return "";
   }, [
     amountLp,
-    amount_receive,
+    isDual,
+    receives,
     errorEstimateWithdraw,
     isLoadingEstimateWithdraw,
+    errorEstimateWithdrawDual,
+    isLoadingEstimateWithdrawDual,
   ]);
 
   const conversion_rate = useMemo(() => {
@@ -464,13 +555,29 @@ export const useWithdrawEtsAmountReceive = (
   }, [lpData, tokenReceive, rate_lp_per_token_receive]);
 
   return {
-    receive: amount_receive,
+    receives,
     amount: amountLp,
-    rate_lp_per_token_receive,
     conversion_rate: conversion_rate,
-    tokenReceive,
     errorEstimateWithdraw: errorEstimate,
-    isLoadingEstimateWithdraw,
+    isLoadingEst: isLoadingEstimateWithdraw || isLoadingEstimateWithdrawDual,
     refreshRate: refetchEstimateWithdraw,
   };
+};
+
+export const useHasWithdrawRequest = (
+  vaultId: string,
+  walletAddress: string
+) => {
+  return useQuery<boolean, Error>({
+    queryKey: ["vault-has-withdrawing", vaultId, walletAddress],
+    queryFn: async () => {
+      const dataRequest: any = await getWithdrawalRequestsMultiTokens({
+        wallet_address: walletAddress,
+        vault_id: vaultId,
+      });
+      return !!dataRequest?.length;
+    },
+    enabled: !!vaultId && !!walletAddress,
+    refetchOnWindowFocus: true,
+  });
 };

@@ -19,6 +19,8 @@ import { useCurrentDepositVault } from "./use-vault";
 import { useWallet } from "./use-wallet";
 import { NdlpTokenPrice } from "./use-token-price";
 import { getNdlpPrices } from "@/apis/token";
+import { getDepositTokens } from "@/apis";
+import { VaultDepositToken } from "@/types/payment-token.types";
 
 const getCoinObjects = async (
   suiClient: SuiClient,
@@ -87,20 +89,32 @@ const getCoinsBalance = async (
   address: string,
   coinTypes: string[]
 ) => {
-  const balances = await Promise.all(
-    coinTypes.map((coinType) =>
-      suiClient.getBalance({ owner: address, coinType })
-    )
-  );
-  return balances.map((balance) => {
+  const allBalances = await suiClient.getAllBalances({ owner: address });
+  const data = coinTypes.map((coinType) => {
+    const _coinType =
+      coinType == SUI_CONFIG.coinType ? SUI_CONFIG.shortType : coinType;
     return {
-      coinType:
-        balance.coinType == SUI_CONFIG.shortType
-          ? SUI_CONFIG.coinType
-          : balance.coinType,
-      totalBalance: balance.totalBalance,
+      coinType,
+      totalBalance:
+        allBalances.find((i) => i.coinType == _coinType)?.totalBalance || "0",
     };
   });
+  return data;
+
+  // const balances = await Promise.all(
+  //   coinTypes.map((coinType) =>
+  //     suiClient.getBalance({ owner: address, coinType })
+  //   )
+  // );
+  // return balances.map((balance) => {
+  //   return {
+  //     coinType:
+  //       balance.coinType == SUI_CONFIG.shortType
+  //         ? SUI_CONFIG.coinType
+  //         : balance.coinType,
+  //     totalBalance: balance.totalBalance,
+  //   };
+  // });
 };
 
 const getCoinsBalanceWithUsdPrice = async (
@@ -111,11 +125,12 @@ const getCoinsBalanceWithUsdPrice = async (
 ) => {
   const vaultIds = vaults.map((vault) => vault.vault_id) || [];
   const [balancesResult, ndlpPricesResult] = await Promise.allSettled([
-    Promise.all(
-      coinTypes.map((coinType) =>
-        suiClient.getBalance({ owner: address, coinType })
-      )
-    ),
+    // Promise.all(
+    //   coinTypes.map((coinType) =>
+    //     suiClient.getBalance({ owner: address, coinType })
+    //   )
+    // ),
+    getCoinsBalance(suiClient, address, coinTypes),
     getNdlpPrices(vaultIds),
   ]);
 
@@ -133,9 +148,9 @@ const getCoinsBalanceWithUsdPrice = async (
     const matchVault = vaults.find(
       (vault) => vault.vault_lp_token === balance.coinType
     );
-    const usdPrice =
-      ndlpPrices.find((price) => price.vault_id === matchVault?.vault_id)
-        ?.ndlp_price || 0;
+    const usdPrice = ndlpPrices.find(
+      (price) => price.vault_id === matchVault?.vault_id
+    )?.ndlp_price_usd;
 
     return {
       coinType:
@@ -374,6 +389,31 @@ export const useFetchAssets = () => {
   const { address, isAuthenticated } = useWallet();
   const suiClient = useSuiClient();
 
+  const { data: depositTokens, refetch: refetchDepositTokens } = useQuery<
+    VaultDepositToken[]
+  >({
+    queryKey: ["depositTokens"],
+    queryFn: async () => {
+      const response =
+        (await getDepositTokens()) as unknown as VaultDepositToken[];
+      const uniqueTokensResponse = response.filter(
+        (token, index, self) =>
+          index ===
+          self.findIndex((t) => t.token_address === token.token_address)
+      );
+      if (uniqueTokensResponse?.length > 0) {
+        localStorage.setItem(
+          "cached-deposit-tokens",
+          JSON.stringify(uniqueTokensResponse)
+        );
+      }
+      return uniqueTokensResponse;
+    },
+    initialData: JSON.parse(
+      localStorage.getItem("cached-deposit-tokens") || "[]"
+    ) as VaultDepositToken[],
+  });
+
   const {
     data: allCoinObjects = [],
     isLoading: allCoinObjectsLoading,
@@ -385,46 +425,11 @@ export const useFetchAssets = () => {
       getCoinsBalance(
         suiClient,
         address || "",
-        COIN_TYPES_CONFIG.collateral_tokens.map((token) => token.id)
+        depositTokens?.map((token) => token.token_address)
       ),
-    enabled: isAuthenticated && !!address,
+    enabled: isAuthenticated && !!address && depositTokens?.length > 0,
     refetchOnWindowFocus: false,
   });
-
-  const collateralTokens = useMemo(() => {
-    return allCoinObjects.filter(
-      (coin, index, self) =>
-        index === self.findIndex((t) => t.coinType === coin.coinType)
-    );
-  }, [allCoinObjects]);
-
-  const coinsMetadataQuery = useQuery({
-    queryKey: [
-      "getCoinMetadata",
-      collateralTokens.map((coin) => coin.coinType),
-    ],
-    queryFn: async () => {
-      return Promise.all(
-        collateralTokens.map((coin) =>
-          suiClient.getCoinMetadata({ coinType: coin.coinType })
-        )
-      );
-    },
-    enabled: !!collateralTokens?.length,
-    gcTime: 1000 * 60 * 60 * 24 * 1, // 1 day,
-    refetchOnWindowFocus: false,
-  });
-
-  const coinsMetadata = useMemo(
-    () =>
-      coinsMetadataQuery?.data?.reduce((acc, result, index) => {
-        if (result) {
-          acc[collateralTokens[index].coinType] = result;
-        }
-        return acc;
-      }, {} as Record<string, CoinMetadata>),
-    [collateralTokens, coinsMetadataQuery]
-  );
 
   useEffect(() => {
     const isFetching = allCoinObjectsFetching || allCoinObjectsLoading;
@@ -432,10 +437,6 @@ export const useFetchAssets = () => {
 
     if (allCoinObjects.length === 0 && isLoading) {
       setIsLoading(false);
-      return;
-    }
-
-    if (Object.keys(coinsMetadata || {}).length === 0) {
       return;
     }
 
@@ -447,8 +448,10 @@ export const useFetchAssets = () => {
     const assets: UserCoinAsset[] =
       allCoinObjects.reduce((acc, coin) => {
         const coinType = coin.coinType;
-        const coinMetadata = coinsMetadata[coinType];
-        const decimals = coinMetadata?.decimals || 6;
+        const coinMetadata = depositTokens?.find(
+          (token) => token.token_address === coinType
+        );
+        const decimals = coinMetadata?.decimal;
 
         const tokenDisplay = COIN_TYPES_CONFIG.collateral_tokens.find(
           (token) => token.id === coinType
@@ -458,11 +461,14 @@ export const useFetchAssets = () => {
           coin_type: coinType,
           balance: "0",
           raw_balance: coin.totalBalance,
-          image_url: tokenDisplay?.image_url || coinMetadata?.iconUrl || "",
+          image_url:
+            tokenDisplay?.image_url ||
+            `/coins/${coinMetadata?.token_symbol}.png`,
           decimals: decimals,
-          display_name: tokenDisplay?.display_name || coinMetadata?.name || "",
-          name: tokenDisplay?.display_name || coinMetadata?.name || "",
-          symbol: coinMetadata?.symbol || "",
+          display_name:
+            tokenDisplay?.display_name || coinMetadata?.token_name || "",
+          name: tokenDisplay?.display_name || coinMetadata?.token_name || "",
+          symbol: coinMetadata?.token_symbol || "",
         });
         return acc;
       }, []) || [];
@@ -486,7 +492,7 @@ export const useFetchAssets = () => {
   }, [
     allCoinObjects,
     updated,
-    coinsMetadata,
+    depositTokens,
     setAssets,
     allCoinObjectsLoading,
     allCoinObjectsFetching,
@@ -496,11 +502,12 @@ export const useFetchAssets = () => {
 
   useEffect(() => {
     if (isRefetch) {
+      refetchDepositTokens();
       allCoinObjectsRefetch().then(() => {
         setUpdated(false);
       });
     }
-  }, [isRefetch, allCoinObjectsRefetch, setUpdated]);
+  }, [isRefetch, allCoinObjectsRefetch, refetchDepositTokens, setUpdated]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -525,7 +532,6 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
     useNdlpAssetsStore();
   const { address, isAuthenticated } = useWallet();
   const suiClient = useSuiClient();
-
   const ndlpCoinTypes = useMemo(() => {
     return vaults?.map((vault) => vault.vault_lp_token) || [];
   }, [vaults]);
@@ -564,6 +570,7 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
     const assets: NdlpAsset[] =
       allCoinObjectsNDLP.reduce((acc, coin) => {
         const coinType = coin.coinType;
+        const vault = vaults.find((i) => i.vault_lp_token === coinType);
         const tokenDisplay = LP_TOKEN_CONFIG;
 
         acc.push({
@@ -571,7 +578,7 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
           balance: "0",
           raw_balance: coin.totalBalance,
           image_url: tokenDisplay?.image_url || "",
-          decimals: LP_TOKEN_CONFIG.decimals,
+          decimals: vault.vault_lp_token_decimals,
           display_name: tokenDisplay?.display_name || "",
           name: tokenDisplay?.display_name || "",
           symbol: tokenDisplay?.symbol || "",

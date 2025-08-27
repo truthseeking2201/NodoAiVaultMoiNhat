@@ -19,10 +19,14 @@ export const formatAmount = ({
   amount,
   precision = 2,
   stripZero = true,
+  minimumDisplay,
+  sign,
 }: {
   amount: number | string;
   precision?: number;
   stripZero?: boolean;
+  minimumDisplay?: number;
+  sign?: string;
 }) => {
   let formatted = new Intl.NumberFormat(undefined, {
     style: "decimal",
@@ -32,6 +36,18 @@ export const formatAmount = ({
 
   if (stripZero) {
     formatted = formatted.replace(/\.?0+$/, "");
+  }
+
+  if (sign) {
+    formatted = sign + formatted;
+  }
+
+  if (amount && minimumDisplay && Number(amount) < minimumDisplay) {
+    if (sign) {
+      formatted = "<" + sign + minimumDisplay;
+    } else {
+      formatted = "<" + minimumDisplay;
+    }
   }
 
   return formatted;
@@ -47,4 +63,9 @@ export const roundDownBalance = (balance: number, decimal: number = 4) => {
 
 export const formatPercentage = (value: number) => {
   return formatAmount({ amount: value, precision: 2, stripZero: false }) + "%";
+};
+
+export const getImage = (symbol: string) => {
+  if (!symbol) return "";
+  return `/coins/${symbol?.toLowerCase()}.png`;
 };

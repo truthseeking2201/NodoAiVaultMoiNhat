@@ -18,10 +18,8 @@ import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
 import { formatPercentage } from "@/lib/utils";
 import { showFormatNumber } from "@/lib/number";
 import { DepositVaultConfig } from "@/types/vault-config.types";
-import { formatCurrency } from "@/utils/currency";
 import { calculateUserHoldings } from "@/utils/helpers";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
-import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { VaultItem } from "./vault-item";
 import useBreakpoint from "@/hooks/use-breakpoint";
@@ -29,8 +27,7 @@ import ConditionRenderer from "@/components/shared/condition-renderer";
 import VaultItemMobile from "./vault-item-mobile";
 import VaultHolding from "./vault-holding";
 import VaultRewards from "./vault-rewards";
-import { IconErrorToast } from "@/components/ui/icon-error-toast";
-import { IconCheckSuccess } from "@/components/ui/icon-check-success";
+import { Skeleton } from "@/components/ui/skeleton";
 import UserHoldingTooltip from "./user-holding-tooltip";
 
 const OPTIONS_CHAINS = [
@@ -38,25 +35,13 @@ const OPTIONS_CHAINS = [
   {
     value: "sui",
     label: "SUI",
-    icon: (
-      <img
-        src="/chains/sui.png"
-        alt="SUI"
-        className="w-5 h-5"
-      />
-    ),
+    icon: <img src="/chains/sui.png" alt="SUI" className="w-5 h-5" />,
   },
   {
     value: "bsc",
     label: "BSC",
     disabled: true,
-    icon: (
-      <img
-        src="/chains/bsc.png"
-        alt="BSC"
-        className="w-5 h-5"
-      />
-    ),
+    icon: <img src="/chains/bsc.png" alt="BSC" className="w-5 h-5" />,
     left: (
       <div
         className="text-white text-[10px] px-2"
@@ -104,7 +89,6 @@ export default function VaultList() {
     data: dataWithdrawals = [],
     refetch: refetchVaultsWithdrawal,
   } = useGetVaultsWithdrawal();
-  const { toast } = useToast();
   const { redeemWithVaultId } = useWithdrawVault();
   const navigate = useNavigate();
   const { vaultObjects } = useVaultObjectStore();
@@ -132,17 +116,15 @@ export default function VaultList() {
 
   const mapData = useMemo(() => {
     return data.map((vault) => {
-      const vaultConfig = vaultObjects.find(
-        (vo) => vo.vault_id === vault.vault_id
-      );
       const ndlpBalance =
         ndlpAssets.find((asset) => asset.coin_type === vault.vault_lp_token)
           ?.balance || "0";
       const user_holdings = Number(
         calculateUserHoldings(
-          vaultConfig,
           ndlpBalance,
-          vault?.user_pending_withdraw_ndlp
+          vault?.user_pending_withdraw_ndlp,
+          vault?.vault_lp_token_decimals,
+          vault?.ndlp_price_usd
         )
       );
       const vault_apy = Number(vault?.vault_apy || 0);
@@ -184,19 +166,12 @@ export default function VaultList() {
           : "--",
         rewards_earned_show: !Number(user_holdings)
           ? "--"
-          : "+" + showUsd(withdrawal_vault?.user_reward_earned_usd || 0),
+          : "+" + showUsd(withdrawal_vault?.user_reward_earned_usd || "0"),
         is_loading_withdrawal: isLoadingWithdrawal,
         withdrawing: withdrawal,
       };
     }) as VaultItemData[];
-  }, [
-    data,
-    vaultObjects,
-    ndlpAssets,
-    isLoadingWithdrawal,
-    dataWithdrawals,
-    idsClaimed,
-  ]);
+  }, [data, ndlpAssets, isLoadingWithdrawal, dataWithdrawals, idsClaimed]);
 
   // Filter logic: if 'all' is selected, show all; else filter by selected DEXs
   const filteredData = useMemo(
@@ -235,39 +210,16 @@ export default function VaultList() {
   const onClaim = useCallback(
     async (data: any) => {
       setIdLoadingClaim(data.vault_id);
-      try {
-        const res: any = await redeemWithVaultId(data.vault_id);
-        toast({
-          title: "Withdraw successful!",
-          description: `${showFormatNumber(res?.receiveAmount || 0)} ${
-            res.receiveSymbol
-          } has been Withdrawn to your account. Check your wallet for Tx details`,
-          variant: "success",
-          duration: 5000,
-          icon: (
-            <IconCheckSuccess
-              size={14}
-              className="h-6 w-6"
-            />
-          ),
-        });
+      const res = await redeemWithVaultId(data.vault_id);
+      if (res) {
+        setIdsClaimed([...idsClaimed, data.vault_id]);
         setTimeout(() => {
           refreshAllBalance();
         }, 2000);
-        setIdsClaimed([...idsClaimed, data.vault_id]);
-      } catch (error) {
-        console.log(error);
-        toast({
-          title: "Claim failed",
-          description: error?.message || error,
-          variant: "error",
-          duration: 5000,
-          icon: <IconErrorToast />,
-        });
       }
       setIdLoadingClaim("");
     },
-    [redeemWithVaultId, refreshAllBalance, toast, idsClaimed]
+    [redeemWithVaultId, refreshAllBalance, idsClaimed]
   );
 
   const columns = useMemo(
@@ -385,9 +337,13 @@ export default function VaultList() {
               <div className="text-white font-medium font-mono text-base">
                 {record.user_holdings_show}
               </div>
-              <div className="text-green-increase font-medium font-mono text-sm mt-1">
-                {record.rewards_earned_show}
-              </div>
+              {record.is_loading_withdrawal ? (
+                <Skeleton className="w-[80px] h-5 mt-1" />
+              ) : (
+                <div className="text-green-increase font-medium font-mono text-sm mt-1">
+                  {record.rewards_earned_show}
+                </div>
+              )}
             </div>
           </UserHoldingTooltip>
         ),

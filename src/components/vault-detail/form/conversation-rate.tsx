@@ -20,6 +20,7 @@ type Props = {
   rate: number;
   isCalculating?: boolean;
   label?: string;
+  className?: string;
   onRefresh?: () => void;
 };
 
@@ -30,6 +31,7 @@ const ConversationRate = ({
   onRefresh,
   isCalculating,
   label,
+  className,
 }: Props) => {
   const [isInverse, setIsInverse] = useState(false);
   const calculateRate = useMemo(() => {
@@ -40,7 +42,12 @@ const ConversationRate = ({
   const targetSymbol = isInverse ? sourceToken.symbol : targetToken.symbol;
 
   return (
-    <RowItem className="max-md:justify-start max-md:items-start max-md:flex-col">
+    <RowItem
+      className={cn(
+        "max-md:justify-start max-md:items-start max-md:flex-col",
+        className
+      )}
+    >
       <RowItem.Label>
         <span className={"text-white/80 text-13px md:text-sm"}>
           {label || "Rate"}

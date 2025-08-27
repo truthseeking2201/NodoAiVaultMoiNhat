@@ -18,7 +18,7 @@ import {
   useWithdrawVaultConfig,
 } from "@/hooks/use-withdraw-vault";
 import BigNumber from "bignumber.js";
-import { sleep } from "@/lib/utils";
+import { sleep, getImage } from "@/lib/utils";
 import { CLOCK } from "@/config/vault-config";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import DataClaimType from "@/types/data-claim.types.d";
@@ -44,9 +44,8 @@ export default function WithdrawVaultSection({
   const lpToken = useGetLpToken(vault?.vault_lp_token, vault_id);
 
   const lpData = useMemo(() => {
-    const poolName = vault.pool.pool_name;
-    const token1 = poolName.split("-")[0];
-    const token2 = poolName.split("-")[1];
+    const token1 = (vault as any).pool?.token_a;
+    const token2 = (vault as any).pool?.token_b;
     const exchange = EXCHANGE_CODES_MAP[vault.exchange_id] || null;
     return {
       package_id: vault.metadata.package_id,
@@ -64,14 +63,19 @@ export default function WithdrawVaultSection({
       collateral_coin_type: vault.collateral_token,
       collateral_decimals: vault.collateral_token_decimals,
 
-      token_coin_type: vault.pool?.token_a_address,
-      token_image: `/coins/${token1?.toLowerCase()}.png`,
-      token_symbol: token1,
+      token_coin_type: token1?.token_address,
+      token_image: getImage(token1?.token_symbol),
+      token_symbol: token1?.token_symbol,
 
-      quote_coin_type: vault.pool?.token_b_address,
-      quote_image: `/coins/${token2?.toLowerCase()}.png`,
-      quote_symbol: token2,
+      quote_coin_type: token2?.token_address,
+      quote_image: getImage(token2?.token_symbol),
+      quote_symbol: token2?.token_symbol,
+      receive_tokens: [
+        { ...token1, image: getImage(token1?.token_symbol) },
+        { ...token2, image: getImage(token2?.token_symbol) },
+      ],
       exchange,
+      is_enable_dual_token: vault?.metadata?.is_enable_dual_token,
     };
   }, [vault, lpToken]);
 
@@ -86,7 +90,7 @@ export default function WithdrawVaultSection({
     return tmp?.map((i) => {
       return {
         ...i,
-        image: `/coins/${i?.token_symbol?.toLocaleLowerCase()}.png`,
+        image: getImage(i?.token_symbol),
       };
     });
   }, [vault]);
@@ -195,17 +199,16 @@ export default function WithdrawVaultSection({
             {dataClaim && ready && (
               <ClaimToken
                 balanceLp={lpToken?.balance || "0"}
-                balanceLpUsd={balanceInputLpUsd || "0"}
+                rateLpUsd={lpToken?.usd_price || "0"}
                 data={dataClaim}
                 onSuccess={onSuccessClaim}
                 reloadData={initDataClaim}
               />
             )}
-
             {!dataClaim && ready && (
               <WithdrawForm
                 balanceLp={lpToken?.balance || "0"}
-                balanceLpUsd={balanceInputLpUsd || "0"}
+                rateLpUsd={lpToken?.usd_price || "0"}
                 lpData={lpData}
                 tokens={tokens}
                 lockDuration={vault?.metadata?.withdraw_interval || 3600}

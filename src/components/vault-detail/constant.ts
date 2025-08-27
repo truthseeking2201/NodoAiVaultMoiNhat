@@ -3,9 +3,7 @@ export const PERIOD_TABS = [
   { value: "ONE_WEEK", label: "1W" },
 ];
 
-export const PERIOD_TABS_1W = [
-  { value: "ONE_WEEK", label: "1W" },
-];
+export const PERIOD_TABS_1W = [{ value: "ONE_WEEK", label: "1W" }];
 
 export const ANALYTICS_TABS = [
   { value: "POSITION_PRICE", label: "Position Price" },
@@ -17,6 +15,15 @@ export const ACTIVITIES_TABS = [
   { value: "SWAP", label: "Swap" },
   { value: "ADD_LIQUIDITY", label: "Add" },
   { value: "REMOVE_LIQUIDITY", label: "Remove" },
+];
+
+export const METHOD_DEPOSIT = {
+  SINGLE: "SINGLE",
+  DUAL: "DUAL",
+};
+export const METHOD_DEPOSIT_TABS = [
+  { value: METHOD_DEPOSIT.SINGLE, label: "Single" },
+  { value: METHOD_DEPOSIT.DUAL, label: "Dual" },
 ];
 
 export const ITEMS_PER_PAGE = 5;

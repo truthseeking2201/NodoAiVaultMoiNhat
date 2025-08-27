@@ -57,25 +57,22 @@ export const calculateInterest = (
 };
 
 export const calculateUserHoldings = (
-  vaultConfig: SCVaultConfig,
   ndlpBalance: string,
-  user_pending_withdraw_ndlp: string
+  user_pending_withdraw_ndlp: string,
+  vault_lp_token_decimals: number,
+  ndlp_price_usd: string
 ) => {
-  const vaultRate = +vaultConfig?.rate;
-
-  const rate = vaultRate / RATE_DENOMINATOR;
-
   let holdings = new BigNumber(ndlpBalance);
 
   if (user_pending_withdraw_ndlp) {
     const pendingWithdraw = getBalanceAmount(
       user_pending_withdraw_ndlp,
-      LP_TOKEN_CONFIG.decimals
+      vault_lp_token_decimals
     );
     holdings = holdings.plus(pendingWithdraw);
   }
 
-  return holdings.multipliedBy(rate).toNumber();
+  return holdings.multipliedBy(ndlp_price_usd).toNumber();
 };
 
 export const getNDLPTotalSupply = (
