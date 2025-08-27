@@ -63,14 +63,7 @@ const useSetWalletDisconnectHandler = () => {
         localStorage.removeItem("whitelisted_address");
         localStorage.removeItem("last_wallet");
       } catch (error) {
-        const walletConnectionInfo = JSON.parse(
-          localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
-        );
         console.error("Error disconnecting wallet:", error);
-        captureSentryError(
-          error,
-          walletConnectionInfo?.state?.lastConnectedAccountAddress
-        );
         localStorage.clear();
         location.reload();
         return;

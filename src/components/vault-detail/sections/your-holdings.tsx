@@ -535,7 +535,7 @@ const YourHoldings = ({
                 <div className="text-white text-sm font-bold mb-1">
                   Cashflow
                 </div>
-                <div className="flex items-center ">
+                <div className="flex items-center text-xs">
                   <LabelWithTooltip
                     hasIcon={false}
                     label="Total Deposits"
@@ -558,7 +558,7 @@ const YourHoldings = ({
                       : "0"}
                   </span>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center text-xs">
                   <LabelWithTooltip
                     hasIcon={false}
                     label="Total Withdrawals"
