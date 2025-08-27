@@ -1,3 +1,5 @@
+import { checkCanDeposit } from "@/apis";
+import ConditionRenderer from "@/components/shared/condition-renderer";
 import { DynamicFontText } from "@/components/ui/dynamic-font-text";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
@@ -14,8 +16,10 @@ import {
   useVaultBasicDetails,
   useWallet,
 } from "@/hooks";
+import useBreakpoint from "@/hooks/use-breakpoint";
 import { useDepositVault } from "@/hooks/use-deposit-vault";
 import { useToast } from "@/hooks/use-toast";
+import { useTokenPrices } from "@/hooks/use-token-price";
 import { getBalanceAmountForInput, getDecimalAmount } from "@/lib/number";
 import { cn, formatAmount } from "@/lib/utils";
 import BigNumber from "bignumber.js";
@@ -26,10 +30,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import ConversationRate from "../conversation-rate";
 import DepositInput from "./deposit-input";
 import DepositModal from "./deposit-modal";
-import { checkCanDeposit } from "@/apis";
-import ConditionRenderer from "@/components/shared/condition-renderer";
-import useBreakpoint from "@/hooks/use-breakpoint";
-import { useTokenPrices } from "@/hooks/use-token-price";
+import SlippageSetting from "./slippage-setting";
 import { useRiskDisclosure } from "@/hooks/use-risk-disclosure";
 import RiskDisclosuresPopup from "./risk-disclosure-popup.tsx";
 
@@ -70,6 +71,8 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   const [canDepositStatus, setCanDepositStatus] = useState<
     "checking" | "can" | "cannot"
   >("can");
+  const [slippage, setSlippage] = useState<string>("0.05");
+
   const { isMd } = useBreakpoint();
   const { toast, dismiss } = useToast();
 
@@ -282,6 +285,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         amount: depositAmount,
         swapDepositInfo,
         collateralToken: vault?.collateral_token,
+        slippage: Number(slippage),
         onDepositSuccessCallback: handleDepositSuccessCallback,
       });
     } catch (error) {
@@ -307,18 +311,18 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     refetchVaultBasicDetails();
     refetchVaultConfig();
 
+    const message = `${formatAmount({
+      amount: Number(depositAmount),
+      precision: collateralToken?.decimals,
+    })} ${collateralToken?.symbol} has been deposited to ${
+      vault?.vault_name
+    }. Check your wallet for Tx details.`;
     toast({
       duration: 5000,
       description: (
         <SuccessfulToast
           title="Deposit successful!"
-          content={`${formatAmount({
-            amount: Number(depositAmount),
-            precision: collateralToken?.decimals,
-          })} ${collateralToken?.symbol} deposited — ${formatAmount({
-            amount: actualNdlpAmount,
-            precision: vault.vault_lp_token_decimals,
-          })} NDLP minted to your account. Check your wallet for Tx details`}
+          content={message}
           closeToast={() => dismiss()}
         />
       ),
@@ -359,9 +363,9 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
             <DynamicFontText
               maxWidth={300}
               breakpoints={[
-                { minLength: 0, fontSize: isMd ? "text-3xl" : "text-lg" },
-                { minLength: 15, fontSize: isMd ? "text-2xl" : "text-base" },
-                { minLength: 20, fontSize: isMd ? "text-xl" : "text-sm" },
+                { minLength: 0, fontSize: isMd ? "text-3xl" : "text-2xl" },
+                { minLength: 15, fontSize: isMd ? "text-2xl" : "text-xl" },
+                { minLength: 20, fontSize: isMd ? "text-xl" : "text-lg" },
               ]}
               defaultFontSize={isMd ? "text-2xl" : "text-xl"}
             >
@@ -406,10 +410,18 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
                 Network
               </div>
               <div className="text-sm font-mono text-white inline-flex items-center md:text-sm text-13px">
-                <img src="/chains/sui.png" alt="SUI" className="w-6 h-6 mr-2" />
+                <img
+                  src="/chains/sui.png"
+                  alt="SUI"
+                  className="w-6 h-6 mr-2"
+                />
                 SUI
               </div>
             </div>
+            <SlippageSetting
+              value={slippage}
+              onChange={(value) => setSlippage(value)}
+            />
           </div>
         </div>
 
@@ -469,6 +481,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         loading={loading}
         collateralToken={collateralToken}
         vault={vault}
+        slippage={slippage}
       />
     </FormProvider>
   );

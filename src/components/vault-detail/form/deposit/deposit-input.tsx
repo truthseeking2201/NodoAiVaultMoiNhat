@@ -5,6 +5,8 @@ import SelectTokens from "../select-tokens";
 import { DepositForm } from "./deposit-form";
 import BigNumber from "bignumber.js";
 import { DepositToken } from "@/types/deposit-token.types";
+import { SUI_CONFIG } from "@/config";
+import { validateDepositBalance } from "./helpers";
 
 type DepositInputProps = {
   paymentTokens: DepositToken[];
@@ -22,6 +24,7 @@ const DepositInput = ({
   const { watch, setValue, control, clearErrors } =
     useFormContext<DepositForm>();
   const selectedToken = watch("token");
+  const isSuitToken = currentToken?.token_address === SUI_CONFIG.coinType;
 
   const minDepositAmount = new BigNumber(1)
     .div(10 ** currentToken?.decimals)
@@ -46,19 +49,24 @@ const DepositInput = ({
             currentToken?.decimals
           )}`,
         },
-        max: {
-          value: +currentToken?.balance,
-          message: `Not enough balance to deposit. Please top-up your wallet.`,
-        },
+        validate: (value) => validateDepositBalance(value, currentToken),
       }}
       render={({ field: { onChange, onBlur, value } }) => (
         <FormattedNumberInput
           value={value ? `${value}` : ""}
           amountAvailable={`${currentToken?.balance}`}
           maxDecimals={currentToken?.decimals}
-          label="Deposit"
+          label="Deposit Amount"
           onChange={onChange}
           onBlur={onBlur}
+          maxBalanceAllowed={
+            isSuitToken
+              ? new BigNumber(currentToken?.balance)
+                  .minus(SUI_CONFIG.gas_fee)
+                  .abs()
+                  .toString()
+              : undefined
+          }
           balanceInput={
             <div className="flex items-center space-x-2">
               <span className="text-white/80 text-sm font-medium font-sans">
@@ -74,13 +82,14 @@ const DepositInput = ({
           }
           balanceInputUsd={
             <span className="text-white/50 text-sm font-medium font-sans">
-              $
               {currentToken
                 ? formatAmount({
                     amount: depositAmountUsd,
                     precision: 2,
+                    minimumDisplay: 0.01,
+                    sign: "$",
                   })
-                : "--"}{" "}
+                : "$--"}{" "}
             </span>
           }
           rightInput={

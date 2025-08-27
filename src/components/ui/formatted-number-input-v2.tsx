@@ -29,6 +29,9 @@ interface FormattedNumberInputProps {
   disabled?: boolean;
   maxAmount?: number;
   label?: string | React.ReactNode;
+  hideDefaultWrapper?: boolean;
+  inputClassName?: string;
+  maxBalanceAllowed?: string;
   onChange: (value: string) => void;
   onValidate?: (value: string) => void;
   onBlur?: (value: string) => void;
@@ -70,11 +73,14 @@ export function FormattedNumberInput({
   rightInput = "",
   balanceInput = "",
   balanceInputUsd = "",
+  hideDefaultWrapper = false,
+  maxBalanceAllowed,
   onChange,
   onValidate,
   onBlur,
   maxAmount = DEFAULT_MAX_AMOUNT,
   label: title,
+  inputClassName,
   ...props
 }: FormattedNumberInputProps) {
   const { isMd } = useBreakpoint();
@@ -110,7 +116,13 @@ export function FormattedNumberInput({
           <BalanceInput balanceInput={balanceInput} />
         </div>
       )}
-      <div className={cn("p-4", "deposit_input_v2_wrapper", className)}>
+      <div
+        className={cn(
+          "p-4",
+          !hideDefaultWrapper && "deposit_input_v2_wrapper rounded-t-lg",
+          className
+        )}
+      >
         {isMd && <Label title={title} className="mb-2.5" />}
         <div className="flex items-center justify-between mb-3">
           <div className="flex-1 mr-2">
@@ -122,7 +134,8 @@ export function FormattedNumberInput({
               placeholder={placeholder}
               className={cn(
                 "font-mono hide-arrow font-bold bg-transparent text-white placeholder:text-white/60 w-full border-0 focus-visible:outline-none",
-                isMd ? "h-[42px] text-[32px]" : "h-[32px] text-[24px]"
+                isMd ? "h-[42px] text-[32px]" : "h-[32px] text-[24px]",
+                inputClassName
               )}
               {...props}
             />
@@ -147,8 +160,12 @@ export function FormattedNumberInput({
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
+                  const amount = maxBalanceAllowed
+                    ? maxBalanceAllowed
+                    : amountAvailable;
+
                   onChange(
-                    BigNumber(amountAvailable)
+                    BigNumber(amount)
                       .multipliedBy(item.value)
                       .decimalPlaces(maxDecimals, BigNumber.ROUND_DOWN)
                       .toFixed()

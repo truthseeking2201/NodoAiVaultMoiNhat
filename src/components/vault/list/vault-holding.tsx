@@ -5,6 +5,7 @@ import Countdown, { zeroPad } from "react-countdown";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import UserHoldingTooltip from "./user-holding-tooltip";
+import IconReady from "@/components/vault-detail/form/withdraw/icon-ready";
 
 const VaultHolding = ({
   item,
@@ -109,26 +110,35 @@ const VaultHolding = ({
           <div className="flex flex-wrap items-center text-sm">
             <span>{item.withdrawing.receive_amount_usd}</span>
             {item.withdrawing.is_ready ? (
-              <div className="ml-2 flex items-center bg-green-ready/20 sm:px-1 px-0.5 rounded-full">
-                <div className="sm:w-4 sm:h-4 w-3 h-3 bg-green-ready rounded-full flex items-center justify-center">
-                  <Check
-                    className={cn(
-                      !isOnlyWithdrawing ? "text-black" : "text-white"
-                    )}
-                    strokeWidth="4"
-                    size={10}
-                  />
-                </div>
-                <span
-                  className={cn(
-                    "sm:text-xs text-[10px] sm:leading-[22px] leading-[17px] font-mono font-bold ml-1",
-                    !isOnlyWithdrawing ? "text-green-ready" : "text-white"
-                  )}
-                >
-                  READY
-                </span>
-              </div>
+              <IconReady
+                className="!py-[2px] ml-2"
+                classNameText={
+                  !isOnlyWithdrawing ? "text-green-ready" : "text-white"
+                }
+                classNameCheck={
+                  !isOnlyWithdrawing ? "text-black" : "text-white"
+                }
+              />
             ) : (
+              // <div className="ml-2 flex items-center bg-green-ready/20 sm:px-1 px-0.5 rounded-full">
+              //   <div className="sm:w-4 sm:h-4 w-3 h-3 bg-green-ready rounded-full flex items-center justify-center">
+              //     <Check
+              //       className={cn(
+              //         !isOnlyWithdrawing ? "text-black" : "text-white"
+              //       )}
+              //       strokeWidth="4"
+              //       size={10}
+              //     />
+              //   </div>
+              //   <span
+              //     className={cn(
+              //       "sm:text-xs text-[10px] sm:leading-[22px] leading-[17px] font-mono font-bold ml-1",
+              //       !isOnlyWithdrawing ? "text-green-ready" : "text-white"
+              //     )}
+              //   >
+              //     READY
+              //   </span>
+              // </div>
               <Countdown
                 date={item.withdrawing.countdown}
                 renderer={renderer}

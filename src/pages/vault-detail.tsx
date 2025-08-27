@@ -98,7 +98,7 @@ const VaultDetail = () => {
           "Price of 1 NDLP token based on the vault’s total value. (Unit USD)",
         value: !isLoadingVaultDetails
           ? formatAmount({
-              amount: vaultDetails?.ndlp_price,
+              amount: vaultDetails?.ndlp_price_usd,
               precision: 4,
             })
           : "--",

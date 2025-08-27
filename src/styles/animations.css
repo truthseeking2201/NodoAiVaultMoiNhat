@@ -362,3 +362,21 @@
 .ai-hiden {
   animation: ai-hiden 1s ease-in-out infinite;
 }
+
+@keyframes new-glow {
+  0%,
+  100% {
+    box-shadow: -2px 0 2px rgba(255, 255, 255, 0.75) inset,
+      2px 0 2px rgba(0, 255, 251, 0.95) inset, 0 -3px 2px #07f inset,
+      0 3px 2px #b708f6 inset;
+  }
+  50% {
+    box-shadow: -2px 0 4px rgba(255, 255, 255, 1) inset,
+      2px 0 4px rgba(0, 255, 251, 1) inset, 0 -3px 4px #0ff inset,
+      0 3px 4px #f0f inset;
+  }
+}
+
+.new-glow {
+  animation: new-glow 2s infinite alternate;
+}

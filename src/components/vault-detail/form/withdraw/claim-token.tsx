@@ -1,25 +1,25 @@
 import { useState, useCallback, useMemo } from "react";
-import { Check } from "lucide-react";
+import BigNumber from "bignumber.js";
 import Web3Button from "@/components/ui/web3-button";
 import { RowItem } from "@/components/ui/row-item";
+import TransactionFee from "./transaction-fee";
 import { FormattedNumberInput } from "@/components/ui/formatted-number-input-v2";
-import { IconErrorToast } from "@/components/ui/icon-error-toast";
-import { IconCheckSuccess } from "@/components/ui/icon-check-success";
 import Countdown, { zeroPad } from "react-countdown";
 import AvgPaceIcon from "@/assets/images/avg-pace.png";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
-import { DynamicFontText } from "@/components/ui/dynamic-font-text";
 import ConversationRate from "../conversation-rate";
+import AmountToken from "./amount-token";
+import IconReady from "./icon-ready";
 
 import { showFormatNumber } from "@/lib/number";
-import { useToast } from "@/components/ui/use-toast";
 import DataClaimType from "@/types/data-claim.types.d";
 import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
+import { METHOD_DEPOSIT } from "@/components/vault-detail/constant";
 
 type Props = {
   data?: DataClaimType;
   balanceLp: string;
-  balanceLpUsd: string;
+  rateLpUsd: string;
   onSuccess: () => void;
   reloadData: () => void;
 };
@@ -27,7 +27,7 @@ type Props = {
 const ClaimToken = ({
   data,
   balanceLp,
-  balanceLpUsd,
+  rateLpUsd,
   onSuccess,
   reloadData,
 }: Props) => {
@@ -35,19 +35,18 @@ const ClaimToken = ({
   /**
    * HOOKS
    */
-  const { toast } = useToast();
   const { redeem } = useWithdrawVault();
 
   const rightInput = useMemo(() => {
     return (
       <div className="flex items-center">
         <img
-          src={data?.withdrawSymbolImage}
-          alt={data.withdrawSymbol}
+          src={data.tokenWithdraw.image}
+          alt={data.tokenWithdraw.token_symbol}
           className="md:w-6 md:h-6 w-5 h-5 mr-2"
         />
         <span className="font-mono text-sm md:text-lg font-bold text-gray-200">
-          {data.withdrawSymbol}
+          {data.tokenWithdraw.token_symbol}
         </span>
       </div>
     );
@@ -56,49 +55,40 @@ const ClaimToken = ({
   const balanceInput = useMemo(() => {
     return (
       <span className="text-white/80 text-sm font-medium font-sans">
-        {showFormatNumber(balanceLp, 0, 6, "", true)} {data.withdrawSymbol}
+        {showFormatNumber(balanceLp, 0, 6, "", true)}{" "}
+        {data.tokenWithdraw.token_symbol}
       </span>
     );
   }, [balanceLp, data]);
 
   const balanceInputUsd = useMemo(() => {
+    const amount = new BigNumber(rateLpUsd)
+      .multipliedBy(data.tokenWithdraw.amount)
+      .toString();
     return (
       <span className="text-white/50 text-sm font-medium font-sans">
-        ${showFormatNumber(balanceLpUsd, 0, 2, "", true)}
+        {showFormatNumber(amount, 0, 2, "$")}
       </span>
     );
-  }, [balanceLpUsd]);
+  }, [rateLpUsd, data]);
+
+  const method = useMemo(() => {
+    return data.tokenReceives?.length > 1
+      ? METHOD_DEPOSIT.DUAL
+      : METHOD_DEPOSIT.SINGLE;
+  }, [data]);
 
   /**
    * FUNCTION
    */
   const onClaim = useCallback(async () => {
     setIsLoading(true);
-    try {
-      await redeem(data.configLp);
+    const res = await redeem(data.configLp);
+    if (res) {
       onSuccess();
-      toast({
-        title: "Withdraw successful!",
-        description: `${showFormatNumber(data?.receiveAmount || 0)} ${
-          data.receiveSymbol
-        } has been Withdrawn to your account. Check your wallet for Tx details`,
-        variant: "success",
-        duration: 5000,
-        icon: <IconCheckSuccess size={14} className="h-6 w-6" />,
-        hideClose: true,
-      });
-    } catch (error) {
-      console.log(error);
-      toast({
-        title: "Claim failed",
-        description: error?.message || error,
-        variant: "error",
-        duration: 5000,
-        icon: <IconErrorToast />,
-      });
     }
     setIsLoading(false);
-  }, [data, onSuccess, redeem, toast]);
+  }, [data, onSuccess, redeem]);
 
   const renderer = ({ hours, minutes, seconds }) => {
     return (
@@ -128,7 +118,7 @@ const ClaimToken = ({
   return (
     <div className="">
       <FormattedNumberInput
-        value={`${data.withdrawAmount}`}
+        value={`${data.tokenWithdraw.amount}`}
         balanceInput={balanceInput}
         balanceInputUsd={balanceInputUsd}
         rightInput={rightInput}
@@ -138,88 +128,50 @@ const ClaimToken = ({
       />
 
       <div className="p-4 border border-white/20 rounded-[12px] rounded-t-none">
-        <RowItem
-          className="flex-col !justify-start !items-start gap-0"
-          classNameValue="w-full mt-2 font-mono text-gray-200 font-bold"
-        >
-          <RowItem.Label>
-            {!data.isClaim ? (
-              <div className="flex items-center">
-                <LabelWithTooltip
-                  label="Est. Max Receive"
-                  labelClassName="text-gray-200 font-bold text-sm md:text-base"
-                  tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
-                />
-                <Countdown
-                  date={data.timeUnlock}
-                  renderer={renderer}
-                  onComplete={reloadData}
-                />
-              </div>
-            ) : (
-              <div className="flex items-center">
-                <span className="text-gray-200 font-bold text-sm md:text-base">
-                  Actual Receive
-                </span>
-                <div className="ml-2 flex items-center bg-green-ready/20 p-1 rounded-full">
-                  <div className="md:w-4 md:h-4 w-3 h-3 bg-green-ready rounded-full flex items-center justify-center">
-                    <Check className="text-black" strokeWidth="4" size={10} />
-                  </div>
-                  <span className="text-green-ready text-[10px] md:text-xs font-mono font-bold ml-1">
-                    READY
-                  </span>
-                </div>
-              </div>
-            )}
-          </RowItem.Label>
-          <RowItem.Value>
-            <div className="flex items-center justify-start md:justify-between md:flex-row-reverse">
-              <div className="flex items-center">
-                <img
-                  src={data?.receiveSymbolImage}
-                  alt={data?.receiveSymbol}
-                  className="w-6 h-6 mr-2 md:mr-1"
-                />
-                <div className="text-lg hidden md:block">
-                  {data?.receiveSymbol}
-                </div>
-              </div>
-              <DynamicFontText
-                maxWidth={300}
-                breakpoints={[
-                  {
-                    minLength: 0,
-                    fontSize: "text-[32px] leading-[42px] max-sm:text-lg",
-                  },
-                  { minLength: 13, fontSize: "text-lg max-sm:text-base" },
-                  { minLength: 18, fontSize: "text-base max-sm:text-sm" },
-                ]}
-              >
-                {showFormatNumber(
-                  data.receiveAmount,
-                  0,
-                  data.receiveDecimal || 6
-                )}
-              </DynamicFontText>
-            </div>
-          </RowItem.Value>
-        </RowItem>
-        <hr className="w-full border-t border-white/15 my-2" />
-        <ConversationRate
-          sourceToken={{ symbol: data?.withdrawSymbol }}
-          targetToken={{ symbol: data?.receiveSymbol }}
-          rate={data.conversionRate}
-        />
-        <RowItem className="mt-2 flex-col md:flex-row justify-start items-start md:items-center md:justify-between gap-0">
-          <RowItem.Label>
-            <span className="text-13px md:text-sm text-white/80">
-              Transaction Fee
-            </span>
-          </RowItem.Label>
-          <RowItem.Value>
-            <span className="text-sm">Free</span>
-          </RowItem.Value>
-        </RowItem>
+        <div className="flex items-center mb-2 md:justify-start justify-between gap-3">
+          {!data.isClaim ? (
+            <>
+              <LabelWithTooltip
+                label="Est. Max Receive"
+                labelClassName="text-gray-200 font-bold text-sm md:text-base"
+                tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
+              />
+              <Countdown
+                date={data.timeUnlock}
+                renderer={renderer}
+                onComplete={reloadData}
+              />
+            </>
+          ) : (
+            <>
+              <span className="text-gray-200 font-bold text-sm md:text-base">
+                Actual Receive
+              </span>
+              <IconReady />
+            </>
+          )}
+        </div>
+
+        {data?.tokenReceives?.map((token, idx) => (
+          <AmountToken
+            key={`amount-${idx}`}
+            amount={token?.amount}
+            token={token}
+            className={idx > 0 ? "mt-4" : ""}
+          />
+        ))}
+
+        <hr className="w-full border-t border-white/15 my-4" />
+        {method === METHOD_DEPOSIT.SINGLE && (
+          <ConversationRate
+            className="mb-2"
+            sourceToken={{ symbol: data.conversionRate.from_symbol }}
+            targetToken={{ symbol: data.conversionRate.to_symbol }}
+            rate={data.conversionRate.rate}
+          />
+        )}
+
+        <TransactionFee />
       </div>
 
       <Web3Button

@@ -55,6 +55,8 @@ const URLS = {
     payout_token: string
   ) =>
     `/data-management/external/vaults/${vaultId}/estimate-withdraw?ndlp_amount=${ndlp_amount}&payout_token=${payout_token}`,
+  getEstimateWithdrawDual: (vaultId: string, ndlp_amount: string) =>
+    `/data-management/external/vaults/${vaultId}/estimate-withdraw-dual?ndlp_amount=${ndlp_amount}`,
   estimateDeposit: (vaultId: string, amount: string, deposit_token: string) =>
     `/data-management/external/vaults/${vaultId}/estimate-deposit?amount=${amount}&deposit_token=${deposit_token}`,
   swapDepositInfo: (vaultId: string, token_address: string) =>
@@ -63,6 +65,9 @@ const URLS = {
     `/data-management/external/vaults/${vaultId}/check-deposit?deposit_token=${token_address}&deposit_amount=${amount}`,
   userHolding: (vaultId: string, ndlp_balance: string) =>
     `/data-management/external/user/vault-stats?vault_id=${vaultId}&ndlp_balance=${ndlp_balance}`,
+  estimateDualDeposit: (vaultId: string) =>
+    `/data-management/external/vaults/${vaultId}/estimate-deposit-dual`,
+  depositTokens: `data-management/external/vaults/list-deposit-tokens`,
 };
 
 export const getLatestWithdrawal = (sender_address: string) => {
@@ -130,6 +135,13 @@ export const getEstimateWithdraw = (
   );
 };
 
+export const getEstimateWithdrawDual = (
+  vaultId: string,
+  ndlp_amount: string
+) => {
+  return http.get(URLS.getEstimateWithdrawDual(vaultId, ndlp_amount));
+};
+
 export const getEstimateDeposit = (
   vaultId: string,
   params: { amount: string; deposit_token: string }
@@ -163,4 +175,12 @@ export const checkCanDeposit = (
 
 export const getUserHolding = (vaultId: string, ndlp_balance: string) => {
   return http.get(URLS.userHolding(vaultId, ndlp_balance));
+};
+
+export const getEstimateDualDeposit = (vaultId: string) => {
+  return http.get(URLS.estimateDualDeposit(vaultId));
+};
+
+export const getDepositTokens = () => {
+  return http.get(URLS.depositTokens);
 };

@@ -191,6 +191,8 @@ export type DepositVaultConfig = {
   tokens: VaultPaymentToken[];
   ready?: boolean;
   user_pending_withdraw_ndlp?: string;
+  ndlp_price_usd?: string;
+  ndlp_price?: string;
 };
 
 export type VaultEstimateWithdraw = {
@@ -198,6 +200,16 @@ export type VaultEstimateWithdraw = {
   collateral_amount: string;
   ndlp_per_payout_rate: number;
   ndlp_rate: number;
+};
+
+export type VaultEstimateWithdrawDual = {
+  amount_a: string;
+  amount_b: string;
+  ndlp_rate: number;
+  collateral_amount: string;
+  collateral_in_usd: string;
+  price_a: string;
+  price_b: string;
 };
 
 export type VaultEstimateDeposit = {
@@ -238,6 +250,7 @@ export type BasicVaultDetailsType = {
   vault_apr: string;
   vault_apy: string;
   ndlp_price: string;
+  ndlp_price_usd: string;
   ndlp_price_7d: string;
   ndlp_price_change_7d: number;
   user_break_even_price: number;
@@ -260,6 +273,22 @@ export type BasicVaultDetailsType = {
     token_b_address: string;
     created_at: string;
     updated_at: string;
+    token_a?: {
+      token_id: number;
+      token_symbol: string;
+      token_name: string;
+      token_address: string;
+      decimal: number;
+      price_feed_id: string;
+    };
+    token_b?: {
+      token_id: number;
+      token_symbol: string;
+      token_name: string;
+      token_address: string;
+      decimal: number;
+      price_feed_id: string;
+    };
   };
   exchange: string;
   exchange_id: number;
@@ -287,13 +316,23 @@ export type BasicVaultDetailsType = {
     package_id: string;
     vault_module: string;
     vault_config_id: string;
+    vault_id: string;
     exchange_id: number;
     withdraw_interval: number;
     pool: string;
+    executor: {
+      [key: string]: {
+        config: string;
+        module: string;
+        address: string;
+      };
+    };
+    is_enable_dual_token: boolean;
   };
   user_pending_withdraw_ndlp?: string;
   max_drawdown?: string;
   user_investment_usd?: number;
+  collateral_price_feed_id: string;
 };
 
 export type VaultHoldingType = {
@@ -302,7 +341,8 @@ export type VaultHoldingType = {
   code: string;
   timestamp: string;
   user_ndlp_balance: number;
-  ndlp_price: number;
+  ndlp_price: string;
+  ndlp_price_usd: string;
   user_total_liquidity_usd: number;
   user_total_rewards_usd: number;
   user_total_deposit: number;
@@ -310,6 +350,7 @@ export type VaultHoldingType = {
   user_rewards_24h_usd: number;
   user_shares_percent: number;
   user_break_event_price: number;
+  user_break_event_price_usd: number;
   user_total_withdraw_usd: number;
   user_vault_tokens: Array<{
     token: string;

@@ -98,16 +98,18 @@ const YourHoldings = ({
   const { vaultConfig } = useGetVaultConfig(vault_id);
   const lpToken = useGetLpToken(vault?.vault_lp_token, vault_id);
 
-  const user_total_liquidity_usd = calculateUserHoldings(
-    vaultConfig,
-    lpToken?.balance || "0",
-    vault?.user_pending_withdraw_ndlp
-  );
   const ndlp_balance = lpToken?.balance || "0";
   const { data, refetch } = useUserHolding(
     vault_id,
     ndlp_balance,
     isAuthenticated
+  );
+
+  const user_total_liquidity_usd = calculateUserHoldings(
+    ndlp_balance,
+    vault?.user_pending_withdraw_ndlp,
+    vault?.vault_lp_token_decimals,
+    data?.ndlp_price_usd
   );
 
   const userHoldingData = useMemo(() => {
@@ -142,10 +144,7 @@ const YourHoldings = ({
             token_name: item?.token_name || "",
             name: item?.token_name,
             token_symbol: item?.token_symbol,
-            value:
-              userHoldingData?.user_total_deposit_usd > 0
-                ? item?.amount_in_usd / totalAmountInUsd
-                : 0,
+            value: item?.amount_in_usd / totalAmountInUsd,
           };
         }) || []
     );
@@ -672,9 +671,11 @@ const YourHoldings = ({
                     $
                     {isAuthenticated
                       ? formatNumber(
-                          userHoldingData?.user_break_event_price,
+                          userHoldingData?.user_break_event_price_usd,
                           0,
-                          userHoldingData?.user_break_event_price < 1 ? 6 : 2
+                          userHoldingData?.user_break_event_price_usd < 1
+                            ? 6
+                            : 2
                         )
                       : "0"}
                   </span>

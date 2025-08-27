@@ -20,6 +20,7 @@
     "@hookform/resolvers": "^3.9.0",
     "@mysten/dapp-kit": "0.16.2",
     "@mysten/sui": "1.29.1",
+    "@pythnetwork/pyth-sui-js": "^2.2.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-aspect-ratio": "^1.1.0",

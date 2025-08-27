@@ -346,7 +346,7 @@ const VaultInfo = ({
               <div className="text-white text-xs font-mono">
                 $
                 {formatAmount({
-                  amount: vaultDetails?.ndlp_price,
+                  amount: vaultDetails?.ndlp_price_usd,
                   precision: 4,
                 })}
                 <span>

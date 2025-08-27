@@ -1,3 +1,12 @@
+export interface TokenType {
+  token_name?: string;
+  token_symbol: string;
+  token_address: string;
+  decimal: number;
+  image: string;
+  amount?: number;
+}
+
 export default interface LpType {
   vault_config_id: string;
   vault_id: string;
@@ -25,4 +34,7 @@ export default interface LpType {
   quote_symbol?: string;
   quote_decimals?: number | 9;
   quote_image?: string;
+
+  receive_tokens?: TokenType[];
+  is_enable_dual_token?: boolean;
 }

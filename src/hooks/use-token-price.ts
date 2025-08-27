@@ -6,7 +6,8 @@ import { useMemo } from "react";
 
 export type NdlpTokenPrice = {
   vault_id: string;
-  ndlp_price: number;
+  ndlp_price: string;
+  ndlp_price_usd: string;
 };
 
 export type TokenUsdPrice = {
@@ -20,6 +21,7 @@ export const useTokenPrices = (tokenIds: number[]) => {
     queryFn: () => getTokenPrices(tokenIds),
     enabled: tokenIds.length > 0,
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
+    staleTime: REFETCH_VAULT_DATA_INTERVAL,
   }) as unknown as AxiosResponse<TokenUsdPrice[]>;
 
   const data = useMemo(() => {

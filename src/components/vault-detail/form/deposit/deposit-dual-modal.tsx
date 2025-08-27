@@ -2,7 +2,6 @@ import gradientLink from "@/assets/icons/gradient-arrow-link.svg";
 import successAnimationData from "@/assets/lottie/circle_checkmark_success.json";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
-import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import Web3Button from "@/components/ui/web3-button";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { formatAmount } from "@/lib/utils";
@@ -11,7 +10,7 @@ import { truncateBetween } from "@/utils/truncate";
 import Lottie from "lottie-react";
 import { METHOD_DEPOSIT } from "../../constant";
 import DepositMethod from "../deposit-method";
-import { DepositSuccessData } from "./deposit-form";
+import { DualDepositSuccessData } from "./dual-deposit-form";
 import { DepositDialogContent, DepositDialogHeader } from "./modal-dialog";
 import ModalRow from "./modal-row";
 import TransactionFee from "./transaction-fee";
@@ -26,18 +25,19 @@ interface DepositModalProps {
   onDeposit?: () => void;
   onDepositSuccess?: () => void;
   onDone?: () => void;
-  confirmData: {
-    amount: number;
-    ndlp: number;
-    conversionRate: number;
-  };
+  ndlpAmount: number;
   loading: boolean;
-  depositSuccessData?: DepositSuccessData;
-  collateralToken: {
-    symbol: string;
+  depositSuccessData?: DualDepositSuccessData;
+  tokenA: {
+    amount: string;
     decimals: number;
+    symbol: string;
   };
-  slippage: string;
+  tokenB: {
+    amount: string;
+    decimals: number;
+    symbol: string;
+  };
 }
 
 const GradientText = ({ text }: { text: string }) => {
@@ -57,95 +57,82 @@ const GradientText = ({ text }: { text: string }) => {
   );
 };
 
-const Slippage = ({ slippage }: { slippage: string }) => {
-  return (
-    <ModalRow
-      label="Slippage"
-      value={`${slippage}%`}
-    />
-  );
-};
-
 const Deployment = () => {
   return (
     <ModalRow
-      label={
-        <LabelWithTooltip
-          hasIcon={true}
-          asChild
-          label="Deployment"
-          iconClassName="mt-0"
-          labelClassName="text-base font-sans text-[#9CA3AF] max-md:text-sm"
-          tooltipContent={
-            <div className="text-xs font-sans text-white/80">
-              Your single-token deposit is released in small batches to cut
-              slippage:
-              <ul className="list-disc ml-8 mt-2">
-                <li>
-                  &lt; <span className="font-bold">15 % of vault TVL</span>:
-                  deployed over <span className="font-bold">24-36h</span>
-                </li>
-                <li>
-                  ≥ <span className="font-bold">15 % of vault TVL</span>:
-                  deployed over an extended{" "}
-                  <span className="font-bold">48-60h</span> window
-                </li>
-              </ul>
-              <div className="text-xs mt-2">
-                When the timeline ends, any idle balance is auto-swapped and
-                fully added to the pool
-              </div>
-            </div>
-          }
-        />
-      }
-      value="Via DCA. For 48-60h"
+      label="Deployment"
+      value="Instant (no DCA)"
     />
   );
 };
 
 const Amount = ({
-  amount,
-  collateralToken,
+  tokenA,
+  tokenB,
 }: {
-  amount: number;
-  collateralToken: { symbol: string; decimals: number };
+  tokenA: { amount: string; decimals: number; symbol: string };
+  tokenB: { amount: string; decimals: number; symbol: string };
 }) => {
-  const { symbol: collateralTokenName = "" } = collateralToken;
-  const formattedAmount = formatAmount({
-    amount: amount,
-    precision: collateralToken?.decimals || 6,
+  const { symbol: tokenAName = "" } = tokenA;
+  const { symbol: tokenBName = "" } = tokenB;
+
+  const formattedTokenA = formatAmount({
+    amount: tokenA.amount,
+    precision: tokenA.decimals || 6,
     stripZero: true,
   });
+
+  const formattedTokenB = formatAmount({
+    amount: tokenB.amount,
+    precision: tokenB.decimals || 6,
+    stripZero: true,
+  });
+
   return (
     <ModalRow
       label="Amount"
-      value={`${formattedAmount} ${collateralTokenName}`}
+      className="items-start"
+      value={
+        <div>
+          <div className="font-mono text-sm md:text-lg text-white mb-2 flex items-center justify-end gap-1">
+            <img
+              src={`/coins/${tokenAName?.toLowerCase()}.png`}
+              alt={tokenAName}
+              className="w-6 h-6 mr-1"
+            />
+            {formattedTokenA} {tokenAName}
+          </div>
+          <div className="font-mono text-sm md:text-lg text-white flex items-center justify-end gap-1">
+            <img
+              src={`/coins/${tokenBName?.toLowerCase()}.png`}
+              alt={tokenBName}
+              className="w-6 h-6 mr-1"
+            />
+            {formattedTokenB} {tokenBName}
+          </div>
+        </div>
+      }
     />
   );
 };
 
-const DepositModal = (props: DepositModalProps) => {
+const DepositDualModal = (props: DepositModalProps) => {
   const {
     isOpen,
     depositStep,
     onOpenChange,
     onDeposit,
     onDone,
-    confirmData,
+    ndlpAmount,
     depositSuccessData,
     loading,
-    collateralToken,
+    tokenA,
+    tokenB,
     vault,
-    slippage,
   } = props;
-
   const { isMd } = useBreakpoint();
-  const { symbol: collateralTokenName = "" } = collateralToken;
-  const { amount, ndlp } = confirmData;
-
   const formattedNdlp = formatAmount({
-    amount: ndlp,
+    amount: ndlpAmount,
     precision: 6,
     stripZero: true,
   });
@@ -176,29 +163,15 @@ const DepositModal = (props: DepositModalProps) => {
               exchangeId={vault?.exchange_id}
             />
             <Amount
-              amount={amount}
-              collateralToken={collateralToken}
-            />
-            <ModalRow
-              label="Conversion Rate"
-              value={
-                <span className="font-mono text-sm md:text-lg text-white">
-                  1 {collateralTokenName} ={" "}
-                  {formatAmount({
-                    amount: confirmData?.conversionRate,
-                    precision: vault.vault_lp_token_decimals,
-                  })}{" "}
-                  NDLP
-                </span>
-              }
+              tokenA={tokenA}
+              tokenB={tokenB}
             />
             <ModalRow
               label="Deposit Method"
-              value={<DepositMethod method={METHOD_DEPOSIT.SINGLE} />}
+              value={<DepositMethod method={METHOD_DEPOSIT.DUAL} />}
             />
             <div className="border-t border-white/15 my-2" />
             <Deployment />
-            <Slippage slippage={slippage} />
             <TransactionFee />
             <div className="border-t border-white/15 my-2" />
             <ModalRow
@@ -218,7 +191,7 @@ const DepositModal = (props: DepositModalProps) => {
         )}
         {depositStep === 2 && (
           <div className="flex flex-col gap-2">
-            <div className="flex max-md:flex-col gap-2 justify-center items-center mb-3 md:mb-4">
+            <div className="flex gap-2 justify-center items-center md:mb-4 mb-3">
               <Lottie
                 animationData={successAnimationData}
                 loop={false}
@@ -236,12 +209,20 @@ const DepositModal = (props: DepositModalProps) => {
                 exchangeId={vault?.exchange_id}
               />
               <Amount
-                amount={amount}
-                collateralToken={collateralToken}
+                tokenA={{
+                  ...tokenA,
+                  amount:
+                    depositSuccessData?.actualInputAmountTokenA?.toString(),
+                }}
+                tokenB={{
+                  ...tokenB,
+                  amount:
+                    depositSuccessData?.actualInputAmountTokenB?.toString(),
+                }}
               />
               <ModalRow
                 label="Deposit Method"
-                value={<DepositMethod method={METHOD_DEPOSIT.SINGLE} />}
+                value={<DepositMethod method={METHOD_DEPOSIT.DUAL} />}
               />
               <ModalRow
                 label="TxHash"
@@ -272,11 +253,10 @@ const DepositModal = (props: DepositModalProps) => {
               />
               <div className="border-t border-white/15 my-2" />
               <Deployment />
-              <Slippage slippage={slippage} />
               <TransactionFee />
               <div className="border-t border-white/15 my-2" />
               <div
-                className="flex items-center justify-between p-2 rounded-lg mt-1"
+                className="flex items-center justify-between p-2 rounded-lg"
                 style={{
                   background:
                     "linear-gradient(87deg, rgba(157, 235, 255, 0.22) -0.54%, rgba(0, 255, 94, 0.22) 97.84%)",
@@ -293,7 +273,7 @@ const DepositModal = (props: DepositModalProps) => {
                   />
                   <span className="font-mono font-bold text-sm md:text-lg text-white">
                     {formatAmount({
-                      amount: depositSuccessData?.depositLpAmount,
+                      amount: depositSuccessData?.ndlpReceived,
                       precision: vault.vault_lp_token_decimals,
                       stripZero: true,
                     })}{" "}
@@ -343,4 +323,4 @@ const DepositModal = (props: DepositModalProps) => {
   );
 };
 
-export default DepositModal;
+export default DepositDualModal;

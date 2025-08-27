@@ -259,6 +259,8 @@ export default {
       },
       fontSize: {
         "13px": "13px",
+        "11px": "[11px, 16px]",
+        "10px": "10px",
       },
       maxWidth: {
         "1/4": "25%",

@@ -1,6 +1,11 @@
-import { executionProfitData } from "@/apis/vault";
-import { SUI_CONFIG, USDC_CONFIG } from "@/config/coin-config";
-import { CLOCK, RATE_DENOMINATOR } from "@/config/vault-config";
+import { executionProfitData, getEstimateDualDeposit } from "@/apis/vault";
+import { SUI_CONFIG } from "@/config/coin-config";
+import {
+  CLOCK,
+  DUAL_TOKEN_DEPOSIT_CONFIG,
+  EXCHANGE_CODES_MAP,
+  RATE_DENOMINATOR,
+} from "@/config/vault-config";
 import { getBalanceAmountForInput } from "@/lib/number";
 import {
   SCVaultConfig,
@@ -11,10 +16,14 @@ import { SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import BigNumber from "bignumber.js";
 import { Buffer } from "buffer";
-import { useMergeCoins } from "./use-merge-coins";
 import { useGetVaultConfig, useVaultBasicDetails } from "./use-vault";
 import { useWallet } from "./use-wallet";
 import { logger } from "@/utils/logger";
+import { useQuery } from "@tanstack/react-query";
+import { EstimateDualDepositToken } from "@/types/deposit-token.types";
+import { useSplitCoin } from "./use-split-coin";
+import { bcs } from "@mysten/sui/bcs";
+import { getPriceOracle } from "@/services/pyth-services";
 
 type DepositCoin = {
   coin_type: string;
@@ -26,6 +35,23 @@ type DepositArgs = {
   amount: number;
   swapDepositInfo: VaultSwapDepositInfo;
   collateralToken: string;
+  slippage?: number;
+  onDepositSuccessCallback?: (data: any) => void;
+};
+
+type DualDepositCoin = {
+  coin_type: string;
+  decimals: number;
+  amount: string;
+  price_feed_id: string;
+};
+
+type DualDepositArgs = {
+  coinA: DualDepositCoin;
+  coinB: DualDepositCoin;
+  exchange_id: number;
+  tick_upper: number;
+  tick_lower: number;
   onDepositSuccessCallback?: (data: any) => void;
 };
 
@@ -100,13 +126,14 @@ export const useDepositVault = (vaultId: string) => {
   const suiClient = useSuiClient();
   const { data: vaultConfig } = useVaultBasicDetails(vaultId);
 
-  const { mergeCoins } = useMergeCoins();
+  const { smartSplitCoin } = useSplitCoin();
 
   const deposit = async ({
     coin,
     amount,
     swapDepositInfo,
     collateralToken,
+    slippage,
     onDepositSuccessCallback,
   }: DepositArgs) => {
     try {
@@ -119,11 +146,7 @@ export const useDepositVault = (vaultId: string) => {
         throw new Error("No package id");
       }
 
-      const totalSuiBalance = await validateDepositGasFee(suiClient, address);
-
-      if (coin.coin_type === SUI_CONFIG.coinType) {
-        await validateDepositSui(totalSuiBalance, amount);
-      }
+      await validateDepositGasFee(suiClient, address);
 
       const profitData: any = await executionProfitData(vaultConfig.vault_id);
       if (!profitData || !profitData?.signature) {
@@ -131,28 +154,13 @@ export const useDepositVault = (vaultId: string) => {
       }
 
       const tx = new Transaction();
-      let splitCoin;
-
-      // Calculate the exact amount to split (with proper precision)
-      const splitAmount = new BigNumber(amount)
-        .multipliedBy(new BigNumber(10).pow(coin.decimals))
-        .toString();
-
-      // Handle SUI vs other tokens differently
-      if (coin.coin_type === SUI_CONFIG.coinType) {
-        // For SUI: Split directly from gas coin to avoid gas coin conflicts
-        [splitCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(splitAmount)]);
-      } else {
-        // For other tokens: Use the normal merge and split flow
-        const mergedCoinId = await mergeCoins(coin.coin_type);
-        if (!mergedCoinId) {
-          throw new Error("No coins available to deposit");
-        }
-
-        [splitCoin] = tx.splitCoins(tx.object(mergedCoinId), [
-          tx.pure.u64(splitAmount),
-        ]);
-      }
+      const splitCoin = await smartSplitCoin(
+        tx,
+        coin.coin_type,
+        coin.decimals,
+        amount,
+        address
+      );
 
       const baseParams = [
         tx.pure.u64(profitData.vault_value_usd),
@@ -175,7 +183,10 @@ export const useDepositVault = (vaultId: string) => {
         tx.object(CLOCK),
       ];
 
-      const slippageBps = 300; // 3%
+      let slippageBps = 300; // 3%
+      if (slippage) {
+        slippageBps = slippage * 100;
+      }
       let _arguments: any = [];
       let _typeArguments: any = [];
       if (coin.coin_type === collateralToken) {
@@ -326,4 +337,208 @@ export const useCollateralLPRate = (
   const collateralTokenRate = isReverse ? rate : 1 / rate;
 
   return collateralTokenRate;
+};
+
+export const useDepositDualVault = (vaultId: string) => {
+  const { mutateAsync: signAndExecuteTransaction } =
+    useSignAndExecuteTransaction();
+  const { address } = useWallet();
+  const suiClient = useSuiClient();
+  const { data: vaultConfig } = useVaultBasicDetails(vaultId);
+  const { smartSplitCoin } = useSplitCoin();
+
+  const deposit = async ({
+    coinA,
+    coinB,
+    tick_upper,
+    tick_lower,
+    onDepositSuccessCallback,
+  }: DualDepositArgs) => {
+    try {
+      const packageId = vaultConfig.metadata.package_id;
+      if (!address) {
+        throw new Error("No account connected");
+      }
+
+      if (!packageId) {
+        throw new Error("No package id");
+      }
+
+      await validateDepositGasFee(suiClient, address);
+
+      const profitData: any = await executionProfitData(vaultConfig.vault_id);
+      if (!profitData || !profitData?.signature) {
+        throw new Error("Failed to get signature");
+      }
+
+      const priceFeedsObjectIds = await getPriceOracle(
+        [
+          vaultConfig.collateral_price_feed_id,
+          coinA.price_feed_id,
+          coinB.price_feed_id,
+        ],
+        suiClient
+      );
+
+      if (!priceFeedsObjectIds[0]) {
+        throw new Error("Failed to get oracle price");
+      }
+
+      const tx = new Transaction();
+      const splitCoinA = await smartSplitCoin(
+        tx,
+        coinA.coin_type,
+        coinA.decimals,
+        coinA.amount,
+        address
+      );
+
+      const splitCoinB = await smartSplitCoin(
+        tx,
+        coinB.coin_type,
+        coinB.decimals,
+        coinB.amount,
+        address
+      );
+
+      const pack = bcs.tuple([bcs.u64()]);
+      const serialized = pack.serialize([0]);
+      const slippageBps = 300; // 3%
+
+      const baseParams = [
+        tx.object(DUAL_TOKEN_DEPOSIT_CONFIG.price_feed_config),
+        tx.object(vaultConfig.pool.pool_address),
+        tx.object(vaultConfig.metadata.vault_id),
+        tx.object(vaultConfig.metadata.vault_config_id),
+        tx.object(priceFeedsObjectIds[0]),
+        tx.object(priceFeedsObjectIds[1]),
+        tx.object(priceFeedsObjectIds[2]),
+        splitCoinA,
+        splitCoinB,
+        tx.pure.u128(slippageBps),
+        tx.pure.u32(tick_lower),
+        tx.pure.u32(tick_upper),
+        tx.pure.u64(profitData.vault_value_usd),
+        tx.pure.u64(new BigNumber(profitData.profit_amount).abs().toString()),
+        tx.pure.bool(profitData.negative),
+        tx.pure.u64(profitData.expire_time),
+        tx.pure.u64(profitData.last_credit_time),
+        tx.pure(
+          "vector<vector<u8>>",
+          [profitData.signer_publickey].map((key) =>
+            Array.from(Buffer.from(key, "hex"))
+          )
+        ),
+        tx.pure(
+          "vector<vector<u8>>",
+          [profitData.signature].map((key) =>
+            Array.from(Buffer.from(key, "hex"))
+          )
+        ),
+        tx.pure.vector("u8", serialized.toBytes()),
+        tx.object(CLOCK),
+      ];
+
+      const _typeArguments: string[] = [
+        vaultConfig.collateral_token,
+        vaultConfig.vault_lp_token,
+        coinA.coin_type,
+        coinB.coin_type,
+      ];
+
+      const exchangeCode = EXCHANGE_CODES_MAP[vaultConfig.exchange_id]?.code;
+      if (!exchangeCode) {
+        throw new Error("Invalid exchange code");
+      }
+      const executorConfig = vaultConfig.metadata.executor[exchangeCode];
+      const _arguments: any = [tx.object(executorConfig.config)];
+
+      if (exchangeCode === "mmt") {
+        _arguments.push(tx.object(DUAL_TOKEN_DEPOSIT_CONFIG.mmt_version));
+      } else if (exchangeCode === "cetus") {
+        _arguments.push(
+          tx.object(DUAL_TOKEN_DEPOSIT_CONFIG.cetus_global_config)
+        );
+      } else if (exchangeCode === "bluefin") {
+        _arguments.push(
+          tx.object(DUAL_TOKEN_DEPOSIT_CONFIG.bluefin_global_config)
+        );
+      }
+      _arguments.push(...baseParams);
+      const module = `${exchangeCode}_composer`;
+      const target = `${executorConfig.address}::${module}::user_deposit_and_add_liquidity`;
+      logger.debug("Dual deposit moveCall target >>", target);
+      tx.moveCall({
+        target,
+        arguments: _arguments,
+        typeArguments: _typeArguments,
+      });
+
+      const result = await signAndExecuteTransaction(
+        {
+          transaction: tx,
+        },
+        {
+          onSuccess: async (data) => {
+            const { digest } = data;
+
+            const txResponse = await suiClient.waitForTransaction({
+              digest,
+              options: {
+                showEvents: true,
+              },
+            });
+            const events = txResponse?.events;
+            const depositEvent = events.find((event) =>
+              event.type.includes("vault::DualTokenDepositEvent")
+            );
+            const userDualDepositAndAddLiquidityEvent = events.find((event) =>
+              event.type.includes("UserDualDepositAndAddLiquidity")
+            ) as {
+              parsedJson: {
+                amount_token_a: string;
+                amount_token_b: string;
+              };
+            };
+
+            // logger.debug("🚀 ~ DepositWithSigTimeEvent:", depositEvent);
+            // logger.debug(
+            //   "🚀 ~ UserDualDepositAndAddLiquidityEvent:",
+            //   userDualDepositAndAddLiquidityEvent
+            // );
+
+            onDepositSuccessCallback?.({
+              ...data,
+              ndlpReceived: (depositEvent?.parsedJson as { lp?: number })?.lp,
+              actualInputAmountTokenA:
+                userDualDepositAndAddLiquidityEvent?.parsedJson?.amount_token_a,
+              actualInputAmountTokenB:
+                userDualDepositAndAddLiquidityEvent?.parsedJson?.amount_token_b,
+            });
+          },
+          onError: (error) => {
+            console.error("Deposit failed:", error);
+            throw error;
+          },
+        }
+      );
+
+      return result;
+    } catch (error) {
+      console.error("Error in deposit dual:", error);
+      throw error;
+    }
+  };
+
+  return {
+    deposit,
+  };
+};
+
+export const useEstimateDualDeposit = (vaultId: string) => {
+  return useQuery({
+    queryKey: ["estimate-dual-deposit", vaultId],
+    queryFn: () => getEstimateDualDeposit(vaultId),
+    refetchInterval: 5000,
+  }) as { data: EstimateDualDepositToken; isLoading: boolean };
 };

@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import debounce from "lodash-es/debounce";
+import BigNumber from "bignumber.js";
 
 import SummaryConfirmWithdraw from "./summary-confirm-withdraw";
 import { Button } from "@/components/ui/button";
 import Web3Button from "@/components/ui/web3-button";
-import { RowItem } from "@/components/ui/row-item";
-import { IconErrorToast } from "@/components/ui/icon-error-toast";
+import TransactionFee from "./transaction-fee";
 import { FormattedNumberInput } from "@/components/ui/formatted-number-input-v2";
-import { DynamicFontText } from "@/components/ui/dynamic-font-text";
 import { Info, X } from "lucide-react";
 import {
   Dialog,
@@ -19,12 +18,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import SelectTokens from "./select-tokens";
+import AmountToken from "./amount-token";
 import ConversationRate from "../conversation-rate";
+import SelectMethod from "../select-method";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import { showFormatNumber } from "@/lib/number";
 import LpType from "@/types/lp.type";
 import PaymentTokenType from "@/types/payment-token.types";
-import { useToast } from "@/components/ui/use-toast";
 import {
   useWithdrawVaultConfig,
   useWithdrawVault,
@@ -34,9 +34,11 @@ import { useWallet } from "@/hooks/use-wallet";
 import Lottie from "lottie-react";
 import successAnimationData from "@/assets/lottie/circle_checkmark_success.json";
 
+import { METHOD_DEPOSIT } from "@/components/vault-detail/constant";
+
 type Props = {
   balanceLp: string;
-  balanceLpUsd: string;
+  rateLpUsd: string;
   lockDuration: number;
   lpData: LpType;
   tokens: PaymentTokenType[];
@@ -48,7 +50,7 @@ interface IFormInput {
 
 export default function WithdrawForm({
   balanceLp,
-  balanceLpUsd,
+  rateLpUsd,
   lpData,
   tokens,
   lockDuration,
@@ -62,10 +64,11 @@ export default function WithdrawForm({
   const [openModalSuccess, setOpenModalSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedToken, setSelectedToken] = useState<PaymentTokenType>();
+  const [method, setMethod] = useState(METHOD_DEPOSIT.SINGLE);
 
   const BadgeCoolDown = useMemo(() => {
     return (
-      <p className="m-0 text-white/70 font-normal text-xs text-center">
+      <p className="m-0 text-white/70 font-normal md:text-xs text-10px max-md:leading-3 text-center">
         After confirming your withdrawal, please wait{" "}
         <span className="text-apr-gradient font-black">{timeCoolDown}</span> for
         processing. Once ready, you can claim your funds back to your wallet.
@@ -83,12 +86,15 @@ export default function WithdrawForm({
   }, [balanceLp, lpData.lp_symbol]);
 
   const balanceInputUsd = useMemo(() => {
+    const amount = new BigNumber(rateLpUsd)
+      .multipliedBy(form?.amount || "0")
+      .toString();
     return (
       <span className="text-white/50 text-sm font-medium font-sans">
-        $ {showFormatNumber(balanceLpUsd, 0, 2, "", true)}
+        {showFormatNumber(amount, 0, 2, "$")}
       </span>
     );
-  }, [balanceLpUsd]);
+  }, [rateLpUsd, form]);
 
   const rightInput = useMemo(() => {
     return (
@@ -105,6 +111,12 @@ export default function WithdrawForm({
     );
   }, [lpData]);
 
+  const tokenReceives = useMemo(() => {
+    return method === METHOD_DEPOSIT.SINGLE
+      ? [selectedToken]
+      : lpData.receive_tokens;
+  }, [method, lpData.receive_tokens, selectedToken]);
+
   /**
    * HOOKS
    */
@@ -117,13 +129,12 @@ export default function WithdrawForm({
     formState: { errors },
   } = useForm<IFormInput>({ mode: "all" });
   const { address } = useWallet();
-  const { toast } = useToast();
   const { withdraw } = useWithdrawVault();
   const { configVault } = useWithdrawVaultConfig(lpData);
   const summary = useWithdrawEtsAmountReceive(
     lpData,
-    selectedToken,
-    form?.amount || 0
+    form?.amount || 0,
+    tokenReceives
   );
 
   /**
@@ -151,26 +162,13 @@ export default function WithdrawForm({
 
   const onWithdraw = useCallback(async () => {
     setIsLoading(true);
-    try {
-      const res = await withdraw(
-        form.amount,
-        lpData,
-        selectedToken?.token_address
-      );
+    const res = await withdraw(form.amount, lpData, tokenReceives);
+    if (res) {
       setOpenModalSuccess(true);
       onCloseModalConfirm();
-    } catch (error) {
-      console.log(error);
-      toast({
-        title: "Withdraw failed",
-        description: error?.message || error,
-        variant: "error",
-        duration: 5000,
-        icon: <IconErrorToast />,
-      });
     }
     setIsLoading(false);
-  }, [form, lpData, selectedToken, onCloseModalConfirm, toast, withdraw]);
+  }, [form, lpData, tokenReceives, onCloseModalConfirm, withdraw]);
 
   /**
    * LIFECYCLES
@@ -218,21 +216,29 @@ export default function WithdrawForm({
    */
   return (
     <div>
-      <div
-        className={`deposit_input_v2_wrapper p-4 !rounded-lg flex items-center justify-between mb-6 max-md:py-2`}
-      >
-        <div className="text-gray-200 font-medium	font-sans text-base max-md:text-13px">
-          Select Payout Token
+      <SelectMethod
+        value={method}
+        onChange={(value) => setMethod(value)}
+        isEnableDual={lpData.is_enable_dual_token}
+      />
+      {method === METHOD_DEPOSIT.SINGLE && (
+        <div
+          className={`deposit_input_v2_wrapper p-4 !rounded-lg flex items-center justify-between mb-4 max-md:py-2`}
+        >
+          <div className="text-gray-200 font-medium	font-sans text-base max-md:text-13px">
+            Select Payout Token
+          </div>
+          <SelectTokens
+            selectedToken={selectedToken}
+            tokens={tokens}
+            onSelectToken={(token) => {
+              setSelectedToken(token);
+            }}
+            title="Select Payout Token"
+          />
         </div>
-        <SelectTokens
-          selectedToken={selectedToken}
-          tokens={tokens}
-          onSelectToken={(token) => {
-            setSelectedToken(token);
-          }}
-          title="Select Payout Token"
-        />
-      </div>
+      )}
+
       {/* form */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <Controller
@@ -271,10 +277,10 @@ export default function WithdrawForm({
           )}
         />
         {(errors?.amount?.message || summary?.errorEstimateWithdraw) && (
-          <div className="py-2 px-4 bg-red-error/20 text-red-error text-sm flex items-center">
+          <div className="py-2 px-4 bg-red-error/20 text-red-error text-sm flex items-center break-all">
             <Info
               size={18}
-              className="mr-2"
+              className="mr-2 flex-shrink-0	"
             />
             {errors?.amount?.message || summary?.errorEstimateWithdraw}
           </div>
@@ -282,76 +288,41 @@ export default function WithdrawForm({
 
         {/* Summary */}
         <div className="p-4 border border-white/20 rounded-[12px] rounded-t-none">
-          <RowItem
-            className="flex-col !justify-start !items-start gap-0"
-            classNameValue="w-full mt-2 font-mono text-gray-200 font-bold"
-          >
-            <RowItem.Label>
-              <LabelWithTooltip
-                label="Est. Max Receive"
-                labelClassName="text-sm md:text-base text-gray-400 font-sans"
-                tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
-              />
-            </RowItem.Label>
-            <RowItem.Value>
-              <div className="flex items-center justify-start md:justify-between md:flex-row-reverse">
-                <div className="flex items-center">
-                  <img
-                    src={selectedToken?.image}
-                    alt={selectedToken?.token_symbol}
-                    className="w-6 h-6 mr-2"
-                  />
-                  <div className="text-lg max-sm:hidden">
-                    {selectedToken?.token_symbol}
-                  </div>
-                </div>
-                <DynamicFontText
-                  maxWidth={245}
-                  breakpoints={[
-                    {
-                      minLength: 0,
-                      fontSize: "text-[32px] leading-[42px] max-sm:text-lg",
-                    },
-                    { minLength: 13, fontSize: "text-lg max-sm:text-base" },
-                    { minLength: 18, fontSize: "text-base max-sm:text-sm" },
-                  ]}
-                >
-                  {summary?.receive
-                    ? `${showFormatNumber(
-                        summary.receive,
-                        0,
-                        selectedToken.decimal
-                      )} `
-                    : "--"}
-                </DynamicFontText>
-              </div>
-            </RowItem.Value>
-          </RowItem>
-          <hr className="w-full border-t border-white/15 my-2" />
-          <ConversationRate
-            sourceToken={{ symbol: summary?.conversion_rate?.from_symbol }}
-            targetToken={{ symbol: summary?.conversion_rate?.to_symbol }}
-            rate={summary?.conversion_rate.amount}
-            isCalculating={summary?.isLoadingEstimateWithdraw}
-            onRefresh={summary.refreshRate}
-          />
+          <div className="mb-2">
+            <LabelWithTooltip
+              label="Est. Max Receive"
+              labelClassName="text-sm md:text-base text-gray-400 font-sans"
+              tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
+            />
+          </div>
+          {summary?.receives?.map((token, idx) => (
+            <AmountToken
+              key={`amount-${idx}`}
+              amount={token?.amount}
+              token={token}
+              className={idx > 0 ? "mt-2 md:mt-4" : ""}
+              isLoading={summary.isLoadingEst}
+            />
+          ))}
 
-          <RowItem className="mt-2 flex-col md:flex-row justify-start items-start md:items-center md:justify-between gap-0">
-            <RowItem.Label>
-              <span className="text-13px md:text-sm text-white/80">
-                Transaction Fee
-              </span>
-            </RowItem.Label>
-            <RowItem.Value>
-              <span className="text-sm">Free</span>
-            </RowItem.Value>
-          </RowItem>
+          <hr className="w-full border-t border-white/15 my-4" />
+          {method === METHOD_DEPOSIT.SINGLE && (
+            <ConversationRate
+              className="mb-2"
+              sourceToken={{ symbol: summary?.conversion_rate?.from_symbol }}
+              targetToken={{ symbol: summary?.conversion_rate?.to_symbol }}
+              rate={summary?.conversion_rate.amount}
+              isCalculating={summary?.isLoadingEst}
+              onRefresh={summary.refreshRate}
+            />
+          )}
+          <TransactionFee />
         </div>
 
         <Web3Button
           type="submit"
           className="w-full font-semibold text-lg py-3 mt-4 mb-3 max-md:text-base"
-          disabled={!summary.receive || !!summary.errorEstimateWithdraw}
+          disabled={!!summary.errorEstimateWithdraw}
         >
           Withdraw
         </Web3Button>
@@ -366,7 +337,7 @@ export default function WithdrawForm({
       >
         <DialogContent
           hideIconClose
-          className="sm:max-w-[480px] bg-[#141517] max-md:rounded-2xl border border-white/10 gap-6 max-md:py-6 max-md:px-4"
+          className="sm:max-w-[564px] bg-[#141517] max-md:rounded-2xl border border-white/10 gap-4 max-md:py-6 max-md:p-4"
         >
           {/* Header */}
           <DialogHeader className="flex flex-row justify-between items-center">
@@ -393,8 +364,8 @@ export default function WithdrawForm({
             lpData={lpData}
             address={address}
             configVault={configVault}
+            method={method}
           />
-          <div>{BadgeCoolDown}</div>
           {/* Footer */}
           <DialogFooter className="w-full flex sm:space-x-0 max-md:flex-row">
             <Button
@@ -415,6 +386,7 @@ export default function WithdrawForm({
               {isLoading ? "Waiting" : "Confirm Withdrawal"}
             </Web3Button>
           </DialogFooter>
+          <div>{BadgeCoolDown}</div>
         </DialogContent>
       </Dialog>
 
@@ -424,20 +396,22 @@ export default function WithdrawForm({
         onOpenChange={(isOpen) => !isOpen && onCloseModalSuccess()}
       >
         <DialogContent
-          className="sm:max-w-[480px] bg-[#141517] border border-white/10 px-7 py-8 rounded-2xl gap-5"
+          className="sm:max-w-[520px] bg-[#141517] border border-white/10 p-4 md:p-6 rounded-2xl gap-5"
           hideIconClose={true}
         >
           <DialogHeader className="relative">
-            <Lottie
-              animationData={successAnimationData}
-              loop={false}
-              autoplay={true}
-              className="w-24 h-24 mx-auto"
-            />
-            <DialogTitle className="text-xl font-bold m-0 text-center">
-              Withdrawal Request Confirmed!
-            </DialogTitle>
-            <DialogDescription className="m-0 text-center text-xs md:text-base text-gray-400">
+            <div className="flex flex-col md:flex-row justify-center items-center ">
+              <Lottie
+                animationData={successAnimationData}
+                loop={false}
+                autoplay={true}
+                className="w-9 h-9 max-md:w-11 max-md:h-11 mr-1"
+              />
+              <DialogTitle className="text-lg md:text-xl font-bold m-0 text-center">
+                Withdrawal Request Confirmed!
+              </DialogTitle>
+            </div>
+            <DialogDescription className="hidden m-0 text-center text-xs md:text-base text-gray-400">
               Your {showFormatNumber(summary?.amount)} {lpData.lp_symbol}{" "}
               withdrawal request from Vault {lpData.vault_name} has been
               confirmed. Funds will be available after the cooldown.
@@ -448,6 +422,7 @@ export default function WithdrawForm({
             lpData={lpData}
             address={address}
             configVault={configVault}
+            method={method}
           />
           <Web3Button
             className="w-full font-semibold text-sm max-md:text-base py-3 rounded-lg"
