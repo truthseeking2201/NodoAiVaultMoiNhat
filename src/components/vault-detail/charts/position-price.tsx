@@ -248,7 +248,7 @@ const PositionPriceChart = ({
   const checkOffset = useMemo(() => {
     return (ref: number) => {
       let offset = 2;
-      const extendRange = ref < Math.pow(10, 4) ? 0.7 : 1;
+      const extendRange = ref < Math.pow(10, 3) ? 1.7 : 2;
       if (ref <= 0) {
         offset = 0.0000001;
       } else {
