@@ -101,6 +101,7 @@ const SlippageSetting = ({ value, onChange }: SlippageSettingProps) => {
     <div>
       <div className="flex justify-between items-center">
         <LabelWithTooltip
+          type="underline"
           label="Max Slippage"
           labelClassName="text-white/80 text-sm"
           tooltipContent="In NODO AI Vaults, Max Slippage is the highest price deviation allowed during swaps to protect you from receiving fewer tokens than expected. Lower slippage means safer but slower execution, higher slippage means faster but riskier"
