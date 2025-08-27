@@ -188,13 +188,13 @@ const YourHoldings = ({
       }
       isLoading={isDetailLoading}
       loadingStyle="h-[68px] w-full"
-      className={cn(!expanded && '!pb-2')}
+      className={cn(!expanded && '!pb-0')}
     >
       <ConditionRenderer
         when={userState !== "nonDeposit"}
         fallback={<UnSignedHolding />}
       >
-        <div className="pb-2">
+        <div className="pb-4">
           <div className="flex items-center justify-between">
             <div>
               <LabelWithTooltip
