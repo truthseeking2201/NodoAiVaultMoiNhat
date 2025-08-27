@@ -1,16 +1,16 @@
 import "@/styles/design-tokens.css";
 
+import ImageBackground from "@/assets/images/bg-leaderboards.png";
 import { PageContainer } from "@/components/layout/page-container";
 import UserRank from "@/components/leaderboards/user-rank";
 import DataLeaderboards from "@/components/leaderboards/data-leaderboards";
 
-import useBreakpoint from "@/hooks/use-breakpoint";
-
 export default function Leaderboards() {
-  const { isMd } = useBreakpoint();
-
   return (
-    <PageContainer className={`${isMd ? "py-8" : "py-6"}`}>
+    <PageContainer
+      backgroundImage={ImageBackground}
+      className="max-md:py-4 py-8"
+    >
       <UserRank />
       <DataLeaderboards />
     </PageContainer>

@@ -19,6 +19,7 @@ export const CRITICAL_IMAGES = {
     "/bg-main.webp",
     "/banners/hero-banner.png",
     "/banners/hero-banner-mobile.png",
+    "/bg-leaderboards.png",
   ],
 
   // Chain icons
