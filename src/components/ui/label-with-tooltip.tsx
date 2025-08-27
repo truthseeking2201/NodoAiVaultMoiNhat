@@ -18,7 +18,7 @@ interface LabelWithTooltipProps {
   contentClassName?: string;
   labelContainerClassName?: string;
   icon?: ReactNode;
-  type?: "info" | "help";
+  type?: "info" | "help" | "underline";
   asChild?: boolean;
   hasIcon?: boolean;
   propsTooltipContent?: any;
@@ -40,7 +40,7 @@ export const LabelWithTooltip = ({
   icon,
   type = "info",
   asChild = false,
-  hasIcon = true,
+  hasIcon = false,
   propsTooltipContent = {},
 }: LabelWithTooltipProps) => {
   const computedIcon = iconMap[type] || <InfoIcon />;
@@ -55,10 +55,7 @@ export const LabelWithTooltip = ({
               <>
                 <div className={labelClassName}>{label}</div>
                 <ConditionRenderer when={!!tooltipContent}>
-                  <TooltipTrigger
-                    asChild={asChild}
-                    type="button"
-                  >
+                  <TooltipTrigger asChild={asChild} type="button">
                     <span>
                       {computedIcon &&
                         React.cloneElement(computedIcon, {
@@ -74,7 +71,15 @@ export const LabelWithTooltip = ({
               </>
             ) : (
               <TooltipTrigger asChild={asChild}>
-                <div className={labelClassName}>{label}</div>
+                <div
+                  className={cn(
+                    labelClassName,
+                    type === "underline" &&
+                      "underline underline-offset-4 decoration-dotted decoration-gray-600"
+                  )}
+                >
+                  {label}
+                </div>
               </TooltipTrigger>
             )}
           </div>

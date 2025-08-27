@@ -326,6 +326,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
           <div className="max-md:rounded-lg rounded-b-lg border border-white/0.20 p-4 mb-3 max-md:mt-3">
             <div className=" bg-black flex items-center justify-between pb-2">
               <LabelWithTooltip
+                type="underline"
                 label="Est. Receive"
                 labelClassName="text-gray-200 text-base font-bold md:text-base text-sm"
                 tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."

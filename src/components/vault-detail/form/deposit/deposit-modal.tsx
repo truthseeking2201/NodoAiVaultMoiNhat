@@ -58,12 +58,7 @@ const GradientText = ({ text }: { text: string }) => {
 };
 
 const Slippage = ({ slippage }: { slippage: string }) => {
-  return (
-    <ModalRow
-      label="Slippage"
-      value={`${slippage}%`}
-    />
-  );
+  return <ModalRow label="Slippage" value={`${slippage}%`} />;
 };
 
 const Deployment = () => {
@@ -71,7 +66,7 @@ const Deployment = () => {
     <ModalRow
       label={
         <LabelWithTooltip
-          hasIcon={true}
+          type="underline"
           asChild
           label="Deployment"
           iconClassName="mt-0"
@@ -159,10 +154,7 @@ const DepositModal = (props: DepositModalProps) => {
   };
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={onOpenChange}
-    >
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DepositDialogContent depositStep={depositStep}>
         <DepositDialogHeader
           depositStep={depositStep}
@@ -175,10 +167,7 @@ const DepositModal = (props: DepositModalProps) => {
               valutName={vault?.vault_name}
               exchangeId={vault?.exchange_id}
             />
-            <Amount
-              amount={amount}
-              collateralToken={collateralToken}
-            />
+            <Amount amount={amount} collateralToken={collateralToken} />
             <ModalRow
               label="Conversion Rate"
               value={
@@ -235,10 +224,7 @@ const DepositModal = (props: DepositModalProps) => {
                 valutName={vault?.vault_name}
                 exchangeId={vault?.exchange_id}
               />
-              <Amount
-                amount={amount}
-                collateralToken={collateralToken}
-              />
+              <Amount amount={amount} collateralToken={collateralToken} />
               <ModalRow
                 label="Deposit Method"
                 value={<DepositMethod method={METHOD_DEPOSIT.SINGLE} />}

@@ -10,7 +10,8 @@ export const logger = {
 };
 
 export const captureSentryError = (error: any, walletAddress?: string) => {
-  const errorMessage = error?.response?.data?.message || error?.message;
+  const errorMessage =
+    error?.response?.data?.message || error?.message || "unknown error";
 
   const errorToCapture =
     error instanceof Error ? error : new Error(errorMessage);

@@ -5,7 +5,7 @@ import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import Web3Button from "@/components/ui/web3-button";
 import SuccessfulToast from "@/components/vault/deposit/successful-toast";
-import { USDC_CONFIG } from "@/config";
+import { SUI_CONFIG, USDC_CONFIG } from "@/config";
 import {
   useEstimateDeposit,
   useGetLpToken,
@@ -83,31 +83,43 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   const [isOpenRiskDisclosure, setIsOpenRiskDisclosure] = useState(false);
 
   const paymentTokens = useMemo(() => {
-    const tokens = vault?.tokens
-      ?.map((token) => {
-        const asset = assets.find(
-          (asset) => asset.coin_type === token?.token_address
-        );
-
-        return {
-          token_id: token?.token_id,
-          symbol: token?.token_symbol,
-          decimals: token.decimal,
-          balance: isAuthenticated ? asset?.balance || "0" : "0",
-          token_address: token?.token_address,
-          min_deposit_amount: token?.min_deposit_amount,
-          min_deposit_amount_usd: token?.min_deposit_amount_usd,
-        };
-      })
-      .sort((a, b) =>
-        new BigNumber(b.balance).minus(new BigNumber(a.balance)).toNumber()
+    const tokens = vault?.tokens?.map((token) => {
+      const asset = assets.find(
+        (asset) => asset.coin_type === token?.token_address
       );
+
+      return {
+        token_id: token?.token_id,
+        symbol: token?.token_symbol,
+        decimals: token.decimal,
+        balance: isAuthenticated ? asset?.balance || "0" : "0",
+        token_address: token?.token_address,
+        min_deposit_amount: token?.min_deposit_amount,
+        min_deposit_amount_usd: token?.min_deposit_amount_usd,
+      };
+    });
 
     if (!tokens?.length) {
       return [DEFAULT_DEPOSIT_TOKEN];
     }
 
-    return tokens;
+    // Sort tokens to ensure SUI is first and USDC is last
+    return tokens.sort((a, b) => {
+      const isSuiA = a.token_address === SUI_CONFIG.coinType;
+      const isSuiB = b.token_address === SUI_CONFIG.coinType;
+      const isUsdcA = a.token_address === USDC_CONFIG.coinType;
+      const isUsdcB = b.token_address === USDC_CONFIG.coinType;
+
+      // SUI should always be first
+      if (isSuiA && !isSuiB) return -1;
+      if (!isSuiA && isSuiB) return 1;
+
+      // USDC should always be last
+      if (isUsdcA && !isUsdcB) return 1;
+      if (!isUsdcA && isUsdcB) return -1;
+
+      return 0;
+    });
   }, [vault, assets, isAuthenticated]);
 
   const tokenIds = useMemo(() => {
@@ -354,6 +366,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         <div className="rounded-b-lg border border-white/0.20 p-4 mb-3">
           <div className=" bg-black flex items-center justify-between pb-2">
             <LabelWithTooltip
+              type="underline"
               label="Est. Receive"
               labelClassName="text-gray-200 text-base font-bold md:text-base text-sm"
               tooltipContent="Estimated amount based on current NDLP price. Final amount may vary slightly due to market conditions during processing."
@@ -410,11 +423,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
                 Network
               </div>
               <div className="text-sm font-mono text-white inline-flex items-center md:text-sm text-13px">
-                <img
-                  src="/chains/sui.png"
-                  alt="SUI"
-                  className="w-6 h-6 mr-2"
-                />
+                <img src="/chains/sui.png" alt="SUI" className="w-6 h-6 mr-2" />
                 SUI
               </div>
             </div>
