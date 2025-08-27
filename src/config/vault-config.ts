@@ -47,9 +47,12 @@ export const EXCHANGE_CODES_MAP: Record<
   },
 };
 
+const isProduction = import.meta.env.VITE_APP_ENV === "production";
+
 export const DUAL_TOKEN_DEPOSIT_CONFIG = {
-  price_feed_config:
-    "0x04e3a1bb44ea289d85ab955d2b6c9fa1da669c8c9bc96de92e50b97e1922a070",
+  price_feed_config: isProduction
+    ? "0x0747105bffac3ba53c0a5a2875ad9ac8f268f596ed497289b78d046f20c64076"
+    : "0x04e3a1bb44ea289d85ab955d2b6c9fa1da669c8c9bc96de92e50b97e1922a070",
   mmt_version:
     "0x2375a0b1ec12010aaea3b2545acfa2ad34cfbba03ce4b59f4c39e1e25eed1b2a",
   cetus_global_config:
