@@ -34,6 +34,7 @@ import { isMobileDevice } from "./utils/helpers";
 import { useToast } from "./hooks/use-toast";
 import { IconErrorToast } from "./components/ui/icon-error-toast";
 import { useStableAutoConnect } from "./hooks/use-stable-auto-connect";
+import { captureSentryError } from "./utils/logger";
 
 const NotFound = lazy(() =>
   import("./pages/not-found").catch((e) => {
@@ -66,12 +67,10 @@ const useSetWalletDisconnectHandler = () => {
           localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
         );
         console.error("Error disconnecting wallet:", error);
-        Sentry.captureException(error, {
-          extra: {
-            wallet_address:
-              walletConnectionInfo?.state?.lastConnectedAccountAddress,
-          },
-        });
+        captureSentryError(
+          error,
+          walletConnectionInfo?.state?.lastConnectedAccountAddress
+        );
         localStorage.clear();
         location.reload();
         return;
@@ -108,7 +107,7 @@ const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (error) {
-      Sentry.captureException(error);
+      captureSentryError(error);
       toast({
         title: error?.message || "Failed to fetch vaults",
         variant: "error",

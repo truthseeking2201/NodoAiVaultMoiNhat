@@ -6,6 +6,7 @@ import { useWallet } from "./use-wallet";
 import { useNdlpAssetsStore, useUserAssetsStore } from "./use-store";
 import { useGetDepositVaults } from "./use-vault";
 import * as Sentry from "@sentry/react";
+import { captureSentryError } from "@/utils/logger";
 
 export const useLoginWallet = () => {
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
@@ -49,16 +50,16 @@ export const useLoginWallet = () => {
         success: true,
       };
     } catch (error) {
-      console.log(error);
-      Sentry.captureException(error, {
-        extra: {
-          walletAddress,
-        },
-      });
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Unknown error during wallet login"';
+
+      captureSentryError(error, walletAddress);
       triggerWalletDisconnect();
       return {
         success: false,
-        message: error?.response?.data?.message || error?.message,
+        message: errorMessage,
       };
     }
   };
