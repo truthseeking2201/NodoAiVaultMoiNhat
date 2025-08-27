@@ -9,12 +9,11 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ArrowUpRight, ArrowRight } from "lucide-react";
 import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 import { motion } from "framer-motion";
-import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import ReferralTooltip from "../my-referrals/referral-tooltip";
 
 import Icon from "@/components/icon";
@@ -31,6 +30,11 @@ const pageRoutes = [
     icon: "Vault",
     label: "Vaults",
     path: "/",
+  },
+  {
+    icon: "Leaderboards",
+    label: "Leaderboards",
+    path: "/leaderboards",
   },
   // {
   //   icon: "Dashboard",
@@ -83,19 +87,23 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
             transition={{ duration: 0.3 }}
           >
             {pageRoutes.map((route) => (
-              <Link
-                key={route.label}
+              <NavLink
                 to={route.path}
-                className={`flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 bg-white/10 text-white`}
+                className={({ isActive }) =>
+                  `flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 text-white ${
+                    isActive
+                      ? "opacity-100 font-medium bg-white/10"
+                      : "opacity-50 font-normal"
+                  }`
+                }
               >
                 <Icon
                   name={route.icon}
                   className="h-4 w-4"
                   color="currentColor"
                 />
-
                 <span className="font-medium text-sm">{route.label}</span>
-              </Link>
+              </NavLink>
             ))}
           </motion.div>
         </div>

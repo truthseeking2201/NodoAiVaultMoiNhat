@@ -7,3 +7,4 @@ export { default as Copy } from "./copy-gradient.svg?react";
 export { default as ArrowDecreasing } from "./arrow-decreasing.svg?react";
 export { default as ArrowIncreasing } from "./arrow-increasing.svg?react";
 export { default as ArrowRightContained } from "./arrow-right-contained.svg?react";
+export { default as Leaderboards } from "./leaderboards.svg?react";
