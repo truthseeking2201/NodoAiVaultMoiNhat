@@ -126,7 +126,7 @@ const DesktopTable = ({
                       tx.tokens?.[0]?.amount || 0,
                       tx.tokens?.[0]?.decimal,
                       0,
-                      2
+                      4
                     )}{" "}
                     <span className="font-mono text-xs text-white/70">
                       {tx.tokens?.[0]?.token_symbol}
