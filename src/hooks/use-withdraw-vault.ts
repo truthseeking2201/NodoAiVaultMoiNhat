@@ -199,7 +199,7 @@ export const useWithdrawVault = () => {
         tx.object(configLp.vault_config_id),
         tx.object(configLp.vault_id),
         splitCoin,
-        tx.pure.u64(profitData.vault_value_usd),
+        tx.pure.u64(profitData.vault_value),
         tx.pure.u64(new BigNumber(profitData.profit_amount).abs().toString()),
         tx.pure.bool(profitData.negative),
         tx.pure.u64(profitData.expire_time),
