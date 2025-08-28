@@ -23,7 +23,7 @@ import {
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
-import { useDepositVaultStore, useVaultObjectStore } from "./use-store";
+import { useVaultObjectStore } from "./use-store";
 import { useWallet } from "./use-wallet";
 
 // get vault config from SUI chain
@@ -107,23 +107,6 @@ export const useGetVaultsWithdrawal = () => {
     refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
     refetchOnWindowFocus: !!address,
   }) as UseQueryResult<WithdrawalRequests[], Error>;
-};
-
-export const useCurrentDepositVault = () => {
-  const { depositVault } = useDepositVaultStore();
-  const { data } = useGetDepositVaults();
-  const defaultVault = data?.find((vault) => vault.is_active) || data?.[0];
-  const vault =
-    data?.find((vault) => vault.vault_id === depositVault) || defaultVault;
-
-  return {
-    ...vault,
-    collateral_token_symbol: vault?.collateral_token.split("::")[2],
-    vault_lp_token_symbol: vault?.vault_lp_token.split("::")[2],
-  } as DepositVaultConfig & {
-    collateral_token_symbol: string;
-    vault_lp_token_symbol: string;
-  };
 };
 
 export const useVaultBasicDetails = (vaultId: string) => {
