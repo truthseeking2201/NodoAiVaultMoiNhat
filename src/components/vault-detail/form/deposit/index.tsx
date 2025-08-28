@@ -1,4 +1,5 @@
 import ConditionRenderer from "@/components/shared/condition-renderer";
+import { useEstimateDualDeposit } from "@/hooks/use-deposit-vault";
 import { useState } from "react";
 import { METHOD_DEPOSIT } from "../../constant";
 import SelectMethod from "../select-method";
@@ -12,6 +13,7 @@ type DepositFormProps = {
 };
 
 const DepositForm = ({ vault_id }: DepositFormProps) => {
+  useEstimateDualDeposit(vault_id, true);
   const [depositMethod, setDepositMethod] = useState<
     (typeof METHOD_DEPOSIT)[keyof typeof METHOD_DEPOSIT]
   >(METHOD_DEPOSIT.SINGLE);

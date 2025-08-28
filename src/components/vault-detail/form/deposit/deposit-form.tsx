@@ -259,6 +259,10 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   };
 
   const handleCloseDepositModal = () => {
+    if (depositStep === 2) {
+      handleDone();
+      return;
+    }
     setIsDepositModalOpen(false);
     setLoading(false);
   };
@@ -315,7 +319,6 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   };
 
   const handleDone = () => {
-    const actualNdlpAmount = depositSuccessData?.depositLpAmount || ndlpAmount;
     setValue("amount", "");
     setIsDepositModalOpen(false);
     setDepositSuccessData(null);
