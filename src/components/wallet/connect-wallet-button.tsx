@@ -1,3 +1,5 @@
+import { Copy } from "@/assets/icons";
+import DisconnectWalletIcon from "@/assets/icons/disconnect-wallet.svg";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -5,74 +7,59 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Web3Button from "@/components/ui/web3-button";
+import { USDC_CONFIG } from "@/config";
 import {
-  useNdlpAssetsStore,
   useRefreshAssetsBalance,
   useUserAssetsStore,
   useWallet,
 } from "@/hooks";
+import useBreakpoint from "@/hooks/use-breakpoint";
 import { useToast } from "@/hooks/use-toast";
 import { formatNumber } from "@/lib/number";
+import { sleep } from "@/lib/utils";
 import { truncateStringWithSeparator } from "@/utils/helpers";
 import { triggerWalletDisconnect } from "@/utils/wallet-disconnect";
+import { useCurrentWallet } from "@mysten/dapp-kit";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { RefreshCw, Wallet } from "lucide-react";
-import { memo, useEffect, useState, useMemo } from "react";
-import { ConnectWalletModal } from "./connect-wallet-modal";
-import { useQueryClient } from "@tanstack/react-query";
-import { SUI_CONFIG, USDC_CONFIG } from "@/config";
+import { memo, useEffect, useMemo, useState } from "react";
 import ConditionRenderer from "../shared/condition-renderer";
-import useBreakpoint from "@/hooks/use-breakpoint";
-import { useCurrentWallet } from "@mysten/dapp-kit";
+import { CollateralTokens } from "./collateral-tokens";
+import { ConnectWalletModal } from "./connect-wallet-modal";
 import { WALLETS } from "./constants";
 import { NdlpTokens } from "./ndlp-tokens";
-import { CollateralTokens } from "./collateral-tokens";
-import { Copy } from "@/assets/icons";
-import DisconnectWalletIcon from "@/assets/icons/disconnect-wallet.svg";
-import { sleep } from "@/lib/utils";
-
-const DISPLAY_TOKENS = [USDC_CONFIG.coinType, SUI_CONFIG.coinType];
 
 export const ConnectWalletButton = memo(() => {
   const { toast } = useToast();
   const [showPulse, setShowPulse] = useState(false);
-  const walletConnectionInfo = JSON.parse(
-    localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
-  );
-
-  const [riskAssessmentTime, setRiskAssessmentTime] = useState<string>("");
   const [lastRefreshTime, setLastRefreshTime] = useState(Date.now());
   const {
     isConnectWalletDialogOpen,
     openConnectWalletDialog,
     closeConnectWalletDialog,
     isAuthenticated,
-    isConnected,
     address,
   } = useWallet();
   const { currentWallet } = useCurrentWallet();
-
+  const queryClient = useQueryClient();
   const walletIcon = useMemo(() => {
-    return WALLETS.find((w) => w.name === currentWallet?.name)?.icon ||
-    currentWallet?.icon;
+    return (
+      WALLETS.find((w) => w.name === currentWallet?.name)?.icon ||
+      currentWallet?.icon
+    );
   }, [currentWallet]);
 
   const { assets } = useUserAssetsStore();
   const { refreshAllBalance } = useRefreshAssetsBalance();
   const { isMd } = useBreakpoint();
   // get first for now due to we support usdc only
-  const collateralToken = useMemo(() => assets.find(
-    (asset) => asset.coin_type === USDC_CONFIG.coinType
-  ), [assets]);
-
+  const collateralToken = useMemo(
+    () => assets.find((asset) => asset.coin_type === USDC_CONFIG.coinType),
+    [assets]
+  );
 
   useEffect(() => {
-    // Update risk assessment time
-    const date = new Date();
-    setRiskAssessmentTime(
-      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    );
-
     // Set pulse animation on button when first connecting
     if (isAuthenticated) {
       setShowPulse(true);
@@ -100,16 +87,30 @@ export const ConnectWalletButton = memo(() => {
   };
 
   const refreshWalletData = async () => {
-    // Simulate refresh with animation
-    setLastRefreshTime(Date.now());
-    refreshAllBalance();
-    await sleep(1000);
-    toast({
-      variant: "success",
-      title: "Wallet refreshed",
-      description: "Latest wallet data loaded",
-      duration: 2000,
-    });
+    try {
+      setLastRefreshTime(Date.now());
+      await queryClient.refetchQueries({
+        queryKey: ["depositTokens"],
+        exact: true,
+        type: "all",
+      });
+      refreshAllBalance();
+      await sleep(1000);
+      toast({
+        variant: "success",
+        title: "Wallet refreshed",
+        description: "Latest wallet data loaded",
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: "error",
+        title: "Error",
+        description: "Failed to refresh wallet data",
+        duration: 2000,
+      });
+    }
   };
 
   return (

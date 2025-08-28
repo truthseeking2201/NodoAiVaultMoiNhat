@@ -92,9 +92,7 @@ export const useFetchAssets = () => {
   const { address, isAuthenticated } = useWallet();
   const suiClient = useSuiClient();
 
-  const { data: depositTokens, refetch: refetchDepositTokens } = useQuery<
-    VaultDepositToken[]
-  >({
+  const { data: depositTokens } = useQuery<VaultDepositToken[]>({
     queryKey: ["depositTokens"],
     queryFn: async () => {
       const response =
@@ -115,6 +113,7 @@ export const useFetchAssets = () => {
     initialData: JSON.parse(
       localStorage.getItem("cached-deposit-tokens") || "[]"
     ) as VaultDepositToken[],
+    refetchOnWindowFocus: false,
   });
 
   const {
@@ -205,12 +204,11 @@ export const useFetchAssets = () => {
 
   useEffect(() => {
     if (isRefetch) {
-      refetchDepositTokens();
       allCoinObjectsRefetch().then(() => {
         setUpdated(false);
       });
     }
-  }, [isRefetch, allCoinObjectsRefetch, refetchDepositTokens, setUpdated]);
+  }, [isRefetch, allCoinObjectsRefetch, setUpdated]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
