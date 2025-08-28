@@ -540,6 +540,5 @@ export const useEstimateDualDeposit = (vaultId: string, runOnce = false) => {
     queryKey: ["estimate-dual-deposit", vaultId],
     queryFn: () => getEstimateDualDeposit(vaultId),
     refetchInterval: runOnce ? false : 5000,
-    refetchOnWindowFocus: false,
   }) as { data: EstimateDualDepositToken; isLoading: boolean };
 };
