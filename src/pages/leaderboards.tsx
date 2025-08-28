@@ -11,7 +11,12 @@ export default function Leaderboards() {
       backgroundImage={ImageBackground}
       className="max-md:py-4 py-8"
     >
-      <UserRank />
+      <UserRank
+        tvl={123456.23423}
+        tvlRank={12}
+        referredTvl={654321.12345}
+        referredTvlRank={123}
+      />
       <DataLeaderboards />
     </PageContainer>
   );

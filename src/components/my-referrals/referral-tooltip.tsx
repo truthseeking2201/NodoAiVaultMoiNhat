@@ -30,15 +30,17 @@ export const ReferralContent = ({
   setActiveTab,
   setOpenModalRefer,
   openModalRefer,
+  className = "",
 }: {
   dataRefer: ReferralTooltipProps["dataRefer"];
   activeTab: "code" | "link";
   setActiveTab: (tab: "code" | "link") => void;
   setOpenModalRefer: (open: boolean) => void;
   openModalRefer: boolean;
+  className?: string;
 }) => {
   return (
-    <div className="p-4 space-y-4">
+    <div className={`p-4 space-y-4 ${className}`}>
       <div className="flex justify-between">
         <div>
           <p className="text-gray-400 text-sm mb-1">Total Referrals</p>
