@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import { Route, Routes } from "react-router-dom";
+import { PATH_ROUTER } from "@/config/router";
 
 import { MainLayout } from "@/components/layout/main-layout";
 import GlobalLoading from "@/components/shared/global-loading";
@@ -27,7 +28,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/vault/:vault_id"
+        path={PATH_ROUTER.VAULT_DETAIL}
         element={
           <MainLayout>
             <VaultDetail />
@@ -35,7 +36,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/leaderboards"
+        path={PATH_ROUTER.LEADERBOARDS}
         element={
           <MainLayout>
             <Leaderboards />

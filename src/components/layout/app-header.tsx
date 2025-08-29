@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { PATH_ROUTER } from "@/config/router";
 import {
   Drawer,
   DrawerTitle,
@@ -29,12 +30,12 @@ const pageRoutes = [
   {
     icon: "Vault",
     label: "Vaults",
-    path: "/",
+    path: PATH_ROUTER.VAULTS,
   },
   {
     icon: "Leaderboards",
     label: "Leaderboards",
-    path: "/leaderboards",
+    path: PATH_ROUTER.LEADERBOARDS,
   },
   // {
   //   icon: "Dashboard",
@@ -63,10 +64,7 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
     >
       {/* Left side */}
       <div className="flex items-center gap-6 cursor-pointer">
-        <div
-          className="relative"
-          onClick={() => navigate("/")}
-        >
+        <div className="relative" onClick={() => navigate("/")}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -102,7 +100,7 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
                   className="h-4 w-4"
                   color="currentColor"
                 />
-                <span className="font-medium text-sm">{route.label}</span>
+                <span className="text-sm">{route.label}</span>
               </NavLink>
             ))}
           </motion.div>
@@ -165,10 +163,7 @@ const MobileHeader = ({ dataRefer }: HeaderProps) => {
             <Menu className="w-7 h-7 text-white" />
           </Button>
           {/* Logo */}
-          <div
-            className="relative"
-            onClick={() => navigate("/")}
-          >
+          <div className="relative" onClick={() => navigate("/")}>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -185,11 +180,7 @@ const MobileHeader = ({ dataRefer }: HeaderProps) => {
         {/* Right: Connect Wallet button */}
         <ConnectWalletButton />
       </div>
-      <Drawer
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
-        direction="top"
-      >
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} direction="top">
         <DrawerContent
           fullWidth
           className="bg-black shadow-lg p-6 rounded-none"

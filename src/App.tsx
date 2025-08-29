@@ -138,10 +138,7 @@ const App = () => {
             networks={networkConfig}
             defaultNetwork={"mainnet"}
           >
-            <WalletProvider
-              autoConnect
-              slushWallet={slushWallet}
-            >
+            <WalletProvider autoConnect slushWallet={slushWallet}>
               <ConfigWrapper>
                 <TooltipProvider delayDuration={0}>
                   <Toaster />

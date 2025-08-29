@@ -14,6 +14,14 @@ export const USDC_CONFIG = {
   decimals: 6,
 };
 
+export const XP_CONFIG = {
+  coinType: "",
+  image_url: "/coins/xp.png",
+  display_name: "XP Shares",
+  symbol: "XP Shares",
+  decimals: 6,
+};
+
 export const SUI_CONFIG = {
   coinType:
     "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",

@@ -35,25 +35,13 @@ const OPTIONS_CHAINS = [
   {
     value: "sui",
     label: "SUI",
-    icon: (
-      <img
-        src="/chains/sui.png"
-        alt="SUI"
-        className="w-5 h-5"
-      />
-    ),
+    icon: <img src="/chains/sui.png" alt="SUI" className="w-5 h-5" />,
   },
   {
     value: "bsc",
     label: "BSC",
     disabled: true,
-    icon: (
-      <img
-        src="/chains/bsc.png"
-        alt="BSC"
-        className="w-5 h-5"
-      />
-    ),
+    icon: <img src="/chains/bsc.png" alt="BSC" className="w-5 h-5" />,
     left: (
       <div
         className="text-white text-[10px] px-2"
