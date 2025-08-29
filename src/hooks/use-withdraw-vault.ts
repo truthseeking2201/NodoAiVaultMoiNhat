@@ -109,7 +109,7 @@ export const useWithdrawVault = () => {
         });
         const conversionRate = {
           from_symbol: tokenWithdraw.token_symbol,
-          to_symbol: tokenReceives[0].to_symbol,
+          to_symbol: tokenReceives[0].token_symbol,
           rate: new BigNumber(tokenReceives[0].amount)
             .dividedBy(withdrawAmount)
             .toNumber(),

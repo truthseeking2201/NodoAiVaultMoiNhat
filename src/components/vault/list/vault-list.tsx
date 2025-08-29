@@ -35,13 +35,25 @@ const OPTIONS_CHAINS = [
   {
     value: "sui",
     label: "SUI",
-    icon: <img src="/chains/sui.png" alt="SUI" className="w-5 h-5" />,
+    icon: (
+      <img
+        src="/chains/sui.png"
+        alt="SUI"
+        className="w-5 h-5"
+      />
+    ),
   },
   {
     value: "bsc",
     label: "BSC",
     disabled: true,
-    icon: <img src="/chains/bsc.png" alt="BSC" className="w-5 h-5" />,
+    icon: (
+      <img
+        src="/chains/bsc.png"
+        alt="BSC"
+        className="w-5 h-5"
+      />
+    ),
     left: (
       <div
         className="text-white text-[10px] px-2"
@@ -64,6 +76,7 @@ type TokenPool = {
 type Withdrawing = {
   receive_amount_usd: string;
   countdown: number;
+  is_over_time: boolean;
   is_ready: boolean;
 };
 
@@ -144,6 +157,7 @@ export default function VaultList() {
         withdrawal = {
           receive_amount_usd: showUsd(tmp.receive_amount_usd),
           countdown: tmp.countdown,
+          is_over_time: new Date().getTime() >= tmp.countdown,
           is_ready: tmp.is_ready,
         };
       }
