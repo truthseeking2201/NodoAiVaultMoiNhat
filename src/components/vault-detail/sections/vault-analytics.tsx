@@ -96,14 +96,14 @@ const VaultAnalytics = ({
             onEmptyStateChange={handleEmptyState}
           />
         )}
-        {analyticsTab === ANALYTICS_TABS?.[1]?.value && (
+        {/* {analyticsTab === ANALYTICS_TABS?.[1]?.value && (
           <APYChart
             period={analyticsRangeTab}
             analyticsData={analyticsData}
             isLoading={isLoading}
             onEmptyStateChange={handleEmptyState}
           />
-        )}
+        )} */}
       </div>
     </DetailWrapper>
   );

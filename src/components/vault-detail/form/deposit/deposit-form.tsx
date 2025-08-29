@@ -4,7 +4,7 @@ import { DynamicFontText } from "@/components/ui/dynamic-font-text";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import Web3Button from "@/components/ui/web3-button";
-import SuccessfulToast from "@/components/vault/deposit/successful-toast";
+import SuccessfulToast from "./successful-toast";
 import { SUI_CONFIG, USDC_CONFIG } from "@/config";
 import {
   useEstimateDeposit,
@@ -259,6 +259,10 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   };
 
   const handleCloseDepositModal = () => {
+    if (depositStep === 2) {
+      handleDone();
+      return;
+    }
     setIsDepositModalOpen(false);
     setLoading(false);
   };
@@ -315,7 +319,6 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   };
 
   const handleDone = () => {
-    const actualNdlpAmount = depositSuccessData?.depositLpAmount || ndlpAmount;
     setValue("amount", "");
     setIsDepositModalOpen(false);
     setDepositSuccessData(null);

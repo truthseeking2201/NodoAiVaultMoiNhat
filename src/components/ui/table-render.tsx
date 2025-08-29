@@ -89,7 +89,7 @@ export function TableRender({
                     el.title
                   ))}
 
-                {el?.keySort && paramsSearch[el.keySort] && (
+                {el?.keySort && paramsSearch.keySort === el.keySort && (
                   <Button
                     variant="icon"
                     size="none"

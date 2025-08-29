@@ -35,13 +35,25 @@ const OPTIONS_CHAINS = [
   {
     value: "sui",
     label: "SUI",
-    icon: <img src="/chains/sui.png" alt="SUI" className="w-5 h-5" />,
+    icon: (
+      <img
+        src="/chains/sui.png"
+        alt="SUI"
+        className="w-5 h-5"
+      />
+    ),
   },
   {
     value: "bsc",
     label: "BSC",
     disabled: true,
-    icon: <img src="/chains/bsc.png" alt="BSC" className="w-5 h-5" />,
+    icon: (
+      <img
+        src="/chains/bsc.png"
+        alt="BSC"
+        className="w-5 h-5"
+      />
+    ),
     left: (
       <div
         className="text-white text-[10px] px-2"
@@ -64,6 +76,7 @@ type TokenPool = {
 type Withdrawing = {
   receive_amount_usd: string;
   countdown: number;
+  is_over_time: boolean;
   is_ready: boolean;
 };
 
@@ -102,11 +115,11 @@ export default function VaultList() {
   const [idLoadingClaim, setIdLoadingClaim] = useState("");
   const [idsClaimed, setIdsClaimed] = useState<string[]>([]);
   const [paramsSort, setParamsSort] = useState({
-    vault_apy: SORT_TYPE.desc,
+    total_value_usd: SORT_TYPE.desc,
     // total_value_usd: SORT_TYPE.desc,
     // rewards_24h_usd: SORT_TYPE.desc,
     // user_holdings: SORT_TYPE.desc,
-    keySort: "vault_apy",
+    keySort: "total_value_usd",
   });
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -144,6 +157,7 @@ export default function VaultList() {
         withdrawal = {
           receive_amount_usd: showUsd(tmp.receive_amount_usd),
           countdown: tmp.countdown,
+          is_over_time: new Date().getTime() >= tmp.countdown,
           is_ready: tmp.is_ready,
         };
       }
@@ -301,7 +315,7 @@ export default function VaultList() {
           />
         ),
         dataIndex: "rewards",
-        classTitle: "text-white/80 text-left w-[100px]",
+        classTitle: "text-white/80 text-left w-[130px]",
         keySort: "rewards_24h_usd",
         render: (value: any, record: any) => (
           <span className="text-white font-medium font-mono text-base">
@@ -329,7 +343,7 @@ export default function VaultList() {
           />
         ),
         dataIndex: "holdings",
-        classTitle: "text-white/80 w-[110px]",
+        classTitle: "text-white/80 w-[145px]",
         keySort: "user_holdings",
         render: (_: any, record: any) => (
           <UserHoldingTooltip>
@@ -358,7 +372,7 @@ export default function VaultList() {
           />
         ),
         dataIndex: "rewards",
-        classTitle: "text-white/80 justify-start",
+        classTitle: "text-white/80 justify-start w-[60px]",
         classCell: "justify-start",
         render: (_: any, record: any) => {
           return <VaultRewards item={record} />;

@@ -535,10 +535,11 @@ export const useDepositDualVault = (vaultId: string) => {
   };
 };
 
-export const useEstimateDualDeposit = (vaultId: string) => {
+export const useEstimateDualDeposit = (vaultId: string, runOnce = false) => {
   return useQuery({
     queryKey: ["estimate-dual-deposit", vaultId],
     queryFn: () => getEstimateDualDeposit(vaultId),
-    refetchInterval: 5000,
+    refetchInterval: runOnce ? false : 5000,
+    refetchOnWindowFocus: false,
   }) as { data: EstimateDualDepositToken; isLoading: boolean };
 };

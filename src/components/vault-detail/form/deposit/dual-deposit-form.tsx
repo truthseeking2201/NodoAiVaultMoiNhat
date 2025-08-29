@@ -2,7 +2,7 @@ import { DynamicFontText } from "@/components/ui/dynamic-font-text";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import Web3Button from "@/components/ui/web3-button";
-import SuccessfulToast from "@/components/vault/deposit/successful-toast";
+import SuccessfulToast from "./successful-toast";
 import {
   useGetLpToken,
   useGetVaultConfig,
@@ -121,8 +121,8 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
 
   const lpToken = useGetLpToken(vault.vault_lp_token, vault_id);
 
-  const methods = useForm({
-    defaultValues: {
+  const defaultValues = useMemo(() => {
+    return {
       token_a: {
         amount: "",
         address: pool?.token_a_address || "",
@@ -131,7 +131,11 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         amount: "",
         address: pool?.token_b_address || "",
       },
-    },
+    };
+  }, [pool]);
+
+  const methods = useForm({
+    defaultValues,
     mode: "onChange",
   });
 
@@ -201,6 +205,10 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   };
 
   const handleCloseDepositModal = () => {
+    if (depositStep === 2) {
+      handleDone();
+      return;
+    }
     setIsDepositModalOpen(false);
     setLoading(false);
   };
@@ -282,7 +290,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
       vault?.vault_name
     }. Check your wallet for Tx details`;
 
-    reset();
+    reset(defaultValues);
     setIsDepositModalOpen(false);
     setDepositSuccessData(null);
     setDepositStep(1);

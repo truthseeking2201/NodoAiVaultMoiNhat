@@ -148,7 +148,7 @@ export default function WithdrawVaultSection({
     };
     init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, configVault]);
+  }, [address, configVault?.id_pending_redeems]);
 
   useEffect(() => {
     if (dataClaim && dataClaim.isClaim === false && !intervalRef.current) {
