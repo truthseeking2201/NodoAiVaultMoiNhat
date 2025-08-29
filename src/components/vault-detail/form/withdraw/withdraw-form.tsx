@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import debounce from "lodash-es/debounce";
 import BigNumber from "bignumber.js";
@@ -65,6 +65,7 @@ export default function WithdrawForm({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedToken, setSelectedToken] = useState<PaymentTokenType>();
   const [method, setMethod] = useState(METHOD_DEPOSIT.SINGLE);
+  const countRef = useRef<boolean>(false);
 
   const BadgeCoolDown = useMemo(() => {
     return (
@@ -202,7 +203,7 @@ export default function WithdrawForm({
   }, [watch, handleFormChange]);
 
   useEffect(() => {
-    if (!tokens.length) return;
+    if (!tokens.length || countRef.current == true) return;
     // Do not set USDC token as default
     const token_sui = tokens.find((i) => i.token_symbol == "SUI");
     const token = tokens.find((i) => !["SUI", "USDC"].includes(i.token_symbol));
@@ -213,6 +214,7 @@ export default function WithdrawForm({
     } else {
       setSelectedToken(tokens[0]);
     }
+    countRef.current = true;
   }, [tokens]);
 
   /**
