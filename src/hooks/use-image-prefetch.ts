@@ -71,6 +71,7 @@ export const CRITICAL_IMAGES = {
     "/leaderboards/rank-2.png",
     "/leaderboards/rank-3.png",
     "/leaderboards/referral-section.png",
+    "/leaderboards/campaign-bg.png"
   ],
 } as const;
 

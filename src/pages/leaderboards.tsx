@@ -4,6 +4,7 @@ import ImageBackground from "@/assets/images/bg-leaderboards.png";
 import { PageContainer } from "@/components/layout/page-container";
 import UserRank from "@/components/leaderboards/user-rank";
 import DataLeaderboards from "@/components/leaderboards/data-leaderboards";
+import Banner from "@/components/leaderboards/campaign";
 
 export default function Leaderboards() {
   return (
@@ -17,6 +18,7 @@ export default function Leaderboards() {
         referredTvl={654321.12345}
         referredTvlRank={123}
       />
+      <Banner />
       <DataLeaderboards />
     </PageContainer>
   );
