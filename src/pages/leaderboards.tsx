@@ -4,7 +4,7 @@ import ImageBackground from "@/assets/images/bg-leaderboards.png";
 import { PageContainer } from "@/components/layout/page-container";
 import UserRank from "@/components/leaderboards/user-rank";
 import DataLeaderboards from "@/components/leaderboards/data-leaderboards";
-import Banner from "@/components/leaderboards/campaign";
+import Banner from "@/components/leaderboards/banner";
 
 export default function Leaderboards() {
   return (
