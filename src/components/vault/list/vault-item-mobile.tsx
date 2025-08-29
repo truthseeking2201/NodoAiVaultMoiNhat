@@ -132,7 +132,8 @@ const VaultItemMobile = ({
         >
           Deposit
         </Web3Button>
-        {item?.withdrawing?.is_ready === true && (
+        {(item?.withdrawing?.is_ready === true ||
+          item?.withdrawing?.is_over_time === true) && (
           <ButtonGradient
             onClick={(e: React.FormEvent) => {
               e.stopPropagation();
@@ -142,7 +143,7 @@ const VaultItemMobile = ({
             variant="outline"
             className="w-full"
             loading={idLoadingClaim === item.vault_id}
-            disabled={!!idLoadingClaim}
+            disabled={!!idLoadingClaim || !item?.withdrawing?.is_ready}
             hideContentOnLoading={true}
           >
             Claim
