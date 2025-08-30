@@ -152,6 +152,7 @@ export type VaultPaymentToken = {
   url: string;
   exchange_id: number;
   min_deposit_amount: string;
+  min_deposit_amount_usd: string;
   max_deposit_amount: string;
 };
 

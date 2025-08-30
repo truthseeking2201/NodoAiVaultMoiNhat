@@ -1,4 +1,4 @@
-import { VaultItemData } from "./vault-list";
+import { TokenPool, VaultItemData } from "./vault-list";
 import { RowItem } from "@/components/ui/row-item";
 import { Skeleton } from "@/components/ui/skeleton";
 import Countdown, { zeroPad } from "react-countdown";
@@ -14,6 +14,8 @@ const VaultHolding = ({
   classValue = "font-medium font-mono text-white text-base",
   isOnlyWithdrawing = false,
   reloadData = () => {},
+  HOLDING_TYPE,
+  holdingShowMode,
 }: {
   item: VaultItemData;
   classLabel?: string;
@@ -21,6 +23,8 @@ const VaultHolding = ({
   classValue?: string;
   isOnlyWithdrawing?: boolean;
   reloadData: () => void;
+  HOLDING_TYPE?: { label: string; value: string }[];
+  holdingShowMode?: string;
 }) => {
   const renderer = ({ hours, minutes, seconds }) => {
     return (
@@ -62,27 +66,63 @@ const VaultHolding = ({
       {!isOnlyWithdrawing &&
         (item.user_holdings_show || item.rewards_earned_show) && (
           <UserHoldingTooltip>
-            {item.user_holdings_show && (
-              <RowItem
-                className={classRow}
-                classNameLabel={classLabel}
-                classNameValue={classValue}
-                label="Available:"
-              >
-                {item.user_holdings_show}
-              </RowItem>
-            )}
+            {holdingShowMode === HOLDING_TYPE[0].value &&
+              item.user_holdings_show && (
+                <RowItem
+                  className={cn(classRow, "!block")}
+                  classNameLabel={classLabel}
+                  classNameValue={classValue}
+                  label="Available:"
+                >
+                  <div className="mt-2 flex flex-col gap-2">
+                    {item.token_pools.map((token: TokenPool, index: number) => (
+                      <div key={index}>
+                        <img
+                          src={token.image}
+                          alt={token.name}
+                          className="inline-block w-4 h-4 mr-1"
+                        />
+                        {Number(token.min_deposit_amount) > 0
+                          ? token.min_deposit_amount
+                          : "--"}
+                      </div>
+                    ))}
+                  </div>
+                </RowItem>
+              )}
+            {holdingShowMode === HOLDING_TYPE[1].value &&
+              item.user_holdings_show && (
+                <RowItem
+                  className={cn(classRow, "block")}
+                  classNameLabel={classLabel}
+                  classNameValue={cn(classValue, "mt-2")}
+                  label="Available:"
+                >
+                  {item.user_holdings_show}
+                </RowItem>
+              )}
             {item.rewards_earned_show && (
               <RowItem
                 classNameLabel={classLabel}
-                className={classRow}
-                classNameValue={cn(classValue, "text-green-increase")}
-                label="Rewards Earned:"
+                className={cn(classRow, "block mt-3")}
+                classNameValue={classValue}
+                label=""
               >
                 {item.is_loading_withdrawal ? (
                   <Skeleton className="w-[100px] h-5" />
                 ) : (
-                  item.rewards_earned_show
+                  <>
+                    {item.rewards_earned_show !== "--" && (
+                      <div className="bg-[#0D314A] flex justify-between items-center px-2 py-1 rounded-md mt-1">
+                        <div className="text-xs text-white">
+                          Compound Rewards:
+                        </div>
+                        <div className="text-xs text-[#5AE5F2] font-mono">
+                          {item.rewards_earned_show}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </RowItem>
             )}
