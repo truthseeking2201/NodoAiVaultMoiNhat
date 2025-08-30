@@ -240,6 +240,7 @@ export type UserHoldingTokens = {
   amount: number | string;
   token_name: string;
   token_symbol: string;
+  percent_change: number;
 };
 
 export type BasicVaultDetailsType = {
