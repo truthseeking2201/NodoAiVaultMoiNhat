@@ -400,11 +400,11 @@ export default function VaultList() {
                               Number(token.amount) < 1 ? 6 : 2
                             )
                           : "--"}
-                        {token.percent_change_usd && (
+                        {token.percent_change >= 0 && (
                           <span
                             className={cn(
                               `text-sm ml-1`,
-                              token.percent_change > 0
+                              token.percent_change >= 0
                                 ? "text-green-increase"
                                 : "text-red-400"
                             )}
