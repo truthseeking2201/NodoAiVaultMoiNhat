@@ -76,7 +76,7 @@ const VaultHolding = ({
                   label="Available:"
                 >
                   <div className="mt-2 flex flex-col gap-2">
-                    {item.change_24h.length > 0 ? (
+                    {item.change_24h && item.change_24h.length > 0 ? (
                       item.change_24h.map((token, index: number) => (
                         <div className="flex items-center gap-1" key={`${index}-${token.token_symbol}`}>
                           <img
