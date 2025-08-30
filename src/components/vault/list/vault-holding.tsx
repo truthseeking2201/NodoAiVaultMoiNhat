@@ -65,7 +65,7 @@ const VaultHolding = ({
     <div className="flex flex-col justify-center gap-1">
       {!isOnlyWithdrawing &&
         (item.user_holdings_show || item.rewards_earned_show) && (
-          <UserHoldingTooltip>
+          <>
             {holdingShowMode === HOLDING_TYPE[0].value &&
               item.user_holdings_show && (
                 <RowItem
@@ -104,7 +104,7 @@ const VaultHolding = ({
             {item.rewards_earned_show && (
               <RowItem
                 classNameLabel={classLabel}
-                className={cn(classRow, "block mt-3")}
+                className={cn(classRow, "block mt-2")}
                 classNameValue={classValue}
                 label=""
               >
@@ -113,9 +113,11 @@ const VaultHolding = ({
                 ) : (
                   <>
                     {item.rewards_earned_show !== "--" && (
-                      <div className="bg-[#0D314A] flex justify-between items-center px-2 py-1 rounded-md mt-1">
+                      <div className="bg-[#0D314A] flex justify-between items-center px-2 py-1 rounded-md">
                         <div className="text-xs text-white">
-                          Compound Rewards:
+                          <UserHoldingTooltip>
+                            Compound Rewards:
+                          </UserHoldingTooltip>
                         </div>
                         <div className="text-xs text-[#5AE5F2] font-mono">
                           {item.rewards_earned_show}
@@ -126,7 +128,7 @@ const VaultHolding = ({
                 )}
               </RowItem>
             )}
-          </UserHoldingTooltip>
+          </>
         )}
 
       {item.is_loading_withdrawal && !isOnlyWithdrawing && (
@@ -143,11 +145,11 @@ const VaultHolding = ({
       {item.withdrawing && (
         <RowItem
           classNameLabel={classLabel}
-          className={classRow}
+          className={cn(classRow, "md:mt-0 mt-2 block md:flex")}
           classNameValue={classValue}
           label="Withdrawing:"
         >
-          <div className="flex flex-wrap items-center text-sm">
+          <div className="flex flex-wrap items-center text-sm md:mt-0 mt-2">
             <span>{item.withdrawing.receive_amount_usd}</span>
             {item.withdrawing.is_ready ? (
               <IconReady

@@ -382,7 +382,7 @@ export default function VaultList() {
         classTitle: "text-white/80 w-[270px]",
         keySort: "user_holdings",
         render: (_: any, record: any) => (
-          <UserHoldingTooltip>
+          <>
             <div>
               {holdingShowMode === HOLDING_TYPE[0].value ? (
                 <div className="text-white font-medium font-mono text-base">
@@ -413,7 +413,9 @@ export default function VaultList() {
               <>
                 {record.rewards_earned_show !== "--" && (
                   <div className="bg-[#0D314A] flex justify-between items-center px-2 py-1 rounded-md mt-1">
-                    <div className="text-xs text-white">Compound Rewards:</div>
+                    <div className="text-xs text-white">
+                      <UserHoldingTooltip>Compound Rewards:</UserHoldingTooltip>
+                    </div>
                     <div className="text-xs text-[#5AE5F2] font-mono">
                       {record.rewards_earned_show}
                     </div>
@@ -421,7 +423,7 @@ export default function VaultList() {
                 )}
               </>
             )}
-          </UserHoldingTooltip>
+          </>
         ),
       },
       {

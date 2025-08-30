@@ -188,7 +188,7 @@ const YourHoldings = ({
       }
       isLoading={isDetailLoading}
       loadingStyle="h-[68px] w-full"
-      className={cn(!expanded && '!pb-0')}
+      className={cn(!expanded && "!pb-0")}
     >
       <ConditionRenderer
         when={userState !== "nonDeposit"}
@@ -295,13 +295,13 @@ const YourHoldings = ({
                                     <TooltipTrigger asChild>
                                       <span className="bg-[#23272F] text-[#6AD6FF] px-2 py-1 rounded text-xs">
                                         Calculating
-                                        <span className="animate-fade-in-out inline-block">
+                                        <span className="animate-fade-in-out inline-block font-mono">
                                           .
                                         </span>
-                                        <span className="animate-fade-in-out inline-block delay-100">
+                                        <span className="animate-fade-in-out inline-block delay-100 font-mono">
                                           .
                                         </span>
-                                        <span className="animate-fade-in-out inline-block delay-200">
+                                        <span className="animate-fade-in-out inline-block delay-200 font-mono">
                                           .
                                         </span>
                                       </span>
@@ -559,7 +559,7 @@ const YourHoldings = ({
                       : "0"}
                   </span>
                 </div>
-                <div className="flex items-center text-xs">
+                <div className="flex items-center text-xs my-1">
                   <LabelWithTooltip
                     hasIcon={false}
                     label="Total Withdrawals"
@@ -570,7 +570,7 @@ const YourHoldings = ({
                     }
                     labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
-                  <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
+                  <span className="flex-1 border-b border-dashed border-[#505050] mx-2 "></span>
                   <span className="font-mono">
                     $
                     {isAuthenticated
