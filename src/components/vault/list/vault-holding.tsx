@@ -66,7 +66,7 @@ const VaultHolding = ({
     <div className="flex flex-col justify-center gap-1">
       {!isOnlyWithdrawing &&
         (item.user_holdings_show || item.rewards_earned_show) && (
-          <>
+          <div id="vault-holding-section">
             {holdingShowMode === HOLDING_TYPE[0].value &&
               item.user_holdings_show && (
                 <RowItem
@@ -77,7 +77,7 @@ const VaultHolding = ({
                 >
                   <div className="mt-2 flex flex-col gap-2">
                     {item.change_24h.map((token, index: number) => (
-                      <div key={index}>
+                      <div key={`${index}-${token.token_symbol}`}>
                         <img
                           src={`coins/${token.token_symbol?.toLowerCase()}.png`}
                           alt={token.token_name}
@@ -133,7 +133,7 @@ const VaultHolding = ({
                 )}
               </RowItem>
             )}
-          </>
+          </div>
         )}
 
       {item.is_loading_withdrawal && !isOnlyWithdrawing && (
@@ -167,25 +167,6 @@ const VaultHolding = ({
                 }
               />
             ) : (
-              // <div className="ml-2 flex items-center bg-green-ready/20 sm:px-1 px-0.5 rounded-full">
-              //   <div className="sm:w-4 sm:h-4 w-3 h-3 bg-green-ready rounded-full flex items-center justify-center">
-              //     <Check
-              //       className={cn(
-              //         !isOnlyWithdrawing ? "text-black" : "text-white"
-              //       )}
-              //       strokeWidth="4"
-              //       size={10}
-              //     />
-              //   </div>
-              //   <span
-              //     className={cn(
-              //       "sm:text-xs text-[10px] sm:leading-[22px] leading-[17px] font-mono font-bold ml-1",
-              //       !isOnlyWithdrawing ? "text-green-ready" : "text-white"
-              //     )}
-              //   >
-              //     READY
-              //   </span>
-              // </div>
               <Countdown
                 date={item.withdrawing.countdown}
                 renderer={renderer}

@@ -379,39 +379,53 @@ export default function VaultList() {
         classTitle: "text-white/80 w-[270px]",
         keySort: "user_holdings",
         render: (_: any, record: any) => (
-          <>
-            <div>
-              {holdingShowMode === HOLDING_TYPE[0].value ? (
-                <div className="text-white font-medium font-mono text-base">
-                  {record.change_24h?.map((token, index: number) => (
-                    <div key={index}>
-                      <img
-                        src={`coins/${token.token_symbol?.toLowerCase()}.png`}
-                        alt={token.token_name}
-                        className="inline-block w-4 h-4 mr-1"
-                      />
-                      {Number(token.amount) > 0
-                        ? formatNumber(
-                            token.amount,
-                            0,
-                            Number(token.amount) < 1 ? 6 : 2
-                          )
-                        : "--"}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <>
-                  <div className="text-white font-medium font-mono text-base">
-                    {record.user_holdings_show}
-                  </div>
-                </>
-              )}
-            </div>
+          <div id="holding-container">
+            {holdingShowMode === HOLDING_TYPE[0].value ? (
+              <div className="text-white font-medium font-mono text-base">
+                {record.change_24h?.length > 0
+                  ? record.change_24h?.map((token, index: number) => (
+                      <div
+                        className="flex items-center gap-1"
+                        key={`${index}-${token.token_symbol}`}
+                      >
+                        <img
+                          src={`coins/${token.token_symbol?.toLowerCase()}.png`}
+                          alt={token.token_name}
+                          className="inline-block w-4 h-4 mr-1"
+                        />
+                        {Number(token.amount) > 0
+                          ? formatNumber(
+                              token.amount,
+                              0,
+                              Number(token.amount) < 1 ? 6 : 2
+                            )
+                          : "--"}
+                        {token.percent_change_usd && (
+                          <span
+                            className={cn(
+                              `text-sm ml-1`,
+                              token.percent_change > 0
+                                ? "text-green-increase"
+                                : "text-red-400"
+                            )}
+                          >{`(${token.percent_change}%)`}</span>
+                        )}
+                      </div>
+                    ))
+                  : <div className="flex flex-col gap-1 font-mono font-bold text-base">
+                    <span className="text-white">--</span>
+                    <span className="text-green-increase">--</span>
+                  </div>}
+              </div>
+            ) : (
+              <div className="text-white font-medium font-mono text-base">
+                {record.user_holdings_show}
+              </div>
+            )}
             {record.is_loading_withdrawal ? (
               <Skeleton className="w-[80px] h-5 mt-1" />
             ) : (
-              <>
+              <div id="compound-container">
                 {record.rewards_earned_show !== "--" && (
                   <div className="bg-[#0D314A] flex justify-between items-center px-2 py-1 rounded-md mt-1">
                     <div className="text-xs text-white">
@@ -422,9 +436,9 @@ export default function VaultList() {
                     </div>
                   </div>
                 )}
-              </>
+              </div>
             )}
-          </>
+          </div>
         ),
       },
       {
