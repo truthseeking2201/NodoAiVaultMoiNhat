@@ -34,11 +34,6 @@ const VaultItemMobile = ({
   return (
     <div
       className={cn("rounded-lg border border-white/10 p-4 mt-4 first:mt-0")}
-      onClick={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onRowClick(item);
-      }}
     >
       <RowItem
         className="items-start"
@@ -140,7 +135,7 @@ const VaultItemMobile = ({
         }
       ></RowItem>
 
-      <div className="px-3 py-2 rounded-md bg-white bg-opacity-4 mt-1">
+      <div className="px-3 py-2 rounded-md bg-white bg-opacity-4 mt-3">
         <VaultHolding
           item={item}
           reloadData={reloadDataWithdraw}

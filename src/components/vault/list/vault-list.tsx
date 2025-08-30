@@ -299,7 +299,7 @@ export default function VaultList() {
           />
         ),
         dataIndex: "apy",
-        classTitle: "text-white/80 text-left",
+        classTitle: "text-white/80 text-left w-[100px]",
         keySort: "vault_apy",
         render: (value: any, record: any) => (
           <span className="text-green-increase font-medium font-mono text-base break-all">
@@ -376,7 +376,7 @@ export default function VaultList() {
           </div>
         ),
         dataIndex: "holdings",
-        classTitle: "text-white/80 w-[270px]",
+        classTitle: "text-white/80 w-[250px]",
         keySort: "user_holdings",
         render: (_: any, record: any) => (
           <div id="holding-container">

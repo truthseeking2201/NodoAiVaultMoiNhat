@@ -66,7 +66,7 @@ const VaultHolding = ({
     <div className="flex flex-col justify-center gap-1">
       {!isOnlyWithdrawing &&
         (item.user_holdings_show || item.rewards_earned_show) && (
-          <div id="vault-holding-section">
+          <div className="my-1.5" id="vault-holding-section">
             {holdingShowMode === HOLDING_TYPE[0].value &&
               item.user_holdings_show && (
                 <RowItem
