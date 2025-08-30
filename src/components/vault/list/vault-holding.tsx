@@ -6,6 +6,7 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import UserHoldingTooltip from "./user-holding-tooltip";
 import IconReady from "@/components/vault-detail/form/withdraw/icon-ready";
+import { formatNumber } from "@/lib/number";
 
 const VaultHolding = ({
   item,
@@ -75,15 +76,19 @@ const VaultHolding = ({
                   label="Available:"
                 >
                   <div className="mt-2 flex flex-col gap-2">
-                    {item.token_pools.map((token: TokenPool, index: number) => (
+                    {item.change_24h.map((token, index: number) => (
                       <div key={index}>
                         <img
-                          src={token.image}
-                          alt={token.name}
+                          src={`coins/${token.token_symbol?.toLowerCase()}.png`}
+                          alt={token.token_name}
                           className="inline-block w-4 h-4 mr-1"
                         />
-                        {Number(token.min_deposit_amount) > 0
-                          ? token.min_deposit_amount
+                        {Number(token.amount) > 0
+                          ? formatNumber(
+                              token.amount,
+                              0,
+                              Number(token.amount) < 1 ? 6 : 2
+                            )
                           : "--"}
                       </div>
                     ))}

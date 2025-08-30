@@ -235,6 +235,13 @@ export type VaultSwapDepositInfo = {
   version: string;
 };
 
+export type UserHoldingTokens = {
+  amount_in_usd: string | number;
+  amount: number | string;
+  token_name: string;
+  token_symbol: string;
+};
+
 export type BasicVaultDetailsType = {
   id: string;
   vault_id: string;
@@ -334,6 +341,7 @@ export type BasicVaultDetailsType = {
   max_drawdown?: string;
   user_investment_usd?: number;
   collateral_price_feed_id: string;
+  change_24h: Array<UserHoldingTokens>;
 };
 
 export type VaultHoldingType = {
@@ -353,18 +361,8 @@ export type VaultHoldingType = {
   user_break_event_price: number;
   user_break_event_price_usd: number;
   user_total_withdraw_usd: number;
-  user_vault_tokens: Array<{
-    token: string;
-    amount: number;
-    token_name: string;
-    token_symbol: string;
-  }>;
-  user_vault_rewards: Array<{
-    token: string;
-    amount: number;
-    token_name: string;
-    token_symbol: string;
-  }>;
+  user_vault_tokens: UserHoldingTokens[];
+  user_vault_rewards: UserHoldingTokens[];
 };
 
 export type WithdrawalRequestItem = {

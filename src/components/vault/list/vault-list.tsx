@@ -16,8 +16,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
 import { formatPercentage } from "@/lib/utils";
-import { showFormatNumber } from "@/lib/number";
-import { DepositVaultConfig } from "@/types/vault-config.types";
+import { formatNumber, showFormatNumber } from "@/lib/number";
+import { DepositVaultConfig, UserHoldingTokens } from "@/types/vault-config.types";
 import { calculateUserHoldings } from "@/utils/helpers";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -84,6 +84,7 @@ export type VaultItemData = DepositVaultConfig & {
   rewards_earned_show?: string;
   is_loading_withdrawal: boolean;
   withdrawing: Withdrawing | null;
+  change_24h: UserHoldingTokens[];
 };
 
 const HOLDING_TYPE = [
@@ -167,8 +168,6 @@ export default function VaultList() {
         };
       }
 
-      console.log(tokens, "tokens");
-
       return {
         ...vault,
         exchange_name: exchange.name,
@@ -199,8 +198,6 @@ export default function VaultList() {
       };
     }) as VaultItemData[];
   }, [data, ndlpAssets, isLoadingWithdrawal, dataWithdrawals, idsClaimed]);
-
-  console.log("mapData", mapData);
 
   // Filter logic: if 'all' is selected, show all; else filter by selected DEXs
   const filteredData = useMemo(
@@ -386,15 +383,19 @@ export default function VaultList() {
             <div>
               {holdingShowMode === HOLDING_TYPE[0].value ? (
                 <div className="text-white font-medium font-mono text-base">
-                  {record.token_pools.map((token: TokenPool, index: number) => (
+                  {record.change_24h?.map((token, index: number) => (
                     <div key={index}>
                       <img
-                        src={token.image}
-                        alt={token.name}
+                        src={`coins/${token.token_symbol?.toLowerCase()}.png`}
+                        alt={token.token_name}
                         className="inline-block w-4 h-4 mr-1"
                       />
-                      {Number(token.min_deposit_amount) > 0
-                        ? token.min_deposit_amount
+                      {Number(token.amount) > 0
+                        ? formatNumber(
+                            token.amount,
+                            0,
+                            Number(token.amount) < 1 ? 6 : 2
+                          )
                         : "--"}
                     </div>
                   ))}

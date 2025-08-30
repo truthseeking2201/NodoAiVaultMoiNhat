@@ -120,7 +120,7 @@ const YourHoldings = ({
       user_ndlp_balance: lpToken?.balance || 0,
       user_vault_rewards:
         data?.user_vault_rewards || vault?.reward_tokens || [],
-      user_vault_tokens: data?.user_vault_tokens || vault?.tokens || [],
+      user_vault_tokens: data?.user_vault_tokens || vault?.change_24h || [],
     };
   }, [data, vault, lpToken, user_total_liquidity_usd]);
 
@@ -136,7 +136,9 @@ const YourHoldings = ({
     return (
       userHoldingData?.user_vault_tokens
         ?.slice()
-        .sort((a, b) => (b.amount_in_usd ?? 0) - (a.amount_in_usd ?? 0))
+        .sort(
+          (a, b) => Number(b.amount_in_usd ?? 0) - Number(a.amount_in_usd ?? 0)
+        )
         .map((item) => {
           return {
             amount: item?.amount || 0,
@@ -144,7 +146,7 @@ const YourHoldings = ({
             token_name: item?.token_name || "",
             name: item?.token_name,
             token_symbol: item?.token_symbol,
-            value: item?.amount_in_usd / totalAmountInUsd,
+            value: Number(item?.amount_in_usd) / totalAmountInUsd,
           };
         }) || []
     );
@@ -351,16 +353,16 @@ const YourHoldings = ({
                                     {formatNumber(
                                       item.amount,
                                       0,
-                                      item.amount < 1 ? 6 : 2
+                                      Number(item.amount) < 1 ? 6 : 2
                                     )}
                                   </div>
-                                  {item.amount_in_usd > 0 && (
+                                  {Number(item.amount_in_usd) > 0 && (
                                     <div className="text-white/40 md:text-sm text-xs font-mono">
                                       ~$
                                       {formatNumber(
-                                        item.amount_in_usd,
+                                        Number(item.amount_in_usd),
                                         0,
-                                        item.amount_in_usd < 1 ? 6 : 2
+                                        Number(item.amount_in_usd) < 1 ? 6 : 2
                                       )}
                                     </div>
                                   )}
