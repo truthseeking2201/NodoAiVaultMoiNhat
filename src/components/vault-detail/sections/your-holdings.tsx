@@ -120,7 +120,7 @@ const YourHoldings = ({
       user_ndlp_balance: lpToken?.balance || 0,
       user_vault_rewards:
         data?.user_vault_rewards || vault?.reward_tokens || [],
-      user_vault_tokens: data?.user_vault_tokens || vault?.tokens || [],
+      user_vault_tokens: data?.user_vault_tokens || vault?.change_24h || [],
     };
   }, [data, vault, lpToken, user_total_liquidity_usd]);
 
@@ -136,7 +136,9 @@ const YourHoldings = ({
     return (
       userHoldingData?.user_vault_tokens
         ?.slice()
-        .sort((a, b) => (b.amount_in_usd ?? 0) - (a.amount_in_usd ?? 0))
+        .sort(
+          (a, b) => Number(b.amount_in_usd ?? 0) - Number(a.amount_in_usd ?? 0)
+        )
         .map((item) => {
           return {
             amount: item?.amount || 0,
@@ -144,7 +146,7 @@ const YourHoldings = ({
             token_name: item?.token_name || "",
             name: item?.token_name,
             token_symbol: item?.token_symbol,
-            value: item?.amount_in_usd / totalAmountInUsd,
+            value: Number(item?.amount_in_usd) / totalAmountInUsd,
           };
         }) || []
     );
@@ -188,7 +190,7 @@ const YourHoldings = ({
       }
       isLoading={isDetailLoading}
       loadingStyle="h-[68px] w-full"
-      className={cn(!expanded && '!pb-0')}
+      className={cn(!expanded && "!pb-0")}
     >
       <ConditionRenderer
         when={userState !== "nonDeposit"}
@@ -295,13 +297,13 @@ const YourHoldings = ({
                                     <TooltipTrigger asChild>
                                       <span className="bg-[#23272F] text-[#6AD6FF] px-2 py-1 rounded text-xs">
                                         Calculating
-                                        <span className="animate-fade-in-out inline-block">
+                                        <span className="animate-fade-in-out inline-block font-mono">
                                           .
                                         </span>
-                                        <span className="animate-fade-in-out inline-block delay-100">
+                                        <span className="animate-fade-in-out inline-block delay-100 font-mono">
                                           .
                                         </span>
-                                        <span className="animate-fade-in-out inline-block delay-200">
+                                        <span className="animate-fade-in-out inline-block delay-200 font-mono">
                                           .
                                         </span>
                                       </span>
@@ -351,16 +353,16 @@ const YourHoldings = ({
                                     {formatNumber(
                                       item.amount,
                                       0,
-                                      item.amount < 1 ? 6 : 2
+                                      Number(item.amount) < 1 ? 6 : 2
                                     )}
                                   </div>
-                                  {item.amount_in_usd > 0 && (
+                                  {Number(item.amount_in_usd) > 0 && (
                                     <div className="text-white/40 md:text-sm text-xs font-mono">
                                       ~$
                                       {formatNumber(
-                                        item.amount_in_usd,
+                                        Number(item.amount_in_usd),
                                         0,
-                                        item.amount_in_usd < 1 ? 6 : 2
+                                        Number(item.amount_in_usd) < 1 ? 6 : 2
                                       )}
                                     </div>
                                   )}
@@ -559,7 +561,7 @@ const YourHoldings = ({
                       : "0"}
                   </span>
                 </div>
-                <div className="flex items-center text-xs">
+                <div className="flex items-center text-xs my-1">
                   <LabelWithTooltip
                     hasIcon={false}
                     label="Total Withdrawals"
@@ -570,7 +572,7 @@ const YourHoldings = ({
                     }
                     labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
-                  <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
+                  <span className="flex-1 border-b border-dashed border-[#505050] mx-2 "></span>
                   <span className="font-mono">
                     $
                     {isAuthenticated
