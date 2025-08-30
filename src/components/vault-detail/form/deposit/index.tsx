@@ -14,11 +14,12 @@ type DepositFormProps = {
 
 const DepositForm = ({ vault_id }: DepositFormProps) => {
   useEstimateDualDeposit(vault_id, true);
+  const { data: vault } = useVaultBasicDetails(vault_id);
+  const isEnableDual = vault?.metadata?.is_enable_dual_token;
+
   const [depositMethod, setDepositMethod] = useState<
     (typeof METHOD_DEPOSIT)[keyof typeof METHOD_DEPOSIT]
-  >(METHOD_DEPOSIT.SINGLE);
-
-  const { data: vault } = useVaultBasicDetails(vault_id);
+  >(isEnableDual ? METHOD_DEPOSIT.DUAL : METHOD_DEPOSIT.SINGLE);
 
   return (
     <div>
@@ -26,7 +27,7 @@ const DepositForm = ({ vault_id }: DepositFormProps) => {
         <SelectMethod
           className="mb-0"
           value={depositMethod}
-          isEnableDual={vault?.metadata?.is_enable_dual_token}
+          isEnableDual={isEnableDual}
           onChange={setDepositMethod}
         />
         {depositMethod === METHOD_DEPOSIT.SINGLE && <DcaStrategy />}

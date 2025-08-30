@@ -1,4 +1,4 @@
-import { VaultItemData } from "./vault-list";
+import { TokenPool, VaultItemData } from "./vault-list";
 import { RowItem } from "@/components/ui/row-item";
 import { Skeleton } from "@/components/ui/skeleton";
 import Countdown, { zeroPad } from "react-countdown";
@@ -6,6 +6,7 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import UserHoldingTooltip from "./user-holding-tooltip";
 import IconReady from "@/components/vault-detail/form/withdraw/icon-ready";
+import { formatNumber } from "@/lib/number";
 
 const VaultHolding = ({
   item,
@@ -14,6 +15,8 @@ const VaultHolding = ({
   classValue = "font-medium font-mono text-white text-base",
   isOnlyWithdrawing = false,
   reloadData = () => {},
+  HOLDING_TYPE,
+  holdingShowMode,
 }: {
   item: VaultItemData;
   classLabel?: string;
@@ -21,6 +24,8 @@ const VaultHolding = ({
   classValue?: string;
   isOnlyWithdrawing?: boolean;
   reloadData: () => void;
+  HOLDING_TYPE?: { label: string; value: string }[];
+  holdingShowMode?: string;
 }) => {
   const renderer = ({ hours, minutes, seconds }) => {
     return (
@@ -61,32 +66,91 @@ const VaultHolding = ({
     <div className="flex flex-col justify-center gap-1">
       {!isOnlyWithdrawing &&
         (item.user_holdings_show || item.rewards_earned_show) && (
-          <UserHoldingTooltip>
-            {item.user_holdings_show && (
-              <RowItem
-                className={classRow}
-                classNameLabel={classLabel}
-                classNameValue={classValue}
-                label="Available:"
-              >
-                {item.user_holdings_show}
-              </RowItem>
-            )}
+          <div className="my-1.5" id="vault-holding-section">
+            {holdingShowMode === HOLDING_TYPE[0].value &&
+              item.user_holdings_show && (
+                <RowItem
+                  className={cn(classRow, "!block")}
+                  classNameLabel={classLabel}
+                  classNameValue={classValue}
+                  label="Available:"
+                >
+                  <div className="mt-2 flex flex-col gap-2">
+                    {item.change_24h.length > 0 ? (
+                      item.change_24h.map((token, index: number) => (
+                        <div className="flex items-center gap-1" key={`${index}-${token.token_symbol}`}>
+                          <img
+                            src={`coins/${token.token_symbol?.toLowerCase()}.png`}
+                            alt={token.token_name}
+                            className="inline-block w-4 h-4 mr-1"
+                          />
+                          {Number(token.amount) > 0
+                            ? formatNumber(
+                                token.amount,
+                                0,
+                                Number(token.amount) < 1 ? 6 : 2
+                              )
+                            : "--"}
+                          {token.percent_change >= 0 && (
+                            <span
+                              className={cn(
+                                `text-sm ml-1`,
+                                token.percent_change >= 0
+                                  ? "text-green-increase"
+                                  : "text-red-400"
+                              )}
+                            >{`(${token.percent_change}%)`}</span>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex flex-col gap-1 font-mono font-bold text-base">
+                        <span className="text-white">--</span>
+                        <span className="text-green-increase">--</span>
+                      </div>
+                    )}
+                  </div>
+                </RowItem>
+              )}
+            {holdingShowMode === HOLDING_TYPE[1].value &&
+              item.user_holdings_show && (
+                <RowItem
+                  className={cn(classRow, "block")}
+                  classNameLabel={classLabel}
+                  classNameValue={cn(classValue, "mt-2")}
+                  label="Available:"
+                >
+                  {item.user_holdings_show}
+                </RowItem>
+              )}
             {item.rewards_earned_show && (
               <RowItem
                 classNameLabel={classLabel}
-                className={classRow}
-                classNameValue={cn(classValue, "text-green-increase")}
-                label="Rewards Earned:"
+                className={cn(classRow, "block mt-2")}
+                classNameValue={classValue}
+                label=""
               >
                 {item.is_loading_withdrawal ? (
                   <Skeleton className="w-[100px] h-5" />
                 ) : (
-                  item.rewards_earned_show
+                  <>
+                    {item.rewards_earned_show !== "--" && (
+                      <div className="bg-[#0D314A] flex justify-between items-center px-2 py-1 rounded-md">
+                        <div className="text-xs text-white">
+                          <UserHoldingTooltip>
+                            Compound Rewards:
+                          </UserHoldingTooltip>
+                        </div>
+                        <div className="text-xs text-[#5AE5F2] font-mono">
+                          {item.rewards_earned_show}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </RowItem>
             )}
-          </UserHoldingTooltip>
+          </div>
         )}
 
       {item.is_loading_withdrawal && !isOnlyWithdrawing && (
@@ -103,11 +167,11 @@ const VaultHolding = ({
       {item.withdrawing && (
         <RowItem
           classNameLabel={classLabel}
-          className={classRow}
+          className={cn(classRow, "md:mt-0 mt-2 block md:flex")}
           classNameValue={classValue}
           label="Withdrawing:"
         >
-          <div className="flex flex-wrap items-center text-sm">
+          <div className="flex flex-wrap items-center text-sm md:mt-0 mt-2">
             <span>{item.withdrawing.receive_amount_usd}</span>
             {item.withdrawing.is_ready ? (
               <IconReady
@@ -120,25 +184,6 @@ const VaultHolding = ({
                 }
               />
             ) : (
-              // <div className="ml-2 flex items-center bg-green-ready/20 sm:px-1 px-0.5 rounded-full">
-              //   <div className="sm:w-4 sm:h-4 w-3 h-3 bg-green-ready rounded-full flex items-center justify-center">
-              //     <Check
-              //       className={cn(
-              //         !isOnlyWithdrawing ? "text-black" : "text-white"
-              //       )}
-              //       strokeWidth="4"
-              //       size={10}
-              //     />
-              //   </div>
-              //   <span
-              //     className={cn(
-              //       "sm:text-xs text-[10px] sm:leading-[22px] leading-[17px] font-mono font-bold ml-1",
-              //       !isOnlyWithdrawing ? "text-green-ready" : "text-white"
-              //     )}
-              //   >
-              //     READY
-              //   </span>
-              // </div>
               <Countdown
                 date={item.withdrawing.countdown}
                 renderer={renderer}

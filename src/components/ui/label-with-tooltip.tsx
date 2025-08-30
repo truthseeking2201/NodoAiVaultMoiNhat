@@ -12,7 +12,7 @@ import ConditionRenderer from "../shared/condition-renderer";
 interface LabelWithTooltipProps {
   tooltipContent?: ReactNode;
   tooltipClassName?: string;
-  label: string;
+  label: string | ReactNode;
   labelClassName?: string;
   iconClassName?: string;
   contentClassName?: string;
