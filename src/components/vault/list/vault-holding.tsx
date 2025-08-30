@@ -91,7 +91,7 @@ const VaultHolding = ({
                                 Number(token.amount) < 1 ? 6 : 2
                               )
                             : "--"}
-                          {token.percent_change && token.percent_change >= 0 && (
+                          {token?.percent_change && (
                             <span
                               className={cn(
                                 `text-sm ml-1`,
