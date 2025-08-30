@@ -382,8 +382,8 @@ export default function VaultList() {
           <div id="holding-container">
             {holdingShowMode === HOLDING_TYPE[0].value ? (
               <div className="text-white font-medium font-mono text-base">
-                {record.change_24h?.length > 0
-                  ? record.change_24h?.map((token, index: number) => (
+                {record.change_24h && record.change_24h.length > 0
+                  ? record.change_24h.map((token, index: number) => (
                       <div
                         className="flex items-center gap-1"
                         key={`${index}-${token.token_symbol}`}
