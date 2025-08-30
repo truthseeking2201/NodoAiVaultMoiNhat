@@ -5,14 +5,17 @@ import Web3Button from "@/components/ui/web3-button";
 import { ButtonGradient } from "@/components/ui/button-gradient";
 import VaultHolding from "./vault-holding";
 import VaultRewards from "./vault-rewards";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type VaultCardProps = {
   item: VaultItemData;
   idLoadingClaim?: string;
-
   reloadDataWithdraw: () => void;
   onRowClick: (item: VaultItemData) => void;
   onClaim: (item: VaultItemData) => void;
+  HOLDING_TYPE: { label: string; value: string }[];
+  holdingShowMode: string;
+  setHoldingShowMode: (mode: string) => void;
 };
 
 const VaultItemMobile = ({
@@ -21,6 +24,9 @@ const VaultItemMobile = ({
   onRowClick,
   onClaim,
   reloadDataWithdraw = () => {},
+  HOLDING_TYPE,
+  holdingShowMode,
+  setHoldingShowMode,
 }: VaultCardProps) => {
   const classLabel = "text-[#9C9C9C]";
   const classValue = "font-medium font-mono text-white text-base";
@@ -106,10 +112,32 @@ const VaultItemMobile = ({
       </RowItem>
 
       <RowItem
-        className="mt-3"
-        classNameLabel={classLabel}
+        className="mt-3 !block w-full"
+        classNameLabel={cn(classLabel, "w-full")}
         classNameValue={classValue}
-        label="Your Holdings"
+        label={
+          <div
+            className="flex items-center justify-between !w-full"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <div>Your Holdings</div>
+            <Tabs value={holdingShowMode} onValueChange={setHoldingShowMode}>
+              <TabsList className="p-1 flex gap-1">
+                {HOLDING_TYPE.map((tab, index) => (
+                  <TabsTrigger
+                    key={`holding-type-${index}`}
+                    value={tab.value}
+                    className="!text-xs"
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
+        }
       ></RowItem>
 
       <div className="px-3 py-2 rounded-md bg-white bg-opacity-4 mt-1">
@@ -119,6 +147,8 @@ const VaultItemMobile = ({
           classRow="justify-between"
           classLabel="text-white/70 font-mono text-xs"
           classValue="font-medium font-mono text-white text-sm"
+          HOLDING_TYPE={HOLDING_TYPE}
+          holdingShowMode={holdingShowMode}
         />
       </div>
 
