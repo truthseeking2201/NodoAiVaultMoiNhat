@@ -37,6 +37,7 @@ const VaultDetail = () => {
     data: depositVaults,
     isLoading: isLoadingDepositVaults,
     isFetching: isFetchingDepositVaults,
+    refetch: refetchDepositVaults,
   } = useGetDepositVaults();
 
   const depositVault = depositVaults?.find(
@@ -51,7 +52,6 @@ const VaultDetail = () => {
   const isDetailLoading = isLoadingVaultDetails || !vaultDetails;
 
   const navigate = useNavigate();
-  const { refetch: refetchDepositVaults } = useGetDepositVaults();
 
   const handleBackToHome = () => {
     refetchDepositVaults();
