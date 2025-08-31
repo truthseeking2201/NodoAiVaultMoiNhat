@@ -11,10 +11,11 @@ import { useWallet } from "@/hooks";
 const Form = ({ vault_id }: { vault_id: string }) => {
   const [tab, setTab] = useState<string>("deposit");
   useWalletSilentConnected();
-  const { address } = useWallet();
+  const { address, isAuthenticated } = useWallet();
   const { data: has_withdraw_request } = useHasWithdrawRequest(
     vault_id,
-    address
+    address,
+    isAuthenticated
   );
   useEffect(() => {
     if (has_withdraw_request === true) {
