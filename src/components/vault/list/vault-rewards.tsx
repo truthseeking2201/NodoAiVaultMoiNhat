@@ -45,7 +45,7 @@ const campaign_default = {
 };
 
 const tokens = [
-  { value: "usdc", symbol: "USDC", image: "/coins/usdc.png" },
+  // { value: "usdc", symbol: "USDC", image: "/coins/usdc.png" },
   { value: "xp", symbol: "XP Shares", image: "/coins/xp.png" },
 ];
 
