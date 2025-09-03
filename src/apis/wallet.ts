@@ -25,7 +25,7 @@ export const subscribeWhitelistRequest = async (
     });
     return await http.get(URLS.walletDetails);
   }
-  if (!res?.wallet_provider && walletProvider) {
+  if (walletProvider) {
     http.post(URLS.updateWalletProvider, {
       wallet_address: walletAddress,
       wallet_provider: walletProvider,
