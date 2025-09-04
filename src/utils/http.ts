@@ -91,7 +91,7 @@ const baseURL = import.meta.env.VITE_NODO_APP_URL || "https://api-dev.nodo.xyz";
 
 const http = axios.create({
   baseURL: baseURL,
-  timeout: 60000,
+  timeout: 300000,
 });
 
 // Request interceptor: add Authorization header with valid token
