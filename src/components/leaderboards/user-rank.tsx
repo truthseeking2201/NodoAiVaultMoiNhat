@@ -7,16 +7,31 @@ import { Button } from "@/components/ui/button";
 import { ItemRow } from "@/components/my-referrals/item-row.tsx";
 import { MyReferralsDashboardModal } from "@/components/my-referrals/my-referrals-dashboard-modal";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RankCompo } from "./helper";
 import ExternalIcon from "@/assets/icons/external-gradient.svg?react";
-import Rank1Icon from "@/assets/images/leaderboards/rank-1.png";
-import Rank2Icon from "@/assets/images/leaderboards/rank-2.png";
-import Rank3Icon from "@/assets/images/leaderboards/rank-3.png";
 
-const RANK_ICON = {
-  1: Rank1Icon,
-  2: Rank2Icon,
-  3: Rank3Icon,
-};
+function UserRankTVL({ rank, label }: { rank: number; label: string }) {
+  return (
+    <div className="flex-1 flex flex-col items-center lg:p-4 p-2">
+      <RankCompo
+        rank={rank}
+        rankNode={
+          <div className="px-4 py-2 flex items-center justify-center lg:text-lg text-xs font-mono font-semibold text-white shadow-lg rounded-[63px] bg-black [box-shadow:-2px_0_4px_0_rgba(255,255,255,0.75)_inset,2px_0_4px_0_rgba(0,255,251,0.95)_inset,0_-3px_4px_0_#07F_inset,0_3px_4px_0_#B708F6_inset]">
+            {rank ? rank : "--"}
+          </div>
+        }
+      />
+      <div className="lg:mt-4 mt-2 flex items-center lg:flex-row flex-col">
+        <span className="text-[#94DCFB] font-semibold lg:text-base text-xs">
+          #{rank ? rank : "--"}
+        </span>
+        <span className="ml-2 text-[#E5E7EB] lg:text-base text-[10px] font-semibold">
+          {label}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function UserRank({
   tvl,
@@ -96,55 +111,11 @@ export default function UserRank({
                     style={{ transform: "translateX(-50%) rotate(25deg)" }}
                   />
                   <div className="flex justify-between items-center mt-4">
-                    <div className="flex-1 flex flex-col items-center lg:p-4 p-2">
-                      {tvlRank > 3 ? (
-                        <div
-                          className="px-4 py-2 flex items-center justify-center lg:text-lg text-xs font-mono font-semibold text-white shadow-lg rounded-[63px] bg-black
-                          [box-shadow:-2px_0_4px_0_rgba(255,255,255,0.75)_inset,2px_0_4px_0_rgba(0,255,251,0.95)_inset,0_-3px_4px_0_#07F_inset,0_3px_4px_0_#B708F6_inset]"
-                        >
-                          {tvlRank ? tvlRank : "--"}
-                        </div>
-                      ) : (
-                        <img
-                          src={RANK_ICON[tvlRank as 1 | 2 | 3]}
-                          alt={`Rank ${tvlRank}`}
-                          className="h-10 w-10"
-                        />
-                      )}
-                      <div className="lg:mt-4 mt-2 flex items-center lg:flex-row flex-col">
-                        <span className="text-[#94DCFB] font-semibold lg:text-base text-xs">
-                          #{tvlRank ? tvlRank : "--"}
-                        </span>
-                        <span className="ml-2 text-[#E5E7EB] lg:text-base text-[10px] font-semibold">
-                          TVL Leaderboard
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col items-center lg:p-4 p-2">
-                      {referredTvlRank > 3 ? (
-                        <div
-                          className="px-4 py-2 flex items-center justify-center lg:text-lg text-xs font-mono font-semibold text-white shadow-lg rounded-[63px] bg-black
-                          [box-shadow:-2px_0_4px_0_rgba(255,255,255,0.75)_inset,2px_0_4px_0_rgba(0,255,251,0.95)_inset,0_-3px_4px_0_#07F_inset,0_3px_4px_0_#B708F6_inset]"
-                        >
-                          {referredTvlRank ? referredTvlRank : "--"}
-                        </div>
-                      ) : (
-                        <img
-                          src={RANK_ICON[referredTvlRank as 1 | 2 | 3]}
-                          alt={`Rank ${referredTvlRank}`}
-                          className="h-10 w-10"
-                        />
-                      )}
-                      <div className="lg:mt-4 mt-2 flex items-center lg:flex-row flex-col">
-                        <span className="text-[#94DCFB] font-semibold lg:text-base text-xs">
-                          #{referredTvlRank ? referredTvlRank : "--"}
-                        </span>
-                        <span className="ml-2 text-[#E5E7EB] lg:text-base text-[10px] font-semibold">
-                          Referred TVL Leaderboard
-                        </span>
-                      </div>
-                    </div>
+                    <UserRankTVL rank={tvlRank} label="TVL Leaderboard" />
+                    <UserRankTVL
+                      rank={referredTvlRank}
+                      label="Referred TVL Leaderboard"
+                    />
                   </div>
                 </div>
               </div>

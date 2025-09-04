@@ -86,6 +86,7 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
           >
             {pageRoutes.map((route) => (
               <NavLink
+                key={route.path}
                 to={route.path}
                 className={({ isActive }) =>
                   `flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 text-white ${

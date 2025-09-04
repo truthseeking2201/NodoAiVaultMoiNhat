@@ -3,7 +3,7 @@ import CountUp from "@/components/ui/count-up";
 
 const Banner = () => {
   return (
-    <div className="w-full flex justify-center items-center py-4">
+    <div className="w-full flex justify-center items-center">
       <div
         className="relative w-full rounded-[16px] px-6 py-4 flex flex-col items-center justify-center shadow-lg overflow-hidden lg:h-[128px] h-full"
         style={{

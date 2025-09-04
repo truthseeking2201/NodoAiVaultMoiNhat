@@ -48,6 +48,7 @@ export function MobileNavigation() {
       <div className="flex">
         {pageRoutes.map((route) => (
           <NavLink
+            key={route.path}
             to={route.path}
             className={({ isActive }) =>
               `w-full flex flex-col items-center gap-1 p-0 rounded-lg transition-colors duration-200 text-white ${
