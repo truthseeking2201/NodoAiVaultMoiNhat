@@ -4,16 +4,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import ShinyText from "@/components/ui/shiny-text";
-import { ArrowDecreasing, ArrowIncreasing } from "@/assets/icons";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { VaultInfo } from "@/pages/vault-detail";
-import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 
 type VaultInfoProps = {
   vault: any;
@@ -142,7 +139,7 @@ const HeaderDetail = ({
             <ShinyText
               text={vault.vault_name}
               className="text-base font-bold mt-3"
-              textColor="text-white/75"
+              textColor="text-white/50"
             />
             <div className="flex items-center gap-1 mt-1">
               <img
@@ -195,7 +192,7 @@ const HeaderDetail = ({
             <ShinyText
               text={vault.vault_name}
               className="text-2xl font-bold"
-              textColor="text-white/75"
+              textColor="text-white/50"
             />
             <div className="flex items-center gap-1">
               <div className="text-white/50"> Powered by </div>
