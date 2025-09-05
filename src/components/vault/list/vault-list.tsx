@@ -16,8 +16,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
 import { formatPercentage } from "@/lib/utils";
-import { showFormatNumber } from "@/lib/number";
-import { DepositVaultConfig } from "@/types/vault-config.types";
+import { formatNumber, showFormatNumber } from "@/lib/number";
+import { DepositVaultConfig, UserHoldingTokens } from "@/types/vault-config.types";
 import { calculateUserHoldings } from "@/utils/helpers";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +29,7 @@ import VaultHolding from "./vault-holding";
 import VaultRewards from "./vault-rewards";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserHoldingTooltip from "./user-holding-tooltip";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const OPTIONS_CHAINS = [
   { value: "all", label: "All Chains" },
@@ -56,9 +57,11 @@ const OPTIONS_CHAINS = [
   },
 ];
 
-type TokenPool = {
+export type TokenPool = {
   name: string;
   image: string;
+  min_deposit_amount?: string | number;
+  min_deposit_amount_usd?: string | number;
 };
 
 type Withdrawing = {
@@ -81,7 +84,19 @@ export type VaultItemData = DepositVaultConfig & {
   rewards_earned_show?: string;
   is_loading_withdrawal: boolean;
   withdrawing: Withdrawing | null;
+  change_24h: UserHoldingTokens[];
 };
+
+const HOLDING_TYPE = [
+  {
+    label: "Token",
+    value: "token",
+  },
+  {
+    label: "USD",
+    value: "usd",
+  },
+];
 
 export default function VaultList() {
   const { isLoading, data = [] } = useGetDepositVaults();
@@ -109,6 +124,9 @@ export default function VaultList() {
     // user_holdings: SORT_TYPE.desc,
     keySort: "total_value_usd",
   });
+  const [holdingShowMode, setHoldingShowMode] = useState<string>(
+    HOLDING_TYPE[0].value
+  );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const showUsd = (num, emty = "--") => {
@@ -157,7 +175,13 @@ export default function VaultList() {
         exchange_code: exchange.code,
         user_holdings: user_holdings,
         token_pools: tokens.map((i) => {
-          return { name: i, image: `/coins/${i?.toLowerCase()}.png` };
+          const token = vault.tokens.find((v) => v.token_symbol === i);
+          return {
+            name: i,
+            image: `/coins/${i?.toLowerCase()}.png`,
+            min_deposit_amount: token?.min_deposit_amount,
+            min_deposit_amount_usd: token?.min_deposit_amount_usd,
+          };
         }),
 
         user_holdings_show: showUsd(user_holdings),
@@ -275,7 +299,7 @@ export default function VaultList() {
           />
         ),
         dataIndex: "apy",
-        classTitle: "text-white/80 text-left",
+        classTitle: "text-white/80 text-left w-[100px]",
         keySort: "vault_apy",
         render: (value: any, record: any) => (
           <span className="text-green-increase font-medium font-mono text-base break-all">
@@ -313,41 +337,108 @@ export default function VaultList() {
       },
       {
         title: (
-          <LabelWithTooltip
-            hasIcon={false}
-            label="Your Holdings"
-            labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
-            tooltipContent={
-              <div className="text-xs">
-                The total value of your position in the vault, including both
-                principal and accrued rewards
-                <span className="text-[#FFBD24] font-bold text-xs">
-                  {" "}
-                  (USD equivalent)
-                </span>
-                . Updates every 1 hour.
-              </div>
-            }
-          />
+          <div className="flex gap-2 items-center">
+            <LabelWithTooltip
+              hasIcon={false}
+              label="Your Holdings"
+              labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
+              tooltipContent={
+                <div className="text-xs">
+                  The total value of your position in the vault, including both
+                  principal and accrued rewards
+                  <span className="text-[#FFBD24] font-bold text-xs">
+                    {" "}
+                    (USD equivalent)
+                  </span>
+                  . Updates every 1 hour.
+                </div>
+              }
+            />
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <Tabs value={holdingShowMode} onValueChange={setHoldingShowMode}>
+                <TabsList className="p-1 flex gap-1">
+                  {HOLDING_TYPE.map((tab, index) => (
+                    <TabsTrigger
+                      key={`holding-type-${index}`}
+                      value={tab.value}
+                      className="!text-xs"
+                    >
+                      {tab.label}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
         ),
         dataIndex: "holdings",
-        classTitle: "text-white/80 w-[145px]",
+        classTitle: "text-white/80 w-[250px]",
         keySort: "user_holdings",
         render: (_: any, record: any) => (
-          <UserHoldingTooltip>
-            <div>
+          <div id="holding-container">
+            {holdingShowMode === HOLDING_TYPE[0].value ? (
+              <div className="text-white font-medium font-mono text-base">
+                {record.change_24h && record.change_24h.length > 0
+                  ? record.change_24h.map((token, index: number) => (
+                      <div
+                        className="flex items-center gap-1"
+                        key={`${index}-${token.token_symbol}`}
+                      >
+                        <img
+                          src={`coins/${token.token_symbol?.toLowerCase()}.png`}
+                          alt={token.token_name}
+                          className="inline-block w-4 h-4 mr-1"
+                        />
+                        {Number(token.amount) > 0
+                          ? formatNumber(
+                              token.amount,
+                              0,
+                              Number(token.amount) < 1 ? 6 : 2
+                            )
+                          : "--"}
+                        {token?.percent_change && (
+                          <span
+                            className={cn(
+                              `text-sm ml-1`,
+                              token.percent_change >= 0
+                                ? "text-green-increase"
+                                : "text-red-400"
+                            )}
+                          >{`(${token.percent_change}%)`}</span>
+                        )}
+                      </div>
+                    ))
+                  : <div className="flex flex-col gap-1 font-mono font-bold text-base">
+                    <span className="text-white">--</span>
+                    <span className="text-green-increase">--</span>
+                  </div>}
+              </div>
+            ) : (
               <div className="text-white font-medium font-mono text-base">
                 {record.user_holdings_show}
               </div>
-              {record.is_loading_withdrawal ? (
-                <Skeleton className="w-[80px] h-5 mt-1" />
-              ) : (
-                <div className="text-green-increase font-medium font-mono text-sm mt-1">
-                  {record.rewards_earned_show}
-                </div>
-              )}
-            </div>
-          </UserHoldingTooltip>
+            )}
+            {record.is_loading_withdrawal ? (
+              <Skeleton className="w-[80px] h-5 mt-1" />
+            ) : (
+              <div id="compound-container">
+                {record.rewards_earned_show !== "--" && (
+                  <div className="bg-[#0D314A] flex justify-between items-center px-2 py-1 rounded-md mt-1">
+                    <div className="text-xs text-white">
+                      <UserHoldingTooltip>Compound Rewards:</UserHoldingTooltip>
+                    </div>
+                    <div className="text-xs text-[#5AE5F2] font-mono">
+                      {record.rewards_earned_show}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         ),
       },
       {
@@ -380,7 +471,7 @@ export default function VaultList() {
         ),
       },
     ],
-    [handleRowClick]
+    [handleRowClick, holdingShowMode]
   );
 
   const rowsColspan = useMemo(
@@ -557,6 +648,9 @@ export default function VaultList() {
                   reloadDataWithdraw={refetchVaultsWithdrawal}
                   onRowClick={handleRowClick}
                   onClaim={onClaim}
+                  HOLDING_TYPE={HOLDING_TYPE}
+                  holdingShowMode={holdingShowMode}
+                  setHoldingShowMode={setHoldingShowMode}
                 />
               ))}
             </ConditionRenderer>

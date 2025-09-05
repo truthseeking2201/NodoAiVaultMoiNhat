@@ -7,6 +7,7 @@ import { useNdlpAssetsStore, useUserAssetsStore } from "./use-store";
 import { useGetDepositVaults } from "./use-vault";
 import * as Sentry from "@sentry/react";
 import { captureSentryError } from "@/utils/logger";
+import { sleep } from "@/lib/utils";
 
 export const useLoginWallet = () => {
   const { mutateAsync: signPersonalMessage } = useSignPersonalMessage();
@@ -22,6 +23,48 @@ export const useLoginWallet = () => {
 
   const { setIsAuthenticated } = useWallet();
 
+  // Helper function to retry triggerLoginWallet on network errors
+  const retryLoginWallet = async (
+    payload: {
+      signature: string;
+      timestamp: number;
+      address: string;
+    },
+    maxRetries = 3
+  ) => {
+    let lastError;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await triggerLoginWallet(payload);
+      } catch (error) {
+        lastError = error;
+
+        // Check if it's a network error
+        const isNetworkError =
+          error?.code === "NETWORK_ERROR" ||
+          error?.message?.toLowerCase().includes("network") ||
+          error?.name === "NetworkError" ||
+          (error?.response === undefined && error?.request !== undefined) ||
+          error?.code === "ECONNABORTED" ||
+          error?.code === "ENOTFOUND" ||
+          error?.code === "ECONNREFUSED" ||
+          error?.code === "ETIMEDOUT";
+
+        // If it's not a network error or we've exhausted retries, throw the error
+        if (!isNetworkError || attempt === maxRetries) {
+          throw error;
+        }
+
+        // Wait before retrying (exponential backoff: 1s, 2s, 4s)
+        const delay = Math.pow(2, attempt - 1) * 1000;
+        await sleep(delay);
+      }
+    }
+
+    throw lastError;
+  };
+
   return async (walletAddress: string) => {
     try {
       const timestamp = Date.now();
@@ -32,7 +75,7 @@ export const useLoginWallet = () => {
         message,
       });
 
-      const data = await triggerLoginWallet({
+      const data = await retryLoginWallet({
         signature: signResult.signature,
         timestamp,
         address: walletAddress,

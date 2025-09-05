@@ -22,8 +22,8 @@ export const METHOD_DEPOSIT = {
   DUAL: "DUAL",
 };
 export const METHOD_DEPOSIT_TABS = [
-  { value: METHOD_DEPOSIT.SINGLE, label: "Single" },
   { value: METHOD_DEPOSIT.DUAL, label: "Dual" },
+  { value: METHOD_DEPOSIT.SINGLE, label: "Single" },
 ];
 
 export const ITEMS_PER_PAGE = 5;

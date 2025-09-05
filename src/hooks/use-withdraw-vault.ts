@@ -566,7 +566,8 @@ export const useWithdrawEtsAmountReceive = (
 
 export const useHasWithdrawRequest = (
   vaultId: string,
-  walletAddress: string
+  walletAddress: string,
+  isAuthenticated: boolean
 ) => {
   return useQuery<boolean, Error>({
     queryKey: ["vault-has-withdrawing", vaultId, walletAddress],
@@ -577,7 +578,7 @@ export const useHasWithdrawRequest = (
       });
       return !!dataRequest?.length;
     },
-    enabled: !!vaultId && !!walletAddress,
+    enabled: !!vaultId && !!walletAddress && isAuthenticated,
     refetchOnWindowFocus: true,
   });
 };
