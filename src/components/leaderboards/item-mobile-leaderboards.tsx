@@ -49,7 +49,7 @@ export default function ItemMobileLeaderboards({
         <div className="text-[#9C9C9C] text-xs">Rewards</div>
         <div className="flex flex-col gap-2">
           {item.rewards?.map((el, idx) => (
-            <RewardCompo token={el} />
+            <RewardCompo token={el} key={idx} />
           ))}
         </div>
       </div>

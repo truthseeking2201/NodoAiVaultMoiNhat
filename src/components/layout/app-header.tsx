@@ -58,7 +58,7 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
   return (
     <div
       className={cn(
-        "container flex items-center justify-between",
+        "container flex items-center justify-between max-lg:px-4",
         visibleRibbon ? "pt-4" : "pt-0"
       )}
     >
@@ -79,7 +79,7 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
         </div>
         <div>
           <motion.div
-            className="flex items-center gap-4"
+            className="flex items-center gap-4 max-lg:gap-1"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -108,9 +108,9 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
         </div>
       </div>
       {/* Right side */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center lg:gap-4">
         <motion.div
-          className="flex items-center gap-4"
+          className="flex items-center lg:gap-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
@@ -118,7 +118,7 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
           <ReferralTooltip dataRefer={dataRefer}>
             <Button
               variant="link"
-              className="text-white flex items-center gap-2 text !no-underline hover:text-white/80"
+              className="text-white flex items-center gap-2 text !no-underline hover:text-white/80 px-2 lg:px-4"
               disabled={!dataRefer.referCode}
             >
               My Referral
@@ -126,7 +126,7 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
           </ReferralTooltip>
           <Button
             variant="link"
-            className="!no-underline hover:text-white/80"
+            className="!no-underline hover:text-white/80 px-2 lg:px-4"
             onClick={() => {
               window.open("https://docs.nodo.xyz", "_blank");
             }}

@@ -41,7 +41,7 @@ export function MobileNavigation() {
   return (
     <div
       className={cn(
-        "fixed bottom-0 left-0 w-full pt-2 px-3 pb-5 bg-[#1D1F24] z-[110] transition-all duration-500",
+        "fixed bottom-0 left-0 w-full pt-2 px-3 pb-5 bg-[#1D1F24] z-50 transition-all duration-500",
         show ? "translate-y-0" : "translate-y-full"
       )}
     >

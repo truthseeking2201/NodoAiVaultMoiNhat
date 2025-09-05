@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, Fragment } from "react";
 import Rank1Icon from "@/assets/images/leaderboards/rank-1.png";
 import Rank2Icon from "@/assets/images/leaderboards/rank-2.png";
 import Rank3Icon from "@/assets/images/leaderboards/rank-3.png";
@@ -105,12 +105,12 @@ export function Columns(isReferTvl: boolean) {
       render: (rewards) => (
         <div className="flex items-center justify-end flex-wrap gap-2">
           {rewards?.map((el, idx) => (
-            <>
+            <Fragment key={`row-${idx}`}>
               {idx > 0 && (
                 <span className="text-base text-white font-mono">+</span>
               )}
               <RewardCompo token={el} />
-            </>
+            </Fragment>
           ))}
         </div>
       ),

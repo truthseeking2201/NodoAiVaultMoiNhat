@@ -105,12 +105,12 @@ export default function DataTableLeaderboards({
           fallback={<NoDataLeaderboards />}
         >
           <div className="rounded-b-md md:rounded-b-xl overflow-hidden border border-t-0 rounded-t-none border-white/10">
-            {/* TableRender */}
             <TableRender
               headerClassName="p-4 h-[70px] border-b"
               data={mapData}
               columns={Columns(isReferTvl)}
               isLoading={isLoading}
+              classRowBody="even:bg-[#212121]"
             />
           </div>
         </ConditionRenderer>
