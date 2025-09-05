@@ -2,6 +2,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDays } from "lucide-react";
 import { formatDate } from "@/utils/date";
+import { TabFilterTime } from "@/hooks/use-leaderboards";
 
 const TABS = [
   { value: "this-week", label: "This Week" },
@@ -10,7 +11,7 @@ const TABS = [
 
 type Props = {
   tab: string;
-  setTab: (tab: string) => void;
+  setTab: (tab: TabFilterTime) => void;
   timeFrom: string;
   timeTo: string;
   timeLastUpdate: string;
@@ -52,7 +53,7 @@ const TimeLeaderboards = ({
       )}
       <Tabs
         value={tab}
-        onValueChange={(value) => setTab(value)}
+        onValueChange={(value: TabFilterTime) => setTab(value)}
         className="max-md:w-full"
       >
         <TabsList className="p-1 flex gap-1 max-md:w-full">

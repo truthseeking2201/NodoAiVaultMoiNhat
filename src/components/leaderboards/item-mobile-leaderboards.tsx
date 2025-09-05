@@ -19,15 +19,21 @@ export default function ItemMobileLeaderboards({
         classNameValue={classValue}
         label="RANK"
       >
-        <RankCompo
-          rank={item.rank}
-          classNameImage="w-[26px] h-[26px]"
-          rankNode={
-            <div className="flex items-center justify-center text-[15px] w-[26px] h-[26px]">
-              {item.rank}
-            </div>
-          }
-        />
+        <div className="flex items-center gap-2">
+          {item.isYou && (
+            <span className="bg-gradient-to-r from-[#00CCFF] to-[#00FF5E] inline-flex rounded-full text-black text-xs leading-[17px] font-bold px-2.5 ">
+              YOU
+            </span>
+          )}
+          <RankCompo
+            rank={item.rank}
+            rankNode={
+              <div className="flex items-center justify-center text-[15px] w-[26px] h-[26px]">
+                {item.rank}
+              </div>
+            }
+          />
+        </div>
       </RowItem>
       <hr className="my-2" />
       <RowItem

@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
-import { useLeaderboard } from "@/hooks/use-leaderboards";
+import { useLeaderboard, TabFilterTime } from "@/hooks/use-leaderboards";
 import useBreakpoint from "@/hooks/use-breakpoint";
+import { useWallet } from "@/hooks";
 import { showFormatNumber } from "@/lib/number";
 import { truncateStringWithSeparator } from "@/utils/helpers";
 import { USDC_CONFIG, XP_CONFIG } from "@/config/coin-config";
@@ -19,9 +20,10 @@ interface DataTableLeaderboardsProps {
 export default function DataTableLeaderboards({
   isReferTvl = false,
 }: DataTableLeaderboardsProps) {
-  const [tab, setTab] = useState<string>("this-week");
-  const { data, isLoading } = useLeaderboard(isReferTvl);
+  const [tab, setTab] = useState<TabFilterTime>("this-week");
+  const { data, isLoading } = useLeaderboard(isReferTvl, tab);
   const { isMd } = useBreakpoint();
+  const { address } = useWallet();
 
   const mapData = useMemo(() => {
     // return [];
@@ -51,9 +53,12 @@ export default function DataTableLeaderboards({
         ),
         tvl: showFormatNumber(el.total_value_usd || 0, 2, 2, "$"),
         rewards,
+        // isYou: address?.toLowerCase() === el?.vault_address?.toLowerCase(),
+        isYou: idx === 1,
+        // isYou: true,
       };
     }) as LeaderboardItem[];
-  }, [data]);
+  }, [data, address]);
 
   // RENDER
   return (

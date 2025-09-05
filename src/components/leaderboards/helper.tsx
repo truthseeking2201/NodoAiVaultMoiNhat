@@ -2,6 +2,7 @@ import { ReactNode, Fragment } from "react";
 import Rank1Icon from "@/assets/images/leaderboards/rank-1.png";
 import Rank2Icon from "@/assets/images/leaderboards/rank-2.png";
 import Rank3Icon from "@/assets/images/leaderboards/rank-3.png";
+import { ButtonGradient } from "@/components/ui/button-gradient";
 
 const RANK_ICON = {
   1: Rank1Icon,
@@ -20,6 +21,7 @@ export type LeaderboardItem = {
   wallet_address: string;
   tvl: string;
   rewards: TokenReward[];
+  isYou: boolean;
 };
 
 interface RankCompoProps {
@@ -30,7 +32,7 @@ interface RankCompoProps {
 export function RankCompo({
   rank = 0,
   rankNode,
-  classNameImage = "h-10 w-10",
+  classNameImage = "h-10 w-10 max-md:w-[26px] max-md:h-[26px]",
 }: RankCompoProps) {
   return (
     <>
@@ -75,15 +77,27 @@ export function Columns(isReferTvl: boolean) {
       title: "RANK",
       dataIndex: "rank",
       classTitle: "text-white/70",
-      render: (_) => (
-        <RankCompo
-          rank={_}
-          rankNode={
-            <div className="flex items-center justify-center text-base w-10 h-10">
-              {_}
-            </div>
-          }
-        />
+      render: (_, record: LeaderboardItem) => (
+        <div className="flex items-center gap-2">
+          <RankCompo
+            rank={_}
+            rankNode={
+              <div className="flex items-center justify-center text-base w-10 h-10">
+                {_}
+              </div>
+            }
+          />
+          {record.isYou && (
+            <ButtonGradient
+              onClick={() => {}}
+              variant="outline2"
+              className=""
+              classButtonInner="bg-[#070707]"
+            >
+              YOU
+            </ButtonGradient>
+          )}
+        </div>
       ),
     },
     {

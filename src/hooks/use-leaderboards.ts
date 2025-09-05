@@ -2,33 +2,14 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import * as api from "@/apis/leaderboards";
 import * as type from "@/types/leaderboards.types";
 
-export const useLeaderboardTVL = () => {
-  return useQuery<type.LeaderboardsItemData[], Error>({
-    queryKey: ["leaderboards-tvl"],
-    queryFn: async () => {
-      const response = await api.getTVLLeaderboard({});
-      return response as unknown as type.LeaderboardsItemData[];
-    },
-    enabled: true,
-    refetchOnWindowFocus: true,
-  });
-};
+export type TabFilterTime = "this-week" | "that-week";
 
-export const useLeaderboardTVLRefer = () => {
-  return useQuery<type.LeaderboardsItemData[], Error>({
-    queryKey: ["leaderboards-tvl-refer"],
-    queryFn: async () => {
-      const response = await api.getReferredTVLLeaderboard({});
-      return response as unknown as type.LeaderboardsItemData[];
-    },
-    enabled: true,
-    refetchOnWindowFocus: true,
-  });
-};
-
-export const useLeaderboard = (isReferTvl: boolean) => {
-  return useQuery<type.LeaderboardsItemData[], Error>({
-    queryKey: ["leaderboards"],
+export const useLeaderboard = (
+  isReferTvl: boolean,
+  filterTime: TabFilterTime
+) => {
+  return useQuery<type.LeaderboardsData, Error>({
+    queryKey: ["leaderboards", isReferTvl, filterTime],
     queryFn: async () => {
       let response = null;
       if (isReferTvl) {
@@ -36,7 +17,7 @@ export const useLeaderboard = (isReferTvl: boolean) => {
       } else {
         response = await api.getReferredTVLLeaderboard({});
       }
-      return response as unknown as type.LeaderboardsItemData[];
+      return response as unknown as type.LeaderboardsData;
     },
     enabled: true,
     refetchOnWindowFocus: true,
