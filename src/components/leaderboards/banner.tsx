@@ -1,7 +1,36 @@
 import CampaignBg from "@/assets/images/leaderboards/campaign-bg.png";
 import CountUp from "@/components/ui/count-up";
+import { useConfigLeaderboard } from "@/hooks/use-leaderboards";
+import { USDC_CONFIG, XP_CONFIG } from "@/config/coin-config";
+import { useMemo, Fragment } from "react";
 
 const Banner = () => {
+  const { data } = useConfigLeaderboard();
+
+  const prize = useMemo(() => {
+    // TODO
+    const valueUsd = data?.[0]?.vault_cap / 500 || 500;
+    const valueXp = data?.[0]?.vault_cap || 10000000;
+    const _prize = [];
+    if (valueUsd) {
+      _prize.push({
+        image: USDC_CONFIG.image_url,
+        symbol: USDC_CONFIG.symbol,
+        fromValue: Math.max(valueUsd - 200, 0),
+        value: valueUsd,
+      });
+    }
+    if (valueXp) {
+      _prize.push({
+        image: XP_CONFIG.image_url,
+        symbol: XP_CONFIG.symbol,
+        fromValue: Math.max(valueXp - 200, 0),
+        value: valueXp,
+      });
+    }
+    return _prize;
+  }, [data]);
+
   return (
     <div className="w-full flex justify-center items-center">
       <div
@@ -21,33 +50,26 @@ const Banner = () => {
             <span className="text-white text-base font-medium">✦</span>
           </div>
           <div className="flex items-center lg:gap-4 gap-0 lg:flex-row flex-col">
-            <div className="flex items-center gap-2">
-              <img src="/coins/usdc.png" alt="USDC" className="w-6 h-6" />
-              <span className="text-white text-xl font-bold">
-                <CountUp
-                  from={0}
-                  to={500}
-                  duration={3}
-                  delay={0}
-                  separator=","
-                />{" "}
-                USDC
-              </span>
-            </div>
-            <div className="text-white text-xl font-bold">+</div>
-            <div className="flex items-center gap-2">
-              <img src="/coins/xp.png" alt="XP" className="w-6 h-6" />
-              <span className="text-white text-xl font-bold">
-                <CountUp
-                  from={9999100}
-                  to={10000000}
-                  duration={3}
-                  delay={0}
-                  separator=","
-                />{" "}
-                XP Shares
-              </span>
-            </div>
+            {prize?.map((el, idx) => (
+              <Fragment key={`row-${idx}`}>
+                {idx > 0 && (
+                  <div className="text-white text-xl font-bold">+</div>
+                )}
+                <div className="flex items-center gap-2">
+                  <img src={el.image} alt={el.symbol} className="w-6 h-6" />
+                  <span className="text-white text-xl font-bold">
+                    <CountUp
+                      from={el.fromValue}
+                      to={el.value}
+                      duration={3}
+                      delay={0}
+                      separator=","
+                    />{" "}
+                    {el.symbol}
+                  </span>
+                </div>
+              </Fragment>
+            ))}
           </div>
         </div>
       </div>

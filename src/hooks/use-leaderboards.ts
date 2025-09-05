@@ -23,3 +23,27 @@ export const useLeaderboard = (
     refetchOnWindowFocus: true,
   });
 };
+
+export const useUserLeaderboard = (enabled: boolean) => {
+  return useQuery<type.UserLeaderboardsData, Error>({
+    queryKey: ["user-leaderboards"],
+    queryFn: async () => {
+      const response = await api.getUserLeaderboard({});
+      return response as unknown as type.UserLeaderboardsData;
+    },
+    enabled: enabled,
+    refetchOnWindowFocus: true,
+  });
+};
+
+export const useConfigLeaderboard = () => {
+  return useQuery<type.ConfigLeaderboardsData, Error>({
+    queryKey: ["config-leaderboards"],
+    queryFn: async () => {
+      const response = await api.getConfigLeaderboard();
+      return response as unknown as type.ConfigLeaderboardsData;
+    },
+    enabled: true,
+    refetchOnWindowFocus: false,
+  });
+};

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useWallet, useWhitelistWallet } from "@/hooks";
+import { useUserLeaderboard } from "@/hooks/use-leaderboards";
 import ReferralBg from "@/assets/images/leaderboards/referral-section.png";
 import { formatNumber } from "@/lib/number";
 import { Button } from "@/components/ui/button";
@@ -33,18 +34,9 @@ function UserRankTVL({ rank, label }: { rank: number; label: string }) {
   );
 }
 
-export default function UserRank({
-  tvl,
-  tvlRank,
-  referredTvl,
-  referredTvlRank,
-}: {
-  tvl: number;
-  tvlRank: number;
-  referredTvl: number;
-  referredTvlRank: number;
-}) {
+export default function UserRank() {
   const { isAuthenticated } = useWallet();
+  const { data, isLoading } = useUserLeaderboard(isAuthenticated);
   const { walletDetails } = useWhitelistWallet();
   const [activeTab, setActiveTab] = useState<"code" | "link">("code");
   const [openModalRefer, setOpenModalRefer] = useState(false);
@@ -57,6 +49,18 @@ export default function UserRank({
       referTotal: walletDetails?.total_referrals,
     };
   }, [walletDetails]);
+
+  const dataUser = useMemo(() => {
+    // TODO
+    const tvl = 1000;
+    const referredTvl = 1;
+    return {
+      tvl: tvl,
+      tvlRank: 1,
+      referredTvl: referredTvl,
+      referredTvlRank: 2,
+    };
+  }, [data]);
 
   return (
     <div className="border border-white/20 rounded-xl bg-black lg:p-6 px-3 py-5">
@@ -94,13 +98,13 @@ export default function UserRank({
                   <div className="w-full rounded-xl bg-white/10 px-4 py-2">
                     <div className="lg:text-base text-white/60">TVL</div>
                     <div className="text-xl text-white font-semibold mt-2 font-mono">
-                      ${formatNumber(tvl, 0, 2)}
+                      ${formatNumber(dataUser.tvl, 0, 2)}
                     </div>
                   </div>
                   <div className="w-full rounded-xl bg-white/10 px-4 py-2">
                     <div className="text-base text-white/60">Referred TVL</div>
                     <div className="text-xl text-white font-semibold mt-2 font-mono">
-                      ${formatNumber(referredTvl, 0, 2)}
+                      ${formatNumber(dataUser.referredTvl, 0, 2)}
                     </div>
                   </div>
                 </div>
@@ -111,9 +115,12 @@ export default function UserRank({
                     style={{ transform: "translateX(-50%) rotate(25deg)" }}
                   />
                   <div className="flex justify-between items-center mt-4">
-                    <UserRankTVL rank={tvlRank} label="TVL Leaderboard" />
                     <UserRankTVL
-                      rank={referredTvlRank}
+                      rank={dataUser.tvlRank}
+                      label="TVL Leaderboard"
+                    />
+                    <UserRankTVL
+                      rank={dataUser.referredTvlRank}
                       label="Referred TVL Leaderboard"
                     />
                   </div>

@@ -3,3 +3,11 @@ export type LeaderboardsItemData = {
 };
 
 export type LeaderboardsData = LeaderboardsItemData[];
+
+export type UserLeaderboardsData = {
+  rank: number;
+};
+
+export type ConfigLeaderboardsData = {
+  rank: number;
+};
