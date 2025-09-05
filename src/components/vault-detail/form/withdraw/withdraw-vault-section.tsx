@@ -105,6 +105,9 @@ export default function WithdrawVaultSection({
   const initDataClaim = async () => {
     try {
       const res = await getLatestRequestClaim(address, lpData, configVault);
+      if (dataClaim && !res) {
+        return;
+      }
       setDataClaim(res);
       return res;
     } catch (error) {
@@ -184,10 +187,7 @@ export default function WithdrawVaultSection({
               className="flex items-center justify-center w-full font-semibold text-lg py-3"
             >
               <span>Connect Wallet</span>
-              <ArrowRight
-                size={16}
-                className="ml-2"
-              />
+              <ArrowRight size={16} className="ml-2" />
             </Web3Button>
           </div>
         )}
