@@ -77,6 +77,11 @@ export const COIN_TYPES_CONFIG = {
       display_name: "XAUM",
       image_url: "/coins/xaum.png",
     },
+    {
+      id: "0xf16e6b723f242ec745dfd7634ad072c42d5c1d9ac9d62a39c381303eaa57693a::fdusd::FDUSD",
+      display_name: "FDUSD",
+      image_url: "/coins/fdusd.png",
+    },
     // TODO: add more collateral tokens here
   ],
 };
