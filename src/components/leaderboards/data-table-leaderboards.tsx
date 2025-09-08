@@ -8,6 +8,7 @@ import { truncateStringWithSeparator } from "@/utils/helpers";
 import { USDC_CONFIG, XP_CONFIG, GEMS_CONFIG } from "@/config/coin-config";
 import { LeaderboardItem, Columns } from "./helper";
 import { LeaderboardsItemData } from "@/types/leaderboards.types.ts";
+import { LEADERBOARD_TIME_FILTER } from "@/config/constants-types.ts";
 
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import { TableRender } from "@/components/ui/table-render";
@@ -22,7 +23,9 @@ interface DataTableLeaderboardsProps {
 export default function DataTableLeaderboards({
   tabLeaderboard,
 }: DataTableLeaderboardsProps) {
-  const [tab, setTab] = useState<TabFilterTime>("this-week");
+  const [tab, setTab] = useState<TabFilterTime>(
+    LEADERBOARD_TIME_FILTER.thisWeek
+  );
   const { data, isLoading } = useLeaderboard(tabLeaderboard, tab);
   const { isMd } = useBreakpoint();
   const { address } = useWallet();
