@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { useLeaderboard, TabFilterTime } from "@/hooks/use-leaderboards";
+import { useLeaderboard } from "@/hooks/use-leaderboards";
+import { TabFilterTime, TabLeaderboard } from "@/types/leaderboards.types";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { useWallet } from "@/hooks";
 import { showFormatNumber } from "@/lib/number";
@@ -15,14 +16,14 @@ import ItemMobileLeaderboards from "./item-mobile-leaderboards";
 import NoDataLeaderboards from "./no-data-leaderboards";
 
 interface DataTableLeaderboardsProps {
-  isReferTvl?: boolean;
+  tabLeaderboard: TabLeaderboard;
 }
 
 export default function DataTableLeaderboards({
-  isReferTvl = false,
+  tabLeaderboard,
 }: DataTableLeaderboardsProps) {
   const [tab, setTab] = useState<TabFilterTime>("this-week");
-  const { data, isLoading } = useLeaderboard(isReferTvl, tab);
+  const { data, isLoading } = useLeaderboard(tabLeaderboard, tab);
   const { isMd } = useBreakpoint();
   const { address } = useWallet();
 
@@ -95,7 +96,7 @@ export default function DataTableLeaderboards({
                 <ItemMobileLeaderboards
                   key={item.rank}
                   item={item}
-                  isReferTvl={isReferTvl}
+                  tabLeaderboard={tabLeaderboard}
                 />
               ))}
             </ConditionRenderer>
@@ -110,7 +111,7 @@ export default function DataTableLeaderboards({
             <TableRender
               headerClassName="p-4 h-[70px] border-b"
               data={mapData}
-              columns={Columns(isReferTvl)}
+              columns={Columns(tabLeaderboard)}
               isLoading={isLoading}
               classRowBody="even:bg-[#212121]"
             />

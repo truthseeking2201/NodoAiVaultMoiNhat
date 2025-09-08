@@ -2,22 +2,21 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import * as api from "@/apis/leaderboards";
 import * as type from "@/types/leaderboards.types";
 
-export type TabFilterTime = "this-week" | "last-week";
-
 export const useLeaderboard = (
-  isReferTvl: boolean,
-  filterTime: TabFilterTime
+  tab: type.TabLeaderboard,
+  filterTime: type.TabFilterTime
 ) => {
   return useQuery<type.LeaderboardsData, Error>({
-    queryKey: ["leaderboards", isReferTvl, filterTime],
+    queryKey: ["leaderboards", tab, filterTime],
     queryFn: async () => {
-      const response = isReferTvl
-        ? filterTime === "this-week"
-          ? await api.getTVLLeaderboardThisWeek()
-          : await api.getTVLLeaderboardLastWeek()
-        : filterTime === "this-week"
-        ? await api.getReferredTVLLeaderboardThisWeek()
-        : await api.getReferredTVLLeaderboardLastWeek();
+      const response =
+        tab == "tvl"
+          ? filterTime === "this-week"
+            ? await api.getTVLLeaderboardThisWeek()
+            : await api.getTVLLeaderboardLastWeek()
+          : filterTime === "this-week"
+          ? await api.getReferredTVLLeaderboardThisWeek()
+          : await api.getReferredTVLLeaderboardLastWeek();
       return response as unknown as type.LeaderboardsData;
     },
     enabled: true,

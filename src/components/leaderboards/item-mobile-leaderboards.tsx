@@ -1,13 +1,14 @@
-import { LeaderboardItem, RankCompo, RewardCompo } from "./helper";
+import { LeaderboardItem, RankCompo, RewardCompo, getTitleCol } from "./helper";
 import { RowItem } from "@/components/ui/row-item";
+import { TabLeaderboard } from "@/types/leaderboards.types";
 
 interface ItemMobileLeaderboardsProps {
-  isReferTvl: boolean;
+  tabLeaderboard: TabLeaderboard;
   item: LeaderboardItem;
 }
 export default function ItemMobileLeaderboards({
   item,
-  isReferTvl,
+  tabLeaderboard,
 }: ItemMobileLeaderboardsProps) {
   const classLabel = "text-white/70 font-sans text-[11px]";
   const classValue = "font-mono text-white text-sm";
@@ -47,7 +48,7 @@ export default function ItemMobileLeaderboards({
       <RowItem
         classNameLabel={classLabel}
         classNameValue={classValue}
-        label={isReferTvl ? "REFERRED TVL" : "TVL"}
+        label={getTitleCol(tabLeaderboard)}
       >
         {item.tvl}
       </RowItem>

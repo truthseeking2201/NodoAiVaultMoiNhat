@@ -3,6 +3,7 @@ import Rank1Icon from "@/assets/images/leaderboards/rank-1.png";
 import Rank2Icon from "@/assets/images/leaderboards/rank-2.png";
 import Rank3Icon from "@/assets/images/leaderboards/rank-3.png";
 import { ButtonGradient } from "@/components/ui/button-gradient";
+import { TabLeaderboard } from "@/types/leaderboards.types";
 
 const RANK_ICON = {
   1: Rank1Icon,
@@ -66,12 +67,21 @@ export function RewardCompo({ token }: RewardCompoProps) {
   );
 }
 
+const TITLES_COL = {
+  tvl: "TVL",
+  refer: "REFERRED TVL",
+};
+
+/* eslint-disable react-refresh/only-export-components */
+export function getTitleCol(tab: TabLeaderboard) {
+  return TITLES_COL[tab] || "";
+}
 /**
  *
- * @param isReferTvl
+ * @param tab
  * @returns
  */
-export function Columns(isReferTvl: boolean) {
+export function Columns(tab: TabLeaderboard) {
   return [
     {
       title: "RANK",
@@ -107,7 +117,7 @@ export function Columns(isReferTvl: boolean) {
       classCell: "text-base",
     },
     {
-      title: isReferTvl ? "REFERRED TVL" : "TVL",
+      title: getTitleCol(tab),
       dataIndex: "tvl",
       classTitle: "text-white/70",
       classCell: "text-base",

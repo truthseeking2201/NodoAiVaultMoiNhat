@@ -2,7 +2,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDays } from "lucide-react";
 import { formatDate } from "@/utils/date";
-import { TabFilterTime } from "@/hooks/use-leaderboards";
+import { TabFilterTime } from "@/types/leaderboards.types";
 
 const TABS = [
   { value: "this-week", label: "This Week" },

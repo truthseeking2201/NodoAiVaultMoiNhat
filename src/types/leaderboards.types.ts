@@ -1,3 +1,6 @@
+export type TabFilterTime = "this-week" | "last-week";
+export type TabLeaderboard = "tvl" | "refer";
+
 export type LeaderboardsItemData = {
   tvl_usd: string;
   reward_gems: string;
