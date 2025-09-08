@@ -4,8 +4,9 @@ import useBreakpoint from "@/hooks/use-breakpoint";
 import { useWallet } from "@/hooks";
 import { showFormatNumber } from "@/lib/number";
 import { truncateStringWithSeparator } from "@/utils/helpers";
-import { USDC_CONFIG, XP_CONFIG } from "@/config/coin-config";
+import { USDC_CONFIG, XP_CONFIG, GEMS_CONFIG } from "@/config/coin-config";
 import { LeaderboardItem, Columns } from "./helper";
+import { LeaderboardsItemData } from "@/types/leaderboards.types.ts";
 
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import { TableRender } from "@/components/ui/table-render";
@@ -26,36 +27,32 @@ export default function DataTableLeaderboards({
   const { address } = useWallet();
 
   const mapData = useMemo(() => {
-    // return [];
-    // TODO
-    return data?.map((el: any, idx) => {
-      const rewards = [];
-      if (idx < 10) {
-        rewards.push({
-          image: USDC_CONFIG.image_url,
-          symbol: USDC_CONFIG.symbol,
-          value: showFormatNumber(el.vault_cap / 100),
-        });
-      }
-      rewards.push({
-        image: XP_CONFIG.image_url,
-        symbol: XP_CONFIG.symbol,
-        value: showFormatNumber(el.vault_cap),
-      });
+    return data?.list?.map((el: LeaderboardsItemData, idx) => {
+      const rewardConfigs = [
+        { value: el.reward_usdc, ...USDC_CONFIG },
+        { value: el.reward_xp_shares, ...XP_CONFIG },
+        { value: el.reward_gems, ...GEMS_CONFIG },
+      ];
+
+      const rewards = rewardConfigs
+        .filter((r) => Number(r.value) > 0)
+        .map((r) => ({
+          image: r.image_url,
+          symbol: r.symbol,
+          value: showFormatNumber(r.value),
+        }));
 
       return {
         rank: idx + 1,
         wallet_address: truncateStringWithSeparator(
-          el.vault_address,
+          el.user_wallet,
           13,
           "...",
           6
         ),
-        tvl: showFormatNumber(el.total_value_usd || 0, 2, 2, "$"),
+        tvl: showFormatNumber(el.tvl_usd || 0, 2, 2, "$"),
         rewards,
-        // isYou: address?.toLowerCase() === el?.vault_address?.toLowerCase(),
-        isYou: idx === 1,
-        // isYou: true,
+        isYou: address?.toLowerCase() === el.user_wallet?.toLowerCase(),
       };
     }) as LeaderboardItem[];
   }, [data, address]);
@@ -66,9 +63,9 @@ export default function DataTableLeaderboards({
       <TimeLeaderboards
         tab={tab}
         setTab={setTab}
-        timeFrom="2025-07-18T08:14:34.629Z"
-        timeTo="2025-07-18T08:14:34.629Z"
-        timeLastUpdate="2025-07-18T08:14:34.629Z"
+        timeFrom={data?.isoDatetimeFrom}
+        timeTo={data?.isoDatetimeTo}
+        timeLastUpdate={data?.lastUpdate}
         isLoading={isLoading}
       />
 

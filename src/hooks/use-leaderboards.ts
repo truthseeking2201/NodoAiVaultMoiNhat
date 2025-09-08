@@ -2,7 +2,7 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import * as api from "@/apis/leaderboards";
 import * as type from "@/types/leaderboards.types";
 
-export type TabFilterTime = "this-week" | "that-week";
+export type TabFilterTime = "this-week" | "last-week";
 
 export const useLeaderboard = (
   isReferTvl: boolean,
@@ -11,16 +11,19 @@ export const useLeaderboard = (
   return useQuery<type.LeaderboardsData, Error>({
     queryKey: ["leaderboards", isReferTvl, filterTime],
     queryFn: async () => {
-      let response = null;
-      if (isReferTvl) {
-        response = await api.getTVLLeaderboard({});
-      } else {
-        response = await api.getReferredTVLLeaderboard({});
-      }
+      const response = isReferTvl
+        ? filterTime === "this-week"
+          ? await api.getTVLLeaderboardThisWeek()
+          : await api.getTVLLeaderboardLastWeek()
+        : filterTime === "this-week"
+        ? await api.getReferredTVLLeaderboardThisWeek()
+        : await api.getReferredTVLLeaderboardLastWeek();
       return response as unknown as type.LeaderboardsData;
     },
     enabled: true,
     refetchOnWindowFocus: true,
+    staleTime: filterTime === "last-week" ? Infinity : 0,
+    gcTime: filterTime === "last-week" ? Infinity : 0,
   });
 };
 

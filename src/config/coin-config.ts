@@ -22,6 +22,14 @@ export const XP_CONFIG = {
   decimals: 6,
 };
 
+export const GEMS_CONFIG = {
+  coinType: "",
+  image_url: "/coins/gem.png",
+  display_name: "GEM",
+  symbol: "GEM",
+  decimals: 6,
+};
+
 export const SUI_CONFIG = {
   coinType:
     "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",
