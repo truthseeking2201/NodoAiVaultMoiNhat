@@ -1,4 +1,5 @@
 import { OptionsSelectType } from "@/types/options-select.types.ts";
+import { isThisWeek } from "date-fns";
 
 export const TIME_FILTER = {
   all: "ALL_TIME",
@@ -24,3 +25,26 @@ export const SORT_TYPE = {
   asc: "ASC",
   desc: "DESC",
 };
+
+export const LEADERBOARD_TYPE = {
+  tvl: "TVL",
+  referred: "REFERRED",
+};
+
+export const LEADERBOARD_TYPE_OPTIONS: OptionsSelectType[] = [
+  { value: LEADERBOARD_TYPE.tvl, label: "TVL Leaderboard" },
+  { value: LEADERBOARD_TYPE.referred, label: "Referred TVL Leaderboard" },
+];
+
+export const LEADERBOARD_TIME_FILTER = {
+  thisWeek: "this-week",
+  lastWeek: "last-week",
+};
+
+export const LEADERBOARD_TIME_FILTER_OPTIONS: OptionsSelectType[] = [
+  { value: LEADERBOARD_TIME_FILTER.thisWeek, label: "This week" },
+  {
+    value: LEADERBOARD_TIME_FILTER.lastWeek,
+    label: "Last week",
+  },
+];

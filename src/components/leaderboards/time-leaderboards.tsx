@@ -3,11 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDays } from "lucide-react";
 import { formatDate } from "@/utils/date";
 import { TabFilterTime } from "@/types/leaderboards.types";
-
-const TABS = [
-  { value: "this-week", label: "This Week" },
-  { value: "last-week", label: "Last Week" },
-] satisfies { value: TabFilterTime; label: string }[];
+import { LEADERBOARD_TIME_FILTER_OPTIONS } from "@/config/constants-types.ts";
 
 type Props = {
   tab: string;
@@ -57,7 +53,7 @@ const TimeLeaderboards = ({
         className="max-md:w-full"
       >
         <TabsList className="p-1 flex gap-1 max-md:w-full">
-          {TABS.map((tab) => (
+          {LEADERBOARD_TIME_FILTER_OPTIONS.map((tab) => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}

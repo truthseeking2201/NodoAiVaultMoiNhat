@@ -1,3 +1,4 @@
+import { LEADERBOARD_TIME_FILTER } from "@/config/constants-types.ts";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import * as api from "@/apis/leaderboards";
 import * as type from "@/types/leaderboards.types";
@@ -9,20 +10,17 @@ export const useLeaderboard = (
   return useQuery<type.LeaderboardsData, Error>({
     queryKey: ["leaderboards", tab, filterTime],
     queryFn: async () => {
+      const params = { leaderboard_type: tab };
       const response =
-        tab == "tvl"
-          ? filterTime === "this-week"
-            ? await api.getTVLLeaderboardThisWeek()
-            : await api.getTVLLeaderboardLastWeek()
-          : filterTime === "this-week"
-          ? await api.getReferredTVLLeaderboardThisWeek()
-          : await api.getReferredTVLLeaderboardLastWeek();
+        filterTime === LEADERBOARD_TIME_FILTER.thisWeek
+          ? await api.getLeaderboardThisWeek(params)
+          : api.getLeaderboardLastWeek(params);
       return response as unknown as type.LeaderboardsData;
     },
     enabled: true,
     refetchOnWindowFocus: true,
-    staleTime: filterTime === "last-week" ? Infinity : 0,
-    gcTime: filterTime === "last-week" ? Infinity : 0,
+    staleTime: filterTime === LEADERBOARD_TIME_FILTER.lastWeek ? Infinity : 0,
+    gcTime: filterTime === LEADERBOARD_TIME_FILTER.lastWeek ? Infinity : 0,
   });
 };
 

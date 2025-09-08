@@ -68,8 +68,8 @@ export function RewardCompo({ token }: RewardCompoProps) {
 }
 
 const TITLES_TVL_COL: Record<TabLeaderboard, string> = {
-  tvl: "TVL",
-  refer: "REFERRED TVL",
+  TVL: "TVL",
+  REFERRED: "REFERRED TVL",
 };
 
 /* eslint-disable react-refresh/only-export-components */

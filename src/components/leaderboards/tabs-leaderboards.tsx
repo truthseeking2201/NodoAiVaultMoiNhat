@@ -1,11 +1,7 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { TabLeaderboard } from "@/types/leaderboards.types";
-
-const TABS = [
-  { value: "tvl", label: "TVL Leaderboard" },
-  { value: "refer", label: "Referred TVL Leaderboard" },
-] satisfies { value: TabLeaderboard; label: string }[];
+import { LEADERBOARD_TYPE_OPTIONS } from "@/config/constants-types.ts";
 
 export const TabsLeaderboards = ({
   tab,
@@ -17,7 +13,7 @@ export const TabsLeaderboards = ({
   return (
     <Tabs value={tab} onValueChange={(value: TabLeaderboard) => setTab(value)}>
       <TabsList className="flex gap-1 relative z-10 w-full p-0 bg-black/50 rounded-b-none rounded-t-md md:rounded-t-xl overflow-hidden !border-none">
-        {TABS.map((t) => {
+        {LEADERBOARD_TYPE_OPTIONS.map((t) => {
           const isActive = tab === t.value;
           return (
             <TabsTrigger

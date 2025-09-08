@@ -1,8 +1,16 @@
-export type TabFilterTime = "this-week" | "last-week";
-export type TabLeaderboard = "tvl" | "refer";
+import {
+  LEADERBOARD_TYPE,
+  LEADERBOARD_TIME_FILTER,
+} from "@/config/constants-types.ts";
+
+export type TabLeaderboard =
+  (typeof LEADERBOARD_TYPE)[keyof typeof LEADERBOARD_TYPE];
+export type TabFilterTime =
+  (typeof LEADERBOARD_TIME_FILTER)[keyof typeof LEADERBOARD_TIME_FILTER];
 
 export type LeaderboardsItemData = {
-  tvl_usd: string;
+  tvl_usd?: string;
+  ref_tvl_usd?: string;
   reward_gems: string;
   reward_xp_shares: string;
   reward_usdc: string;

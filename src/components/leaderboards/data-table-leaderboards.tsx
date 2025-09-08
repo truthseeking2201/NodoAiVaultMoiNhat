@@ -51,7 +51,7 @@ export default function DataTableLeaderboards({
           "...",
           6
         ),
-        tvl: showFormatNumber(el.tvl_usd || 0, 2, 2, "$"),
+        tvl: showFormatNumber(el?.tvl_usd || el?.ref_tvl_usd || 0, 2, 2, "$"),
         rewards,
         isYou: address?.toLowerCase() === el.user_wallet?.toLowerCase(),
       };
