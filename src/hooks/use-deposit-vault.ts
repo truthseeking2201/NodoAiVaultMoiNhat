@@ -371,20 +371,22 @@ export const useDepositDualVault = (vaultId: string) => {
         throw new Error("Failed to get signature");
       }
 
+      const tx = new Transaction();
+
       const priceFeedsObjectIds = await getPriceOracle(
         [
           vaultConfig.collateral_price_feed_id,
           coinA.price_feed_id,
           coinB.price_feed_id,
         ],
-        suiClient
+        suiClient,
+        tx
       );
 
       if (!priceFeedsObjectIds[0]) {
         throw new Error("Failed to get oracle price");
       }
 
-      const tx = new Transaction();
       const splitCoinA = await smartSplitCoin(
         tx,
         coinA.coin_type,
