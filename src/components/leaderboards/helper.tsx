@@ -67,14 +67,14 @@ export function RewardCompo({ token }: RewardCompoProps) {
   );
 }
 
-const TITLES_COL = {
+const TITLES_TVL_COL: Record<TabLeaderboard, string> = {
   tvl: "TVL",
   refer: "REFERRED TVL",
 };
 
 /* eslint-disable react-refresh/only-export-components */
-export function getTitleCol(tab: TabLeaderboard) {
-  return TITLES_COL[tab] || "";
+export function getTitleTvlCol(tab: TabLeaderboard) {
+  return TITLES_TVL_COL[tab] || "";
 }
 /**
  *
@@ -117,7 +117,7 @@ export function Columns(tab: TabLeaderboard) {
       classCell: "text-base",
     },
     {
-      title: getTitleCol(tab),
+      title: getTitleTvlCol(tab),
       dataIndex: "tvl",
       classTitle: "text-white/70",
       classCell: "text-base",

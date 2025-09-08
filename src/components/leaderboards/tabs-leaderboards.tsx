@@ -5,7 +5,7 @@ import { TabLeaderboard } from "@/types/leaderboards.types";
 const TABS = [
   { value: "tvl", label: "TVL Leaderboard" },
   { value: "refer", label: "Referred TVL Leaderboard" },
-];
+] satisfies { value: TabLeaderboard; label: string }[];
 
 export const TabsLeaderboards = ({
   tab,

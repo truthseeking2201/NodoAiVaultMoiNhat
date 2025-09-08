@@ -1,4 +1,9 @@
-import { LeaderboardItem, RankCompo, RewardCompo, getTitleCol } from "./helper";
+import {
+  LeaderboardItem,
+  RankCompo,
+  RewardCompo,
+  getTitleTvlCol,
+} from "./helper";
 import { RowItem } from "@/components/ui/row-item";
 import { TabLeaderboard } from "@/types/leaderboards.types";
 
@@ -48,7 +53,7 @@ export default function ItemMobileLeaderboards({
       <RowItem
         classNameLabel={classLabel}
         classNameValue={classValue}
-        label={getTitleCol(tabLeaderboard)}
+        label={getTitleTvlCol(tabLeaderboard)}
       >
         {item.tvl}
       </RowItem>

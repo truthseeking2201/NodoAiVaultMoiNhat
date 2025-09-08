@@ -7,7 +7,7 @@ import { TabFilterTime } from "@/types/leaderboards.types";
 const TABS = [
   { value: "this-week", label: "This Week" },
   { value: "last-week", label: "Last Week" },
-];
+] satisfies { value: TabFilterTime; label: string }[];
 
 type Props = {
   tab: string;
