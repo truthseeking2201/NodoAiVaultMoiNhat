@@ -40,7 +40,6 @@ export const CRITICAL_IMAGES = {
     "/coins/xbtc.png",
     "/coins/ndlp.png",
     "/coins/lbtc.png",
-    "/coins/xsui.png",
     "/coins/wal.png",
     "/coins/stsui.png",
     "/coins/sui.png",
