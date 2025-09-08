@@ -10,6 +10,7 @@ import { MyReferralsDashboardModal } from "@/components/my-referrals/my-referral
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RankCompo } from "./helper";
 import ExternalIcon from "@/assets/icons/external-gradient.svg?react";
+import NewTag from "@/components/ui/new-tag";
 
 function UserRankTVL({ rank, label }: { rank: number; label: string }) {
   return (
@@ -17,9 +18,10 @@ function UserRankTVL({ rank, label }: { rank: number; label: string }) {
       <RankCompo
         rank={rank}
         rankNode={
-          <div className="px-4 py-2 flex items-center justify-center lg:text-lg text-xs font-mono font-semibold text-white shadow-lg rounded-[63px] bg-black [box-shadow:-2px_0_4px_0_rgba(255,255,255,0.75)_inset,2px_0_4px_0_rgba(0,255,251,0.95)_inset,0_-3px_4px_0_#07F_inset,0_3px_4px_0_#B708F6_inset]">
-            {rank ? rank : "--"}
-          </div>
+          <NewTag
+            parentClassName="px-4 py-2 flex items-center justify-center lg:text-lg text-xs font-mono font-semibold text-white shadow-lg rounded-[63px]"
+            text={rank ? String(rank) : "--"}
+          ></NewTag>
         }
       />
       <div className="lg:mt-4 mt-2 flex items-center lg:flex-row flex-col">
@@ -56,9 +58,9 @@ export default function UserRank() {
     const referredTvl = 1;
     return {
       tvl: tvl,
-      tvlRank: 1,
+      tvlRank: 4,
       referredTvl: referredTvl,
-      referredTvlRank: 2,
+      referredTvlRank: 4,
     };
   }, [data]);
 
