@@ -382,25 +382,26 @@ export default function VaultList() {
           <div id="holding-container">
             {holdingShowMode === HOLDING_TYPE[0].value ? (
               <div className="text-white font-medium font-mono text-base">
-                {record.change_24h && record.change_24h.length > 0
-                  ? record.change_24h.map((token, index: number) => (
-                      <div
-                        className="flex items-center gap-1"
-                        key={`${index}-${token.token_symbol}`}
-                      >
-                        <img
-                          src={`coins/${token.token_symbol?.toLowerCase()}.png`}
-                          alt={token.token_name}
-                          className="inline-block w-4 h-4 mr-1"
-                        />
-                        {Number(token.amount) > 0
-                          ? formatNumber(
-                              token.amount,
-                              0,
-                              Number(token.amount) < 1 ? 6 : 2
-                            )
-                          : "--"}
-                        {token?.percent_change && (
+                {record.change_24h && record.change_24h.length > 0 ? (
+                  record.change_24h.map((token, index: number) => (
+                    <div
+                      className="flex items-center gap-1"
+                      key={`${index}-${token.token_symbol}`}
+                    >
+                      <img
+                        src={`coins/${token.token_symbol?.toLowerCase()}.png`}
+                        alt={token.token_name}
+                        className="inline-block w-4 h-4 mr-1"
+                      />
+                      {Number(token.amount) > 0
+                        ? formatNumber(
+                            token.amount,
+                            0,
+                            Number(token.amount) < 1 ? 6 : 2
+                          )
+                        : "--"}
+                      {token?.percent_change && (
+                        <>
                           <span
                             className={cn(
                               `text-sm ml-1`,
@@ -409,13 +410,17 @@ export default function VaultList() {
                                 : "text-red-400"
                             )}
                           >{`(${token.percent_change}%)`}</span>
-                        )}
-                      </div>
-                    ))
-                  : <div className="flex flex-col gap-1 font-mono font-bold text-base">
+                          <span className="text-sm text-white/40">(24h)</span>
+                        </>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col gap-1 font-mono font-bold text-base">
                     <span className="text-white">--</span>
                     <span className="text-green-increase">--</span>
-                  </div>}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-white font-medium font-mono text-base">
