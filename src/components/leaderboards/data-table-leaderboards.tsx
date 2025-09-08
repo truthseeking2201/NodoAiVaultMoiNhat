@@ -1,14 +1,17 @@
 import { useState, useMemo } from "react";
 import { useLeaderboard } from "@/hooks/use-leaderboards";
-import { TabFilterTime, TabLeaderboard } from "@/types/leaderboards.types";
+import {
+  TabFilterTime,
+  TabLeaderboard,
+  LeaderboardsItemData,
+} from "@/types/leaderboards.types";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { useWallet } from "@/hooks";
 import { showFormatNumber } from "@/lib/number";
 import { truncateStringWithSeparator } from "@/utils/helpers";
 import { USDC_CONFIG, XP_CONFIG, GEMS_CONFIG } from "@/config/coin-config";
 import { LeaderboardItem, Columns } from "./helper";
-import { LeaderboardsItemData } from "@/types/leaderboards.types.ts";
-import { LEADERBOARD_TIME_FILTER } from "@/config/constants-types.ts";
+import { LEADERBOARD_TIME_FILTER } from "@/config/constants-types";
 
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import { TableRender } from "@/components/ui/table-render";

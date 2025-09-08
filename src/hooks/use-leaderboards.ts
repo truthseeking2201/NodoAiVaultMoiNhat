@@ -1,4 +1,4 @@
-import { LEADERBOARD_TIME_FILTER } from "@/config/constants-types.ts";
+import { LEADERBOARD_TIME_FILTER } from "@/config/constants-types";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import * as api from "@/apis/leaderboards";
 import * as type from "@/types/leaderboards.types";
@@ -37,11 +37,11 @@ export const useUserLeaderboard = (enabled: boolean) => {
 };
 
 export const useConfigLeaderboard = () => {
-  return useQuery<type.ConfigLeaderboardsData, Error>({
+  return useQuery<type.ConfigLeaderboardsRewards, Error>({
     queryKey: ["config-leaderboards"],
     queryFn: async () => {
-      const response = await api.getConfigLeaderboard();
-      return response as unknown as type.ConfigLeaderboardsData;
+      const response = await api.getConfigRewards();
+      return response as unknown as type.ConfigLeaderboardsRewards;
     },
     enabled: true,
     refetchOnWindowFocus: false,

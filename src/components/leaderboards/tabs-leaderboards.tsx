@@ -1,7 +1,7 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { TabLeaderboard } from "@/types/leaderboards.types";
-import { LEADERBOARD_TYPE_OPTIONS } from "@/config/constants-types.ts";
+import { LEADERBOARD_TYPE_OPTIONS } from "@/config/constants-types";
 
 export const TabsLeaderboards = ({
   tab,

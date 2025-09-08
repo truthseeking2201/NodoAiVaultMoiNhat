@@ -2,10 +2,10 @@ import http from "@/utils/http";
 
 const URLS = {
   leaderboardThisWeek: `/data-management/external/user/leaderboard/this-week-leaderboard`,
+  configRewards: `/data-management/external/user/leaderboard/config-rewards`,
   // TODO
-  leaderboardLastWeek: `/data-management/external/user/leaderboard/this-week-leaderboard`,
+  leaderboardLastWeek: `/data-management/external/user/leaderboard/last-week-leaderboard`,
   userLeaderboard: `/data-management/external/vaults/list`,
-  configLeaderboard: `/data-management/external/vaults/list`,
 };
 
 export const getLeaderboardThisWeek = (params) => {
@@ -21,6 +21,6 @@ export const getUserLeaderboard = (params: any) => {
   });
 };
 
-export const getConfigLeaderboard = () => {
-  return http.get(URLS.configLeaderboard);
+export const getConfigRewards = () => {
+  return http.get(URLS.configRewards);
 };

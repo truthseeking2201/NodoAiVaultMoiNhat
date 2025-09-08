@@ -105,7 +105,7 @@ export default function WithdrawVaultSection({
   const initDataClaim = async () => {
     try {
       const res = await getLatestRequestClaim(address, lpData, configVault);
-      if (dataClaim && !res) {
+      if (dataClaim && dataClaim.isClaim === false && !res) {
         return;
       }
       setDataClaim(res);

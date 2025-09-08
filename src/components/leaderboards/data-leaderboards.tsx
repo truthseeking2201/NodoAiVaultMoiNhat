@@ -3,7 +3,7 @@ import { TabsLeaderboards } from "./tabs-leaderboards";
 import { TabLeaderboard } from "@/types/leaderboards.types";
 import DataTableLeaderboards from "./data-table-leaderboards";
 import ConditionRenderer from "@/components/shared/condition-renderer";
-import { LEADERBOARD_TYPE } from "@/config/constants-types.ts";
+import { LEADERBOARD_TYPE } from "@/config/constants-types";
 
 export default function DataLeaderboards() {
   const [tab, setTab] = useState<TabLeaderboard>(LEADERBOARD_TYPE.tvl);

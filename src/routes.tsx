@@ -6,12 +6,18 @@ import { MainLayout } from "@/components/layout/main-layout";
 import GlobalLoading from "@/components/shared/global-loading";
 
 import Home from "./pages/home";
-import VaultDetail from "./pages/vault-detail";
 import Leaderboards from "./pages/leaderboards";
 
 const NotFound = lazy(() =>
   import("./pages/not-found").catch((e) => {
     console.error("Error loading NotFound:", e);
+    return { default: () => <GlobalLoading /> };
+  })
+);
+
+const VaultDetail = lazy(() =>
+  import("./pages/vault-detail").catch((e) => {
+    console.error("Error loading VaultDetail:", e);
     return { default: () => <GlobalLoading /> };
   })
 );
@@ -43,10 +49,7 @@ const AppRoutes = () => {
           </MainLayout>
         }
       />
-      <Route
-        path="*"
-        element={<NotFound />}
-      />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
