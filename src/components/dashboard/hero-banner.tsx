@@ -164,7 +164,7 @@ const HeroBanner = () => {
                   "linear-gradient(90deg, rgba(255,232,201,0.25) 0%, rgba(249,244,233,0.25) 25%, rgba(227,246,255,0.25) 60%, rgba(201,212,255,0.25) 100%)",
               }}
             >
-              <GradientText>Migration completes at 23:00:00(UTC) on 01 Oct 2025</GradientText>
+              <GradientText>Before 23:59:59 (UTC) 30 Sep 2025</GradientText>
             </div>
           </div>
         ),
