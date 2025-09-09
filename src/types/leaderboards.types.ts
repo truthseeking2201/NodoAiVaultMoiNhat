@@ -29,7 +29,13 @@ export type LeaderboardsData = {
 };
 
 export type UserLeaderboardsData = {
-  rank: number;
+  datetime_from: string;
+  datetime_to: string;
+  user_wallet: string;
+  tvl_usd: string;
+  ref_tvl_usd: string;
+  tvl_ranking: number;
+  referred_ranking: number;
 };
 
 export type RewardEntry = {

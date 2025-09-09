@@ -2,6 +2,7 @@ import { LEADERBOARD_TIME_FILTER } from "@/config/constants-types";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import * as api from "@/apis/leaderboards";
 import * as type from "@/types/leaderboards.types";
+import { useWallet } from "@/hooks";
 
 export const useLeaderboard = (
   tab: type.TabLeaderboard,
@@ -24,14 +25,15 @@ export const useLeaderboard = (
   });
 };
 
-export const useUserLeaderboard = (enabled: boolean) => {
+export const useUserLeaderboard = () => {
+  const { address } = useWallet();
   return useQuery<type.UserLeaderboardsData, Error>({
     queryKey: ["user-leaderboards"],
     queryFn: async () => {
-      const response = await api.getUserLeaderboard({});
+      const response = await api.getUserLeaderboard({ user_wallet: address });
       return response as unknown as type.UserLeaderboardsData;
     },
-    enabled: enabled,
+    enabled: !!address,
     refetchOnWindowFocus: true,
   });
 };
