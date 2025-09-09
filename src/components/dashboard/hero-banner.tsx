@@ -7,6 +7,7 @@ import useBreakpoint from "@/hooks/use-breakpoint";
 import CountUp from "../ui/count-up";
 import GradientText from "../ui/gradient-text";
 import ArrowRightGradient from "@/assets/icons/arrow-right-gradient";
+import { cn } from "@/lib/utils";
 
 type Slide = {
   title: string | React.ReactNode;
@@ -26,7 +27,7 @@ const OutlinedButton = ({
     <GradientOutlinedButton onClick={onClick}>
       <span className="bg-gradient-to-r from-[#FFE8C9] via-[#E3F6FF] to-[#C9D4FF] text-transparent bg-clip-text flex items-center">
         {label}
-        <ArrowRightGradient />
+        <ArrowRightGradient className="md:ml-2 !ml-1" />
       </span>
     </GradientOutlinedButton>
   );
@@ -134,7 +135,7 @@ const HeroBanner = () => {
       {
         title: (
           <div>
-            <GradientText className="text-left md:text-[28px] text-base font-bold md:px-12 px-4 md:py-1 flex items-center justify-left md:flex-wrap flex-nowrap">
+            <GradientText className="text-left md:text-[28px] text-base font-bold md:px-12 px-4 md:py-1 flex items-center justify-left md:flex-wrap flex-nowrap tracking-[-0.9px]">
               <span>Migrate your</span>
               <img
                 src="/coins/xp.png"
@@ -149,7 +150,7 @@ const HeroBanner = () => {
               />
               <span>GEMs to SUI</span>
             </GradientText>
-            <GradientText className="text-left md:text-[28px] text-base font-bold md:px-12 px-4 md:py-1 flex items-center justify-left">
+            <GradientText className="text-left md:text-[28px] text-base font-bold md:px-12 px-4 md:py-1 pt-2 flex items-center justify-left">
               Keep the upside
             </GradientText>
           </div>
@@ -157,13 +158,13 @@ const HeroBanner = () => {
         description: (
           <div className="flex py-2 md:w-fit w-full md:px-12 px-4">
             <div
-              className="px-4 py-1 font-bold text-base md:text-[28px] leading-[36px] tracking-[-0.9px] flex items-center"
+              className="md:px-4 px-3 py-1 font-bold text-base md:text-[28px] md:leading-[36px] md:tracking-[-0.9px] flex items-center"
               style={{
                 background:
                   "linear-gradient(90deg, rgba(255,232,201,0.25) 0%, rgba(249,244,233,0.25) 25%, rgba(227,246,255,0.25) 60%, rgba(201,212,255,0.25) 100%)",
               }}
             >
-              <GradientText>Before 23:59:59 (UTC) 30 Sep 2025</GradientText>
+              <GradientText>Migration completes at 23:00:00(UTC) on 01 Oct 2025</GradientText>
             </div>
           </div>
         ),
@@ -211,7 +212,7 @@ const HeroBanner = () => {
 
   return (
     <section
-      className="relative w-full h-[210px] md:h-[210px] flex items-center overflow-hidden rounded-xl mb-12"
+      className="relative w-full h-[210px] md:h-[210px] flex items-center overflow-hidden md:rounded-xl rounded-none mb-12 "
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -221,15 +222,22 @@ const HeroBanner = () => {
         alt={
           active === 0
             ? "NODO AI Vaults Banner"
-            : "Genesis Vault Campaign Banner"
+            : "Migrate your XP Shares and GEMs to SUI"
         }
-        className="absolute inset-0 w-full h-full object-cover rounded-xl z-0"
+        className="absolute inset-0 w-full h-full object-cover md:rounded-xl rounded-none z-0"
         width={1720}
         height={210}
         loading="eager"
         {...{ fetchpriority: "high" }}
       />
-      <div className="relative z-20 flex flex-col justify-center h-full text-left max-w-[1000px] md:px-8">
+      <div
+        className={cn(
+          "relative z-20 h-full text-left max-w-[1000px] md:px-8 w-full",
+          active === 1
+            ? "md:flex md:flex-col md:justify-center block md:mt-0 mt-4"
+            : "flex flex-col justify-center"
+        )}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={active}

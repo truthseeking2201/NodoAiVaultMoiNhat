@@ -1,6 +1,6 @@
-const ArrowRightGradient = () => (
+const ArrowRightGradient = ({ className }: { className?: string }) => (
   <svg
-    className="inline ml-2 w-5 h-5"
+    className={`inline ml-2 w-5 h-5 ${className}`}
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
