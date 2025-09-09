@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import { AppHeader } from "./app-header";
 import { AppFooter } from "./app-footer";
+import { MobileNavigation } from "./app-mobile-navigation";
 import { useRibbon } from "@/hooks/use-ribbon";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +12,7 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const { isMd } = useBreakpoint();
+  const { isMd, isMobile } = useBreakpoint();
   const [visibleRibbon] = useRibbon();
 
   return (
@@ -37,6 +38,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             <div>
               {children}
               <AppFooter />
+              {isMobile && <MobileNavigation />}
             </div>
           </div>
         </motion.div>

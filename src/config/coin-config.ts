@@ -14,6 +14,22 @@ export const USDC_CONFIG = {
   decimals: 6,
 };
 
+export const XP_CONFIG = {
+  coinType: "",
+  image_url: "/coins/xp.png",
+  display_name: "XP Shares",
+  symbol: "XP Shares",
+  decimals: 6,
+};
+
+export const GEMS_CONFIG = {
+  coinType: "",
+  image_url: "/coins/gem.png",
+  display_name: "GEM",
+  symbol: "GEM",
+  decimals: 6,
+};
+
 export const SUI_CONFIG = {
   coinType:
     "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",
@@ -76,6 +92,11 @@ export const COIN_TYPES_CONFIG = {
       id: "0x9d297676e7a4b771ab023291377b2adfaa4938fb9080b8d12430e4b108b836a9::xaum::XAUM",
       display_name: "XAUM",
       image_url: "/coins/xaum.png",
+    },
+    {
+      id: "0xf16e6b723f242ec745dfd7634ad072c42d5c1d9ac9d62a39c381303eaa57693a::fdusd::FDUSD",
+      display_name: "FDUSD",
+      image_url: "/coins/fdusd.png",
     },
     // TODO: add more collateral tokens here
   ],

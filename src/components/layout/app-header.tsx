@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { PATH_ROUTER } from "@/config/router";
 import {
   Drawer,
   DrawerTitle,
@@ -9,12 +10,11 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ArrowUpRight, ArrowRight } from "lucide-react";
 import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 import { motion } from "framer-motion";
-import { ArrowUpRight, ArrowRight } from "lucide-react";
 import { useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import ReferralTooltip from "../my-referrals/referral-tooltip";
 
 import Icon from "@/components/icon";
@@ -30,7 +30,12 @@ const pageRoutes = [
   {
     icon: "Vault",
     label: "Vaults",
-    path: "/",
+    path: PATH_ROUTER.VAULTS,
+  },
+  {
+    icon: "Leaderboards",
+    label: "Leaderboards",
+    path: PATH_ROUTER.LEADERBOARDS,
   },
   // {
   //   icon: "Dashboard",
@@ -53,16 +58,13 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
   return (
     <div
       className={cn(
-        "container flex items-center justify-between",
+        "container flex items-center justify-between max-lg:px-4",
         visibleRibbon ? "pt-4" : "pt-0"
       )}
     >
       {/* Left side */}
       <div className="flex items-center gap-6 cursor-pointer">
-        <div
-          className="relative"
-          onClick={() => navigate("/")}
-        >
+        <div className="relative" onClick={() => navigate("/")}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -77,33 +79,38 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
         </div>
         <div>
           <motion.div
-            className="flex items-center gap-4"
+            className="flex items-center gap-4 max-lg:gap-1"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
             {pageRoutes.map((route) => (
-              <Link
-                key={route.label}
+              <NavLink
+                key={route.path}
                 to={route.path}
-                className={`flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 bg-white/10 text-white`}
+                className={({ isActive }) =>
+                  `flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 text-white ${
+                    isActive
+                      ? "opacity-100 font-medium bg-white/10"
+                      : "opacity-50 font-normal"
+                  }`
+                }
               >
                 <Icon
                   name={route.icon}
                   className="h-4 w-4"
                   color="currentColor"
                 />
-
-                <span className="font-medium text-sm">{route.label}</span>
-              </Link>
+                <span className="text-sm">{route.label}</span>
+              </NavLink>
             ))}
           </motion.div>
         </div>
       </div>
       {/* Right side */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center lg:gap-4">
         <motion.div
-          className="flex items-center gap-4"
+          className="flex items-center lg:gap-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
@@ -111,7 +118,7 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
           <ReferralTooltip dataRefer={dataRefer}>
             <Button
               variant="link"
-              className="text-white flex items-center gap-2 text !no-underline hover:text-white/80"
+              className="text-white flex items-center gap-2 text !no-underline hover:text-white/80 px-2 lg:px-4"
               disabled={!dataRefer.referCode}
             >
               My Referral
@@ -119,7 +126,7 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
           </ReferralTooltip>
           <Button
             variant="link"
-            className="!no-underline hover:text-white/80"
+            className="!no-underline hover:text-white/80 px-2 lg:px-4"
             onClick={() => {
               window.open("https://docs.nodo.xyz", "_blank");
             }}
@@ -157,10 +164,7 @@ const MobileHeader = ({ dataRefer }: HeaderProps) => {
             <Menu className="w-7 h-7 text-white" />
           </Button>
           {/* Logo */}
-          <div
-            className="relative"
-            onClick={() => navigate("/")}
-          >
+          <div className="relative" onClick={() => navigate("/")}>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -177,11 +181,7 @@ const MobileHeader = ({ dataRefer }: HeaderProps) => {
         {/* Right: Connect Wallet button */}
         <ConnectWalletButton />
       </div>
-      <Drawer
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
-        direction="top"
-      >
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} direction="top">
         <DrawerContent
           fullWidth
           className="bg-black shadow-lg p-6 rounded-none"
