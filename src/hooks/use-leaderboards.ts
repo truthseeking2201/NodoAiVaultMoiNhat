@@ -21,8 +21,8 @@ export const useLeaderboard = (
     enabled: true,
     refetchOnWindowFocus: true,
     staleTime:
-      filterTime === LEADERBOARD_TIME_FILTER.lastWeek ? Infinity : 600000,
-    gcTime: filterTime === LEADERBOARD_TIME_FILTER.lastWeek ? Infinity : 600000,
+      filterTime === LEADERBOARD_TIME_FILTER.lastWeek ? Infinity : 300000,
+    gcTime: filterTime === LEADERBOARD_TIME_FILTER.lastWeek ? Infinity : 300000,
   });
 };
 
