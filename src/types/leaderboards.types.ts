@@ -1,7 +1,7 @@
 import {
   LEADERBOARD_TYPE,
   LEADERBOARD_TIME_FILTER,
-} from "@/config/constants-types.ts";
+} from "@/config/constants-types";
 
 export type TabLeaderboard =
   (typeof LEADERBOARD_TYPE)[keyof typeof LEADERBOARD_TYPE];
@@ -32,6 +32,26 @@ export type UserLeaderboardsData = {
   rank: number;
 };
 
-export type ConfigLeaderboardsData = {
-  rank: number;
+export type RewardEntry = {
+  reward_gems: number;
+  reward_usdc: number;
+  reward_xp_shares: number;
+};
+export type Rankings = Record<string, RewardEntry>;
+export type Requirements = {
+  min_tvl_usd?: number;
+  min_ref_tvl_usd?: number;
+};
+export type RankingWeight = {
+  by_tvl_usd?: number;
+  by_ref_tvl_usd?: number;
+};
+export type ConfigRewards = {
+  rankings: Rankings;
+  requirements: Requirements;
+  ranking_weight: RankingWeight;
+};
+export type ConfigLeaderboardsRewards = {
+  tvl_config_rewards: ConfigRewards;
+  referred_config_rewards: ConfigRewards;
 };

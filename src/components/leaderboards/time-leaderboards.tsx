@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarDays } from "lucide-react";
 import { formatDate } from "@/utils/date";
 import { TabFilterTime } from "@/types/leaderboards.types";
-import { LEADERBOARD_TIME_FILTER_OPTIONS } from "@/config/constants-types.ts";
+import { LEADERBOARD_TIME_FILTER_OPTIONS } from "@/config/constants-types";
 
 type Props = {
   tab: string;
