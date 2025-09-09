@@ -30,7 +30,7 @@ const Banner = () => {
           image: r.image_url,
           symbol: r.symbol,
           value: r.value,
-          fromValue: Math.max(r.value - 100, 0),
+          fromValue: Math.max(r.value - 50, 0),
         }));
     }
     return _prize;
@@ -82,7 +82,7 @@ const Banner = () => {
                       <CountUp
                         from={el.fromValue}
                         to={el.value}
-                        duration={3}
+                        duration={5}
                         delay={0}
                         separator=","
                       />{" "}

@@ -3,14 +3,14 @@ import http from "@/utils/http";
 const URLS = {
   leaderboardThisWeek: `/data-management/external/user/leaderboard/this-week-leaderboard`,
   configRewards: `/data-management/external/user/leaderboard/config-rewards`,
-  // TODO
   leaderboardLastWeek: `/data-management/external/user/leaderboard/last-week-leaderboard`,
-  userLeaderboard: `/data-management/external/vaults/list`,
+  userLeaderboard: `/data-management/external/user/leaderboard/info`,
 };
 
 export const getLeaderboardThisWeek = (params) => {
   return http.get(URLS.leaderboardThisWeek, { params });
 };
+
 export const getLeaderboardLastWeek = (params) => {
   return http.get(URLS.leaderboardLastWeek, { params });
 };
