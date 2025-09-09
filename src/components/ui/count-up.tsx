@@ -22,7 +22,7 @@ export default function CountUp({
   duration = 2,
   className = "",
   startWhen = true,
-  separator = "",
+  separator = ",",
   onStart,
   onEnd,
 }: CountUpProps) {
@@ -79,6 +79,24 @@ export default function CountUp({
         clearTimeout(timeoutId);
         clearTimeout(durationTimeoutId);
       };
+    } else if (!startWhen) {
+      if (ref.current) {
+        const hasDecimals = maxDecimals > 0;
+
+        const options: Intl.NumberFormatOptions = {
+          useGrouping: !!separator,
+          minimumFractionDigits: hasDecimals ? maxDecimals : 0,
+          maximumFractionDigits: hasDecimals ? maxDecimals : 0,
+        };
+
+        const formattedNumber = Intl.NumberFormat("en-US", options).format(
+          direction === "down" ? from : to
+        );
+
+        ref.current.textContent = separator
+          ? formattedNumber.replace(/,/g, separator)
+          : formattedNumber;
+      }
     }
   }, [
     isInView,
@@ -91,6 +109,8 @@ export default function CountUp({
     onStart,
     onEnd,
     duration,
+    maxDecimals,
+    separator,
   ]);
 
   useEffect(() => {

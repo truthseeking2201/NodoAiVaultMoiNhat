@@ -8,7 +8,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import HeroBanner from "@/components/dashboard/hero-banner-simple";
+import HeroBanner from "@/components/dashboard/hero-banner";
 
 export default function NodoAIVaults() {
   const { openConnectWalletDialog } = useWallet();
@@ -27,13 +27,10 @@ export default function NodoAIVaults() {
 
   return (
     <>
-      {!isMd && <HeroBanner />}
       <PageContainer className={`${isMd ? "py-8" : "py-6"}`}>
-        {isMd && (
-          <Suspense fallback={<Skeleton className="h-64 w-full" />}>
-            <HeroBanner />
-          </Suspense>
-        )}
+        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+          <HeroBanner />
+        </Suspense>
 
         <VaultList />
       </PageContainer>
