@@ -158,7 +158,7 @@ const HeroBanner = () => {
         description: (
           <div className="flex py-2 md:w-fit w-full md:px-12 px-4">
             <div
-              className="md:px-4 px-3 py-1 font-bold text-base md:text-[28px] md:leading-[36px] md:tracking-[-0.9px] flex items-center"
+              className="md:px-4 px-3 md:py-2 py-1 font-bold text-base flex items-center"
               style={{
                 background:
                   "linear-gradient(90deg, rgba(255,232,201,0.25) 0%, rgba(249,244,233,0.25) 25%, rgba(227,246,255,0.25) 60%, rgba(201,212,255,0.25) 100%)",
