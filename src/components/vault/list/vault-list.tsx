@@ -17,7 +17,10 @@ import { cn } from "@/lib/utils";
 import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
 import { formatPercentage } from "@/lib/utils";
 import { formatNumber, showFormatNumber } from "@/lib/number";
-import { DepositVaultConfig, UserHoldingTokens } from "@/types/vault-config.types";
+import {
+  DepositVaultConfig,
+  UserHoldingTokens,
+} from "@/types/vault-config.types";
 import { calculateUserHoldings } from "@/utils/helpers";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -260,7 +263,7 @@ export default function VaultList() {
           />
         ),
         dataIndex: "vault_name",
-        classCell: "py-6",
+        classCell: "py-6 h-[79px]",
         classTitle: "text-white/80 text-left",
         render: (_, record: VaultItemData) => <VaultItem item={record} />,
       },

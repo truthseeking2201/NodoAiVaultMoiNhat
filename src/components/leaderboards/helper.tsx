@@ -87,6 +87,7 @@ export function Columns(tab: TabLeaderboard) {
       title: "RANK",
       dataIndex: "rank",
       classTitle: "text-white/70",
+      classCell: "h-[65px]",
       render: (_, record: LeaderboardItem) => (
         <div className="flex items-center gap-2">
           <RankCompo

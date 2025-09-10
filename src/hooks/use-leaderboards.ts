@@ -20,8 +20,9 @@ export const useLeaderboard = (
     },
     enabled: true,
     refetchOnWindowFocus: true,
-    staleTime: filterTime === LEADERBOARD_TIME_FILTER.lastWeek ? Infinity : 0,
-    gcTime: filterTime === LEADERBOARD_TIME_FILTER.lastWeek ? Infinity : 0,
+    staleTime:
+      filterTime === LEADERBOARD_TIME_FILTER.lastWeek ? Infinity : 300000,
+    gcTime: filterTime === LEADERBOARD_TIME_FILTER.lastWeek ? Infinity : 300000,
   });
 };
 
