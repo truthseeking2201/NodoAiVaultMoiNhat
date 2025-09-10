@@ -18,7 +18,7 @@ import BigNumber from "bignumber.js";
 import { Buffer } from "buffer";
 import { useGetVaultConfig, useVaultBasicDetails } from "./use-vault";
 import { useWallet } from "./use-wallet";
-import { logger } from "@/utils/logger";
+import { captureSentryError, logger } from "@/utils/logger";
 import { useQuery } from "@tanstack/react-query";
 import { EstimateDualDepositToken } from "@/types/deposit-token.types";
 import { useSplitCoin } from "./use-split-coin";
@@ -288,6 +288,11 @@ export const useDepositVault = (vaultId: string) => {
       return result;
     } catch (error) {
       console.error("Error in deposit:", error);
+      let err = error;
+      if (error instanceof Error) {
+        err = new Error("Single deposit error: " + error.message);
+      }
+      captureSentryError(err, address);
       throw error;
     }
   };
@@ -362,6 +367,10 @@ export const useDepositDualVault = (vaultId: string) => {
 
       if (!packageId) {
         throw new Error("No package id");
+      }
+
+      if (!coinA.price_feed_id || !coinB.price_feed_id) {
+        throw new Error("No price feed id");
       }
 
       await validateDepositGasFee(suiClient, address);
@@ -528,6 +537,11 @@ export const useDepositDualVault = (vaultId: string) => {
       return result;
     } catch (error) {
       console.error("Error in deposit dual:", error);
+      let err = error;
+      if (error instanceof Error) {
+        err = new Error("Dual deposit error: " + error.message);
+      }
+      captureSentryError(err, address);
       throw error;
     }
   };

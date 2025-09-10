@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { PATH_ROUTER } from "@/config/router";
 import {
   Drawer,
   DrawerTitle,
@@ -11,20 +10,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { ConnectWalletButton } from "@/components/wallet/connect-wallet-button";
 import { Menu, X, ArrowUpRight, ArrowRight } from "lucide-react";
-import { useWhitelistWallet } from "@/hooks/use-whitelist-wallet";
 import { motion } from "framer-motion";
-import { useMemo } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import ReferralTooltip from "../my-referrals/referral-tooltip";
-
 import Icon from "@/components/icon";
-import { useScrollbarWidth } from "@/hooks/use-scrollbar-width";
-import { useBreakpoint } from "@/hooks/use-breakpoint";
-import { ReferralContent } from "@/components/my-referrals/referral-tooltip";
-import { useWallet } from "@/hooks";
+import ReferralTooltip from "@/components/my-referrals/referral-tooltip";
+import { ReferralContent } from "@/components/my-referrals/referral-content.tsx";
 import { Ribbon } from "@/components/shared/ribbon";
-import { cn } from "@/lib/utils";
+import { NavLink, useNavigate } from "react-router-dom";
+
+import { PATH_ROUTER } from "@/config/router";
+import { useBreakpoint } from "@/hooks/use-breakpoint";
 import { useRibbon } from "@/hooks/use-ribbon";
+import { useWallet, useWhitelistWallet } from "@/hooks";
+import { cn } from "@/lib/utils";
 
 const pageRoutes = [
   {
@@ -44,17 +41,10 @@ const pageRoutes = [
   // },
 ] as const;
 
-type HeaderProps = {
-  dataRefer: {
-    referCode: string | null;
-    referLinkCode: string;
-    referTotal: number | null;
-  };
-};
-
-const DesktopHeader = ({ dataRefer }: HeaderProps) => {
+const DesktopHeader = () => {
   const navigate = useNavigate();
   const [visibleRibbon] = useRibbon();
+  const { isAuthenticated } = useWallet();
   return (
     <div
       className={cn(
@@ -89,7 +79,7 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
                 key={route.path}
                 to={route.path}
                 className={({ isActive }) =>
-                  `flex items-center gap-2 p-2 rounded-lg transition-colors duration-200 text-white ${
+                  `flex items-center gap-2 p-2 rounded-lg transition-all  duration-200 text-white hover:opacity-100 ${
                     isActive
                       ? "opacity-100 font-medium bg-white/10"
                       : "opacity-50 font-normal"
@@ -115,11 +105,11 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <ReferralTooltip dataRefer={dataRefer}>
+          <ReferralTooltip>
             <Button
               variant="link"
               className="text-white flex items-center gap-2 text !no-underline hover:text-white/80 px-2 lg:px-4"
-              disabled={!dataRefer.referCode}
+              disabled={!isAuthenticated}
             >
               My Referral
             </Button>
@@ -141,11 +131,9 @@ const DesktopHeader = ({ dataRefer }: HeaderProps) => {
   );
 };
 
-const MobileHeader = ({ dataRefer }: HeaderProps) => {
+const MobileHeader = () => {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"code" | "link">("code");
-  const [openModalRefer, setOpenModalRefer] = useState(false);
   const { isAuthenticated } = useWallet();
 
   return (
@@ -215,15 +203,7 @@ const MobileHeader = ({ dataRefer }: HeaderProps) => {
                 <div className=" text-[#A6A6B0] font-sans text-base font-medium">
                   My Referral
                 </div>
-                <div className="bg-[#1A1B21] rounded-md mt-2">
-                  <ReferralContent
-                    dataRefer={dataRefer}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    setOpenModalRefer={setOpenModalRefer}
-                    openModalRefer={openModalRefer}
-                  />
-                </div>
+                <ReferralContent className="bg-[#1A1B21] rounded-md mt-2 border border-white/10" />
               </>
             )}
 
@@ -243,17 +223,6 @@ const MobileHeader = ({ dataRefer }: HeaderProps) => {
 };
 
 export function AppHeader() {
-  const scrollbarWidth = useScrollbarWidth();
-  const { walletDetails } = useWhitelistWallet();
-  const dataRefer = useMemo(() => {
-    const referCode = walletDetails?.invite_code?.code;
-    const href = window.location?.origin;
-    return {
-      referCode: referCode,
-      referLinkCode: `${href}?invite-ref=${referCode}`,
-      referTotal: walletDetails?.total_referrals,
-    };
-  }, [walletDetails]);
   const { isMobile } = useBreakpoint();
   const [visibleRibbon] = useRibbon();
 
@@ -286,11 +255,7 @@ export function AppHeader() {
         />
       </div>
       {/* Main header content */}
-      {isMobile ? (
-        <MobileHeader dataRefer={dataRefer} />
-      ) : (
-        <DesktopHeader dataRefer={dataRefer} />
-      )}
+      {isMobile ? <MobileHeader /> : <DesktopHeader />}
     </header>
   );
 }

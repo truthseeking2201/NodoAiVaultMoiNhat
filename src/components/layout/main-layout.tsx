@@ -33,7 +33,10 @@ export function MainLayout({ children }: MainLayoutProps) {
               "flex-1 overflow-y-auto ",
               visibleRibbon ? (isMd ? "pt-[122px]" : "pt-[93px]") : "pt-[70px]"
             )}
-            style={{ height: "calc(100vh - 77px)" }}
+            style={{
+              height: "calc(100vh - 77px)",
+              scrollbarWidth: `${isMd ? "auto" : "none"}`,
+            }}
           >
             <div>
               {children}
