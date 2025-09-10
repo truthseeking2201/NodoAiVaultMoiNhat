@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import HeroBannerImage1 from "@/assets/images/dashboard/hero-banner-1.png";
-import HeroBannerImage2 from "@/assets/images/dashboard/hero-banner-2.png";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { GradientOutlinedButton } from "@/components/ui/gradient-outlined-button";
-import { useWallet } from "@/hooks/use-wallet";
+import useBreakpoint from "@/hooks/use-breakpoint";
+import CountUp from "../ui/count-up";
+import GradientText from "../ui/gradient-text";
+import ArrowRightGradient from "@/assets/icons/arrow-right-gradient";
+import { cn } from "@/lib/utils";
 
 type Slide = {
   title: string | React.ReactNode;
@@ -14,145 +16,203 @@ type Slide = {
   content?: React.ReactNode;
 };
 
-const ConnectWalletButton = () => {
-  const { openConnectWalletDialog } = useWallet();
+const OutlinedButton = ({
+  onClick,
+  label = "Read More",
+}: {
+  onClick: () => void;
+  label?: string;
+}) => {
   return (
-    <GradientOutlinedButton onClick={openConnectWalletDialog}>
+    <GradientOutlinedButton onClick={onClick}>
       <span className="bg-gradient-to-r from-[#FFE8C9] via-[#E3F6FF] to-[#C9D4FF] text-transparent bg-clip-text flex items-center">
-        Connect Wallet
+        {label}
+        <ArrowRightGradient className="md:ml-2 !ml-1" />
       </span>
     </GradientOutlinedButton>
   );
 };
 
-const slides: Slide[] = [
-  {
-    title: (
-      <div className="bg-clip-text text-transparent bg-[linear-gradient(90deg,_#FFE8C9_0%,_#F9F4E9_25%,_#E3F6FF_60%,_#C9D4FF_100%)] text-center font-dm-sans text-[32px] font-bold">
-        NODO AI Vaults Are Live!
-      </div>
-    ),
-    description: (
-      <div className="text-white text-sm">
-        Connect your wallet now to unlock XP Shares Airdrops
-      </div>
-    ),
-    image: HeroBannerImage1,
-    content: (
-      <div className="mt-6 w-fit">
-        <ConnectWalletButton />
-      </div>
-    ),
-  },
-  {
-    title: (
-      <div className="bg-clip-text text-transparent bg-[linear-gradient(90deg,_#FFE8C9_0%,_#F9F4E9_25%,_#E3F6FF_60%,_#C9D4FF_100%)] text-center font-dm-sans text-[32px] font-bold">
-        Claim your share in NODO’s Genesis vault campaign
-      </div>
-    ),
-    description: (
-      <div
-        className="text-white text-center font-dm-sans text-[32px] font-bold leading-[36.258px] tracking-[-0.906px] flex items-center justify-center py-1 w-fit px-10 ml-[-40px]"
-        style={{
-          background:
-            "linear-gradient(90deg, rgba(255, 0, 166, 0.00) 0%, rgba(255, 0, 200, 0.60) 12%, rgba(255, 0, 255, 0.60) 25%, rgba(196, 0, 255, 0.60) 38%, rgba(74, 40, 255, 0.60) 50%, rgba(0, 47, 255, 0.60) 62%, rgba(0, 120, 255, 0.60) 75%, rgba(0, 196, 255, 0.60) 88%, rgba(0, 255, 255, 0.00) 100%)",
-        }}
-      >
-        <img
-          src="/coins/usdc.png"
-          alt="USDC"
-          className="h-8 w-auto"
-          width="32"
-          height="32"
-        />
-        <span className="ml-2 mr-4">10,000 USDC </span>
-        <span className="mr-4">+ </span>
-        <img
-          src="/coins/xp.png"
-          alt="XP"
-          className="h-8 w-auto"
-          width="32"
-          height="32"
-        />
-        <span className="ml-2">1,500,000,000 XP</span>
-      </div>
-    ),
-    image: HeroBannerImage2,
-    content: (
-      <div className="mt-6 w-fit">
-        <GradientOutlinedButton
-          onClick={() => (window.location.href = "/vaults")}
-        >
-          <span className="bg-gradient-to-r from-[#FFE8C9] via-[#E3F6FF] to-[#C9D4FF] text-transparent bg-clip-text flex items-center">
-            Read More
-            <svg
-              className="inline ml-2 w-5 h-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient
-                  id="arrow-gradient"
-                  x1="0"
-                  y1="12"
-                  x2="24"
-                  y2="12"
-                  gradientUnits="userSpaceOnUse"
-                >
-                  <stop stopColor="#FFE8C9" />
-                  <stop offset="0.25" stopColor="#F9F4E9" />
-                  <stop offset="0.6" stopColor="#E3F6FF" />
-                  <stop offset="1" stopColor="#C9D4FF" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M5 12h14M13 6l6 6-6 6"
-                stroke="url(#arrow-gradient)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-        </GradientOutlinedButton>
-      </div>
-    ),
-  },
-];
-
-const HeroBanner = React.memo(() => {
+const HeroBanner = () => {
   const [active, setActive] = useState(0);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
+  const [firstCount, setFirstCount] = useState(true);
+  const { isMobile } = useBreakpoint();
+  const handleReadMore = useCallback(() => {
+    window.open(
+      "https://docs.nodo.xyz/public/nodo-campaigns/nodo-ai-vault-genesis-yield-campaign-phase-1",
+      "_blank"
+    );
+  }, []);
+
+  const handleMigrate = useCallback(() => {
+    window.open(
+      "https://docs.nodo.xyz/public/nodo-campaigns/move-your-xp-shares-and-gems-to-sui",
+      "_blank"
+    );
+  }, []);
+
+  const slides: Slide[] = useMemo(
+    () => [
+      {
+        title: (
+          <GradientText className="text-left md:text-[28px] text-base font-bold md:px-12 px-4 md:py-1">
+            Claim your share in {isMobile && <br />} NODO’s Genesis vault
+            campaign
+          </GradientText>
+        ),
+        description: (
+          <div
+            className="text-white font-dm-sans text-[28px] font-bold leading-[36px] tracking-[-0.9px] flex md:flex-row flex-col items-center py-2 md:w-fit w-full md:px-10 px-4 md:my-4"
+            style={{
+              background: isMobile
+                ? "none"
+                : "linear-gradient(90deg, rgba(255, 0, 166, 0.00) 0%, rgba(255, 0, 200, 0.60) 12%, rgba(255, 0, 255, 0.60) 25%, rgba(196, 0, 255, 0.60) 38%, rgba(74, 40, 255, 0.60) 50%, rgba(0, 47, 255, 0.60) 62%, rgba(0, 120, 255, 0.60) 75%, rgba(0, 196, 255, 0.60) 88%, rgba(0, 255, 255, 0.00) 100%)",
+            }}
+          >
+            <div className="flex items-center justify-start w-full md:w-fit">
+              <img
+                src="/coins/usdc.png"
+                alt="USDC"
+                className="md:h-8 h-4 w-auto md:ml-2"
+                width={isMobile ? 16 : 32}
+                height={isMobile ? 16 : 32}
+              />
+              <div className="ml-2 mr-4 flex gap-2 items-center md:text-[32px] text-base  ">
+                <div className="md:w-[105px] w-[45px]">
+                  <CountUp
+                    from={9940}
+                    to={10000}
+                    duration={2}
+                    delay={0}
+                    separator=","
+                    startWhen={firstCount}
+                    onEnd={() => setFirstCount(false)}
+                  />
+                </div>{" "}
+                USDC
+              </div>
+            </div>
+            {!isMobile && (
+              <span className="mr-4 md:text-[32px] text-base">+ </span>
+            )}
+            <div className="flex items-center gap-2 justify-start w-full md:w-fit">
+              <img
+                src="/coins/xp.png"
+                alt="XP"
+                className="md:h-8 h-4 w-auto"
+                width={isMobile ? 16 : 32}
+                height={isMobile ? 16 : 32}
+              />
+              <div className="flex gap-2 items-center md:text-[32px] text-base ">
+                <div className="md:w-[230px] w-[105px]">
+                  <CountUp
+                    from={1999999940}
+                    to={2000000000}
+                    duration={2}
+                    delay={0}
+                    separator=","
+                    startWhen={firstCount}
+                  />
+                </div>{" "}
+                XP Shares
+              </div>
+            </div>
+          </div>
+        ),
+        image: `${
+          isMobile
+            ? "/banners/hero-banner-mobile.png"
+            : "/banners/hero-banner.png"
+        }`,
+        content: (
+          <div className="w-fit md:px-12 px-4">
+            <OutlinedButton onClick={handleReadMore} />
+          </div>
+        ),
+      },
+      {
+        title: (
+          <div>
+            <GradientText className="text-left md:text-[28px] text-base font-bold md:px-12 px-4 md:py-1 flex items-center justify-left md:flex-wrap flex-nowrap tracking-[-0.9px]">
+              <span>Migrate your</span>
+              <img
+                src="/coins/xp.png"
+                alt="xp"
+                className="inline md:h-6 h-4 w-auto md:mx-2 mx-1"
+              />
+              <span>XP Shares & </span>
+              <img
+                src="/coins/gem.png"
+                alt="gem"
+                className="inline md:h-6 h-4 w-auto md:mx-2 mx-1"
+              />
+              <span>GEMs to SUI</span>
+            </GradientText>
+            <GradientText className="text-left md:text-[28px] text-base font-bold md:px-12 px-4 md:py-1 pt-2 flex items-center justify-left">
+              Keep the upside
+            </GradientText>
+          </div>
+        ),
+        description: (
+          <div className="flex py-2 md:w-fit w-full md:px-12 px-4">
+            <div
+              className="md:px-4 px-3 md:py-2 py-1 font-bold text-base flex items-center"
+              style={{
+                background:
+                  "linear-gradient(90deg, rgba(255,232,201,0.25) 0%, rgba(249,244,233,0.25) 25%, rgba(227,246,255,0.25) 60%, rgba(201,212,255,0.25) 100%)",
+              }}
+            >
+              <GradientText>Before 23:59:59 (UTC) 30 Sep 2025</GradientText>
+            </div>
+          </div>
+        ),
+        image: `${
+          isMobile
+            ? "/banners/migrate-banner-mobile.png"
+            : "/banners/migrate-banner.png"
+        }`,
+        content: (
+          <div className="w-fit md:px-12 px-4">
+            <OutlinedButton onClick={handleMigrate} label="Migrate Now" />
+          </div>
+        ),
+      },
+    ],
+    [isMobile, firstCount, handleReadMore, handleMigrate]
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setActive((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     }, 5000);
     return () => clearTimeout(timer);
-  }, [active]);
+  }, [active, slides.length]);
 
-  const handlePrev = () =>
+  const handlePrev = useCallback(() => {
     setActive((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
-  const handleNext = () =>
+  }, [slides.length]);
+  const handleNext = useCallback(() => {
     setActive((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+  }, [slides.length]);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const { left, right } = e.currentTarget.getBoundingClientRect();
     const x = e.clientX;
     const edgeThreshold = 80; // px from edge
     setShowLeftArrow(x - left < edgeThreshold);
     setShowRightArrow(right - x < edgeThreshold);
-  };
-  const handleMouseLeave = () => {
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
     setShowLeftArrow(false);
     setShowRightArrow(false);
-  };
+  }, []);
 
   return (
     <section
-      className="relative w-full h-[210px] md:h-[210px] flex items-center overflow-hidden rounded-xl mb-12"
+      className="relative w-full h-[210px] md:h-[210px] flex items-center overflow-hidden md:rounded-xl rounded-none mb-12 "
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -162,15 +222,22 @@ const HeroBanner = React.memo(() => {
         alt={
           active === 0
             ? "NODO AI Vaults Banner"
-            : "Genesis Vault Campaign Banner"
+            : "Migrate your XP Shares and GEMs to SUI"
         }
-        className="absolute inset-0 w-full h-full object-cover rounded-xl z-0"
+        className="absolute inset-0 w-full h-full object-cover md:rounded-xl rounded-none z-0"
         width={1720}
         height={210}
         loading="eager"
         {...{ fetchpriority: "high" }}
       />
-      <div className="relative z-20 flex flex-col justify-center h-full text-left max-w-[1000px] px-8">
+      <div
+        className={cn(
+          "relative z-20 h-full text-left max-w-[1000px] md:px-8 w-full",
+          active === 1
+            ? "md:flex md:flex-col md:justify-center block md:mt-0 mt-4"
+            : "flex flex-col justify-center"
+        )}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={active}
@@ -237,6 +304,6 @@ const HeroBanner = React.memo(() => {
       )}
     </section>
   );
-});
+};
 
 export default HeroBanner;
