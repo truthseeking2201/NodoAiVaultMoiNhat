@@ -19,6 +19,8 @@ export const CRITICAL_IMAGES = {
     "/bg-main.webp",
     "/banners/hero-banner.png",
     "/banners/hero-banner-mobile.png",
+    "/banners/migrate-banner.png",
+    "/banners/migrate-banner-mobile.png",
   ],
 
   // Chain icons
@@ -46,6 +48,7 @@ export const CRITICAL_IMAGES = {
     "/coins/xp.png",
     "/coins/xaum.png",
     "/coins/fdusd.png",
+    "/coins/gem.png",
   ],
 
   // dexs

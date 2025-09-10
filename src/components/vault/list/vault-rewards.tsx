@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import { showFormatNumber } from "@/lib/number";
 import { formatShortCurrency } from "@/utils/currency";
+import GradientText from "@/components/ui/gradient-text";
 
 const campaigns_data = {
   "SUI-USDC-cetus": {
@@ -63,10 +64,7 @@ const VaultRewards = ({ item }: { item: VaultItemData }) => {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <Tooltip
-        open={open}
-        onOpenChange={setOpen}
-      >
+      <Tooltip open={open} onOpenChange={setOpen}>
         <TooltipTrigger asChild>
           <div
             className="flex items-center"
@@ -90,9 +88,9 @@ const VaultRewards = ({ item }: { item: VaultItemData }) => {
         </TooltipTrigger>
         <TooltipContent className="shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3 max-w-[300px]">
           <div>
-            <div className="text-sm bg-clip-text text-transparent bg-[linear-gradient(90deg,_#FFE8C9_0%,_#F9F4E9_25%,_#E3F6FF_60%,_#C9D4FF_100%)] mb-3 font-medium">
+            <GradientText className="text-sm mb-3 font-medium">
               TOTAL REWARD POOL
-            </div>
+            </GradientText>
             <hr />
 
             {tokens.map((token, index) => (
