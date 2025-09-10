@@ -1,4 +1,4 @@
-import { subscribeWhitelistRequest } from "@/apis";
+import { subscribeWhitelistRequest, getWalletDetail } from "@/apis";
 import { WalletDetails } from "@/types/wallet-detail";
 import { useCurrentWallet } from "@mysten/dapp-kit";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
@@ -55,4 +55,15 @@ export const useWhitelistWallet = () => {
     walletDetails,
     refetch,
   };
+};
+
+export const useWalletDetail = () => {
+  const { address, isAuthenticated } = useWallet();
+
+  return useQuery({
+    queryKey: ["wallet-detail", address],
+    queryFn: () => getWalletDetail(address),
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+  }) as UseQueryResult<WalletDetails, Error>;
 };

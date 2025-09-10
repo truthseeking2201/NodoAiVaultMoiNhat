@@ -20,7 +20,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { PATH_ROUTER } from "@/config/router";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import { useRibbon } from "@/hooks/use-ribbon";
-import { useWallet } from "@/hooks";
+import { useWallet, useWhitelistWallet } from "@/hooks";
 import { cn } from "@/lib/utils";
 
 const pageRoutes = [

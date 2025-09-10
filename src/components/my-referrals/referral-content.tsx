@@ -4,7 +4,7 @@ import { RowCopy } from "./row-copy";
 import { MyReferralsDashboardModal } from "./my-referrals-dashboard-modal";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRightContained } from "@/assets/icons";
-import { useWhitelistWallet } from "@/hooks";
+import { useWalletDetail } from "@/hooks";
 import ExternalIcon from "@/assets/icons/external-gradient.svg?react";
 import { cn } from "@/lib/utils";
 
@@ -25,14 +25,14 @@ export const ReferralContent = ({
   ];
   const [activeTab, setActiveTab] = useState<valueTab>("code");
   const [openModalRefer, setOpenModalRefer] = useState(false);
-  const { walletDetails, refetch } = useWhitelistWallet();
+  const { data: walletDetails, refetch } = useWalletDetail();
   const dataRefer = useMemo(() => {
     const referCode = walletDetails?.invite_code?.code;
     const href = window.location?.origin;
     return {
       referCode: referCode,
       referLinkCode: `${href}?invite-ref=${referCode}`,
-      referTotal: walletDetails?.total_referrals,
+      referTotal: walletDetails?.total_referrals || 0,
     };
   }, [walletDetails]);
 
