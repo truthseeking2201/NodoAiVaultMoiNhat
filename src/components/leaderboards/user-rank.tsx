@@ -1,22 +1,17 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { useMemo, useState } from "react";
-import { useWallet, useWhitelistWallet } from "@/hooks";
+import { useMemo } from "react";
+import { useWallet } from "@/hooks";
 import { useUserLeaderboard } from "@/hooks/use-leaderboards";
 import ReferralBg from "@/assets/images/leaderboards/referral-section.png";
 import { formatNumber } from "@/lib/number";
-import { Button } from "@/components/ui/button";
-import { ItemRow } from "@/components/my-referrals/item-row.tsx";
-import { MyReferralsDashboardModal } from "@/components/my-referrals/my-referrals-dashboard-modal";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RankCompo } from "./helper";
-import ExternalIcon from "@/assets/icons/external-gradient.svg?react";
 import NewTag from "@/components/ui/new-tag";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ReferralContent } from "@/components/my-referrals/referral-content.tsx";
 
 function UserRankTVL({ rank, label }: { rank: number; label: string }) {
   return (
-    <div className="flex-1 flex flex-col items-center lg:p-4 p-2">
+    <div className="flex-1 flex flex-col items-center lg:px-4 lg:py-[18px] p-3">
       <RankCompo
         rank={rank}
         classNameImage="h-10 w-10 max-md:w-[28px] max-md:h-[28px]"
@@ -43,16 +38,16 @@ function UserRankLoading() {
   return (
     <>
       <Skeleton className="w-[200px] lg:h-[32px] h-[24px] rounded bg-white/20 mb-6" />
-      <div className="flex gap-4 lg:flex-row flex-col">
-        <div className="w-full">
+      <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+        <div className="w-full flex flex-col justify-between">
           <div className="flex gap-4">
             <Skeleton className="w-full h-[80px] rounded-xl bg-white/20" />
             <Skeleton className="w-full h-[80px] rounded-xl bg-white/20" />
           </div>
-          <Skeleton className="w-full h-[112px] rounded-xl bg-white/20 mt-4" />
+          <Skeleton className="w-full lg:h-[116px] h-[96px] rounded-xl bg-white/20 mt-4" />
         </div>
         <div className="w-full">
-          <Skeleton className="h-[209px] rounded-xl bg-white/20" />
+          <Skeleton className="md:h-[214px] h-[174px] rounded-xl bg-white/20" />
         </div>
       </div>
     </>
@@ -62,18 +57,6 @@ function UserRankLoading() {
 export default function UserRank() {
   const { isAuthenticated } = useWallet();
   const { data, isFetched } = useUserLeaderboard();
-  const { walletDetails } = useWhitelistWallet();
-  const [activeTab, setActiveTab] = useState<"code" | "link">("code");
-  const [openModalRefer, setOpenModalRefer] = useState(false);
-  const dataRefer = useMemo(() => {
-    const referCode = walletDetails?.invite_code?.code;
-    const href = window.location?.origin;
-    return {
-      referCode: referCode,
-      referLinkCode: `${href}?invite-ref=${referCode}`,
-      referTotal: walletDetails?.total_referrals,
-    };
-  }, [walletDetails]);
 
   const dataUser = useMemo(() => {
     const getRank = (rank) => (rank === 999999999 ? null : rank);
@@ -119,8 +102,8 @@ export default function UserRank() {
           <div className="lg:text-2xl text-base text-white font-semibold mb-6">
             {title}
           </div>
-          <div className="flex gap-4 lg:flex-row flex-col">
-            <div className="w-full">
+          <div className="grid lg:grid-cols-2 grid-cols-1 gap-4">
+            <div className="w-full flex flex-col justify-between">
               <div className="flex gap-4">
                 <div className="w-full rounded-xl bg-white/10 px-4 py-2">
                   <div className="lg:text-base text-white/60">TVL</div>
@@ -141,7 +124,7 @@ export default function UserRank() {
                   className="absolute left-1/2 lg:top-[-6px] top-[-4px] h-[110%] w-px bg-white/25"
                   style={{ transform: "translateX(-50%) rotate(25deg)" }}
                 />
-                <div className="flex justify-between items-center mt-4">
+                <div className="flex justify-between items-center">
                   <UserRankTVL
                     rank={dataUser.tvlRank}
                     label="TVL Leaderboard"
@@ -154,82 +137,20 @@ export default function UserRank() {
               </div>
             </div>
 
-            <div className="w-full bg-white/5 rounded-xl lg:p-6 px-6 py-4 relative">
+            <div className="w-full bg-white/5 rounded-xl md:p-6 px-6 py-4 relative">
               <img
                 src={ReferralBg}
                 alt="Referral Section"
                 className="absolute inset-0 w-full h-full z-0 rounded-xl"
               />
-              <div className="relative z-10">
-                <div className="flex justify-between">
-                  <div>
-                    <p className="text-gray-400 text-sm mb-1">
-                      Total Referrals
-                    </p>
-                    <p className="lg:text-2xl text-xl font-bold text-white mb-0">
-                      {dataRefer.referTotal}
-                    </p>
-                  </div>
-                  <div className="flex items-end">
-                    <Tabs
-                      value={activeTab}
-                      onValueChange={(value) =>
-                        setActiveTab(value as "code" | "link")
-                      }
-                      // className="bg-black border rounded-lg"
-                    >
-                      <TabsList className="p-1 flex gap-1">
-                        <TabsTrigger
-                          value="code"
-                          className="w-[68px] lg:h-[38px] h-[24px]"
-                        >
-                          Code
-                        </TabsTrigger>
-                        <TabsTrigger
-                          value="link"
-                          className="w-[68px] lg:h-[38px] h-[24px]"
-                        >
-                          Link
-                        </TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-                </div>
-                <div className="mt-6">
-                  <ItemRow
-                    value={
-                      activeTab === "code"
-                        ? dataRefer.referCode
-                        : dataRefer.referLinkCode
-                    }
-                    isNew
-                  />
-                </div>
-
-                <Button
-                  size="sm"
-                  className="font-semibold text-sm p-0 h-fit w-full hover:opacity-80 mt-3 justify-start"
-                  onClick={() => {
-                    setOpenModalRefer(true);
-                  }}
-                >
-                  <span className="bg-gradient-to-r from-[#FFE8C9] via-[#F9F4E9] via-[#E3F6FF] to-[#C9D4FF] text-transparent bg-clip-text">
-                    My Referral Dashboard
-                  </span>
-
-                  <ExternalIcon className="!w-4 !h-4" />
-                </Button>
-              </div>
+              <ReferralContent
+                className="relative z-10 !p-0"
+                forType="leaderboard"
+              />
             </div>
           </div>
         </ConditionRenderer>
       </ConditionRenderer>
-      <MyReferralsDashboardModal
-        isOpen={openModalRefer}
-        onClose={() => {
-          setOpenModalRefer(false);
-        }}
-      />
     </div>
   );
 }
