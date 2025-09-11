@@ -98,6 +98,18 @@ export const useFetchAssets = () => {
     queryFn: async () => {
       const response =
         (await getDepositTokens()) as unknown as VaultDepositToken[];
+
+      // add token rewards
+      TOKEN_REWARDS?.forEach((token, idx) => {
+        response.push({
+          token_id: 9999 + idx,
+          token_symbol: token.symbol,
+          token_name: token.display_name,
+          token_address: token.id,
+          decimal: token.decimals,
+        });
+      });
+
       const uniqueTokensResponse = response.filter(
         (token, index, self) =>
           index ===
@@ -108,19 +120,6 @@ export const useFetchAssets = () => {
           "cached-deposit-tokens",
           JSON.stringify(uniqueTokensResponse)
         );
-      }
-
-      // add token rewards
-      if (TOKEN_REWARDS.length > 0) {
-        TOKEN_REWARDS.forEach((token, idx) => {
-          uniqueTokensResponse.push({
-            token_id: 9999 + idx,
-            token_symbol: token.symbol,
-            token_name: token.display_name,
-            token_address: token.id,
-            decimal: token.decimals,
-          });
-        });
       }
       return uniqueTokensResponse;
     },
