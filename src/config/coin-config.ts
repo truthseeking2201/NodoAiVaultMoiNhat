@@ -45,6 +45,7 @@ export const SUI_CONFIG = {
   gas_fee: 0.006,
 };
 
+console.log("-----isPro", isPro);
 export const TOKEN_REWARDS = isPro
   ? []
   : [

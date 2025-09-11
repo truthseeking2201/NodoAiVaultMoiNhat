@@ -100,6 +100,7 @@ export const useFetchAssets = () => {
         (await getDepositTokens()) as unknown as VaultDepositToken[];
 
       // add token rewards
+      console.log("----TOKEN_REWARDS", TOKEN_REWARDS);
       TOKEN_REWARDS?.forEach((token, idx) => {
         response.push({
           token_id: 9999 + idx,
@@ -109,7 +110,7 @@ export const useFetchAssets = () => {
           decimal: token.decimals,
         });
       });
-
+      console.log("----response", response);
       const uniqueTokensResponse = response.filter(
         (token, index, self) =>
           index ===
