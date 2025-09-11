@@ -1,4 +1,4 @@
-const isPro = import.meta.env.VITE_APP_ENV === "production";
+const env = import.meta.env.VITE_APP_ENV;
 
 export const LP_TOKEN_CONFIG = {
   image_url: "/coins/nodo-lp.png",
@@ -29,7 +29,7 @@ export const GEMS_CONFIG = {
   image_url: "/coins/gem.png",
   display_name: "GEM",
   symbol: "GEM",
-  decimals: 6,
+  decimals: 9,
 };
 
 export const SUI_CONFIG = {
@@ -43,24 +43,42 @@ export const SUI_CONFIG = {
   gas_fee: 0.006,
 };
 
-export const TOKEN_REWARDS = isPro
-  ? []
-  : [
-      {
-        id: "0x931739984670bc9d1af4f1f1a9f5a4445066f591f8776ca148a55fe406d82929::xp_share::XP_SHARE",
-        display_name: "T XP Shares",
-        symbol: "XP Shares",
-        image_url: "/coins/xp.png",
-        decimals: 0,
-      },
-      {
-        id: "0xfa983b7a87369b32944467a17bb97aac99e3b82851287b2b15a549fdfb7a54a7::usdc::USDC",
-        display_name: "T USDC",
-        symbol: "USDC",
-        image_url: "/coins/usdc.png",
-        decimals: 6,
-      },
-    ];
+const TOKEN_REWARDS_BUY_ENV = {
+  dev: [
+    {
+      id: "0x931739984670bc9d1af4f1f1a9f5a4445066f591f8776ca148a55fe406d82929::xp_share::XP_SHARE",
+      display_name: "T XP Shares",
+      symbol: "XP Shares",
+      image_url: XP_CONFIG.image_url,
+      decimals: 0,
+    },
+    {
+      id: "0xfa983b7a87369b32944467a17bb97aac99e3b82851287b2b15a549fdfb7a54a7::usdc::USDC",
+      display_name: "T USDC",
+      symbol: "USDC",
+      image_url: USDC_CONFIG.image_url,
+      decimals: 6,
+    },
+  ],
+  staging: [
+    {
+      id: "0x041ec6f987cfe1d546c03538248b448d0525878a542474e277f4289b58012857::xp_share::XP_SHARE",
+      display_name: "T XP Shares",
+      symbol: "XP Shares",
+      image_url: XP_CONFIG.image_url,
+      decimals: 0,
+    },
+    {
+      id: "0x339c978af8106a7048dfb89584f395c7a2193e03cad7dfe64cd1e07f058e0d01::usdc::USDC",
+      display_name: "T USDC",
+      symbol: "USDC",
+      image_url: USDC_CONFIG.image_url,
+      decimals: 6,
+    },
+  ],
+};
+
+export const TOKEN_REWARDS = TOKEN_REWARDS_BUY_ENV[env] || [];
 
 export const COIN_TYPES_CONFIG = {
   collateral_tokens: [

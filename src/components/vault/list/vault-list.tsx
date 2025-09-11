@@ -6,6 +6,7 @@ import Web3Button from "@/components/ui/web3-button";
 import { ButtonGradient } from "@/components/ui/button-gradient";
 import { SORT_TYPE } from "@/config/constants-types";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
+import { getPathVaultDetail } from "@/config/router";
 import {
   useGetDepositVaults,
   useNdlpAssetsStore,
@@ -231,7 +232,7 @@ export default function VaultList() {
 
   const handleRowClick = useCallback(
     (el: any) => {
-      navigate(`/vault/${el.vault_id}`);
+      navigate(getPathVaultDetail(el.vault_id));
     },
     [navigate]
   );
