@@ -1,3 +1,7 @@
+const isPro =
+  import.meta.env.VITE_APP_ENV == "production" ||
+  process.env.NODE_ENV == "production";
+
 export const LP_TOKEN_CONFIG = {
   image_url: "/coins/nodo-lp.png",
   display_name: "NDLP",
@@ -19,7 +23,7 @@ export const XP_CONFIG = {
   image_url: "/coins/xp.png",
   display_name: "XP Shares",
   symbol: "XP Shares",
-  decimals: 6,
+  decimals: 0,
 };
 
 export const GEMS_CONFIG = {
@@ -40,6 +44,25 @@ export const SUI_CONFIG = {
   shortType: "0x2::sui::SUI",
   gas_fee: 0.006,
 };
+
+export const TOKEN_REWARDS = isPro
+  ? []
+  : [
+      {
+        id: "0x931739984670bc9d1af4f1f1a9f5a4445066f591f8776ca148a55fe406d82929::xp_share::XP_SHARE",
+        display_name: "T XP Shares",
+        symbol: "XP Shares",
+        image_url: "/coins/xp.png",
+        decimals: 0,
+      },
+      {
+        id: "0xfa983b7a87369b32944467a17bb97aac99e3b82851287b2b15a549fdfb7a54a7::usdc::USDC",
+        display_name: "T USDC",
+        symbol: "USDC",
+        image_url: "/coins/usdc.png",
+        decimals: 6,
+      },
+    ];
 
 export const COIN_TYPES_CONFIG = {
   collateral_tokens: [
@@ -98,6 +121,7 @@ export const COIN_TYPES_CONFIG = {
       display_name: "FDUSD",
       image_url: "/coins/fdusd.png",
     },
+    ...TOKEN_REWARDS,
     // TODO: add more collateral tokens here
   ],
 };
