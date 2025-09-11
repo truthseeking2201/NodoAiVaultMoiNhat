@@ -53,7 +53,7 @@ const campaign_default = {
 };
 
 const gold_rush_campaign = {
-  usdc: 1600,
+  usdc: 1500,
   xp: 100000000,
 };
 
