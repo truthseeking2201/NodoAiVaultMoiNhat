@@ -46,6 +46,8 @@ export const SUI_CONFIG = {
 };
 
 console.log("-----isPro", isPro);
+console.log("-----import.meta.env.VITE_APP_ENV", import.meta.env.VITE_APP_ENV);
+console.log("-----process.env.NODE_ENV", process.env.NODE_ENV);
 export const TOKEN_REWARDS = isPro
   ? []
   : [
