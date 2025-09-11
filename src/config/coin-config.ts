@@ -1,6 +1,4 @@
-const isPro =
-  import.meta.env.VITE_APP_ENV == "production" ||
-  process.env.NODE_ENV == "production";
+const isPro = import.meta.env.VITE_APP_ENV === "production";
 
 export const LP_TOKEN_CONFIG = {
   image_url: "/coins/nodo-lp.png",
