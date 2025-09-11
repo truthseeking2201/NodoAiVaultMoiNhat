@@ -8,7 +8,6 @@ import {
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { useWallet } from "@/hooks";
 import { showFormatNumber } from "@/lib/number";
-import { truncateStringWithSeparator } from "@/utils/helpers";
 import { USDC_CONFIG, XP_CONFIG, GEMS_CONFIG } from "@/config/coin-config";
 import { LeaderboardItem, Columns } from "./helper";
 import { LEADERBOARD_TIME_FILTER } from "@/config/constants-types";
@@ -50,13 +49,8 @@ export default function DataTableLeaderboards({
         }));
 
       return {
-        rank: idx + 1,
-        wallet_address: truncateStringWithSeparator(
-          el.user_wallet,
-          13,
-          "...",
-          6
-        ),
+        rank: el.ranking,
+        wallet_address: el.user_wallet,
         tvl: showFormatNumber(el?.tvl_usd || el?.ref_tvl_usd || 0, 2, 2, "$"),
         rewards,
         isYou: address?.toLowerCase() === el.user_wallet?.toLowerCase(),

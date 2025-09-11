@@ -2,6 +2,7 @@ import {
   LeaderboardItem,
   RankCompo,
   RewardCompo,
+  AddressCompo,
   getTitleTvlCol,
 } from "./helper";
 import { RowItem } from "@/components/ui/row-item";
@@ -47,7 +48,7 @@ export default function ItemMobileLeaderboards({
         classNameValue={classValue}
         label="WALLET ADDRESS"
       >
-        {item.wallet_address}
+        <AddressCompo address={item.wallet_address} className={classValue} />
       </RowItem>
       <hr className="my-2" />
       <RowItem

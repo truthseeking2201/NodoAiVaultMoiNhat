@@ -114,8 +114,8 @@ export function MyReferralsDashboardModal({
       await navigator.clipboard.writeText(text);
       toast({
         variant: "success",
-        title: "Referral code copied",
-        description: "Referral code copied to clipboard",
+        title: "Address copied",
+        description: "Address copied to clipboard",
         duration: 2000,
       });
     }
