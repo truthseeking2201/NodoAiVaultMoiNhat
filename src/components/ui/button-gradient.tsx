@@ -6,15 +6,25 @@ const buttonVariants = {
   outline: {
     buttonWrapper:
       "bg-gradient-to-r from-[#FFE8C9] via-[#F9F4E9] via-60% to-[#C9D4FF] inline-flex p-[1px] rounded-md",
+    buttonOut: "bg-black w-full h-auto rounded-md",
     buttonInner:
       "flex items-center justify-center w-full h-[30px] rounded-md bg-black",
     buttonText: "gradient-3rd text-sm font-semibold",
+  },
+  outline2: {
+    buttonWrapper:
+      "bg-gradient-to-r from-[#00CCFF] to-[#00FF5E] inline-flex p-[1px] rounded-full",
+    buttonOut: "w-full h-auto rounded-full",
+    buttonInner:
+      "flex items-center justify-center w-full h-auto rounded-full bg-black px-2 py-[1px]",
+    buttonText:
+      "text-you-gradient text-[11px] leading-[16px] font-bold font-sans",
   },
 };
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant: "outline";
+  variant: "outline" | "outline2";
   classButtonOut?: string;
   classButtonInner?: string;
   classButtonText?: string;
@@ -52,9 +62,7 @@ const ButtonGradient = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
       >
-        <span
-          className={cn("bg-black w-full h-auto rounded-md", classButtonOut)}
-        >
+        <span className={cn(buttonVariants[variant].buttonOut, classButtonOut)}>
           <span
             className={cn(
               "block",

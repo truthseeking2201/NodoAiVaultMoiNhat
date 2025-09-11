@@ -17,7 +17,7 @@ import ExistingUser from "@/components/wallet/existing-user";
 import InputReferral from "@/components/wallet/input-referral";
 import SuccessReferral from "@/components/wallet/success-referral";
 import WalletList from "@/components/wallet/wallet-list";
-import { useWallet } from "@/hooks";
+import { useWallet, useWhitelistWallet } from "@/hooks";
 import { useToast } from "@/hooks/use-toast";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { cn, sleep } from "@/lib/utils";
@@ -48,6 +48,7 @@ export function ConnectWalletModal({
   const { address } = useWallet();
   const { isMobile } = useBreakpoint();
   const [searchParams] = useSearchParams();
+  useWhitelistWallet();
 
   const handleClosePopup = () => {
     onClose();
@@ -292,10 +293,12 @@ export function ConnectWalletModal({
             "0px 10px 15px -3px rgba(255, 255, 255, 0.10), 0px 4px 6px -4px rgba(255, 255, 255, 0.10)",
         }}
       >
-        <DialogHeader className={cn(
-          "px-6 pt-6 pb-0 relative text-left",
-          isMobile && "flex-shrink-0"
-        )}>
+        <DialogHeader
+          className={cn(
+            "px-6 pt-6 pb-0 relative text-left",
+            isMobile && "flex-shrink-0"
+          )}
+        >
           <button
             className="absolute right-6 top-6 rounded-full h-8 w-8 flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors"
             onClick={handleClosePopup}
@@ -315,9 +318,7 @@ export function ConnectWalletModal({
             </>
           )}
         </DialogHeader>
-        <div className={cn(
-          isMobile && "flex-1 overflow-y-auto"
-        )}>
+        <div className={cn(isMobile && "flex-1 overflow-y-auto")}>
           {step === STEPS.CONNECT_WALLET && (
             <WalletList
               onConnectSuccess={(successAddress, resetConnection) =>

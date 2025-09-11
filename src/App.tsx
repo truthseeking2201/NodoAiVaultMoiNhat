@@ -1,4 +1,3 @@
-import { MainLayout } from "@/components/layout/main-layout";
 import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { ScrollToTopButton } from "@/components/ui/scroll-to-top-button";
 import { Toaster } from "@/components/ui/toaster";
@@ -13,9 +12,10 @@ import { getFullnodeUrl } from "@mysten/sui/client";
 import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { BrowserRouter } from "react-router-dom";
 import GlobalLoading from "./components/shared/global-loading";
+import AppRoutes from "./routes";
 import ScrollToTop from "./components/ui/scroll-to-top";
 import {
   useCriticalImagePrefetch,
@@ -27,27 +27,13 @@ import {
   useUserAssetsStore,
   useWallet,
 } from "./hooks";
-import Home from "./pages/home";
+
 import { setWalletDisconnectHandler } from "./utils/wallet-disconnect";
 import { isMobileDevice } from "./utils/helpers";
 import { useToast } from "./hooks/use-toast";
 import { IconErrorToast } from "./components/ui/icon-error-toast";
 import { useStableAutoConnect } from "./hooks/use-stable-auto-connect";
 import { captureSentryError } from "./utils/logger";
-
-const NotFound = lazy(() =>
-  import("./pages/not-found").catch((e) => {
-    console.error("Error loading NotFound:", e);
-    return { default: () => <GlobalLoading /> };
-  })
-);
-
-const VaultDetail = lazy(() =>
-  import("./pages/vault-detail").catch((e) => {
-    console.error("Error loading VaultDetail:", e);
-    return { default: () => <GlobalLoading /> };
-  })
-);
 
 const useSetWalletDisconnectHandler = () => {
   const { mutateAsync: disconnect } = useDisconnectWallet();
@@ -160,25 +146,7 @@ const App = () => {
                   <BrowserRouter>
                     <ScrollToTop />
                     <ScrollToTopButton />
-                    <Routes>
-                      <Route
-                        path="/"
-                        element={
-                          <MainLayout>
-                            <Home />
-                          </MainLayout>
-                        }
-                      />
-                      <Route
-                        path="/vault/:vault_id"
-                        element={
-                          <MainLayout>
-                            <VaultDetail />
-                          </MainLayout>
-                        }
-                      />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
+                    <AppRoutes />
                   </BrowserRouter>
                 </TooltipProvider>
               </ConfigWrapper>

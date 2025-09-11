@@ -4,6 +4,7 @@ import {
   COIN_TYPES_CONFIG,
   LP_TOKEN_CONFIG,
   SUI_CONFIG,
+  TOKEN_REWARDS,
 } from "@/config/coin-config";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { getBalanceAmountForInput } from "@/lib/number";
@@ -97,6 +98,18 @@ export const useFetchAssets = () => {
     queryFn: async () => {
       const response =
         (await getDepositTokens()) as unknown as VaultDepositToken[];
+
+      // add token rewards
+      TOKEN_REWARDS?.forEach((token, idx) => {
+        response.push({
+          token_id: 9999 + idx,
+          token_symbol: token.symbol,
+          token_name: token.display_name,
+          token_address: token.id,
+          decimal: token.decimals,
+        });
+      });
+
       const uniqueTokensResponse = response.filter(
         (token, index, self) =>
           index ===

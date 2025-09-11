@@ -10,7 +10,7 @@ import {
   linkReferralCode,
   skipReferralCode,
 } from "@/apis/wallet";
-import { useWallet } from "@/hooks";
+import { useWalletDetail } from "@/hooks";
 
 type InputReferralProps = {
   onClose: () => void;
@@ -33,7 +33,8 @@ const InputReferral = ({
       referralCode: "",
     },
   });
-  const { address } = useWallet();
+
+  const { refetch: refetchDetail } = useWalletDetail();
 
   const handleCheckReferralCode = async (referralCode: string) => {
     try {
@@ -48,6 +49,7 @@ const InputReferral = ({
     try {
       const res = await skipReferralCode();
       if (res) {
+        refetchDetail();
         onClose();
       }
     } catch (error) {
@@ -82,6 +84,7 @@ const InputReferral = ({
         const res = await handleLinkReferralCode(data.referralCode);
         if (res.success) {
           onNextStep(data.referralCode);
+          refetchDetail();
         } else {
           setFieldError();
         }

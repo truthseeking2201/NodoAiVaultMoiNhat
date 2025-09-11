@@ -84,6 +84,7 @@
 
   --nodi-gradient: linear-gradient(90deg, #f59e0b 0%, #f97316 100%);
   --apr-gradient: linear-gradient(87deg, #9debff -0.54%, #00ff5e 97.84%);
+  --you-gradient: linear-gradient(90deg, #00ccff 0%, #00ff5e 100%);
 }
 
 /* Typography Tokens */
@@ -366,6 +367,15 @@
 
 .text-apr-gradient {
   background: var(--apr-gradient);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: textGradient 4s linear infinite;
+}
+
+.text-you-gradient {
+  background: var(--you-gradient);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

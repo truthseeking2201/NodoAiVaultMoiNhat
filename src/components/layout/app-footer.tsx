@@ -223,19 +223,6 @@ export function AppFooter() {
           </div>
         </div>
       </div>
-
-      {!isHome && (
-        <div className="md:hidden">
-          <RouterLink
-            to={"/"}
-            className={`flex items-center justify-center gap-2 p-4 pb-5 transition-colors duration-200 bg-white/10 text-white`}
-          >
-            <Icon name={"Vault"} className="h-5" color="currentColor" />
-
-            <span className="font-medium text-sm">Vaults</span>
-          </RouterLink>
-        </div>
-      )}
     </footer>
   );
 }

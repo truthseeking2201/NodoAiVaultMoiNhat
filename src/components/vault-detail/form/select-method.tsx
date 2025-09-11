@@ -5,6 +5,7 @@ import {
   METHOD_DEPOSIT,
 } from "@/components/vault-detail/constant";
 import { cn } from "@/lib/utils";
+import NewTag from "@/components/ui/new-tag";
 
 type Props = {
   className?: string;
@@ -32,27 +33,9 @@ const SelectMethod = ({
     >
       <TabsList className="p-1 flex gap-1 ">
         {tabs.map((tab) => (
-          <TabsTrigger
-            key={tab.value}
-            value={tab.value}
-          >
+          <TabsTrigger key={tab.value} value={tab.value}>
             {tab.label}
-            {tab.value == METHOD_DEPOSIT.DUAL && (
-              // <span className="glow-animation ml-2 text-10px md:text-xs font-bold px-2 py-0.5 font-sans rounded-[6px] bg-black [box-shadow:-2px_0_4px_0_rgba(255,255,255,0.75)_inset,2px_0_4px_0_rgba(0,255,251,0.95)_inset,0_-3px_4px_0_#07F_inset,0_3px_4px_0_#B708F6_inset]">
-              <span className="glow-animation ml-2 text-10px md:text-xs font-bold px-2 py-0.5 font-sans rounded-[6px] bg-black new-glow">
-                <span
-                  style={{
-                    background:
-                      "linear-gradient(90deg, #FFE8C9 0%, #F9F4E9 25%, #DDF7F1 60%, #B5F0FF 100%)",
-                    backgroundClip: "text",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  NEW
-                </span>
-              </span>
-            )}
+            {tab.value == METHOD_DEPOSIT.DUAL && <NewTag text="NEW" />}
           </TabsTrigger>
         ))}
       </TabsList>

@@ -114,8 +114,8 @@ export function MyReferralsDashboardModal({
       await navigator.clipboard.writeText(text);
       toast({
         variant: "success",
-        title: "Referral code copied",
-        description: "Referral code copied to clipboard",
+        title: "Address copied",
+        description: "Address copied to clipboard",
         duration: 2000,
       });
     }
@@ -241,10 +241,7 @@ export function MyReferralsDashboardModal({
               />
               {isInvalidAddress && (
                 <div className="text-red-error text-sm mt-1 flex items-center">
-                  <Info
-                    size={16}
-                    className="mr-2"
-                  />
+                  <Info size={16} className="mr-2" />
                   Invalid address
                 </div>
               )}
@@ -264,6 +261,7 @@ export function MyReferralsDashboardModal({
           columns={columns}
           isLoading={isLoading}
           paramsSearch={paramsRefer}
+          numRowLoading={3}
           changeSort={changeSort}
         />
         {totalRefer > 0 && (
