@@ -410,7 +410,7 @@ export default function VaultList() {
                                 : "text-red-400"
                             )}
                           >{`(${token.percent_change}%)`}</span>
-                          <span className="text-sm text-white/40">(24h)</span>
+                          <span className="text-sm text-white">(24h)</span>
                         </>
                       )}
                     </div>
