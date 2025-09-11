@@ -3,7 +3,10 @@ import Rank1Icon from "@/assets/images/leaderboards/rank-1.png";
 import Rank2Icon from "@/assets/images/leaderboards/rank-2.png";
 import Rank3Icon from "@/assets/images/leaderboards/rank-3.png";
 import { ButtonGradient } from "@/components/ui/button-gradient";
+import { Button } from "@/components/ui/button";
 import { TabLeaderboard } from "@/types/leaderboards.types";
+import { truncateStringWithSeparator } from "@/utils/helpers";
+import { useToast } from "@/hooks/use-toast";
 
 const RANK_ICON = {
   1: Rank1Icon,
@@ -67,6 +70,37 @@ export function RewardCompo({ token }: RewardCompoProps) {
   );
 }
 
+interface AddressCompoProps {
+  address: string;
+  className?: string;
+}
+export function AddressCompo({ address, className }: AddressCompoProps) {
+  const { toast } = useToast();
+  const handleCopy = async (text) => {
+    if (text) {
+      await navigator.clipboard.writeText(text);
+      toast({
+        variant: "success",
+        title: "Address copied",
+        description: "Address copied to clipboard",
+        duration: 2000,
+      });
+    }
+  };
+  return (
+    <Button
+      variant="icon"
+      size="none"
+      className=""
+      onClick={() => handleCopy(address)}
+    >
+      <span className={className}>
+        {truncateStringWithSeparator(address, 13, "...", 6)}
+      </span>
+    </Button>
+  );
+}
+
 const TITLES_TVL_COL: Record<TabLeaderboard, string> = {
   TVL: "TVL",
   REFERRED: "REFERRED TVL",
@@ -115,7 +149,9 @@ export function Columns(tab: TabLeaderboard) {
       title: "WALLET ADDRESS",
       dataIndex: "wallet_address",
       classTitle: "text-white/70",
-      classCell: "text-base",
+      render: (value: any) => (
+        <AddressCompo address={value} className="text-base" />
+      ),
     },
     {
       title: getTitleTvlCol(tab),
