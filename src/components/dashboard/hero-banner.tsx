@@ -41,7 +41,7 @@ const HeroBanner = () => {
   const { isMobile } = useBreakpoint();
   const handleReadMore = useCallback(() => {
     window.open(
-      "https://docs.nodo.xyz/public/nodo-campaigns/nodo-ai-vault-genesis-yield-campaign-phase-1",
+      "https://docs.nodo.xyz/public/nodo-campaigns/nodo-x-matrixdock-gold-rush-campaign",
       "_blank"
     );
   }, []);
@@ -57,9 +57,12 @@ const HeroBanner = () => {
     () => [
       {
         title: (
-          <GradientText className="text-left md:text-[28px] text-base font-bold md:px-12 px-4 md:py-1">
-            Claim your share in {isMobile && <br />} NODO’s Genesis vault
-            campaign
+          <GradientText className="text-left md:text-[28px] text-sm font-bold md:px-12 px-4 md:py-1 md:tracking-normal tracking-tighter">
+            Claim your share in NODO’s{" "}
+            <GradientText className="bg-gradient-to-tr from-[#FF9100] to-[#FFD54F] text-transparent bg-clip-text">
+              Gold Rush{" "}
+            </GradientText>
+            Campaign
           </GradientText>
         ),
         description: (
@@ -80,10 +83,10 @@ const HeroBanner = () => {
                 height={isMobile ? 16 : 32}
               />
               <div className="ml-2 mr-4 flex gap-2 items-center md:text-[32px] text-base  ">
-                <div className="md:w-[105px] w-[45px]">
+                <div className="md:w-[80px] w-[37px]">
                   <CountUp
-                    from={9940}
-                    to={10000}
+                    from={1540}
+                    to={1600}
                     duration={2}
                     delay={0}
                     separator=","
@@ -106,10 +109,10 @@ const HeroBanner = () => {
                 height={isMobile ? 16 : 32}
               />
               <div className="flex gap-2 items-center md:text-[32px] text-base ">
-                <div className="md:w-[230px] w-[105px]">
+                <div className="md:w-[195px] w-[90px]">
                   <CountUp
-                    from={1999999940}
-                    to={2000000000}
+                    from={99999940}
+                    to={100000000}
                     duration={2}
                     delay={0}
                     separator=","
@@ -127,7 +130,7 @@ const HeroBanner = () => {
             : "/banners/hero-banner.png"
         }`,
         content: (
-          <div className="w-fit md:px-12 px-4">
+          <div className="w-fit md:px-12 px-4 md:mt-0 mt-8">
             <OutlinedButton onClick={handleReadMore} />
           </div>
         ),
