@@ -8,6 +8,7 @@ import {
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { useWallet } from "@/hooks";
 import { showFormatNumber } from "@/lib/number";
+import { compareSuiAddresses } from "@/lib/address";
 import { USDC_CONFIG, XP_CONFIG, GEMS_CONFIG } from "@/config/coin-config";
 import { LeaderboardItem, Columns } from "./helper";
 import { LEADERBOARD_TIME_FILTER } from "@/config/constants-types";
@@ -53,7 +54,7 @@ export default function DataTableLeaderboards({
         wallet_address: el.user_wallet,
         tvl: showFormatNumber(el?.tvl_usd || el?.ref_tvl_usd || 0, 2, 2, "$"),
         rewards,
-        isYou: address?.toLowerCase() === el.user_wallet?.toLowerCase(),
+        isYou: compareSuiAddresses(address, el.user_wallet),
       };
     }) as LeaderboardItem[];
   }, [data, address]);
