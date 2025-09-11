@@ -17,12 +17,6 @@ export const subscribeWhitelistRequest = async (
   walletProvider: string
 ) => {
   const res = (await http.get(URLS.walletDetails)) as any;
-  console.log("-------subscribeWhitelistRequest------------------");
-  console.log("-----data", res);
-  console.log("-----code", res?.invite_code?.code);
-  console.log("-----walletAddress", walletAddress);
-  console.log("-----walletProvider", walletProvider);
-  console.log("-------subscribeWhitelistRequest------------------");
 
   if (!res?.invite_code?.code) {
     await http.post(URLS.subscribe, {
