@@ -53,7 +53,7 @@ const campaign_default = {
 };
 
 const gold_rush_campaign = {
-  usdc: 1600,
+  usdc: 1500,
   xp: 100000000,
 };
 
@@ -72,7 +72,6 @@ const VaultRewards = ({ item }: { item: VaultItemData }) => {
     item.pool.pool_name === "XAUM-USDC" && item.exchange_code === "mmt";
   const campaignData = useMemo(() => {
     let campaignName = `${item.pool.pool_name}-${item.exchange_code}`;
-    console.log("campaignName", campaignName);
     if (campaignName === "XAUM-USDC-mmt") {
       return gold_rush_campaign;
     }
@@ -82,8 +81,6 @@ const VaultRewards = ({ item }: { item: VaultItemData }) => {
     campaignName = `${item.vault_name}-${item.exchange_code}`;
     return campaigns_data[campaignName] || campaign_default;
   }, [item]);
-
-  console.log("campaignData", campaignData);
 
   const [open, setOpen] = useState(false);
 
