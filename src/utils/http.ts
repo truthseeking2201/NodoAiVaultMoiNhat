@@ -54,7 +54,9 @@ const refreshTokenRequest = async (): Promise<string | null> => {
   }
 };
 
-const getValidToken = async (): Promise<string | null> => {
+const getValidToken = async (
+  isInvalidToken = false
+): Promise<string | null> => {
   const token = localStorage.getItem("access_token");
 
   if (!token) {
@@ -62,7 +64,7 @@ const getValidToken = async (): Promise<string | null> => {
   }
 
   // If token is still valid, return it
-  if (!checkTokenAboutToExpired(token)) {
+  if (!checkTokenAboutToExpired(token) && !isInvalidToken) {
     return token;
   }
 
@@ -144,13 +146,12 @@ http.interceptors.response.use(
       originalRequest._retryCount++;
 
       try {
-        const token = await getValidToken();
+        const token = await getValidToken(true);
         if (token && originalRequest.headers) {
           originalRequest.headers["Authorization"] = `Bearer ${token}`;
           return axios(originalRequest);
         }
       } catch (refreshError) {
-        console.log("🚀 ~ refreshError:", refreshError);
         if (
           refreshError?.response?.status === 401 ||
           refreshError?.message === NOT_REFRESH_TOKEN_ERROR
