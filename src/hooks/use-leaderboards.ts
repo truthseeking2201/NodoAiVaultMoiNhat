@@ -29,7 +29,7 @@ export const useLeaderboard = (
 export const useUserLeaderboard = () => {
   const { address } = useWallet();
   return useQuery<type.UserLeaderboardsData, Error>({
-    queryKey: ["user-leaderboards"],
+    queryKey: ["user-leaderboards", address],
     queryFn: async () => {
       const response = await api.getUserLeaderboard({ user_wallet: address });
       return response as unknown as type.UserLeaderboardsData;
