@@ -7,6 +7,7 @@ interface UnderlineTabsProps {
   labelClassName?: string;
   underlineWidth?: number;
   duration?: number;
+  tabClassName?: string;
   onActiveTabChange?: (tab: number) => void;
 }
 
@@ -16,6 +17,7 @@ const UnderlineTabs = ({
   onActiveTabChange,
   underlineWidth = 50,
   labelClassName,
+  tabClassName,
   duration = 300,
 }: UnderlineTabsProps) => {
   const [selectedTab, setSelectedTab] = useState(activeTab);
@@ -53,7 +55,7 @@ const UnderlineTabs = ({
     <div className="max-w-7xl mx-auto">
       {/* Tab Navigation */}
       <div className="relative">
-        <nav className="flex space-x-8">
+        <nav className={cn("flex space-x-8", tabClassName)}>
           {tabsLabel.map((tab, index) => {
             if (typeof tab === "string") {
               return (
@@ -87,7 +89,6 @@ const UnderlineTabs = ({
                 key={index}
                 ref={(el) => (tabRefs.current[index] = el)}
                 onClick={() => handleTabClick(index)}
-                className="pb-3"
               >
                 {tab}
               </div>

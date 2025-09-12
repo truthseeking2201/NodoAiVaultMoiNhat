@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Drawer,
   DrawerTitle,
@@ -15,13 +15,14 @@ import Icon from "@/components/icon";
 import ReferralTooltip from "@/components/my-referrals/referral-tooltip";
 import { ReferralContent } from "@/components/my-referrals/referral-content.tsx";
 import { Ribbon } from "@/components/shared/ribbon";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 import { PATH_ROUTER } from "@/config/router";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import { useRibbon } from "@/hooks/use-ribbon";
 import { useWallet, useWhitelistWallet } from "@/hooks";
 import { cn } from "@/lib/utils";
+import UnderlineTabs from "../ui/underline-tab";
 
 const pageRoutes = [
   {
@@ -45,6 +46,28 @@ const DesktopHeader = () => {
   const navigate = useNavigate();
   const [visibleRibbon] = useRibbon();
   const { isAuthenticated } = useWallet();
+  const pathname = useLocation()?.pathname;
+  const activeTab = pageRoutes.findIndex((route) => route.path === pathname);
+  const tabs = useMemo(
+    () =>
+      pageRoutes.map((route) => (
+        <NavLink
+          key={route.path}
+          to={route.path}
+          className={({ isActive }) =>
+            `flex items-center gap-2 p-2 rounded-lg transition-all duration-200 text-white hover:opacity-100 ${
+              isActive
+                ? "opacity-100 font-medium"
+                : "opacity-50 font-normal mb-1"
+            }`
+          }
+        >
+          <Icon name={route.icon} className="h-4 w-4" color="currentColor" />
+          <span className="text-sm">{route.label}</span>
+        </NavLink>
+      )),
+    []
+  );
   return (
     <div
       className={cn(
@@ -74,26 +97,7 @@ const DesktopHeader = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
-            {pageRoutes.map((route) => (
-              <NavLink
-                key={route.path}
-                to={route.path}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 p-2 rounded-lg transition-all  duration-200 text-white hover:opacity-100 ${
-                    isActive
-                      ? "opacity-100 font-medium bg-white/10"
-                      : "opacity-50 font-normal"
-                  }`
-                }
-              >
-                <Icon
-                  name={route.icon}
-                  className="h-4 w-4"
-                  color="currentColor"
-                />
-                <span className="text-sm">{route.label}</span>
-              </NavLink>
-            ))}
+            <UnderlineTabs activeTab={activeTab} labels={tabs} />
           </motion.div>
         </div>
       </div>
