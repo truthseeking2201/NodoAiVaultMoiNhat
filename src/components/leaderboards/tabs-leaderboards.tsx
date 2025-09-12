@@ -12,7 +12,7 @@ export const TabsLeaderboards = ({
 }) => {
   return (
     <Tabs value={tab} onValueChange={(value: TabLeaderboard) => setTab(value)}>
-      <TabsList className="flex gap-0 relative z-10 w-full p-0 bg-black/50 rounded-b-none rounded-t-md md:rounded-t-xl overflow-hidden !border-b-0 border-white/35">
+      <TabsList className="flex gap-0 relative z-10 w-full p-0 bg-black/50 rounded-b-none rounded-t-md md:rounded-t-xl overflow-hidden md:border-b-0 border-white/35">
         {LEADERBOARD_TYPE_OPTIONS.map((t) => {
           const isActive = tab === t.value;
           return (

@@ -62,14 +62,16 @@ export default function DataTableLeaderboards({
   // RENDER
   return (
     <>
-      <TimeLeaderboards
-        tab={tab}
-        setTab={setTab}
-        timeFrom={data?.isoDatetimeFrom}
-        timeTo={data?.isoDatetimeTo}
-        timeLastUpdate={data?.lastUpdate}
-        isLoading={isLoading}
-      />
+      <div className={isMd ? "border border-t-0 border-white/20" : ""}>
+        <TimeLeaderboards
+          tab={tab}
+          setTab={setTab}
+          timeFrom={data?.isoDatetimeFrom}
+          timeTo={data?.isoDatetimeTo}
+          timeLastUpdate={data?.lastUpdate}
+          isLoading={isLoading}
+        />
+      </div>
 
       <ConditionRenderer
         when={isMd}
@@ -108,13 +110,13 @@ export default function DataTableLeaderboards({
           when={isLoading || mapData?.length > 0}
           fallback={<NoDataLeaderboards />}
         >
-          <div className="rounded-b-md md:rounded-b-xl overflow-hidden border border-t-0 rounded-t-none border-white/10">
+          <div className="rounded-b-md md:rounded-b-xl overflow-hidden border border-t-0 rounded-t-none border-white/20">
             <TableRender
-              headerClassName="p-4 h-[70px] border-b"
+              headerClassName="p-4 h-[70px] border-b border-white/20"
               data={mapData}
               columns={Columns(tabLeaderboard)}
               isLoading={isLoading}
-              classRowBody="even:bg-[#212121]"
+              classRowBody="even:bg-[#212121] !border-none"
               numRowLoading={3}
             />
           </div>
