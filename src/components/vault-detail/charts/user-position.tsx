@@ -1,15 +1,13 @@
-import React, { useState, useEffect, Fragment, useMemo } from "react";
+import React, { Fragment, useMemo } from "react";
 import {
-  LineChart,
   Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
+  LineChart,
   ReferenceArea,
   ReferenceLine,
-  Dot,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 import {
   ChartDataPoint,
@@ -25,11 +23,11 @@ const UserPosition = ({ periodTab }: { periodTab: string }) => {
   const chartData: ChartDataPoint[] = useMemo(() => {
     if (periodTab === PERIOD_TABS[0].value) {
       return mockDataLiveChart;
-    } else if (timeFilter === "W") {
+    } else if (periodTab === PERIOD_TABS[1].value) {
       return mockDataLiveChart2;
     }
-    return mockDataLiveChart; // Mặc định trả về dữ liệu ngày nếu không có điều kiện nào khác
-  }, [timeFilter]);
+    return mockDataLiveChart; // Default to daily data
+  }, [periodTab]);
 
   const checkPositionOfPrice = useMemo(() => {
     for (let i = chartData.length - 1; i >= 0; i--) {
@@ -42,10 +40,6 @@ const UserPosition = ({ periodTab }: { periodTab: string }) => {
     }
     return null;
   }, [chartData]);
-
-  useEffect(() => {
-    setTimeFilter(period);
-  }, [period]);
 
   return (
     <div
@@ -104,9 +98,19 @@ const UserPosition = ({ periodTab }: { periodTab: string }) => {
               <stop offset="100%" stopColor="#F5C8A4" />
             </linearGradient>
           </defs>
-          <ReferenceArea y1={0} y2={15} fill="url(#greenGradient)" radius={[10,10,0,0]}/>
+          <ReferenceArea
+            y1={0}
+            y2={15}
+            fill="url(#greenGradient)"
+            radius={[10, 10, 0, 0]}
+          />
           <ReferenceArea y1={-5} y2={0} fill="url(#yellowGradient)" />
-          <ReferenceArea y1={-15} y2={-5} fill="url(#redGradient)" radius={[0,0,10,10]}/>
+          <ReferenceArea
+            y1={-15}
+            y2={-5}
+            fill="url(#redGradient)"
+            radius={[0, 0, 10, 10]}
+          />
 
           <ReferenceLine y={0} stroke="#6b7280" strokeDasharray="3 3" />
 

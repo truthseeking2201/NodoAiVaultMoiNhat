@@ -20,6 +20,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import UnderlineTabs from "@/components/ui/underline-tab";
+import PositionStatus from "@/components/vault-detail/sections/position-status";
 
 export type VaultInfo = {
   label: string;
@@ -200,12 +201,10 @@ const VaultDetail = () => {
                 vault_id={vault_id}
               />
               <div className="mt-4" />
-
               <StrategyExplanation
                 vault={vaultDetails}
                 isDetailLoading={isDetailLoading}
               />
-
               <div className="mt-4" />
               <VaultInfo
                 vaultDetails={vaultDetails}
@@ -224,17 +223,17 @@ const VaultDetail = () => {
               />
 
               <div className="mt-6" />
+              <PositionStatus />
+              <div className="mt-6" />
               <VaultActivities
                 isDetailLoading={isDetailLoading}
                 vault_id={vault_id}
               />
-
               <div className="mt-6" />
               <StrategyExplanation
                 vault={vaultDetails}
                 isDetailLoading={isDetailLoading}
               />
-
               <div className="mt-6" />
               <VaultInfo
                 vaultDetails={vaultDetails}

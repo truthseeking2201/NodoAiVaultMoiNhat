@@ -5,11 +5,13 @@ import { PERIOD_TABS } from "@/components/vault-detail/constant";
 import UserPosition from "../charts/user-position";
 
 const PositionStatus = () => {
-  const [positionPeriodTab, setPositionPeriodTab] = useState("D");
+  const [positionPeriodTab, setPositionPeriodTab] = useState(
+    PERIOD_TABS[0].value
+  );
 
   return (
     <DetailWrapper
-      title="Your Position Status"
+      title="NDLP Price"
       titleComponent={
         <div>
           <Tabs
@@ -27,7 +29,7 @@ const PositionStatus = () => {
         </div>
       }
     >
-      <UserPosition period={positionPeriodTab} />
+      <UserPosition periodTab={positionPeriodTab} />
     </DetailWrapper>
   );
 };
