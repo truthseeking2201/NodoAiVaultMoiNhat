@@ -11,14 +11,19 @@ import {
   ReferenceLine,
   Dot,
 } from "recharts";
-import { mockDataLiveChart, mockDataLiveChart2 } from "../constant";
+import {
+  ChartDataPoint,
+  mockDataLiveChart,
+  mockDataLiveChart2,
+  PERIOD_TABS,
+} from "../constant";
+import useBreakpoint from "@/hooks/use-breakpoint";
 
-const UserPosition = ({ period }) => {
-  console.log("UserPosition rendered with period:", period);
-  const [timeFilter, setTimeFilter] = useState(period);
+const UserPosition = ({ periodTab }: { periodTab: string }) => {
+  const { isMobile } = useBreakpoint();
 
-  const chartData = useMemo(() => {
-    if (timeFilter === "D") {
+  const chartData: ChartDataPoint[] = useMemo(() => {
+    if (periodTab === PERIOD_TABS[0].value) {
       return mockDataLiveChart;
     } else if (timeFilter === "W") {
       return mockDataLiveChart2;
@@ -43,13 +48,19 @@ const UserPosition = ({ period }) => {
   }, [period]);
 
   return (
-    <div>
-      <ResponsiveContainer width="100%" height={300}>
+    <div
+      className="w-full rounded-[10.742px] border-[0.671px] border-white/5 p-1"
+      style={{
+        background:
+          "linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 33%, rgba(251, 191, 36, 0.02) 33%, rgba(251, 191, 36, 0.05) 66%, rgba(239, 68, 68, 0.02) 66%, rgba(239, 68, 68, 0.05) 100%), #0A0A0A",
+      }}
+    >
+      <ResponsiveContainer width="100%" height={isMobile ? 278 : 300}>
         <LineChart
           data={chartData}
-          margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-          width={500}
-          height={300}
+          margin={{ top: 20, right: 0, left: 0, bottom: 20 }}
+          width={isMobile ? 364 : 500}
+          height={isMobile ? 278 : 300}
         >
           <defs>
             <linearGradient
@@ -83,9 +94,9 @@ const UserPosition = ({ period }) => {
               y2="1"
               gradientUnits="objectBoundingBox"
             >
-              <stop offset="0%" stopColor="rgba(239, 68, 68, 0.80)" />
-              <stop offset="48%" stopColor="rgba(239, 68, 68, 0.80)" />
-              <stop offset="100%" stopColor="rgba(239, 68, 68, 0.20)" />
+              <stop offset="0%" stopColor="rgba(239, 68, 68, 0.90)" />
+              <stop offset="50%" stopColor="rgba(239, 68, 68, 0.70)" />
+              <stop offset="100%" stopColor="rgba(239, 68, 68, 0.30)" />
             </linearGradient>
             <linearGradient id="customLineGradient" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="#F2BB89" />
@@ -93,9 +104,9 @@ const UserPosition = ({ period }) => {
               <stop offset="100%" stopColor="#F5C8A4" />
             </linearGradient>
           </defs>
-          <ReferenceArea y1={0} y2={15} fill="url(#greenGradient)" />
+          <ReferenceArea y1={0} y2={15} fill="url(#greenGradient)" radius={[10,10,0,0]}/>
           <ReferenceArea y1={-5} y2={0} fill="url(#yellowGradient)" />
-          <ReferenceArea y1={-15} y2={-5} fill="url(#redGradient)" />
+          <ReferenceArea y1={-15} y2={-5} fill="url(#redGradient)" radius={[0,0,10,10]}/>
 
           <ReferenceLine y={0} stroke="#6b7280" strokeDasharray="3 3" />
 
@@ -105,8 +116,8 @@ const UserPosition = ({ period }) => {
             dataKey="time"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#9ca3af", fontSize: 12 }}
-            padding={{ left: 10, right: 10 }}
+            tick={{ fill: "#FFFFFFBF", fontSize: 12 }}
+            tickMargin={10}
           />
 
           <YAxis
@@ -114,10 +125,22 @@ const UserPosition = ({ period }) => {
             tickFormatter={(value) => `${value > 0 ? "+" : ""}${value}%`}
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "#9ca3af", fontSize: 12 }}
+            tick={{ fill: "#FFFFFF", fontSize: 12 }}
           />
 
-          <Tooltip />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "#1f2937",
+              border: "1px solid #374151",
+              borderRadius: "8px",
+              color: "#f9fafb",
+            }}
+            formatter={(value: number, name: string) => [
+              `${value > 0 ? "+" : ""}${value.toFixed(2)}%`,
+              "Position Change",
+            ]}
+            labelFormatter={(label) => `Time: ${label}`}
+          />
 
           <Line
             type="monotone"
