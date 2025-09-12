@@ -7,9 +7,11 @@ function normalizeSuiType(typeStr: string): string {
 }
 
 export function compareSuiTypes(typeA: string, typeB: string): boolean {
+  if (!typeA || !typeB) return;
   return normalizeSuiType(typeA) === normalizeSuiType(typeB);
 }
 
 export function compareSuiAddresses(addrA: string, addrB: string): boolean {
+  if (!addrA || !addrB) return;
   return normalizeSuiAddress(addrA) === normalizeSuiAddress(addrB);
 }
