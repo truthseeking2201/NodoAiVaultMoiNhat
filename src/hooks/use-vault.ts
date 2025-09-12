@@ -216,6 +216,9 @@ export const useUserHolding = (
       return response as unknown as VaultHoldingType;
     },
     enabled: !!vaultId && isAuthenticated,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
   });
 
   return {
