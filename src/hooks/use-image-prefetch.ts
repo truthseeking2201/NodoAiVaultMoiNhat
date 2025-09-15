@@ -21,6 +21,7 @@ export const CRITICAL_IMAGES = {
     "/banners/hero-banner-mobile.png",
     "/banners/migrate-banner.png",
     "/banners/migrate-banner-mobile.png",
+    "/bg-leaderboards.png",
   ],
 
   // Chain icons
@@ -66,6 +67,15 @@ export const CRITICAL_IMAGES = {
     "/banners/hero-banner.png",
     "/banners/hero-banner-mobile.png",
     "/banners/welcome-icon.png",
+  ],
+
+  leaderboards: [
+    "/leaderboards/rank-1.png",
+    "/leaderboards/rank-2.png",
+    "/leaderboards/rank-3.png",
+    "/leaderboards/referral-section.png",
+    "/leaderboards/campaign-bg.png",
+    "/leaderboards/no-data.png",
   ],
 } as const;
 

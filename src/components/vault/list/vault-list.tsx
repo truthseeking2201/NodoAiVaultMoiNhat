@@ -6,6 +6,7 @@ import Web3Button from "@/components/ui/web3-button";
 import { ButtonGradient } from "@/components/ui/button-gradient";
 import { SORT_TYPE } from "@/config/constants-types";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
+import { getPathVaultDetail } from "@/config/router";
 import {
   useGetDepositVaults,
   useNdlpAssetsStore,
@@ -17,7 +18,10 @@ import { cn } from "@/lib/utils";
 import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
 import { formatPercentage } from "@/lib/utils";
 import { formatNumber, showFormatNumber } from "@/lib/number";
-import { DepositVaultConfig, UserHoldingTokens } from "@/types/vault-config.types";
+import {
+  DepositVaultConfig,
+  UserHoldingTokens,
+} from "@/types/vault-config.types";
 import { calculateUserHoldings } from "@/utils/helpers";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -228,7 +232,7 @@ export default function VaultList() {
 
   const handleRowClick = useCallback(
     (el: any) => {
-      navigate(`/vault/${el.vault_id}`);
+      navigate(getPathVaultDetail(el.vault_id));
     },
     [navigate]
   );
@@ -260,7 +264,7 @@ export default function VaultList() {
           />
         ),
         dataIndex: "vault_name",
-        classCell: "py-6",
+        classCell: "py-6 h-[79px]",
         classTitle: "text-white/80 text-left",
         render: (_, record: VaultItemData) => <VaultItem item={record} />,
       },
@@ -410,7 +414,7 @@ export default function VaultList() {
                                 : "text-red-400"
                             )}
                           >{`(${token.percent_change}%)`}</span>
-                          <span className="text-sm text-white/40">(24h)</span>
+                          <span className="text-sm text-white">(24h)</span>
                         </>
                       )}
                     </div>

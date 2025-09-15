@@ -32,7 +32,7 @@ interface TableRenderProps {
   data: any[];
   columns: ColumnsTable[];
   rowsColspan?: rowsColspanTable[];
-  labelNodata?: string;
+  labelNodata?: string | ReactNode;
   isLoading?: boolean;
   paramsSearch?: any;
   classRowBody?: string;
@@ -55,11 +55,6 @@ export function TableRender({
   headerClassName = "",
   onRowClick = () => {},
 }: TableRenderProps) {
-  // const rows_colspan = useMemo(
-  //   () => rowsColspan.filter((col) => !col?.isColspan),
-  //   [rowsColspan]
-  // );
-
   /**
    * RENDER
    */
@@ -125,7 +120,7 @@ export function TableRender({
                   <TableCell
                     key={`loading-${index}`}
                     className={cn(
-                      "px-6 py-3 h-[97px] align-middle",
+                      "px-6 py-3 h-[50.5px] align-middle",
                       column?.classCell
                     )}
                   >
@@ -187,9 +182,15 @@ export function TableRender({
           <TableRow className="hover:bg-inherit">
             <TableCell
               colSpan={columns.length}
-              className="text-center py-8 text-white/60 border-t border-white/10"
+              className="border-t border-white/10 pt-0"
             >
-              {labelNodata}
+              {typeof labelNodata == "string" ? (
+                <div className="text-center py-16 text-white/60 ">
+                  {labelNodata}
+                </div>
+              ) : (
+                <>{labelNodata}</>
+              )}
             </TableCell>
           </TableRow>
         )}

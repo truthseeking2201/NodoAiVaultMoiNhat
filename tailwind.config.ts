@@ -245,7 +245,8 @@ export default {
         "bounce-gentle":
           "bounce-gentle 1.2s infinite cubic-bezier(0.4,0,0.2,1)",
         shine: "shine 5s linear infinite",
-        "fade-in-out": "fade-in-out 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
+        "fade-in-out":
+          "fade-in-out 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
       },
       spacing: {
         // Standard spacing scale
@@ -259,7 +260,7 @@ export default {
       },
       fontSize: {
         "13px": "13px",
-        "11px": "[11px, 16px]",
+        "11px": "11px",
         "10px": "10px",
       },
       maxWidth: {

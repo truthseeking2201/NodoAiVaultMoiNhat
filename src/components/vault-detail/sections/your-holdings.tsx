@@ -179,7 +179,6 @@ const YourHoldings = ({
   }, [isAuthenticated, userHoldingData, user_total_liquidity_usd, hasValue]);
 
   useEffect(() => {
-    refetch();
     setExpanded(isAuthenticated);
   }, [isAuthenticated]);
 

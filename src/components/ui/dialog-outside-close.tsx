@@ -34,10 +34,7 @@ export function DialogOutsideClose({
    * RENDER
    */
   return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
           `!rounded-xl !p-0 bg-transparent border-none gap-0 max-h-[100vh] !pb-4 !pt-4 focus:outline-none focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-offset-0 !outline-none`,
@@ -61,7 +58,7 @@ export function DialogOutsideClose({
 
         <div
           className={cn(
-            "max-h-[calc(100vh-120px)] overflow-auto border bg-black py-6 px-4 md:px-6 rounded-xl shadow-lg",
+            "max-h-[calc(100vh-120px)] overflow-auto border border-white/20 bg-black py-6 px-4 md:px-6 rounded-xl shadow-lg",
             className
           )}
         >
