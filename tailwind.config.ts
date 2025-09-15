@@ -52,6 +52,9 @@ export default {
           ready: "#07D993",
           increase: "#64EBBC",
         },
+        orange: {
+          warning: "#FF9903",
+        },
 
         // shadcn UI colors
         border: "hsl(var(--border))",

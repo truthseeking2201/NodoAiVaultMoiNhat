@@ -1,15 +1,15 @@
-import React from "react";
+import React, { memo } from "react";
 import { formatAmount } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
-interface PriceChange7dProps {
+interface PriceChangeProps {
   priceChange: number;
   className?: string;
   showParentheses?: boolean;
   showPeriod?: boolean;
 }
 
-const PriceChange7d: React.FC<PriceChange7dProps> = ({
+const PriceChange: React.FC<PriceChangeProps> = ({
   priceChange,
   className,
   showParentheses = true,
@@ -21,12 +21,12 @@ const PriceChange7d: React.FC<PriceChange7dProps> = ({
   return (
     <span className={cn("text-xs", className)}>
       {showParentheses && "("}
-      {isPositive && "+"}
       <span
         className={cn(
-          isPositive ? "text-[#64EBBC]" : "text-red-400"
+          isPositive ? "text-green-increase" : "text-red-400"
         )}
       >
+        {isPositive &&  "+"}
         {formattedChange}%
       </span>
       {showPeriod && " in 7d"}
@@ -35,4 +35,4 @@ const PriceChange7d: React.FC<PriceChange7dProps> = ({
   );
 };
 
-export default PriceChange7d;
+export default memo(PriceChange);

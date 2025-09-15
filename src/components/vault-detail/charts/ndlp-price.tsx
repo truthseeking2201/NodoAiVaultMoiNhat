@@ -17,11 +17,9 @@ import {
 } from "../constant";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { CustomTooltipProps } from "./type";
-import { formatDate } from "@/utils/date";
-import PriceChange7d from "@/components/shared/price-change-7d";
+import PriceChange from "@/components/shared/price-change";
 
 const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
-  console.log("🚀 ~ CustomTooltip ~ label:", label)
   if (!active || !payload || !payload.length) return null;
 
   const priceData = payload[0]?.payload;
@@ -46,7 +44,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
           <span className="font-mono text-sm font-semibold text-white">
             {ndlpPrice}
           </span>
-          <PriceChange7d priceChange={percentage} />
+          <PriceChange priceChange={percentage} showParentheses={false} showPeriod={false} />
         </div>
       )}
       <div className="flex items-end justify-between">
@@ -175,9 +173,7 @@ const NdlpPrice = ({ periodTab }: { periodTab: string }) => {
             tickLine={false}
             tick={{ fill: "#FFFFFF", fontSize: 12 }}
           />
-
           <Tooltip content={<CustomTooltip />} />
-
           <Line
             type="monotone"
             dataKey="percentage"

@@ -6,18 +6,14 @@ import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import TableMobile, {
-  RowTokens,
-  RowType,
-  RowTime,
   RowValue,
   RowAction,
-  RowSkeleton,
 } from "@/components/ui/table-mobile";
 import { formatCurrency } from "@/utils/currency";
 import gradientLink from "@/assets/icons/gradient-arrow-link.svg";
 import { formatAmount } from "@/lib/utils";
 import { ADD_NDLP_WALLET_TUTORIAL_LINK } from "@/config/constants";
-import PriceChange7d from "@/components/shared/price-change-7d";
+import PriceChange from "@/components/shared/price-change";
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import VideoModal from "@/components/ui/video-modal";
 import { useState } from "react";
@@ -148,9 +144,9 @@ const VaultInfoMobile = ({
               $
               {formatAmount({
                 amount: vaultDetails?.ndlp_price,
-                precision: 4,
+              precision: 4,
               })}{" "}
-              <PriceChange7d priceChange={vaultDetails?.ndlp_price_change_7d} />
+              <PriceChange priceChange={vaultDetails?.ndlp_price_change_7d} />
             </span>
           </RowItem.Value>
         </MRowItem>
@@ -329,7 +325,7 @@ const VaultInfo = ({
             </div>
             <div>
               <div className="text-[#9CA3AF] text-xs pb-1">Price</div>
-              <PriceChange7d priceChange={vaultDetails?.ndlp_price_change_7d} />
+              <PriceChange priceChange={vaultDetails?.ndlp_price_change_7d} />
             </div>
           </div>
           <div className="flex items-center gap-16 mt-4">
