@@ -20,13 +20,18 @@ import {
   formatTime,
   renamingType,
 } from "@/components/vault-detail/activities/utils";
+import FormatUsdCollateralAmount from "../sections/format-usd-collateral-amount";
+import { useVaultMetricUnitStore } from "@/hooks";
+import { formatNumber } from "@/lib/number";
 
 const DesktopTable = ({
   paginatedTransactions,
   isFetching,
   isFetched,
   handleSelectTransaction,
+  vault_id,
 }) => {
+  const { isUsd, unit } = useVaultMetricUnitStore(vault_id);
   return (
     <Table className="w-full border-0">
       <TableHeader className="border-b border-white/20">
@@ -159,7 +164,12 @@ const DesktopTable = ({
                   "font-mono font-medium text-white px-2 flex pt-3.5 border-0"
                 )}
               >
-                {formatCurrency(tx.value, 0, 0, 2, "currency", "USD")}
+                {/* {formatCurrency(tx.value, 0, 0, 2, "currency", "USD")} */}
+                <FormatUsdCollateralAmount
+                  collateralIcon={unit}
+                  collateralClassName="w-4 h-4"
+                  text={formatNumber(tx.value, 0, isUsd ? 2 : 4)}
+                />
               </TableCell>
               <TableCell
                 className={cn(

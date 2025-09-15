@@ -175,6 +175,7 @@ const VaultActivities = ({
           isFetching={isFetching}
           isFetched={isFetched}
           handleSelectTransaction={handleSelectTransaction}
+          vault_id={vault_id}
         />
       )}
 

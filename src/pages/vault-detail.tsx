@@ -19,7 +19,7 @@ import {
 } from "@/hooks";
 import { cn, formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
-import { ReactNode, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
@@ -48,7 +48,7 @@ const VaultDetail = () => {
   } = useGetDepositVaults();
 
   const [activeTab, setActiveTab] = useState(0);
-  const { isUsd, unit } = useVaultMetricUnitStore();
+  const { isUsd, unit } = useVaultMetricUnitStore(vault_id);
   const depositVault = depositVaults?.find(
     (vault) => vault.vault_id === vault_id
   );
@@ -173,7 +173,10 @@ const VaultDetail = () => {
           labels={["Overview", "Your Holdings"]}
           onActiveTabChange={setActiveTab}
         />
-        <CollateralUnit collateralToken={vaultDetails?.collateral_token} />
+        <CollateralUnit
+          collateralToken={vaultDetails?.collateral_token}
+          vault_id={vault_id}
+        />
       </div>
 
       <div className={cn("flex gap-8 mb-[76px]", activeTab !== 1 && "hidden")}>
@@ -258,6 +261,11 @@ const VaultDetail = () => {
             </div>
             {/* Right sessions */}
             <div className="xl:w-[450px] w-[380px]">
+              {/* <YourHoldings
+                isDetailLoading={isDetailLoading}
+                vault_id={vault_id}
+                vault={vaultDetails}
+              /> */}
               <DepositWithdraw
                 vault_id={vault_id}
                 isDetailLoading={isDetailLoading}
