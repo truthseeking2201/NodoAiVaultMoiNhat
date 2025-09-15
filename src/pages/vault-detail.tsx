@@ -15,10 +15,11 @@ import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import { useGetDepositVaults, useVaultBasicDetails } from "@/hooks";
 import { formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
+import UnderlineTabs from "@/components/ui/underline-tab";
 
 export type VaultInfo = {
   label: string;
@@ -39,6 +40,8 @@ const VaultDetail = () => {
     isFetching: isFetchingDepositVaults,
     refetch: refetchDepositVaults,
   } = useGetDepositVaults();
+
+  const [activeTab, setActiveTab] = useState(0);
 
   const depositVault = depositVaults?.find(
     (vault) => vault.vault_id === vault_id
@@ -135,6 +138,13 @@ const VaultDetail = () => {
         <ChevronLeft className="!w-6 !h-6" />
         AI Vaults
       </Button>
+      {/* <div className="p-3">
+        <UnderlineTabs
+          activeTab={activeTab}
+          labels={["Overview", "Your Holdings"]}
+          onActiveTabChange={setActiveTab}
+        />
+      </div> */}
       <HeaderDetail
         vault={vaultDetails}
         exchange={exchange}
