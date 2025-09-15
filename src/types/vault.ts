@@ -86,3 +86,13 @@ export type Types = {
     | "CLOSE"
     | "ALL";
 };
+
+export interface NdlpPriceChartData {
+  code: string;
+  timestamp: string;
+  ndlp_price: number;
+  ndlp_price_usd: number;
+  performance_percent: number;
+  user_break_event_price: number;
+  user_break_event_price_usd: number;
+}

@@ -211,7 +211,7 @@ const VaultDetail = () => {
                 vault={vaultDetails}
               />
               <div className="mt-4" />
-              <NdlpStatus />
+              <NdlpStatus vaultId={vault_id || ""} />
               <div className="mt-4" />
               <HelpfulInfo isDetailLoading={isDetailLoading} />
               <div className="mt-4" />
@@ -242,7 +242,10 @@ const VaultDetail = () => {
               />
 
               <div className="mt-6" />
-              <NdlpStatus />
+              <NdlpStatus 
+                isDetailLoading={isDetailLoading}
+                vaultId={vault_id || ""} 
+              />
               <div className="mt-6" />
               <VaultActivities
                 isDetailLoading={isDetailLoading}

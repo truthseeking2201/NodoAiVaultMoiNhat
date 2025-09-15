@@ -10,20 +10,17 @@ import {
   YAxis,
   Legend,
 } from "recharts";
-import {
-  ChartDataPoint,
-  mockDataLiveChart,
-  mockDataLiveChart2,
-  PERIOD_TABS,
-} from "../constant";
+import { ChartDataPoint, PERIOD_TABS } from "../constant";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { CustomTooltipProps } from "./type";
 import PriceChange from "@/components/shared/price-change";
+import { formatDate } from "@/utils/date";
+import { formatNumber } from "@/lib/number";
 
 const CustomLegend = () => {
   const { isMobile } = useBreakpoint();
   return (
-    <div className="flex md:gap-[200px] gap-4 justify-center mt-4">
+    <div className="flex gap-4 justify-center mt-4">
       <div className="flex items-center gap-2">
         <span
           style={{
@@ -80,14 +77,16 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
           <span className="font-medium text-xs text-white/80">
             NDLP Price:{" "}
           </span>
-          <span className="font-mono text-sm font-semibold text-white">
-            {ndlpPrice}
-          </span>
-          <PriceChange
-            priceChange={percentage}
-            showParentheses={false}
-            showPeriod={false}
-          />
+          <div className="flex items-center gap-1">
+            <span className="font-mono text-sm font-semibold text-white">
+              {ndlpPrice}
+            </span>
+            <PriceChange
+              priceChange={percentage}
+              showParentheses={false}
+              showPeriod={false}
+            />
+          </div>
         </div>
       )}
       <div className="flex items-end justify-between">
@@ -95,24 +94,41 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
           Break Even Price:{" "}
         </span>
         <span className="font-mono text-sm font-semibold text-white">
-          {breakEvenPrice}
+          ${formatNumber(breakEvenPrice, 0, breakEvenPrice < 1 ? 6 : 2)}
         </span>
       </div>
     </div>
   );
 };
 
-const NdlpPriceChart = ({ periodTab }: { periodTab: string }) => {
+interface NdlpPriceChartProps {
+  periodTab: string;
+  ndlpPriceData?: any;
+}
+
+const NdlpPriceChart = ({ periodTab, ndlpPriceData }: NdlpPriceChartProps) => {
   const { isMobile } = useBreakpoint();
 
-  const chartData: ChartDataPoint[] = useMemo(() => {
-    if (periodTab === PERIOD_TABS[0].value) {
-      return mockDataLiveChart;
-    } else if (periodTab === PERIOD_TABS[1].value) {
-      return mockDataLiveChart2;
-    }
-    return mockDataLiveChart; // Default to daily data
+  const isWeek = useMemo(() => {
+    return periodTab === PERIOD_TABS[1].value;
   }, [periodTab]);
+
+  const chartData: ChartDataPoint[] = useMemo(() => {
+    if (!ndlpPriceData) return [];
+
+    const chartData = [];
+
+    for (const item of ndlpPriceData) {
+      chartData.push({
+        time: item.timestamp,
+        price: item.ndlp_price,
+        breakEvenPrice: item.user_break_event_price,
+        percentage: item.performance_percent,
+      });
+    }
+
+    return chartData;
+  }, [ndlpPriceData]);
 
   const checkPositionOfPrice = useMemo(() => {
     for (let i = chartData.length - 1; i >= 0; i--) {
@@ -125,6 +141,11 @@ const NdlpPriceChart = ({ periodTab }: { periodTab: string }) => {
     }
     return null;
   }, [chartData]);
+
+  const interval = useMemo(
+    () => (isWeek ? (isMobile ? 20 : 10) : 3),
+    [isWeek, isMobile]
+  );
 
   return (
     <div className="flex flex-col gap-3">
@@ -211,12 +232,35 @@ const NdlpPriceChart = ({ periodTab }: { periodTab: string }) => {
               dataKey="time"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#FFFFFFBF", fontSize: 12 }}
-              tickMargin={12}
-            />
+              tick={({ x, y, payload, index }) => {
+                const total = chartData.length;
+                const isFirst = index === 0;
 
+                // Check if this tick represents the last data point
+                const lastDataPoint = chartData[total - 1];
+                const isLast = payload.value === lastDataPoint?.time;
+
+                return (
+                  <text
+                    x={x}
+                    y={y + 8}
+                    fontSize={12}
+                    className="text-white/75 md:text-xs text-[10px]"
+                    fill="#fff"
+                    textAnchor={isFirst ? "start" : isLast ? "end" : "middle"}
+                  >
+                    {isWeek
+                      ? formatDate(payload.value, "dd/MM HH:mm")
+                      : formatDate(payload.value, "HH:mm")}
+                  </text>
+                );
+              }}
+              tickMargin={12}
+              interval={interval}
+            />
             <YAxis
               domain={[-15, 15]}
+              ticks={[-15, -10, -5, 0, 5, 10, 15]}
               tickFormatter={(value) => `${value > 0 ? "+" : ""}${value}%`}
               axisLine={false}
               tickLine={false}

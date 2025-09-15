@@ -1,6 +1,6 @@
 export const PERIOD_TABS = [
-  { value: "ONE_DAY", label: "1D" },
-  { value: "ONE_WEEK", label: "1W" },
+  { value: "1d", label: "1D" },
+  { value: "1w", label: "1W" },
 ];
 
 export const PERIOD_TABS_1W = [{ value: "ONE_WEEK", label: "1W" }];
