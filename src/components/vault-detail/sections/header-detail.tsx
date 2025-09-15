@@ -58,42 +58,52 @@ const Statistic = ({
         isMobile && "flex-col gap-1.5 min-w-[160px]"
       )}
     >
-      {vaultInfo.map((info) => (
-        <div key={info.label} className="w-full">
-          <div className="flex items-center gap-1 justify-end mb-1 max-md:justify-between max-md:w-full">
-            <div className="flex items-center gap-1">
-              <TooltipProvider delayDuration={0}>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <div
-                      className={cn(
-                        "text-white/80 text-xs text-right max-md:text-xs underline underline-offset-8 decoration-dotted decoration-gray-600 whitespace-nowrap"
-                      )}
-                    >
-                      {info.label}
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3 max-w-[229px] text-white/80 text-xs">
-                    {info.tooltip}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+      {vaultInfo.map((info) => {
+        const textContent = (
+          <div className="text-white font-medium text-right text-xl font-mono max-md:text-sm">
+            {typeof info.prefix === "string" ? (
+              `${info.prefix || ""}${info.value}${info.suffix || ""}`
+            ) : (
+              <div className="flex items-center justify-end gap-1">
+                {info.prefix} {info.value}
+                {info.suffix}
+              </div>
+            )}
+          </div>
+        );
+        return (
+          <div key={info.label} className="w-full">
+            <div className="flex items-center gap-1 justify-end mb-1 max-md:justify-between max-md:w-full">
+              <div className="flex items-center gap-1">
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <div
+                        className={cn(
+                          "text-white/80 text-xs text-right max-md:text-xs underline underline-offset-8 decoration-dotted decoration-gray-600 whitespace-nowrap"
+                        )}
+                      >
+                        {info.label}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3 max-w-[229px] text-white/80 text-xs">
+                      {info.tooltip}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+
+              <ConditionRenderer when={isMobile}>
+                {textContent}
+              </ConditionRenderer>
             </div>
 
-            <ConditionRenderer when={isMobile}>
-              <div className="text-white font-medium text-right text-xl font-mono max-md:text-sm">
-                {`${info.prefix || ""}${info.value}${info.suffix || ""}`}
-              </div>
+            <ConditionRenderer when={!isMobile}>
+              {textContent}
             </ConditionRenderer>
           </div>
-
-          <ConditionRenderer when={!isMobile}>
-            <div className="text-white font-medium text-right text-xl font-mono">
-              {`${info.prefix || ""}${info.value}${info.suffix || ""}`}
-            </div>
-          </ConditionRenderer>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

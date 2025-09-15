@@ -12,20 +12,25 @@ import VaultAnalytics from "@/components/vault-detail/sections/vault-analytics";
 import VaultInfo from "@/components/vault-detail/sections/vault-info";
 import YourHoldings from "@/components/vault-detail/sections/your-holdings";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
-import { useGetDepositVaults, useVaultBasicDetails } from "@/hooks";
-import { formatAmount } from "@/lib/utils";
+import {
+  useGetDepositVaults,
+  useVaultBasicDetails,
+  useVaultMetricUnitStore,
+} from "@/hooks";
+import { cn, formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
-import { useMemo, useState } from "react";
+import { ReactNode, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import UnderlineTabs from "@/components/ui/underline-tab";
 import PositionStatus from "@/components/vault-detail/sections/position-status";
+import CollateralUnit from "@/components/vault-detail/sections/collateral-unit";
 
 export type VaultInfo = {
   label: string;
   value: string;
-  prefix?: string;
+  prefix?: string | JSX.Element;
   suffix?: string;
   tooltip?: any;
 };
@@ -43,7 +48,7 @@ const VaultDetail = () => {
   } = useGetDepositVaults();
 
   const [activeTab, setActiveTab] = useState(0);
-
+  const { isUsd, unit } = useVaultMetricUnitStore();
   const depositVault = depositVaults?.find(
     (vault) => vault.vault_id === vault_id
   );
@@ -61,6 +66,20 @@ const VaultDetail = () => {
     refetchDepositVaults();
     navigate("/", { replace: true });
   };
+
+  const unitIcon = useMemo(
+    () =>
+      isUsd ? (
+        "$"
+      ) : (
+        <img
+          src={`/coins/${unit?.toLowerCase()}.png`}
+          className="w-4 h-4"
+          alt={unit}
+        />
+      ),
+    [isUsd, unit]
+  );
 
   const vaultInfo = useMemo(() => {
     return [
@@ -83,7 +102,7 @@ const VaultDetail = () => {
               amount: vaultDetails?.total_value_usd,
             })
           : "--",
-        prefix: "$",
+        prefix: unitIcon,
       },
       {
         label: "24h Rewards",
@@ -94,7 +113,7 @@ const VaultDetail = () => {
               amount: vaultDetails?.rewards_24h_usd,
             })
           : "--",
-        prefix: "$",
+        prefix: unitIcon,
       },
       {
         label: "NDLP Price",
@@ -106,10 +125,10 @@ const VaultDetail = () => {
               precision: 4,
             })
           : "--",
-        prefix: "$",
+        prefix: unitIcon,
       },
     ];
-  }, [vaultDetails, isLoadingVaultDetails]);
+  }, [vaultDetails, unitIcon, isLoadingVaultDetails]);
 
   if ((!vaultDetails || !isValidVault) && !isLoadingVaultDetails) {
     return <Navigate to="/" replace />;
@@ -154,31 +173,26 @@ const VaultDetail = () => {
           labels={["Overview", "Your Holdings"]}
           onActiveTabChange={setActiveTab}
         />
-        <div>View by: TODO</div>
+        <CollateralUnit collateralToken={vaultDetails?.collateral_token} />
       </div>
-      <ConditionRenderer
-        when={activeTab === 0}
-        fallback={
-          <div className="flex gap-8 mb-[76px]">
-            <div className="flex-1">
-              <YourHoldings
-                isDetailLoading={isDetailLoading}
-                vault_id={vault_id}
-                vault={vaultDetails}
-              />
-            </div>
-            <div className="xl:w-[450px] w-[380px]">
-              <DepositWithdraw
-                vault_id={vault_id}
-                isDetailLoading={isDetailLoading}
-              />
 
-              <div className="mt-6" />
-              <HelpfulInfo isDetailLoading={isDetailLoading} />
-            </div>
-          </div>
-        }
-      >
+      <div className={cn("flex gap-8 mb-[76px]", activeTab !== 1 && "hidden")}>
+        <div className="flex-1">
+          <YourHoldings
+            isDetailLoading={isDetailLoading}
+            vault_id={vault_id}
+            vault={vaultDetails}
+          />
+        </div>
+        <div className="xl:w-[450px] w-[380px]">
+          <DepositWithdraw
+            vault_id={vault_id}
+            isDetailLoading={isDetailLoading}
+          />
+        </div>
+      </div>
+
+      <div className={cn(activeTab !== 0 && "hidden")}>
         <ConditionRenderer
           when={isLg}
           fallback={
@@ -252,7 +266,7 @@ const VaultDetail = () => {
             </div>
           </div>
         </ConditionRenderer>
-      </ConditionRenderer>
+      </div>
     </PageContainer>
   );
 };

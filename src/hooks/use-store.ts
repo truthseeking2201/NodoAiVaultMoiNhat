@@ -230,3 +230,23 @@ export const useGetLpToken = (coinType: string, vaultId: string) => {
     usd_price: "0",
   };
 };
+
+interface VaultMetricUnitState {
+  unit: string;
+  setMetricUnit: (metricUnit: string) => void;
+}
+
+const vaultMetricUnitStore = create<VaultMetricUnitState>((set) => ({
+  unit: "usd",
+  setMetricUnit: (unit: string) => set({ unit }),
+}));
+
+export const useVaultMetricUnitStore = () => {
+  const unit = vaultMetricUnitStore((state) => state.unit);
+  const setMetricUnit = vaultMetricUnitStore((state) => state.setMetricUnit);
+  return {
+    unit,
+    isUsd: unit === "usd",
+    setMetricUnit,
+  };
+};
