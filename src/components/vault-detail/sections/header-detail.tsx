@@ -171,7 +171,7 @@ const HeaderDetail = ({
     );
   }
   return (
-    <header className="mb-6 flex items-center justify-between">
+    <header className="mb-4 flex items-center justify-between">
       {isDetailLoading ? (
         <div className="flex gap-4 h-[58px]">
           <div className="flex items-center justify-center">

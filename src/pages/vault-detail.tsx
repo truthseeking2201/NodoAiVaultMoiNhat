@@ -138,13 +138,7 @@ const VaultDetail = () => {
         <ChevronLeft className="!w-6 !h-6" />
         AI Vaults
       </Button>
-      {/* <div className="p-3">
-        <UnderlineTabs
-          activeTab={activeTab}
-          labels={["Overview", "Your Holdings"]}
-          onActiveTabChange={setActiveTab}
-        />
-      </div> */}
+
       <HeaderDetail
         vault={vaultDetails}
         exchange={exchange}
@@ -153,92 +147,112 @@ const VaultDetail = () => {
         vaultDetails={vaultDetails}
         isDetailLoading={isDetailLoading}
       />
+      <div className="p-3 mb-4 flex justify-between">
+        <UnderlineTabs
+          activeTab={activeTab}
+          labels={["Overview", "Your Holdings"]}
+          onActiveTabChange={setActiveTab}
+        />
+        <div>View by: TODO</div>
+      </div>
       <ConditionRenderer
-        when={isLg}
+        when={activeTab === 0}
         fallback={
-          <div>
-            <YourHoldings
-              isDetailLoading={isDetailLoading}
-              vault_id={vault_id}
-              vault={vaultDetails}
-            />
-            <div className="mt-4" />
-            <DepositWithdraw
-              vault_id={vault_id}
-              isDetailLoading={isDetailLoading}
-            />
-            <div className="mt-4" />
-            <VaultAnalytics
-              vault_id={vault_id}
-              isDetailLoading={isDetailLoading}
-              vault={vaultDetails}
-            />
-            <div className="mt-4" />
-            <HelpfulInfo isDetailLoading={isDetailLoading} />
-            <div className="mt-4" />
-            <VaultActivities
-              isDetailLoading={isDetailLoading}
-              vault_id={vault_id}
-            />
-            <div className="mt-4" />
+          <div className="flex gap-8 mb-[76px]">
+            <div className="flex-1">
+              <YourHoldings
+                isDetailLoading={isDetailLoading}
+                vault_id={vault_id}
+                vault={vaultDetails}
+              />
+            </div>
+            <div className="xl:w-[450px] w-[380px]">
+              <DepositWithdraw
+                vault_id={vault_id}
+                isDetailLoading={isDetailLoading}
+              />
 
-            <StrategyExplanation
-              vault={vaultDetails}
-              isDetailLoading={isDetailLoading}
-            />
-
-            <div className="mt-4" />
-            <VaultInfo
-              vaultDetails={vaultDetails}
-              isDetailLoading={isDetailLoading}
-            />
+              <div className="mt-6" />
+              <HelpfulInfo isDetailLoading={isDetailLoading} />
+            </div>
           </div>
         }
       >
-        <div className="flex gap-8 mb-[76px]">
-          {/* Left sessions */}
-          <div className="flex-1">
-            <VaultAnalytics
-              vault_id={vault_id}
-              isDetailLoading={isDetailLoading}
-              vault={vaultDetails}
-            />
+        <ConditionRenderer
+          when={isLg}
+          fallback={
+            <div>
+              <DepositWithdraw
+                vault_id={vault_id}
+                isDetailLoading={isDetailLoading}
+              />
+              <div className="mt-4" />
+              <VaultAnalytics
+                vault_id={vault_id}
+                isDetailLoading={isDetailLoading}
+                vault={vaultDetails}
+              />
+              <div className="mt-4" />
+              <HelpfulInfo isDetailLoading={isDetailLoading} />
+              <div className="mt-4" />
+              <VaultActivities
+                isDetailLoading={isDetailLoading}
+                vault_id={vault_id}
+              />
+              <div className="mt-4" />
 
-            <div className="mt-6" />
-            <VaultActivities
-              isDetailLoading={isDetailLoading}
-              vault_id={vault_id}
-            />
+              <StrategyExplanation
+                vault={vaultDetails}
+                isDetailLoading={isDetailLoading}
+              />
 
-            <div className="mt-6" />
-            <StrategyExplanation
-              vault={vaultDetails}
-              isDetailLoading={isDetailLoading}
-            />
+              <div className="mt-4" />
+              <VaultInfo
+                vaultDetails={vaultDetails}
+                isDetailLoading={isDetailLoading}
+              />
+            </div>
+          }
+        >
+          <div className="flex gap-8 mb-[76px]">
+            {/* Left sessions */}
+            <div className="flex-1">
+              <VaultAnalytics
+                vault_id={vault_id}
+                isDetailLoading={isDetailLoading}
+                vault={vaultDetails}
+              />
 
-            <div className="mt-6" />
-            <VaultInfo
-              vaultDetails={vaultDetails}
-              isDetailLoading={isDetailLoading}
-            />
+              <div className="mt-6" />
+              <VaultActivities
+                isDetailLoading={isDetailLoading}
+                vault_id={vault_id}
+              />
+
+              <div className="mt-6" />
+              <StrategyExplanation
+                vault={vaultDetails}
+                isDetailLoading={isDetailLoading}
+              />
+
+              <div className="mt-6" />
+              <VaultInfo
+                vaultDetails={vaultDetails}
+                isDetailLoading={isDetailLoading}
+              />
+            </div>
+            {/* Right sessions */}
+            <div className="xl:w-[450px] w-[380px]">
+              <DepositWithdraw
+                vault_id={vault_id}
+                isDetailLoading={isDetailLoading}
+              />
+
+              <div className="mt-6" />
+              <HelpfulInfo isDetailLoading={isDetailLoading} />
+            </div>
           </div>
-          {/* Right sessions */}
-          <div className="xl:w-[450px] w-[380px]">
-            <YourHoldings
-              isDetailLoading={isDetailLoading}
-              vault_id={vault_id}
-              vault={vaultDetails}
-            />
-            <div className="mt-6" />
-            <DepositWithdraw
-              vault_id={vault_id}
-              isDetailLoading={isDetailLoading}
-            />
-
-            <div className="mt-6" />
-            <HelpfulInfo isDetailLoading={isDetailLoading} />
-          </div>
-        </div>
+        </ConditionRenderer>
       </ConditionRenderer>
     </PageContainer>
   );
