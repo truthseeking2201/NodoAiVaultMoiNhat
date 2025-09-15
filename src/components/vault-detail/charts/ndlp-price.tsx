@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo } from "react";
+import React, { Fragment, useMemo, FC } from "react";
 import {
   Line,
   LineChart,
@@ -16,8 +16,52 @@ import {
   PERIOD_TABS,
 } from "../constant";
 import useBreakpoint from "@/hooks/use-breakpoint";
+import { CustomTooltipProps } from "./type";
+import { formatDate } from "@/utils/date";
+import PriceChange7d from "@/components/shared/price-change-7d";
 
-const UserPosition = ({ periodTab }: { periodTab: string }) => {
+const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
+  console.log("🚀 ~ CustomTooltip ~ label:", label)
+  if (!active || !payload || !payload.length) return null;
+
+  const priceData = payload[0]?.payload;
+
+  if (!priceData) return null;
+
+  const ndlpPrice = Number(priceData.price);
+  const breakEvenPrice = Number(priceData.breakEvenPrice) || 0;
+  const percentage = Number(priceData.percentage) || 0;
+  const time = priceData.time;
+
+  return (
+    <div className="bg-black p-3 border border-white/20 rounded-lg shadow-lg w-[250px]">
+      <div className="text-xs font-bold text-white mb-[6px]">
+        {label}
+      </div>
+      {ndlpPrice && (
+        <div className="flex items-end justify-between mb-1">
+          <span className="font-medium text-xs text-white/80">
+            NDLP Price:{" "}
+          </span>
+          <span className="font-mono text-sm font-semibold text-white">
+            {ndlpPrice}
+          </span>
+          <PriceChange7d priceChange={percentage} />
+        </div>
+      )}
+      <div className="flex items-end justify-between">
+        <span className="font-medium text-xs text-white/80">
+          Break Even Price:{" "}
+        </span>
+        <span className="font-mono text-sm font-semibold text-white">
+          {breakEvenPrice}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const NdlpPrice = ({ periodTab }: { periodTab: string }) => {
   const { isMobile } = useBreakpoint();
 
   const chartData: ChartDataPoint[] = useMemo(() => {
@@ -132,19 +176,7 @@ const UserPosition = ({ periodTab }: { periodTab: string }) => {
             tick={{ fill: "#FFFFFF", fontSize: 12 }}
           />
 
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#1f2937",
-              border: "1px solid #374151",
-              borderRadius: "8px",
-              color: "#f9fafb",
-            }}
-            formatter={(value: number, name: string) => [
-              `${value > 0 ? "+" : ""}${value.toFixed(2)}%`,
-              "Position Change",
-            ]}
-            labelFormatter={(label) => `Time: ${label}`}
-          />
+          <Tooltip content={<CustomTooltip />} />
 
           <Line
             type="monotone"
@@ -180,4 +212,4 @@ const UserPosition = ({ periodTab }: { periodTab: string }) => {
   );
 };
 
-export default UserPosition;
+export default NdlpPrice;

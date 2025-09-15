@@ -2,7 +2,7 @@ import { DetailWrapper } from "@/components/vault-detail/detail-wrapper";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { PERIOD_TABS } from "@/components/vault-detail/constant";
-import UserPosition from "../charts/user-position";
+import NdlpPrice from "../charts/ndlp-price";
 
 const PositionStatus = () => {
   const [positionPeriodTab, setPositionPeriodTab] = useState(
@@ -29,7 +29,7 @@ const PositionStatus = () => {
         </div>
       }
     >
-      <UserPosition periodTab={positionPeriodTab} />
+      <NdlpPrice periodTab={positionPeriodTab} />
     </DetailWrapper>
   );
 };
