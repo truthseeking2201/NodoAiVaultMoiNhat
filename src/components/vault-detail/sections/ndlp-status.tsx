@@ -12,7 +12,7 @@ const NdlpStatus = () => {
   return (
     <DetailWrapper
       title="NDLP Price"
-      titleClassName="flex flex-row items-center justify-between"
+      titleClassName="flex flex-row"
       hasTitlePadding={false}
       titleComponent={
         <Tabs

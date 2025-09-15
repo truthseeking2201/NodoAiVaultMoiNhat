@@ -46,7 +46,7 @@ const CustomLegend = () => {
             width: isMobile ? 19 : 38,
             height: isMobile ? 2 : 4,
             borderRadius: 1,
-            borderTop: `2px dashed rgba(253, 235, 207, 0.6)`,
+            borderTop: `${isMobile ? 1 : 2}px dashed rgba(253, 235, 207, 0.6)`,
             borderBottom: "none",
             borderLeft: "none",
             borderRight: "none",
@@ -102,7 +102,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
   );
 };
 
-const NdlpPrice = ({ periodTab }: { periodTab: string }) => {
+const NdlpPriceChart = ({ periodTab }: { periodTab: string }) => {
   const { isMobile } = useBreakpoint();
 
   const chartData: ChartDataPoint[] = useMemo(() => {
@@ -261,4 +261,4 @@ const NdlpPrice = ({ periodTab }: { periodTab: string }) => {
   );
 };
 
-export default NdlpPrice;
+export default NdlpPriceChart;
