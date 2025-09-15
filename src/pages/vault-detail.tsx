@@ -24,7 +24,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import UnderlineTabs from "@/components/ui/underline-tab";
-import PositionStatus from "@/components/vault-detail/sections/position-status";
+import NdlpStatus from "@/components/vault-detail/sections/ndlp-status";
 import CollateralUnit from "@/components/vault-detail/sections/collateral-unit";
 
 export type VaultInfo = {
@@ -208,6 +208,8 @@ const VaultDetail = () => {
                 vault={vaultDetails}
               />
               <div className="mt-4" />
+              <NdlpStatus />
+              <div className="mt-4" />
               <HelpfulInfo isDetailLoading={isDetailLoading} />
               <div className="mt-4" />
               <VaultActivities
@@ -237,7 +239,7 @@ const VaultDetail = () => {
               />
 
               <div className="mt-6" />
-              <PositionStatus />
+              <NdlpStatus />
               <div className="mt-6" />
               <VaultActivities
                 isDetailLoading={isDetailLoading}

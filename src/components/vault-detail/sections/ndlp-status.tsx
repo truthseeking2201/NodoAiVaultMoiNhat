@@ -4,7 +4,7 @@ import { useState } from "react";
 import { PERIOD_TABS } from "@/components/vault-detail/constant";
 import NdlpPrice from "../charts/ndlp-price";
 
-const PositionStatus = () => {
+const NdlpStatus = () => {
   const [positionPeriodTab, setPositionPeriodTab] = useState(
     PERIOD_TABS[0].value
   );
@@ -12,21 +12,21 @@ const PositionStatus = () => {
   return (
     <DetailWrapper
       title="NDLP Price"
+      titleClassName="flex flex-row items-center justify-between"
+      hasTitlePadding={false}
       titleComponent={
-        <div>
-          <Tabs
-            value={positionPeriodTab}
-            onValueChange={(value) => setPositionPeriodTab(value)}
-          >
-            <TabsList className="p-1 flex gap-1">
-              {PERIOD_TABS.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value}>
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </div>
+        <Tabs
+          value={positionPeriodTab}
+          onValueChange={(value) => setPositionPeriodTab(value)}
+        >
+          <TabsList className="p-1 flex gap-1">
+            {PERIOD_TABS.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       }
     >
       <NdlpPrice periodTab={positionPeriodTab} />
@@ -34,4 +34,4 @@ const PositionStatus = () => {
   );
 };
 
-export default PositionStatus;
+export default NdlpStatus;
