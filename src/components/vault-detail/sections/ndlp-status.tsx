@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { DetailWrapper } from "@/components/vault-detail/detail-wrapper";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PERIOD_TABS } from "@/components/vault-detail/constant";
@@ -53,9 +53,11 @@ const NdlpStatus = ({ vaultId, isDetailLoading }: NdlpStatusProps) => {
       <NdlpPrice
         periodTab={positionPeriodTab}
         ndlpPriceData={ndlpPriceData}
+        isFetching={isFetching}
+        isFetched={isFetched}
       />
     </DetailWrapper>
   );
 };
 
-export default NdlpStatus;
+export default memo(NdlpStatus);

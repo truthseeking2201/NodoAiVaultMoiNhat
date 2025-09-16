@@ -41,6 +41,7 @@ export interface ChartDataPoint {
   time: string;
   percentage: number;
   price: number;
+  breakEvenPrice?: number;
 }
 
 // Mock data for user position charts - Daily (24 hours)

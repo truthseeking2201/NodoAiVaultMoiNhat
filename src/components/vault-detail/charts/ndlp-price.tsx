@@ -1,4 +1,4 @@
-import React, { Fragment, useMemo, FC } from "react";
+import { Fragment, useMemo, FC } from "react";
 import {
   Line,
   LineChart,
@@ -16,11 +16,15 @@ import { CustomTooltipProps } from "./type";
 import PriceChange from "@/components/shared/price-change";
 import { formatDate } from "@/utils/date";
 import { formatNumber } from "@/lib/number";
+import { useVaultMetricUnitStore } from "@/hooks";
+import FormatUsdCollateralAmount from "../sections/format-usd-collateral-amount";
+import { useParams } from "react-router-dom";
+import ChartNoData from "./empty-data";
 
 const CustomLegend = () => {
   const { isMobile } = useBreakpoint();
   return (
-    <div className="flex gap-4 justify-center mt-4">
+    <div className="flex gap-4 justify-evenly mt-4">
       <div className="flex items-center gap-2">
         <span
           style={{
@@ -58,6 +62,8 @@ const CustomLegend = () => {
 };
 
 const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
+  const { vault_id } = useParams();
+  const { unit } = useVaultMetricUnitStore(vault_id);
   if (!active || !payload || !payload.length) return null;
 
   const priceData = payload[0]?.payload;
@@ -67,20 +73,24 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
   const ndlpPrice = Number(priceData.price);
   const breakEvenPrice = Number(priceData.breakEvenPrice) || 0;
   const percentage = Number(priceData.percentage) || 0;
-  const time = priceData.time;
 
   return (
     <div className="bg-black p-3 border border-white/20 rounded-lg shadow-lg w-[250px]">
-      <div className="text-xs font-bold text-white mb-[6px]">{label}</div>
+      <div className="text-xs font-bold text-white mb-[6px]">
+        {formatDate(label, "dd MMM yyyy HH:mm")}
+      </div>
       {ndlpPrice && (
         <div className="flex items-end justify-between mb-1">
           <span className="font-medium text-xs text-white/80">
             NDLP Price:{" "}
           </span>
           <div className="flex items-center gap-1">
-            <span className="font-mono text-sm font-semibold text-white">
-              {ndlpPrice}
-            </span>
+            <FormatUsdCollateralAmount
+              collateralIcon={unit}
+              className="font-mono text-sm font-semibold text-white"
+              collateralClassName="w-4 h-4"
+              text={formatNumber(ndlpPrice, 0, ndlpPrice < 1 ? 6 : 2)}
+            />
             <PriceChange
               priceChange={percentage}
               showParentheses={false}
@@ -93,9 +103,12 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
         <span className="font-medium text-xs text-white/80">
           Break Even Price:{" "}
         </span>
-        <span className="font-mono text-sm font-semibold text-white">
-          ${formatNumber(breakEvenPrice, 0, breakEvenPrice < 1 ? 6 : 2)}
-        </span>
+        <FormatUsdCollateralAmount
+          collateralIcon={unit}
+          className="font-mono text-sm font-semibold text-white"
+          collateralClassName="w-4 h-4"
+          text={formatNumber(breakEvenPrice, 0, breakEvenPrice < 1 ? 6 : 2)}
+        />
       </div>
     </div>
   );
@@ -104,51 +117,106 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
 interface NdlpPriceChartProps {
   periodTab: string;
   ndlpPriceData?: any;
+  isFetching: boolean;
+  isFetched: boolean;
 }
 
-const NdlpPriceChart = ({ periodTab, ndlpPriceData }: NdlpPriceChartProps) => {
+const NdlpPriceChart = ({
+  periodTab,
+  ndlpPriceData,
+  isFetching,
+  isFetched,
+}: NdlpPriceChartProps) => {
   const { isMobile } = useBreakpoint();
+  const { isUsd } = useVaultMetricUnitStore();
 
   const isWeek = useMemo(() => {
     return periodTab === PERIOD_TABS[1].value;
   }, [periodTab]);
 
   const chartData: ChartDataPoint[] = useMemo(() => {
-    if (!ndlpPriceData) return [];
+    if (!ndlpPriceData || isFetching) return [];
 
-    const chartData = [];
-
-    for (const item of ndlpPriceData) {
-      chartData.push({
-        time: item.timestamp,
-        price: item.ndlp_price,
-        breakEvenPrice: item.user_break_event_price,
-        percentage: item.performance_percent,
-      });
-    }
-
-    return chartData;
-  }, [ndlpPriceData]);
-
-  const checkPositionOfPrice = useMemo(() => {
-    for (let i = chartData.length - 1; i >= 0; i--) {
-      if (
-        typeof chartData[i].price === "number" &&
-        !isNaN(chartData[i].price)
-      ) {
-        return i;
+    const dataPoints = [];
+    if (isFetched) {
+      for (const item of ndlpPriceData) {
+        dataPoints.push({
+          time: item.timestamp,
+          price: isUsd ? item.ndlp_price_usd : item.ndlp_price,
+          breakEvenPrice: isUsd
+            ? item.user_break_event_price_usd
+            : item.user_break_event_price,
+          percentage: item.performance_percent,
+        });
       }
     }
-    return null;
-  }, [chartData]);
+
+    return dataPoints;
+  }, [ndlpPriceData, isFetching, isFetched, isUsd]);
+
+  const lastItemIndex = chartData.length - 1;
 
   const interval = useMemo(
-    () => (isWeek ? (isMobile ? 20 : 10) : 3),
+    () => (isWeek ? (isMobile ? 20 : 35) : 3),
     [isWeek, isMobile]
   );
 
+  const yAxisRange = useMemo(() => {
+    if (!chartData.length) return [-15, 15];
+
+    const percentages = chartData.map((item) => item.percentage);
+    const minPercentage = Math.min(...percentages);
+    const maxPercentage = Math.max(...percentages);
+
+    // For 1D period, use default range of -15% to +15%
+    if (!isWeek) {
+      return [-15, 15];
+    }
+
+    // For weekly period, use dynamic range
+    const range = maxPercentage - minPercentage;
+    const padding = Math.max(range * 0.1, 5); // At least 5% padding
+
+    const min = Math.floor(minPercentage - padding);
+    const max = Math.ceil(maxPercentage + padding);
+
+    // Ensure we have reasonable bounds
+    const finalMin = Math.max(min, -100);
+    const finalMax = Math.min(max, 100);
+
+    return [finalMin, finalMax];
+  }, [chartData, isWeek]);
+
+  const yAxisTicks = useMemo(() => {
+    const [min, max] = yAxisRange;
+    const range = max - min;
+
+    let tickInterval;
+    if (range <= 30) tickInterval = 5;
+    else if (range <= 60) tickInterval = 10;
+    else if (range <= 120) tickInterval = 20;
+    else tickInterval = 50;
+
+    const ticks = [];
+    for (let i = min; i <= max; i += tickInterval) {
+      ticks.push(i);
+    }
+
+    return ticks;
+  }, [yAxisRange]);
+
+  if ((!chartData || chartData?.length === 0) && !isFetching) {
+    return (
+      <ChartNoData>
+        <div className="text-white/60 text-sm mb-6 text-center">
+          No data available
+        </div>
+      </ChartNoData>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 md:gap-6">
       <span className="text-white md:text-sm text-xs font-medium">
         Track the NDLP price of this vault over time
       </span>
@@ -210,19 +278,19 @@ const NdlpPriceChart = ({ periodTab, ndlpPriceData }: NdlpPriceChartProps) => {
                 y2="0"
               >
                 <stop offset="0%" stopColor="#F2BB89" />
-                <stop offset="50.48%" stopColor="#F3D2B5" />
+                <stop offset="50%" stopColor="#F3D2B5" />
                 <stop offset="100%" stopColor="#F5C8A4" />
               </linearGradient>
             </defs>
             <ReferenceArea
               y1={0}
-              y2={15}
+              y2={yAxisRange[1]}
               fill="url(#greenGradient)"
               radius={[10, 10, 0, 0]}
             />
             <ReferenceArea y1={-5} y2={0} fill="url(#yellowGradient)" />
             <ReferenceArea
-              y1={-15}
+              y1={yAxisRange[0]}
               y2={-5}
               fill="url(#redGradient)"
               radius={[0, 0, 10, 10]}
@@ -259,8 +327,8 @@ const NdlpPriceChart = ({ periodTab, ndlpPriceData }: NdlpPriceChartProps) => {
               interval={interval}
             />
             <YAxis
-              domain={[-15, 15]}
-              ticks={[-15, -10, -5, 0, 5, 10, 15]}
+              domain={yAxisRange}
+              ticks={yAxisTicks}
               tickFormatter={(value) => `${value > 0 ? "+" : ""}${value}%`}
               axisLine={false}
               tickLine={false}
@@ -276,14 +344,14 @@ const NdlpPriceChart = ({ periodTab, ndlpPriceData }: NdlpPriceChartProps) => {
               stroke="url(#customLineGradient)"
               strokeWidth={2}
               dot={({ cx, cy, index }) =>
-                index === checkPositionOfPrice ? (
+                index === lastItemIndex ? (
                   <Fragment key={index}>
                     <circle
                       cx={cx}
                       cy={cy}
                       r={8}
                       fill="white"
-                      style={{ filter: "blur(6px)" }}
+                      style={{ filter: "blur(4px)" }}
                       className="animate-pulse"
                     />
                     <circle
@@ -294,6 +362,14 @@ const NdlpPriceChart = ({ periodTab, ndlpPriceData }: NdlpPriceChartProps) => {
                       stroke="#fff"
                       strokeWidth={2.5}
                     />
+                    <style>
+                      {`
+                    @keyframes fadeInDot {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                    }
+                  `}
+                    </style>
                   </Fragment>
                 ) : null
               }

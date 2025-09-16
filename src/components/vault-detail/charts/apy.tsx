@@ -134,7 +134,6 @@ const APYChart = ({
   }, [chartData]);
 
   if ((!chartData || chartData?.length === 0) && !isLoading) {
-    onEmptyStateChange(true);
     return (
       <ChartNoData>
         <div className="text-white/60 text-sm mb-6">

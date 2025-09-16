@@ -440,9 +440,7 @@ const PositionPriceChart = ({
               />
 
               <Legend content={<CustomLegend />} />
-              <Tooltip
-                content={<CustomTooltip isConvertedToken={isConvertedToken} />}
-              />
+              <Tooltip content={<CustomTooltip />} />
               <Bar
                 dataKey="range"
                 fill="rgba(253, 235, 207, 0.6)"

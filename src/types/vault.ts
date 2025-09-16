@@ -88,7 +88,7 @@ export type Types = {
 };
 
 export interface NdlpPriceChartData {
-  code: string;
+  code?: string;
   timestamp: string;
   ndlp_price: number;
   ndlp_price_usd: number;
