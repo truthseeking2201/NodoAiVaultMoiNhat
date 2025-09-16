@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import FormatUsdCollateralAmount from "./format-usd-collateral-amount";
+import { formatCollateralUsdNumber } from "../helpers";
 
 type YourHoldingProps = {
   isDetailLoading: boolean;
@@ -108,24 +109,24 @@ const YourHoldings = ({
     isAuthenticated
   );
 
-  const user_total_liquidity_usd = calculateUserHoldings(
+  const user_total_liquidity = calculateUserHoldings(
     ndlp_balance,
     vault?.user_pending_withdraw_ndlp,
     vault?.vault_lp_token_decimals,
-    data?.ndlp_price_usd
+    isUsd ? data?.ndlp_price_usd : data?.ndlp_price
   );
 
   const userHoldingData = useMemo(() => {
     return {
       ...data,
-      user_total_liquidity_usd: user_total_liquidity_usd || 0,
+      user_total_liquidity,
       user_total_deposit_usd: data?.user_total_deposit_usd || 0,
       user_ndlp_balance: lpToken?.balance || 0,
       user_vault_rewards:
         data?.user_vault_rewards || vault?.reward_tokens || [],
       user_vault_tokens: data?.user_vault_tokens || vault?.change_24h || [],
     };
-  }, [data, vault, lpToken, user_total_liquidity_usd]);
+  }, [data, vault, lpToken, user_total_liquidity]);
 
   const pieData = useMemo(() => {
     const totalAmountInUsd = userHoldingData?.user_vault_tokens?.reduce(
@@ -169,61 +170,21 @@ const YourHoldings = ({
 
   useEffect(() => {
     if (isAuthenticated && userHoldingData) {
-      if (user_total_liquidity_usd > 0 && hasValue) {
+      if (user_total_liquidity > 0 && hasValue) {
         setUserState("holding");
-      } else if (user_total_liquidity_usd > 0 && !hasValue) {
+      } else if (user_total_liquidity > 0 && !hasValue) {
         setUserState("pending");
-      } else if (user_total_liquidity_usd === 0) {
+      } else if (user_total_liquidity === 0) {
         setUserState("nonDeposit");
       }
     } else {
       setUserState("nonDeposit");
     }
-  }, [isAuthenticated, userHoldingData, user_total_liquidity_usd, hasValue]);
+  }, [isAuthenticated, userHoldingData, user_total_liquidity, hasValue]);
 
   useEffect(() => {
     setExpanded(isAuthenticated);
   }, [isAuthenticated]);
-
-  const formattedUserBreakEventPrice = useMemo(() => {
-    const value = isUsd
-      ? userHoldingData?.user_break_event_price_usd
-      : userHoldingData?.user_break_event_price_collateral;
-    if (!value) return "--";
-    return formatNumber(value, 0, value < 1 ? 6 : 2);
-  }, [isUsd, userHoldingData]);
-
-  const formattedUserTotalRewards = useMemo(() => {
-    const value = isUsd
-      ? userHoldingData?.user_total_rewards_usd
-      : userHoldingData?.user_total_rewards_collateral;
-    if (!value) return "--";
-    return formatNumber(value, 0, value < 1 ? 6 : 2);
-  }, [isUsd, userHoldingData]);
-
-  const formattedUserRewards24h = useMemo(() => {
-    const value = isUsd
-      ? userHoldingData?.user_rewards_24h_usd
-      : userHoldingData?.user_rewards_24h_collateral;
-    if (!value) return "--";
-    return formatNumber(value, 0, value < 1 ? 6 : 2);
-  }, [isUsd, userHoldingData]);
-
-  const formattedUserTotalDeposit = useMemo(() => {
-    const value = isUsd
-      ? userHoldingData?.user_total_deposit_usd
-      : userHoldingData?.user_total_deposit_collateral;
-    if (!value) return "--";
-    return formatNumber(value, 0, value < 1 ? 6 : 2);
-  }, [isUsd, userHoldingData]);
-
-  const formattedUserTotalWithdraw = useMemo(() => {
-    const value = isUsd
-      ? userHoldingData?.user_total_withdraw_usd
-      : userHoldingData?.user_total_withdraw_collateral;
-    if (!value) return "--";
-    return formatNumber(value, 0, value < 1 ? 6 : 2);
-  }, [isUsd, userHoldingData]);
 
   return (
     <DetailWrapper
@@ -254,15 +215,11 @@ const YourHoldings = ({
               <FormatUsdCollateralAmount
                 className="md:text-xl text-base font-mono font-semibold text-white"
                 collateralIcon={unit}
-                text={
-                  userHoldingData?.user_total_liquidity_usd
-                    ? formatNumber(
-                        userHoldingData?.user_total_liquidity_usd,
-                        0,
-                        2
-                      )
-                    : null
-                }
+                text={formatCollateralUsdNumber({
+                  value_usd: user_total_liquidity,
+                  value_collateral: user_total_liquidity,
+                  isUsd,
+                })}
               />
             </div>
             <Button
@@ -557,7 +514,12 @@ const YourHoldings = ({
                     userHoldingData?.user_total_rewards_usd ? (
                       <FormatUsdCollateralAmount
                         collateralIcon={unit}
-                        text={formattedUserTotalRewards}
+                        text={formatCollateralUsdNumber({
+                          value_usd: userHoldingData?.user_total_rewards_usd,
+                          value_collateral:
+                            userHoldingData?.user_total_rewards_collateral,
+                          isUsd,
+                        })}
                       />
                     ) : (
                       <span className="text-[#00FFB2]">
@@ -597,7 +559,12 @@ const YourHoldings = ({
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
                   <FormatUsdCollateralAmount
                     collateralIcon={unit}
-                    text={formattedUserTotalDeposit}
+                    text={formatCollateralUsdNumber({
+                      value_usd: userHoldingData?.user_total_deposit_usd,
+                      value_collateral:
+                        userHoldingData?.user_total_deposit_collateral,
+                      isUsd,
+                    })}
                     className="font-mono"
                     collateralClassName="w-4 h-4"
                   />
@@ -616,7 +583,12 @@ const YourHoldings = ({
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2 "></span>
                   <FormatUsdCollateralAmount
                     collateralIcon={unit}
-                    text={formattedUserTotalWithdraw}
+                    text={formatCollateralUsdNumber({
+                      value_usd: userHoldingData?.user_total_withdraw_usd,
+                      value_collateral:
+                        userHoldingData?.user_total_withdraw_collateral,
+                      isUsd,
+                    })}
                     className="font-mono"
                     collateralClassName="w-4 h-4"
                   />
@@ -640,7 +612,12 @@ const YourHoldings = ({
                       userHoldingData?.user_rewards_24h_usd > 0 ? (
                         <FormatUsdCollateralAmount
                           collateralIcon={unit}
-                          text={formattedUserRewards24h}
+                          text={formatCollateralUsdNumber({
+                            value_usd: userHoldingData?.user_rewards_24h_usd,
+                            value_collateral:
+                              userHoldingData?.user_rewards_24h_collateral,
+                            isUsd,
+                          })}
                           className="font-mono"
                           collateralClassName="w-4 h-4"
                         />
@@ -710,7 +687,12 @@ const YourHoldings = ({
                     className="font-mono"
                     collateralClassName="w-4 h-4"
                     collateralIcon={unit}
-                    text={isAuthenticated ? formattedUserBreakEventPrice : "0"}
+                    text={formatCollateralUsdNumber({
+                      value_usd: userHoldingData?.user_break_event_price_usd,
+                      value_collateral:
+                        userHoldingData?.user_break_event_price_collateral,
+                      isUsd,
+                    })}
                   />
                 </div>
               </HoldingCard>

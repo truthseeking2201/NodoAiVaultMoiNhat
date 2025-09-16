@@ -26,6 +26,7 @@ import ConditionRenderer from "@/components/shared/condition-renderer";
 import UnderlineTabs from "@/components/ui/underline-tab";
 import NdlpStatus from "@/components/vault-detail/sections/ndlp-status";
 import CollateralUnit from "@/components/vault-detail/sections/collateral-unit";
+import { formatCollateralUsdNumber } from "@/components/vault-detail/helpers";
 
 export type VaultInfo = {
   label: string;
@@ -98,10 +99,10 @@ const VaultDetail = () => {
         label: "TVL",
         tooltip: "Total Liquidity Value at the current market price",
         value: !isLoadingVaultDetails
-          ? formatAmount({
-              amount: isUsd
-                ? vaultDetails?.total_value_usd
-                : vaultDetails?.total_value_collateral,
+          ? formatCollateralUsdNumber({
+              value_usd: vaultDetails?.total_value_usd,
+              value_collateral: vaultDetails?.total_value_collateral,
+              isUsd,
             })
           : "--",
         prefix: unitIcon,
@@ -111,10 +112,10 @@ const VaultDetail = () => {
         tooltip:
           "Total LP fees and token incentives earned by the vault in the last 24 hours. Updates every 1 hour.",
         value: !isLoadingVaultDetails
-          ? formatAmount({
-              amount: isUsd
-                ? vaultDetails?.rewards_24h_usd
-                : vaultDetails?.rewards_24h_collateral,
+          ? formatCollateralUsdNumber({
+              value_usd: vaultDetails?.rewards_24h_usd,
+              value_collateral: vaultDetails?.rewards_24h_collateral,
+              isUsd,
             })
           : "--",
         prefix: unitIcon,
@@ -124,11 +125,10 @@ const VaultDetail = () => {
         tooltip:
           "Price of 1 NDLP token based on the vault’s total value. (Unit USD)",
         value: !isLoadingVaultDetails
-          ? formatAmount({
-              amount: isUsd
-                ? vaultDetails?.ndlp_price_usd
-                : vaultDetails?.ndlp_price,
-              precision: 4,
+          ? formatCollateralUsdNumber({
+              value_usd: vaultDetails?.ndlp_price_usd,
+              value_collateral: vaultDetails?.ndlp_price,
+              isUsd,
             })
           : "--",
         prefix: unitIcon,
