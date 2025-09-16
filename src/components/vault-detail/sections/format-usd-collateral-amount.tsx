@@ -29,7 +29,7 @@ const FormatUsdCollateralAmount = ({
     return <div className={className}>{`$${text}`}</div>;
   }
   return (
-    <div className={cn("flex items-center gap-1", className)}>
+    <div className={cn("flex items-center gap-0.5", className)}>
       <img
         src={`/coins/${collateralIcon?.toLowerCase()}.png`}
         alt={collateralIcon}

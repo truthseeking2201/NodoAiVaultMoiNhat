@@ -99,7 +99,9 @@ const VaultDetail = () => {
         tooltip: "Total Liquidity Value at the current market price",
         value: !isLoadingVaultDetails
           ? formatAmount({
-              amount: vaultDetails?.total_value_usd,
+              amount: isUsd
+                ? vaultDetails?.total_value_usd
+                : vaultDetails?.total_value_collateral,
             })
           : "--",
         prefix: unitIcon,
@@ -110,7 +112,9 @@ const VaultDetail = () => {
           "Total LP fees and token incentives earned by the vault in the last 24 hours. Updates every 1 hour.",
         value: !isLoadingVaultDetails
           ? formatAmount({
-              amount: vaultDetails?.rewards_24h_usd,
+              amount: isUsd
+                ? vaultDetails?.rewards_24h_usd
+                : vaultDetails?.rewards_24h_collateral,
             })
           : "--",
         prefix: unitIcon,
@@ -121,14 +125,16 @@ const VaultDetail = () => {
           "Price of 1 NDLP token based on the vault’s total value. (Unit USD)",
         value: !isLoadingVaultDetails
           ? formatAmount({
-              amount: vaultDetails?.ndlp_price_usd,
+              amount: isUsd
+                ? vaultDetails?.ndlp_price_usd
+                : vaultDetails?.ndlp_price,
               precision: 4,
             })
           : "--",
         prefix: unitIcon,
       },
     ];
-  }, [vaultDetails, unitIcon, isLoadingVaultDetails]);
+  }, [vaultDetails, unitIcon, isUsd, isLoadingVaultDetails]);
 
   if ((!vaultDetails || !isValidVault) && !isLoadingVaultDetails) {
     return <Navigate to="/" replace />;

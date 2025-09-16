@@ -37,13 +37,13 @@ export interface UserInvestment {
 }
 
 export interface TransactionHistory {
-  list?: Transaction[];
+  list?: VaultActivityTransaction[];
   total?: number;
   page?: number;
   limit?: number;
 }
 
-export interface Transaction {
+export interface VaultActivityTransaction {
   type:
     | "ADD_LIQUIDITY"
     | "REMOVE_LIQUIDITY"
@@ -59,7 +59,8 @@ export interface Transaction {
   txhash: string;
   status: string;
   id: string;
-  value: string;
+  value_usd: string;
+  value_collateral: number;
 }
 
 export interface Token {

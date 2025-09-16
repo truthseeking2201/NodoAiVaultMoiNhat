@@ -185,10 +185,44 @@ const YourHoldings = ({
     setExpanded(isAuthenticated);
   }, [isAuthenticated]);
 
-  const user_break_event_price = useMemo(() => {
-    return isUsd
+  const formattedUserBreakEventPrice = useMemo(() => {
+    const value = isUsd
       ? userHoldingData?.user_break_event_price_usd
-      : userHoldingData?.user_break_event_price;
+      : userHoldingData?.user_break_event_price_collateral;
+    if (!value) return "--";
+    return formatNumber(value, 0, value < 1 ? 6 : 2);
+  }, [isUsd, userHoldingData]);
+
+  const formattedUserTotalRewards = useMemo(() => {
+    const value = isUsd
+      ? userHoldingData?.user_total_rewards_usd
+      : userHoldingData?.user_total_rewards_collateral;
+    if (!value) return "--";
+    return formatNumber(value, 0, value < 1 ? 6 : 2);
+  }, [isUsd, userHoldingData]);
+
+  const formattedUserRewards24h = useMemo(() => {
+    const value = isUsd
+      ? userHoldingData?.user_rewards_24h_usd
+      : userHoldingData?.user_rewards_24h_collateral;
+    if (!value) return "--";
+    return formatNumber(value, 0, value < 1 ? 6 : 2);
+  }, [isUsd, userHoldingData]);
+
+  const formattedUserTotalDeposit = useMemo(() => {
+    const value = isUsd
+      ? userHoldingData?.user_total_deposit_usd
+      : userHoldingData?.user_total_deposit_collateral;
+    if (!value) return "--";
+    return formatNumber(value, 0, value < 1 ? 6 : 2);
+  }, [isUsd, userHoldingData]);
+
+  const formattedUserTotalWithdraw = useMemo(() => {
+    const value = isUsd
+      ? userHoldingData?.user_total_withdraw_usd
+      : userHoldingData?.user_total_withdraw_collateral;
+    if (!value) return "--";
+    return formatNumber(value, 0, value < 1 ? 6 : 2);
   }, [isUsd, userHoldingData]);
 
   return (
@@ -523,11 +557,7 @@ const YourHoldings = ({
                     userHoldingData?.user_total_rewards_usd ? (
                       <FormatUsdCollateralAmount
                         collateralIcon={unit}
-                        text={formatNumber(
-                          userHoldingData?.user_total_rewards_usd,
-                          0,
-                          userHoldingData?.user_total_rewards_usd < 1 ? 6 : 2
-                        )}
+                        text={formattedUserTotalRewards}
                       />
                     ) : (
                       <span className="text-[#00FFB2]">
@@ -566,14 +596,7 @@ const YourHoldings = ({
                   />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
                   <span className="font-mono">
-                    $
-                    {isAuthenticated
-                      ? formatNumber(
-                          userHoldingData?.user_total_deposit_usd,
-                          0,
-                          userHoldingData?.user_total_deposit_usd < 1 ? 6 : 2
-                        )
-                      : "0"}
+                    ${isAuthenticated ? formattedUserTotalDeposit : "0"}
                   </span>
                 </div>
                 <div className="flex items-center text-xs my-1">
@@ -589,16 +612,7 @@ const YourHoldings = ({
                   />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2 "></span>
                   <span className="font-mono">
-                    $
-                    {isAuthenticated
-                      ? formatNumber(
-                          userHoldingData?.user_total_withdraw_usd || 0,
-                          0,
-                          Number(userHoldingData?.user_total_withdraw_usd) < 1
-                            ? 6
-                            : 2
-                        )
-                      : "0"}
+                    ${isAuthenticated ? formattedUserTotalWithdraw : "0"}
                   </span>
                 </div>
                 <div className="flex items-center text-xs">
@@ -618,11 +632,12 @@ const YourHoldings = ({
                   <span className="font-mono">
                     {isAuthenticated ? (
                       userHoldingData?.user_rewards_24h_usd > 0 ? (
-                        `$${formatNumber(
-                          userHoldingData?.user_rewards_24h_usd,
-                          0,
-                          userHoldingData?.user_rewards_24h_usd < 1 ? 6 : 2
-                        )}`
+                        <FormatUsdCollateralAmount
+                          collateralIcon={unit}
+                          text={formattedUserRewards24h}
+                          className="font-mono"
+                          collateralClassName="w-4 h-4"
+                        />
                       ) : (
                         <span className="text-[#00FFB2]">
                           <span>Farming</span>
@@ -689,15 +704,7 @@ const YourHoldings = ({
                     className="font-mono"
                     collateralClassName="w-4 h-4"
                     collateralIcon={unit}
-                    text={
-                      isAuthenticated
-                        ? formatNumber(
-                            user_break_event_price,
-                            0,
-                            user_break_event_price < 1 ? 6 : 2
-                          )
-                        : 0
-                    }
+                    text={isAuthenticated ? formattedUserBreakEventPrice : "0"}
                   />
                 </div>
               </HoldingCard>

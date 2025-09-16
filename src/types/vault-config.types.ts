@@ -255,6 +255,7 @@ export type BasicVaultDetailsType = {
   vault_lp_token_decimals: number;
   total_value_usd: string;
   pool_total_value_usd: number;
+  total_value_collateral: number;
   pool_apr: string;
   vault_apr: string;
   vault_apy: string;
@@ -266,6 +267,7 @@ export type BasicVaultDetailsType = {
   ndlp_price_change_24h: number;
   ndlp_total_supply: string;
   rewards_24h_usd: string;
+  rewards_24h_collateral: number;
   rewards_24h_daily_rate: number;
   nodo_share: number;
   management_fee: number;
@@ -355,13 +357,18 @@ export type VaultHoldingType = {
   ndlp_price_usd: string;
   user_total_liquidity_usd: number;
   user_total_rewards_usd: number;
+  user_total_rewards_collateral: number;
   user_total_deposit: number;
   user_total_deposit_usd: number;
+  user_total_deposit_collateral: number;
   user_rewards_24h_usd: number;
+  user_rewards_24h_collateral: number;
   user_shares_percent: number;
   user_break_event_price: number;
   user_break_event_price_usd: number;
+  user_break_event_price_collateral: number;
   user_total_withdraw_usd: number;
+  user_total_withdraw_collateral: number;
   user_vault_tokens: UserHoldingTokens[];
   user_vault_rewards: UserHoldingTokens[];
 };
