@@ -107,13 +107,13 @@ export default function UserRank() {
               <div className="flex gap-4">
                 <div className="w-full rounded-xl bg-white/10 px-4 py-2">
                   <div className="lg:text-base text-white/60">TVL</div>
-                  <div className="text-2xl text-white font-semibold mt-2 font-mono">
+                  <div className="text-2xl max-sm:text-xl text-white font-semibold mt-2 font-mono">
                     ${formatNumber(dataUser.tvl, 0, 2)}
                   </div>
                 </div>
                 <div className="w-full rounded-xl bg-white/10 px-4 py-2">
                   <div className="text-base text-white/60">Referred TVL</div>
-                  <div className="text-2xl text-white font-semibold mt-2 font-mono">
+                  <div className="text-2xl max-sm:text-xl text-white font-semibold mt-2 font-mono">
                     ${formatNumber(dataUser.referredTvl, 0, 2)}
                   </div>
                 </div>
