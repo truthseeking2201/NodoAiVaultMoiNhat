@@ -10,7 +10,7 @@ import StrategyExplanation from "@/components/vault-detail/sections/strategy-exp
 import VaultActivities from "@/components/vault-detail/sections/vault-activities";
 import VaultAnalytics from "@/components/vault-detail/sections/vault-analytics";
 import VaultInfo from "@/components/vault-detail/sections/vault-info";
-import YourHoldings from "@/components/vault-detail/sections/your-holdings";
+import UserPositionValue from "@/components/vault-detail/sections/user-position-value";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import {
   useGetDepositVaults,
@@ -48,7 +48,8 @@ const VaultDetail = () => {
     refetch: refetchDepositVaults,
   } = useGetDepositVaults();
 
-  const [activeTab, setActiveTab] = useState(0);
+  // const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(1);
   const { isUsd, unit } = useVaultMetricUnitStore(vault_id);
   const depositVault = depositVaults?.find(
     (vault) => vault.vault_id === vault_id
@@ -194,7 +195,7 @@ const VaultDetail = () => {
       >
         <div className="flex-1">
           <ConditionRenderer when={isLg}>
-            <YourHoldings
+            <UserPositionValue
               isDetailLoading={isDetailLoading}
               vault_id={vault_id}
               vault={vaultDetails}
@@ -222,7 +223,7 @@ const VaultDetail = () => {
                 vault_id={vault_id}
               />
             </div>
-            <YourHoldings
+            <UserPositionValue
               isDetailLoading={isDetailLoading}
               vault_id={vault_id}
               vault={vaultDetails}

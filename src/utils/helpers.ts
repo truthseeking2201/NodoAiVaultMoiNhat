@@ -56,6 +56,24 @@ export const calculateInterest = (
   return Math.round(interest * 100) / 100;
 };
 
+export const calculateTotalLiquidity = (
+  ndlpBalance: string,
+  user_pending_withdraw_ndlp: string,
+  vault_lp_token_decimals: number
+) => {
+  let holdings = new BigNumber(ndlpBalance);
+
+  if (user_pending_withdraw_ndlp) {
+    const pendingWithdraw = getBalanceAmount(
+      user_pending_withdraw_ndlp,
+      vault_lp_token_decimals
+    );
+    holdings = holdings.plus(pendingWithdraw);
+  }
+
+  return holdings.toNumber();
+};
+
 export const calculateUserHoldings = (
   ndlpBalance: string,
   user_pending_withdraw_ndlp: string,
