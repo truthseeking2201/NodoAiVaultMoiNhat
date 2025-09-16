@@ -212,8 +212,8 @@ const NdlpPriceChart = ({
   }
 
   return (
-    <div className="flex flex-col">
-      <span className="text-white md:text-sm text-xs font-medium">
+    <div className="flex flex-col gap-3 md:gap-6">
+      <span className="text-white md:text-sm text-xs font-medium ">
         Track the NDLP price of this vault over time
       </span>
       <div
