@@ -207,16 +207,12 @@ const NdlpPriceChart = ({
 
   if ((!chartData || chartData?.length === 0) && !isFetching) {
     return (
-      <ChartNoData>
-        <div className="text-white/60 text-sm mb-6 text-center">
-          No data available
-        </div>
-      </ChartNoData>
+      <ChartNoData type="ndlp-price" />
     );
   }
 
   return (
-    <div className="flex flex-col gap-3 md:gap-6">
+    <div className="flex flex-col">
       <span className="text-white md:text-sm text-xs font-medium">
         Track the NDLP price of this vault over time
       </span>
