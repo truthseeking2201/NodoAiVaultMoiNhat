@@ -23,6 +23,7 @@ import { VaultActivityTransaction } from "@/types/vault";
 import { useVaultMetricUnitStore } from "@/hooks";
 import { formatNumber } from "@/lib/number";
 import FormatUsdCollateralAmount from "../sections/format-usd-collateral-amount";
+import { formatCollateralUsdNumber } from "../helpers";
 
 const MobileList = ({
   paginatedTransactions,
@@ -91,11 +92,11 @@ const MobileList = ({
                 <FormatUsdCollateralAmount
                   collateralIcon={unit}
                   collateralClassName="w-4 h-4"
-                  text={formatNumber(
-                    isUsd ? tx.value_usd : tx.value_collateral,
-                    0,
-                    isUsd ? 2 : 4
-                  )}
+                  text={formatCollateralUsdNumber({
+                    value_usd: tx.value_usd,
+                    value_collateral: tx.value_collateral,
+                    isUsd,
+                  })}
                 />
               }
             />
