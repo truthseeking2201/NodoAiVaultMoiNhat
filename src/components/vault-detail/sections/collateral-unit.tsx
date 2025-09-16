@@ -27,6 +27,7 @@ const CollateralUnit = ({
       if (defaultToken) {
         collateralAsset = {
           ...defaultToken,
+          decimals: defaultToken.decimal,
           display_name: defaultToken.token_symbol,
           symbol: defaultToken.token_symbol,
           image_url: `/coins/${defaultToken.token_symbol.toLowerCase()}.png`,
@@ -41,7 +42,9 @@ const CollateralUnit = ({
   return (
     <Tabs
       value={unit}
-      onValueChange={(value) => setMetricUnit(value, vault_id)}
+      onValueChange={(value) =>
+        setMetricUnit(value, vault_id, collateralAsset.decimals)
+      }
     >
       <TabsList className="flex gap-1 max-md:gap-0">
         <TabsTrigger

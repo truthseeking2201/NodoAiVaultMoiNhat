@@ -189,13 +189,17 @@ const VaultDetail = () => {
           />
         </div>
       </ConditionRenderer>
-      <div className={cn("flex gap-8 mb-[76px]", activeTab !== 1 && "hidden")}>
+      <div
+        className={cn("flex md:gap-8 mb-[76px]", activeTab !== 1 && "hidden")}
+      >
         <div className="flex-1">
-          <YourHoldings
-            isDetailLoading={isDetailLoading}
-            vault_id={vault_id}
-            vault={vaultDetails}
-          />
+          <ConditionRenderer when={isLg}>
+            <YourHoldings
+              isDetailLoading={isDetailLoading}
+              vault_id={vault_id}
+              vault={vaultDetails}
+            />
+          </ConditionRenderer>
         </div>
         <div className="xl:w-[450px] w-[380px]">
           <DepositWithdraw
@@ -211,12 +215,18 @@ const VaultDetail = () => {
                 labelClassName="max-md:text-base max-md:px-0"
                 tabClassName="max-md:space-x-4"
                 onActiveTabChange={setActiveTab}
+                key={activeTab}
               />
               <CollateralUnit
                 collateralToken={vaultDetails?.collateral_token}
                 vault_id={vault_id}
               />
             </div>
+            <YourHoldings
+              isDetailLoading={isDetailLoading}
+              vault_id={vault_id}
+              vault={vaultDetails}
+            />
           </ConditionRenderer>
         </div>
       </div>
@@ -239,6 +249,7 @@ const VaultDetail = () => {
                     labelClassName="max-md:text-base max-md:px-0"
                     tabClassName="max-md:space-x-4"
                     onActiveTabChange={setActiveTab}
+                    key={activeTab}
                   />
                   <CollateralUnit
                     collateralToken={vaultDetails?.collateral_token}
@@ -307,12 +318,7 @@ const VaultDetail = () => {
               />
             </div>
             {/* Right sessions */}
-            <div className="xl:w-[450px] w-[380px]">
-              {/* <YourHoldings
-                isDetailLoading={isDetailLoading}
-                vault_id={vault_id}
-                vault={vaultDetails}
-              /> */}
+            <div className="xl:w-[450px] w-[380px] sticky top-[10px] self-start">
               <DepositWithdraw
                 vault_id={vault_id}
                 isDetailLoading={isDetailLoading}
