@@ -595,9 +595,12 @@ const YourHoldings = ({
                     labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
-                  <span className="font-mono">
-                    ${isAuthenticated ? formattedUserTotalDeposit : "0"}
-                  </span>
+                  <FormatUsdCollateralAmount
+                    collateralIcon={unit}
+                    text={formattedUserTotalDeposit}
+                    className="font-mono"
+                    collateralClassName="w-4 h-4"
+                  />
                 </div>
                 <div className="flex items-center text-xs my-1">
                   <LabelWithTooltip
@@ -611,9 +614,12 @@ const YourHoldings = ({
                     labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2 "></span>
-                  <span className="font-mono">
-                    ${isAuthenticated ? formattedUserTotalWithdraw : "0"}
-                  </span>
+                  <FormatUsdCollateralAmount
+                    collateralIcon={unit}
+                    text={formattedUserTotalWithdraw}
+                    className="font-mono"
+                    collateralClassName="w-4 h-4"
+                  />
                 </div>
                 <div className="flex items-center text-xs">
                   <LabelWithTooltip
