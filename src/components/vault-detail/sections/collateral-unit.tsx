@@ -43,10 +43,14 @@ const CollateralUnit = ({
       value={unit}
       onValueChange={(value) => setMetricUnit(value, vault_id)}
     >
-      <TabsList className="flex gap-1">
-        <TabsTrigger key={collateralToken} value={`${collateralAsset?.symbol}`}>
+      <TabsList className="flex gap-1 max-md:gap-0">
+        <TabsTrigger
+          key={collateralToken}
+          value={`${collateralAsset?.symbol}`}
+          className="max-md:p-1"
+        >
           <div className="flex items-center gap-1 min-w-[50px]">
-            <div className="text-base font-medium">
+            <div className="text-base max-md:text-xs font-medium">
               {collateralAsset?.display_name}
             </div>
             <img
@@ -56,8 +60,10 @@ const CollateralUnit = ({
             />
           </div>
         </TabsTrigger>
-        <TabsTrigger key={usdValue} value={usdValue}>
-          <div className="text-base font-medium min-w-[50px]">$</div>
+        <TabsTrigger key={usdValue} value={usdValue} className="max-md:p-1">
+          <div className="text-base max-md:text-xs font-medium min-w-[50px]">
+            $
+          </div>
         </TabsTrigger>
       </TabsList>
     </Tabs>

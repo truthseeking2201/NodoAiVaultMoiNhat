@@ -63,7 +63,7 @@ const UnderlineTabs = ({
                 ref={(el) => (tabRefs.current[index] = el)}
                 onClick={() => handleTabClick(index)}
                 className={cn(
-                  `pb-3 px-1 text-lg font-bold transition-all duration-300 ${
+                  `pb-3 max-md:pb-2 px-1 text-lg font-bold transition-all duration-300 ${
                     selectedTab !== index ? "hover:opacity-80 opacity-50" : ""
                   }`,
                   labelClassName

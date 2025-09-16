@@ -7,12 +7,14 @@ interface PageContainerProps {
   children: React.ReactNode;
   className?: string;
   backgroundImage?: string;
+  backgroundSize?: string;
 }
 
 export function PageContainer({
   children,
   className = "",
   backgroundImage = "",
+  backgroundSize = "cover",
 }: PageContainerProps) {
   const [isReady, setIsReady] = useState(false);
   const { isSm } = useBreakpoint();
@@ -34,7 +36,7 @@ export function PageContainer({
           className="min-h-screen w-full"
           style={{
             backgroundImage: `url(${backgroundImage})`,
-            backgroundSize: "cover",
+            backgroundSize: backgroundSize || "cover",
             backgroundPosition: "top",
             backgroundRepeat: "no-repeat",
           }}

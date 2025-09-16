@@ -148,6 +148,7 @@ const VaultDetail = () => {
     <PageContainer
       backgroundImage={DetailsBackground}
       className="max-md:py-4 py-8"
+      backgroundSize={isMd ? "cover" : "contain"}
     >
       <Button
         variant="outline"
@@ -167,18 +168,21 @@ const VaultDetail = () => {
         vaultDetails={vaultDetails}
         isDetailLoading={isDetailLoading}
       />
-      <div className="p-3 mb-4 flex justify-between">
-        <UnderlineTabs
-          activeTab={activeTab}
-          labels={["Overview", "Your Holdings"]}
-          onActiveTabChange={setActiveTab}
-        />
-        <CollateralUnit
-          collateralToken={vaultDetails?.collateral_token}
-          vault_id={vault_id}
-        />
-      </div>
-
+      <ConditionRenderer when={isMd}>
+        <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
+          <UnderlineTabs
+            activeTab={activeTab}
+            labels={["Overview", "Your Holdings"]}
+            labelClassName="max-md:text-base max-md:px-0"
+            tabClassName="max-md:space-x-4"
+            onActiveTabChange={setActiveTab}
+          />
+          <CollateralUnit
+            collateralToken={vaultDetails?.collateral_token}
+            vault_id={vault_id}
+          />
+        </div>
+      </ConditionRenderer>
       <div className={cn("flex gap-8 mb-[76px]", activeTab !== 1 && "hidden")}>
         <div className="flex-1">
           <YourHoldings
@@ -192,6 +196,22 @@ const VaultDetail = () => {
             vault_id={vault_id}
             isDetailLoading={isDetailLoading}
           />
+          <ConditionRenderer when={!isMd}>
+            <div className="mt-4" />
+            <div className="mb-3 flex justify-between">
+              <UnderlineTabs
+                activeTab={activeTab}
+                labels={["Overview", "Your Holdings"]}
+                labelClassName="max-md:text-base max-md:px-0"
+                tabClassName="max-md:space-x-4"
+                onActiveTabChange={setActiveTab}
+              />
+              <CollateralUnit
+                collateralToken={vaultDetails?.collateral_token}
+                vault_id={vault_id}
+              />
+            </div>
+          </ConditionRenderer>
         </div>
       </div>
 
@@ -205,13 +225,31 @@ const VaultDetail = () => {
                 isDetailLoading={isDetailLoading}
               />
               <div className="mt-4" />
+              <ConditionRenderer when={!isMd}>
+                <div className="mb-3 flex justify-between">
+                  <UnderlineTabs
+                    activeTab={activeTab}
+                    labels={["Overview", "Your Holdings"]}
+                    labelClassName="max-md:text-base max-md:px-0"
+                    tabClassName="max-md:space-x-4"
+                    onActiveTabChange={setActiveTab}
+                  />
+                  <CollateralUnit
+                    collateralToken={vaultDetails?.collateral_token}
+                    vault_id={vault_id}
+                  />
+                </div>
+              </ConditionRenderer>
               <VaultAnalytics
                 vault_id={vault_id}
                 isDetailLoading={isDetailLoading}
                 vault={vaultDetails}
               />
               <div className="mt-4" />
-              <NdlpStatus vaultId={vault_id || ""} />
+              <NdlpStatus
+                vaultId={vault_id || ""}
+                isDetailLoading={isDetailLoading}
+              />
               <div className="mt-4" />
               <HelpfulInfo isDetailLoading={isDetailLoading} />
               <div className="mt-4" />
@@ -242,9 +280,9 @@ const VaultDetail = () => {
               />
 
               <div className="mt-6" />
-              <NdlpStatus 
+              <NdlpStatus
                 isDetailLoading={isDetailLoading}
-                vaultId={vault_id || ""} 
+                vaultId={vault_id || ""}
               />
               <div className="mt-6" />
               <VaultActivities
