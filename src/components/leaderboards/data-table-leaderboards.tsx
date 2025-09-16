@@ -8,6 +8,7 @@ import {
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { useWallet } from "@/hooks";
 import { showFormatNumber } from "@/lib/number";
+import { compareSuiAddresses } from "@/lib/address";
 import { USDC_CONFIG, XP_CONFIG, GEMS_CONFIG } from "@/config/coin-config";
 import { LeaderboardItem, Columns } from "./helper";
 import { LEADERBOARD_TIME_FILTER } from "@/config/constants-types";
@@ -53,7 +54,7 @@ export default function DataTableLeaderboards({
         wallet_address: el.user_wallet,
         tvl: showFormatNumber(el?.tvl_usd || el?.ref_tvl_usd || 0, 2, 2, "$"),
         rewards,
-        isYou: address?.toLowerCase() === el.user_wallet?.toLowerCase(),
+        isYou: compareSuiAddresses(address, el.user_wallet),
       };
     }) as LeaderboardItem[];
   }, [data, address]);
@@ -61,14 +62,16 @@ export default function DataTableLeaderboards({
   // RENDER
   return (
     <>
-      <TimeLeaderboards
-        tab={tab}
-        setTab={setTab}
-        timeFrom={data?.isoDatetimeFrom}
-        timeTo={data?.isoDatetimeTo}
-        timeLastUpdate={data?.lastUpdate}
-        isLoading={isLoading}
-      />
+      <div className={isMd ? "border border-t-0 border-white/20" : ""}>
+        <TimeLeaderboards
+          tab={tab}
+          setTab={setTab}
+          timeFrom={data?.isoDatetimeFrom}
+          timeTo={data?.isoDatetimeTo}
+          timeLastUpdate={data?.lastUpdate}
+          isLoading={isLoading}
+        />
+      </div>
 
       <ConditionRenderer
         when={isMd}
@@ -107,13 +110,13 @@ export default function DataTableLeaderboards({
           when={isLoading || mapData?.length > 0}
           fallback={<NoDataLeaderboards />}
         >
-          <div className="rounded-b-md md:rounded-b-xl overflow-hidden border border-t-0 rounded-t-none border-white/10">
+          <div className="rounded-b-md md:rounded-b-xl overflow-hidden border border-t-0 rounded-t-none border-white/20">
             <TableRender
-              headerClassName="p-4 h-[70px] border-b"
+              headerClassName="p-4 h-[70px] border-b border-white/20"
               data={mapData}
               columns={Columns(tabLeaderboard)}
               isLoading={isLoading}
-              classRowBody="even:bg-[#212121]"
+              classRowBody="even:bg-[#212121] !border-none"
               numRowLoading={3}
             />
           </div>

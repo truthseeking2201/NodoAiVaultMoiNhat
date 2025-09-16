@@ -8,6 +8,7 @@ import {
 } from "@/config/coin-config";
 import { REFETCH_VAULT_DATA_INTERVAL } from "@/config/constants";
 import { getBalanceAmountForInput } from "@/lib/number";
+import { compareSuiTypes } from "@/lib/address";
 import { NdlpAsset, UserCoinAsset } from "@/types/coin.types";
 import { VaultDepositToken } from "@/types/payment-token.types";
 import { DepositVaultConfig } from "@/types/vault-config.types";
@@ -32,7 +33,8 @@ const getCoinsBalance = async (
     return {
       coinType,
       totalBalance:
-        allBalances.find((i) => i.coinType == _coinType)?.totalBalance || "0",
+        allBalances.find((i) => compareSuiTypes(i.coinType, _coinType))
+          ?.totalBalance || "0",
     };
   });
   return data;
@@ -112,7 +114,9 @@ export const useFetchAssets = () => {
       const uniqueTokensResponse = response.filter(
         (token, index, self) =>
           index ===
-          self.findIndex((t) => t.token_address === token.token_address)
+          self.findIndex((t) =>
+            compareSuiTypes(t.token_address, token.token_address)
+          )
       );
       if (uniqueTokensResponse?.length > 0) {
         localStorage.setItem(
@@ -162,8 +166,8 @@ export const useFetchAssets = () => {
     const assets: UserCoinAsset[] =
       allCoinObjects.reduce((acc, coin) => {
         const coinType = coin.coinType;
-        const coinMetadata = depositTokens?.find(
-          (token) => token.token_address === coinType
+        const coinMetadata = depositTokens?.find((token) =>
+          compareSuiTypes(token.token_address, coinType)
         );
         const decimals = coinMetadata?.decimal;
 

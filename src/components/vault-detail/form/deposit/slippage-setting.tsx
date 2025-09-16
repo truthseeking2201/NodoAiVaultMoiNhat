@@ -210,7 +210,7 @@ const SlippageSetting = ({ value, onChange }: SlippageSettingProps) => {
             <div
               className={cn(
                 "mt-2 text-xs cursor-pointer w-fit font-medium",
-                isWarning ? "text-[#FF9903]" : "text-[#64EBBC]",
+                isWarning ? "text-orange-warning" : "text-green-increase",
                 value === "custom" && "text-red-500"
               )}
               onClick={() => {
@@ -222,7 +222,7 @@ const SlippageSetting = ({ value, onChange }: SlippageSettingProps) => {
             </div>
           </ConditionRenderer>
           {isWarning && (
-            <div className="rounded-lg bg-[#FF990333] px-4 py-2 text-xs font-medium text-[#FF9903] mt-1.5">
+            <div className="rounded-lg bg-orange-warning/30 px-4 py-2 text-xs font-medium text-orange-warning mt-1.5">
               Slippage is high, consider lowering to reduce front-run
             </div>
           )}

@@ -22,13 +22,7 @@ import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import { Skeleton } from "@/components/ui/skeleton";
 import ChartNoData from "@/components/vault-detail/charts/empty-data.tsx";
-
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: any[];
-  label?: string;
-  isConvertedToken: boolean;
-}
+import { CustomTooltipProps } from "./type";
 
 interface PositionPriceChartProps {
   period: string;
@@ -446,9 +440,7 @@ const PositionPriceChart = ({
               />
 
               <Legend content={<CustomLegend />} />
-              <Tooltip
-                content={<CustomTooltip isConvertedToken={isConvertedToken} />}
-              />
+              <Tooltip content={<CustomTooltip />} />
               <Bar
                 dataKey="range"
                 fill="rgba(253, 235, 207, 0.6)"

@@ -6,23 +6,20 @@ import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import { useBreakpoint } from "@/hooks/use-breakpoint";
 import TableMobile, {
-  RowTokens,
-  RowType,
-  RowTime,
   RowValue,
   RowAction,
-  RowSkeleton,
 } from "@/components/ui/table-mobile";
 import { formatCurrency } from "@/utils/currency";
 import gradientLink from "@/assets/icons/gradient-arrow-link.svg";
 import { formatAmount } from "@/lib/utils";
 import { ADD_NDLP_WALLET_TUTORIAL_LINK } from "@/config/constants";
+import PriceChange from "@/components/shared/price-change";
 import { useSuiClientQuery } from "@mysten/dapp-kit";
 import VideoModal from "@/components/ui/video-modal";
 import { useState } from "react";
 import { RowItem } from "@/components/ui/row-item";
 import { CoinMetadata } from "@mysten/sui/client";
-import { cn } from "@/lib/utils";
+
 
 const MRowItem = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -147,24 +144,9 @@ const VaultInfoMobile = ({
               $
               {formatAmount({
                 amount: vaultDetails?.ndlp_price,
-                precision: 4,
+              precision: 4,
               })}{" "}
-              <span className="text-xs">
-                ({vaultDetails?.ndlp_price_change_7d > 0 ? "+" : ""}
-                <span
-                  className={cn(
-                    vaultDetails?.ndlp_price_change_7d > 0
-                      ? "text-[#64EBBC]"
-                      : "text-red-400"
-                  )}
-                >
-                  {formatAmount({
-                    amount: vaultDetails?.ndlp_price_change_7d,
-                  })}
-                  %
-                </span>{" "}
-                in 7d)
-              </span>
+              <PriceChange priceChange={vaultDetails?.ndlp_price_change_7d} />
             </span>
           </RowItem.Value>
         </MRowItem>
@@ -343,29 +325,7 @@ const VaultInfo = ({
             </div>
             <div>
               <div className="text-[#9CA3AF] text-xs pb-1">Price</div>
-              <div className="text-white text-xs font-mono">
-                $
-                {formatAmount({
-                  amount: vaultDetails?.ndlp_price_usd,
-                  precision: 4,
-                })}
-                <span>
-                  ({vaultDetails?.ndlp_price_change_7d > 0 ? "+" : ""}
-                  <span
-                    className={cn(
-                      vaultDetails?.ndlp_price_change_7d > 0
-                        ? "text-[#64EBBC]"
-                        : "text-red-400"
-                    )}
-                  >
-                    {formatAmount({
-                      amount: vaultDetails?.ndlp_price_change_7d,
-                    })}
-                    %
-                  </span>{" "}
-                  in 7d)
-                </span>
-              </div>
+              <PriceChange priceChange={vaultDetails?.ndlp_price_change_7d} />
             </div>
           </div>
           <div className="flex items-center gap-16 mt-4">

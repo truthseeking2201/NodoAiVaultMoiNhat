@@ -56,7 +56,7 @@ export default function WithdrawForm({
   lockDuration,
   onSuccess,
 }: Props) {
-  const min_amount = 0.01;
+  const min_amount_usd = 0.01;
   const max_decimals = 6;
   const [timeCoolDown, setTimeCoolDown] = useState<string>("");
   const [form, setForm] = useState<IFormInput>();
@@ -66,6 +66,10 @@ export default function WithdrawForm({
   const [selectedToken, setSelectedToken] = useState<PaymentTokenType>();
   const [method, setMethod] = useState(METHOD_DEPOSIT.SINGLE);
   const countRef = useRef<boolean>(false);
+
+  const minAmount = useMemo(() => {
+    return new BigNumber(min_amount_usd).dividedBy(rateLpUsd).toNumber();
+  }, [rateLpUsd]);
 
   const BadgeCoolDown = useMemo(() => {
     return (
@@ -80,11 +84,17 @@ export default function WithdrawForm({
   const balanceInput = useMemo(() => {
     return (
       <span className="text-white/80 text-sm font-medium font-sans">
-        {showFormatNumber(balanceLp, 0, max_decimals, "", true)}{" "}
+        {showFormatNumber(
+          balanceLp,
+          0,
+          lpData?.lp_decimals | max_decimals,
+          "",
+          true
+        )}{" "}
         {lpData.lp_symbol}
       </span>
     );
-  }, [balanceLp, lpData.lp_symbol]);
+  }, [balanceLp, lpData.lp_symbol, lpData?.lp_decimals]);
 
   const balanceInputUsd = useMemo(() => {
     const amount = new BigNumber(rateLpUsd)
@@ -256,15 +266,21 @@ export default function WithdrawForm({
               message: "Please enter withdrawal amount",
             },
             min: {
-              value: min_amount,
-              message: `Minimum withdrawal is ${min_amount}`,
+              value: minAmount,
+              message: `Minimum withdrawal is ${showFormatNumber(
+                minAmount,
+                0,
+                lpData.lp_decimals
+              )}`,
             },
             max: {
               value: balanceLp,
               message: `Insufficient ${lpData.lp_symbol} balance.`,
             },
             pattern: {
-              value: new RegExp(`^\\d*\\.?\\d{0,${max_decimals}}$`),
+              value: new RegExp(
+                `^\\d*\\.?\\d{0,${lpData?.lp_decimals | max_decimals}}$`
+              ),
               message: "Invalid withdrawal amount",
             },
           }}
@@ -275,7 +291,7 @@ export default function WithdrawForm({
               balanceInput={balanceInput}
               balanceInputUsd={balanceInputUsd}
               rightInput={rightInput}
-              maxDecimals={max_decimals}
+              maxDecimals={lpData?.lp_decimals | max_decimals}
               label="Withdraw"
               onChange={onChange}
               onBlur={onBlur}
@@ -284,10 +300,7 @@ export default function WithdrawForm({
         />
         {(errors?.amount?.message || summary?.errorEstimateWithdraw) && (
           <div className="py-2 px-4 bg-red-error/20 text-red-error text-sm flex items-center break-all">
-            <Info
-              size={18}
-              className="mr-2 flex-shrink-0	"
-            />
+            <Info size={18} className="mr-2 flex-shrink-0	" />
             {errors?.amount?.message || summary?.errorEstimateWithdraw}
           </div>
         )}
@@ -358,10 +371,7 @@ export default function WithdrawForm({
               className="w-8 h-8 bg-white/5 text-gray-400 !mt-0"
               onClick={onCloseModalConfirm}
             >
-              <X
-                size={20}
-                className="text-white"
-              />
+              <X size={20} className="text-white" />
             </Button>
           </DialogHeader>
           {/* Content */}

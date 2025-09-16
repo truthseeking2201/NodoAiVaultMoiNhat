@@ -34,6 +34,7 @@ import VaultRewards from "./vault-rewards";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserHoldingTooltip from "./user-holding-tooltip";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PriceChange from "@/components/shared/price-change";
 
 const OPTIONS_CHAINS = [
   { value: "all", label: "All Chains" },
@@ -406,15 +407,8 @@ export default function VaultList() {
                         : "--"}
                       {token?.percent_change && (
                         <>
-                          <span
-                            className={cn(
-                              `text-sm ml-1`,
-                              token.percent_change >= 0
-                                ? "text-green-increase"
-                                : "text-red-400"
-                            )}
-                          >{`(${token.percent_change}%)`}</span>
-                          <span className="text-sm text-white/40">(24h)</span>
+                          <PriceChange priceChange={token.percent_change} showParentheses={false} showPeriod={false} className="text-sm" />
+                          <span className="text-sm text-white">(24h)</span>
                         </>
                       )}
                     </div>

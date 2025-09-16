@@ -3,7 +3,11 @@ import { DetailWrapper } from "@/components/vault-detail/detail-wrapper";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ACTIVITIES_TABS } from "@/components/vault-detail/constant";
 import { useState, useEffect } from "react";
-import { TransactionHistory, Types, Transaction } from "@/types/vault";
+import {
+  TransactionHistory,
+  Types,
+  VaultActivityTransaction,
+} from "@/types/vault";
 import { getVaultsActivities } from "@/apis/vault";
 import { useQuery } from "@tanstack/react-query";
 import { CustomPagination } from "@/components/ui/custom-pagination";
@@ -121,14 +125,17 @@ const VaultActivities = ({
     [fetchVaultActivities, handleFormatFilter, filter]
   );
 
-  const handleSelectTransaction = useCallback((transaction: Transaction) => {
-    if (transaction.txhash) {
-      window.open(
-        `https://suiscan.xyz/mainnet/tx/${transaction.txhash}`,
-        "_blank"
-      );
-    }
-  }, []);
+  const handleSelectTransaction = useCallback(
+    (transaction: VaultActivityTransaction) => {
+      if (transaction.txhash) {
+        window.open(
+          `https://suiscan.xyz/mainnet/tx/${transaction.txhash}`,
+          "_blank"
+        );
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     if (!isFetching && totalPages !== lastTotalPages) {
@@ -168,6 +175,7 @@ const VaultActivities = ({
           paginatedTransactions={paginatedTransactions}
           isFetched={isFetched}
           handleSelectTransaction={handleSelectTransaction}
+          vault_id={vault_id}
         />
       ) : (
         <DesktopTable
@@ -175,6 +183,7 @@ const VaultActivities = ({
           isFetching={isFetching}
           isFetched={isFetched}
           handleSelectTransaction={handleSelectTransaction}
+          vault_id={vault_id}
         />
       )}
 

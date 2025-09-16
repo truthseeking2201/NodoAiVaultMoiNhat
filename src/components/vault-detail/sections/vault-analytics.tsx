@@ -13,6 +13,7 @@ import {
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { useVaultMetricUnitStore } from "@/hooks";
 
 type VaultAnalyticsProps = {
   vault_id: string;
@@ -25,6 +26,8 @@ const VaultAnalytics = ({
   isDetailLoading,
   vault,
 }: VaultAnalyticsProps) => {
+  const { unit, isUsd } = useVaultMetricUnitStore();
+
   const [analyticsTab, setAnalyticsTab] = useState<string>(
     ANALYTICS_TABS?.[0]?.value
   );

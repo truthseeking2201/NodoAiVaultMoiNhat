@@ -12,14 +12,16 @@ export const TabsLeaderboards = ({
 }) => {
   return (
     <Tabs value={tab} onValueChange={(value: TabLeaderboard) => setTab(value)}>
-      <TabsList className="flex gap-1 relative z-10 w-full p-0 bg-black/50 rounded-b-none rounded-t-md md:rounded-t-xl overflow-hidden !border-none">
+      <TabsList className="flex gap-0 relative z-10 w-full p-0 bg-black/50 rounded-b-none rounded-t-md md:rounded-t-xl overflow-hidden md:border-b-0 border-white/35">
         {LEADERBOARD_TYPE_OPTIONS.map((t) => {
           const isActive = tab === t.value;
           return (
             <TabsTrigger
               key={t.value}
               value={t.value}
-              className="w-full h-[32px] md:h-[60px] !rounded-none bg-transparent transition-all duration-500"
+              className={cn(
+                "w-full h-[32px] md:h-[60px] !rounded-none bg-transparent transition-all duration-500 group"
+              )}
               style={
                 isActive
                   ? {
@@ -34,8 +36,9 @@ export const TabsLeaderboards = ({
                 className={cn(
                   "font-sans text-xs md:text-[22px] font-bold flex items-center",
                   {
-                    "text-ai-dark  ": isActive,
-                    "text-white/50 hover:text-white/65": !isActive,
+                    "text-ai-dark": isActive,
+                    "gradient-3rd opacity-70 group-hover:opacity-100":
+                      !isActive,
                   }
                 )}
               >
