@@ -37,6 +37,7 @@ type DepositArgs = {
   collateralToken: string;
   slippage?: number;
   onDepositSuccessCallback?: (data: any) => void;
+  onDepositFailedCallback?: (error: any) => void;
 };
 
 type DualDepositCoin = {
@@ -53,6 +54,7 @@ type DualDepositArgs = {
   tick_upper: number;
   tick_lower: number;
   onDepositSuccessCallback?: (data: any) => void;
+  onDepositFailedCallback?: (error: any) => void;
 };
 
 const MODULE_ADAPTERS = {
@@ -135,6 +137,7 @@ export const useDepositVault = (vaultId: string) => {
     collateralToken,
     slippage,
     onDepositSuccessCallback,
+    onDepositFailedCallback,
   }: DepositArgs) => {
     try {
       const packageId = vaultConfig.metadata.package_id;
@@ -268,6 +271,19 @@ export const useDepositVault = (vaultId: string) => {
             const depositEvent = events.find((event) =>
               event.type.includes("vault::DepositWithSigTimeEvent")
             );
+
+            const isSuccess = !!depositEvent;
+
+            if (!isSuccess) {
+              const err = new Error("Transaction failed. No events found.");
+              captureSentryError(
+                new Error(`Single deposit error: ${err.message}`),
+                address
+              );
+              onDepositFailedCallback?.(err);
+              return;
+            }
+
             logger.debug("🚀 ~ depositEvent:", depositEvent);
             // Pass the event data to your callback
             onDepositSuccessCallback?.({
@@ -279,8 +295,12 @@ export const useDepositVault = (vaultId: string) => {
             });
           },
           onError: (error) => {
-            console.error("Deposit failed:", error);
-            throw error;
+            let err = error;
+            if (error instanceof Error) {
+              err = new Error("Single deposit error: " + error.message);
+            }
+            captureSentryError(err, address);
+            onDepositFailedCallback?.(error as any);
           },
         }
       );
@@ -358,6 +378,7 @@ export const useDepositDualVault = (vaultId: string) => {
     tick_upper,
     tick_lower,
     onDepositSuccessCallback,
+    onDepositFailedCallback,
   }: DualDepositArgs) => {
     try {
       const packageId = vaultConfig.metadata.package_id;
@@ -382,20 +403,6 @@ export const useDepositDualVault = (vaultId: string) => {
 
       const tx = new Transaction();
 
-      const priceFeedsObjectIds = await getPriceOracle(
-        [
-          vaultConfig.collateral_price_feed_id,
-          coinA.price_feed_id,
-          coinB.price_feed_id,
-        ],
-        suiClient,
-        tx
-      );
-
-      if (!priceFeedsObjectIds[0]) {
-        throw new Error("Failed to get oracle price");
-      }
-
       const splitCoinA = await smartSplitCoin(
         tx,
         coinA.coin_type,
@@ -415,6 +422,20 @@ export const useDepositDualVault = (vaultId: string) => {
       const pack = bcs.tuple([bcs.u64()]);
       const serialized = pack.serialize([0]);
       const slippageBps = 300; // 3%
+
+      const priceFeedsObjectIds = await getPriceOracle(
+        [
+          vaultConfig.collateral_price_feed_id,
+          coinA.price_feed_id,
+          coinB.price_feed_id,
+        ],
+        suiClient,
+        tx
+      );
+
+      if (!priceFeedsObjectIds[0]) {
+        throw new Error("Failed to get oracle price");
+      }
 
       const baseParams = [
         tx.object(DUAL_TOKEN_DEPOSIT_CONFIG.price_feed_config),
@@ -502,7 +523,11 @@ export const useDepositDualVault = (vaultId: string) => {
             const events = txResponse?.events;
             const depositEvent = events.find((event) =>
               event.type.includes("vault::DualTokenDepositEvent")
-            );
+            ) as {
+              parsedJson: {
+                lp: number;
+              };
+            };
             const userDualDepositAndAddLiquidityEvent = events.find((event) =>
               event.type.includes("UserDualDepositAndAddLiquidity")
             ) as {
@@ -512,11 +537,23 @@ export const useDepositDualVault = (vaultId: string) => {
               };
             };
 
+            const isSuccess =
+              !!userDualDepositAndAddLiquidityEvent && !!depositEvent;
             // logger.debug("🚀 ~ DepositWithSigTimeEvent:", depositEvent);
             // logger.debug(
             //   "🚀 ~ UserDualDepositAndAddLiquidityEvent:",
             //   userDualDepositAndAddLiquidityEvent
             // );
+
+            if (!isSuccess) {
+              const err = new Error("Transaction failed. No events found.");
+              captureSentryError(
+                new Error(`Dual deposit error: ${err.message}`),
+                address
+              );
+              onDepositFailedCallback?.(err);
+              return;
+            }
 
             onDepositSuccessCallback?.({
               ...data,
@@ -528,8 +565,12 @@ export const useDepositDualVault = (vaultId: string) => {
             });
           },
           onError: (error) => {
-            console.error("Deposit failed:", error);
-            throw error;
+            let err = error;
+            if (error instanceof Error) {
+              err = new Error("Dual deposit error: " + error.message);
+            }
+            captureSentryError(err, address);
+            onDepositFailedCallback?.(error as any);
           },
         }
       );
