@@ -168,24 +168,27 @@ const NdlpPriceChart = ({
     const minPercentage = Math.min(...percentages);
     const maxPercentage = Math.max(...percentages);
 
-    // For 1D period, use default range of -15% to +15%
-    if (!isWeek) {
-      return [-15, 15];
-    }
-
-    // For weekly period, use dynamic range
+    // Calculate dynamic range with padding
     const range = maxPercentage - minPercentage;
     const padding = Math.max(range * 0.1, 5); // At least 5% padding
 
-    const min = Math.floor(minPercentage - padding);
-    const max = Math.ceil(maxPercentage + padding);
+    let min = Math.floor(minPercentage - padding);
+    let max = Math.ceil(maxPercentage + padding);
+
+    // Always ensure 0% is included in the range
+    if (min > 0) {
+      min = 0; // If all data is positive, start from 0%
+    }
+    if (max < 0) {
+      max = 0; // If all data is negative, end at 0%
+    }
 
     // Ensure we have reasonable bounds
     const finalMin = Math.max(min, -100);
     const finalMax = Math.min(max, 100);
 
     return [finalMin, finalMax];
-  }, [chartData, isWeek]);
+  }, [chartData]);
 
   const yAxisTicks = useMemo(() => {
     const [min, max] = yAxisRange;
@@ -202,20 +205,81 @@ const NdlpPriceChart = ({
       ticks.push(i);
     }
 
-    return ticks;
+    // Always include 0% as baseline if it's within the range and not already included
+    if (min <= 0 && max >= 0 && !ticks.includes(0)) {
+      ticks.push(0);
+    }
+
+    // Sort ticks to maintain order
+    const sortedTicks = ticks.sort((a, b) => a - b);
+    return sortedTicks;
   }, [yAxisRange]);
 
+  const referenceAreaBounds = useMemo(() => {
+    const [yAxisMin, yAxisMax] = yAxisRange;
+    
+    if (!chartData.length) {
+      return {
+        greenTop: yAxisMax,
+        greenBottom: 0,
+        yellowTop: 0,
+        yellowBottom: -10,
+        redBottom: yAxisMin,
+        referenceLineY: 0,
+      };
+    }
+
+    const percentages = chartData.map((item) => item.percentage);
+    const minPercentage = Math.min(...percentages);
+    const maxPercentage = Math.max(...percentages);
+
+    // Calculate dynamic zones based on data
+    let greenBottom, yellowTop, yellowBottom, referenceLineY;
+
+    if (minPercentage >= 0) {
+      // All positive data - green zone starts from minimum data value
+      greenBottom = minPercentage;
+      yellowTop = 0;
+      yellowBottom = -10;
+      // Reference line should be at the minimum data value (start of green zone)
+      referenceLineY = minPercentage;
+    } else if (maxPercentage <= 0) {
+      // All negative data - yellow zone from 0% to -10%, red zone below -10%
+      greenBottom = yAxisMax; // No green zone visible
+      yellowTop = 0;
+      yellowBottom = -10;
+      // Reference line should be at 0%
+      referenceLineY = 0;
+    } else {
+      // Mixed data - yellow zone from 0% to -10%
+      greenBottom = 0;
+      yellowTop = 0;
+      yellowBottom = -10;
+      // Reference line should be at 0%
+      referenceLineY = 0;
+    }
+
+    return {
+      greenTop: yAxisMax,
+      greenBottom,
+      yellowTop,
+      yellowBottom,
+      redBottom: yAxisMin,
+      referenceLineY,
+    };
+  }, [chartData, yAxisRange]);
+
   if ((!chartData || chartData?.length === 0) && !isFetching) {
-    return (
-      <ChartNoData type="ndlp-price" />
-    );
+    return <ChartNoData type="ndlp-price" />;
   }
 
   return (
     <div className="flex flex-col gap-3 md:gap-6">
-      <span className="text-white md:text-sm text-xs font-medium ">
-        Track the NDLP price of this vault over time
-      </span>
+      <div className="flex items-center justify-between">
+        <span className="text-white md:text-sm text-xs font-medium ">
+          Track the NDLP price of this vault over time
+        </span>
+      </div>
       <div
         className="w-full rounded-[10.742px] border-[0.671px] border-white/5 p-1"
         style={{
@@ -226,7 +290,7 @@ const NdlpPriceChart = ({
         <ResponsiveContainer width="100%" height={isMobile ? 278 : 300}>
           <LineChart
             data={chartData}
-            margin={{ top: 20, left: -10, right: 10, bottom: 10 }}
+            margin={{ top: 20, left: 0, right: 10, bottom: 10 }}
             width={isMobile ? 364 : 500}
             height={isMobile ? 278 : 300}
           >
@@ -279,19 +343,27 @@ const NdlpPriceChart = ({
               </linearGradient>
             </defs>
             <ReferenceArea
-              y1={0}
-              y2={yAxisRange[1]}
+              y1={referenceAreaBounds.greenBottom}
+              y2={referenceAreaBounds.greenTop}
               fill="url(#greenGradient)"
               radius={[10, 10, 0, 0]}
             />
-            <ReferenceArea y1={-5} y2={0} fill="url(#yellowGradient)" />
+            <ReferenceArea 
+              y1={referenceAreaBounds.yellowBottom} 
+              y2={referenceAreaBounds.yellowTop} 
+              fill="url(#yellowGradient)" 
+            />
             <ReferenceArea
               y1={yAxisRange[0]}
-              y2={-5}
+              y2={referenceAreaBounds.yellowBottom}
               fill="url(#redGradient)"
               radius={[0, 0, 10, 10]}
             />
-            <ReferenceLine y={0} stroke="#6b7280" strokeDasharray="3 3" />
+            <ReferenceLine
+              y={referenceAreaBounds.referenceLineY}
+              stroke="#6b7280"
+              strokeDasharray="3 3"
+            />
             <XAxis
               dataKey="time"
               axisLine={false}
@@ -337,7 +409,8 @@ const NdlpPriceChart = ({
             <Line
               type="monotone"
               dataKey="percentage"
-              stroke="url(#customLineGradient)"
+              // stroke="url(#customLineGradient)"
+              stroke="#F3D2B5"
               strokeWidth={2}
               dot={({ cx, cy, index }) =>
                 index === lastItemIndex ? (
