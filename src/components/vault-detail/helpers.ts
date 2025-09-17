@@ -6,12 +6,14 @@ export const formatCollateralUsdNumber = ({
   isUsd,
   collateralDecimals = 4,
   fallback = "--",
+  unit = "",
 }: {
   value_usd: number | string;
   value_collateral: number | string;
   isUsd: boolean;
   collateralDecimals?: number;
   fallback?: string;
+  unit?: string;
 }) => {
   if (isUsd) {
     if (!value_usd && typeof value_usd !== "number") return fallback;
@@ -19,5 +21,7 @@ export const formatCollateralUsdNumber = ({
   }
   if (!value_collateral && typeof value_collateral !== "number")
     return fallback;
-  return formatNumber(value_collateral, 0, collateralDecimals);
+
+  const isBTCCoin = unit?.toLowerCase().includes("btc");
+  return formatNumber(value_collateral, 0, isBTCCoin ? 8 : collateralDecimals);
 };

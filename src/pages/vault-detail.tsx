@@ -107,6 +107,7 @@ const VaultDetail = () => {
               value_usd: vaultDetails?.total_value_usd,
               value_collateral: vaultDetails?.total_value_collateral,
               isUsd,
+              unit,
             })
           : "--",
         prefix: unitIcon,
@@ -120,6 +121,7 @@ const VaultDetail = () => {
               value_usd: vaultDetails?.rewards_24h_usd,
               value_collateral: vaultDetails?.rewards_24h_collateral,
               isUsd,
+              unit,
             })
           : "--",
         prefix: unitIcon,
@@ -132,6 +134,7 @@ const VaultDetail = () => {
               value_usd: vaultDetails?.ndlp_price_usd,
               value_collateral: vaultDetails?.ndlp_price,
               isUsd,
+              unit,
             })
           : "--",
         prefix: unitIcon,
@@ -269,6 +272,7 @@ const VaultDetail = () => {
               isDetailLoading={isDetailLoading}
               vault_id={vault_id}
               vault={vaultDetails}
+              activeTab={activeTab}
             />
           </div>
           {/* Left sessions - end */}
