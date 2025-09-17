@@ -273,7 +273,6 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
             duration: 5000,
             icon: <IconErrorToast />,
           });
-          console.error(error);
           setLoading(false);
         },
       });
