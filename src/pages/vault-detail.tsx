@@ -204,8 +204,8 @@ const VaultDetail = () => {
         <div
           className={cn(
             isBreakMobile && "w-full",
-            !isBreakMobile &&
-              "xl:w-[450px] w-[380px] sticky top-[10px] self-start"
+            !isBreakMobile && "xl:w-[450px] w-[380px]",
+            window.innerHeight > 900 && "sticky top-[10px] self-start"
           )}
         >
           <DepositWithdraw
