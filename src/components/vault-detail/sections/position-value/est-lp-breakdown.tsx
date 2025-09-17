@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import { PieChart, Pie, Cell } from "recharts";
 import { useMemo } from "react";
-import { showFormatNumber } from "@/lib/number";
+import { showFormatNumber, showFormatNumberOption } from "@/lib/number";
 import { formatDate } from "@/utils/date";
 import { getImage } from "@/lib/utils";
 import useBreakpoint from "@/hooks/use-breakpoint";
@@ -73,8 +73,7 @@ const ItemAmount = ({ item, color }: { item: any; color: string }) => {
         className="w-[20px] h-[20px] flex-shrink-0"
       />
       <div className="flex-1 text-white text-sm font-medium">
-        {showFormatNumber(item.amount, 0, Number(item.amount) < 1 ? 6 : 2)}{" "}
-        <br className="md:hidden block" />
+        {showFormatNumberOption(item.amount)} <br className="sm:hidden block" />
         {item.token_symbol}
       </div>
       <div>
@@ -82,12 +81,7 @@ const ItemAmount = ({ item, color }: { item: any; color: string }) => {
           {showFormatNumber(item.value * 100, 0, 2)}%
         </p>
         <p className="m-0 font-mono text-xs text-white/60 text-right">
-          {showFormatNumber(
-            item.amount_in_usd,
-            0,
-            Number(item.amount_in_usd) < 1 ? 6 : 2,
-            "$"
-          )}
+          {showFormatNumberOption(item.amount_in_usd, 2, 6, "$")}
         </p>
       </div>
     </div>

@@ -47,7 +47,7 @@ export const FormatNumberByMetrics = ({
     return isNegative ? "-" : "";
   }, [indicator, isNegative]);
 
-  if (unit === "usd") {
+  if (unit?.toLocaleLowerCase() === "usd") {
     return (
       <span className={cn(className, indicatorClass)}>
         {prefix}

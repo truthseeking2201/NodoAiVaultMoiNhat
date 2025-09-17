@@ -57,6 +57,19 @@ export const showFormatNumber = (
   return prefix + num.toLocaleString(undefined, options);
 };
 
+export const showFormatNumberOption = (
+  number: string | number,
+  maxPrecisionAbove = 2,
+  maxPrecisionUnder = 6,
+  prefix = "",
+  ratio = 1
+) => {
+  if (Number(number) < ratio) {
+    return showFormatNumber(number, 0, maxPrecisionUnder, prefix);
+  }
+  return showFormatNumber(number, 0, maxPrecisionAbove, prefix);
+};
+
 export const formatLocalisedCompactNumber = (
   number: number,
   isShort = true

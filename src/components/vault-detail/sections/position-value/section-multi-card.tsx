@@ -2,7 +2,7 @@ import { VaultHoldingType } from "@/types/vault-config.types";
 import { WrapCard } from "./wrap-card";
 import { FormatNumberByMetrics } from "./format-number-by-metrics";
 import { useMemo, ReactNode } from "react";
-import { showFormatNumber } from "@/lib/number";
+import { showFormatNumberOption } from "@/lib/number";
 
 const Card = ({
   children,
@@ -15,7 +15,7 @@ const Card = ({
 }) => {
   return (
     <WrapCard className="px-4 py-3">
-      <div className="flex item-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-1">
         <div className="font-sans text-xs text-white/60 uppercase ">
           {title}
         </div>
@@ -54,6 +54,16 @@ export const SectionMultiCard = ({
     return Number(data?.user_shares_percent || 0) * 100;
   }, [data]);
 
+  const userLp = useMemo(() => {
+    // TODO
+    return 4652;
+  }, [data]);
+
+  const totalLp = useMemo(() => {
+    // TODO
+    return 1000000;
+  }, [data]);
+
   const valueClass = "font-mono text-white text-lg md:text-xl font-medium";
   const collateralClass = "w-4 h-4";
 
@@ -87,30 +97,35 @@ export const SectionMultiCard = ({
           </span>
         )}
       </Card>
-      <Card title="Break-even">
+      <Card
+        title="Break-even"
+        rightMobile={
+          <div className="text-xs text-white/60 ">
+            {`Current ${lpSymbol} price: `}
+            <FormatNumberByMetrics
+              unit={unitMetric}
+              number={lpPrice}
+              className="text-white"
+              showUnit
+              minPrecision={4}
+            />
+          </div>
+        }
+      >
         <FormatNumberByMetrics
           unit={unitMetric}
           number={breakEvent}
           className={valueClass}
           collateralClassName={collateralClass}
         />
-        <div className="text-xs text-white/60 mt-1">
-          {`Current ${lpSymbol} price: `}
-          <FormatNumberByMetrics
-            unit={unitMetric}
-            number={lpPrice}
-            className="text-white"
-            showUnit
-            minPrecision={4}
-          />
-        </div>
       </Card>
       <Card title="Your Share">
         <div className={valueClass}>
-          {showFormatNumber(sharesPercent, 2, sharesPercent < 1 ? 6 : 2)}%
+          {showFormatNumberOption(sharesPercent)}%
         </div>
         <div className="text-xs mt-1 text-white">
-          <span className="text-white/60">≈</span> 4,652 / 1,000,000
+          <span className="text-white/60">≈</span>{" "}
+          {showFormatNumberOption(userLp)} / {showFormatNumberOption(totalLp)}
           <span className="text-white/60"> {lpSymbol}</span>
         </div>
       </Card>

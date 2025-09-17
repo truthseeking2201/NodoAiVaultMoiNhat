@@ -1,40 +1,25 @@
 import { DetailWrapper } from "@/components/vault-detail/detail-wrapper";
+import ConditionRenderer from "@/components/shared/condition-renderer";
 import { FormatNumberByMetrics } from "@/components/vault-detail/sections/position-value/format-number-by-metrics";
 import { UnSignedHolding } from "@/components/vault-detail/sections/position-value/un-signed-holding";
 import { SectionMultiCard } from "@/components/vault-detail/sections/position-value/section-multi-card";
 import { EstLPBreakdown } from "@/components/vault-detail/sections/position-value/est-lp-breakdown";
 import { PnlBreakdown } from "@/components/vault-detail/sections/position-value/pnl-breakdown";
-import React, { ReactNode, useEffect, useMemo, useState } from "react";
-import { PieChart, Pie, Cell } from "recharts";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import ChevronDown from "@/assets/icons/chevron-down-gradient.svg?react";
+import { Cashflow } from "@/components/vault-detail/sections/position-value/cashflow";
+import { useMemo } from "react";
+
 import {
   useGetLpToken,
-  useGetVaultConfig,
   useUserHolding,
   useVaultMetricUnitStore,
   useWallet,
 } from "@/hooks";
 import { showFormatNumber } from "@/lib/number";
-import { getBalanceAmount } from "@/lib/number";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
-import { ChevronRight, Info } from "lucide-react";
-import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
-import useBreakpoint from "@/hooks/use-breakpoint";
 import {
   calculateUserHoldings,
   calculateTotalLiquidity,
 } from "@/utils/helpers";
-import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import ConditionRenderer from "@/components/shared/condition-renderer";
-import FormatUsdCollateralAmount from "./format-usd-collateral-amount";
 
 type UserPositionValueProps = {
   isDetailLoading: boolean;
@@ -65,7 +50,7 @@ const UserPositionValue = ({
     return isLoadingHolding || isDetailLoading;
   }, [isLoadingHolding, isDetailLoading]);
 
-  const user_total_liquidity = useMemo(() => {
+  const totalLiquidity = useMemo(() => {
     return calculateTotalLiquidity(
       ndlp_balance,
       vault?.user_pending_withdraw_ndlp,
@@ -73,7 +58,7 @@ const UserPositionValue = ({
     );
   }, [ndlp_balance, vault]);
 
-  const user_total_liquidity_by_unit = useMemo(() => {
+  const totalLiquidityByUnit = useMemo(() => {
     return calculateUserHoldings(
       ndlp_balance,
       vault?.user_pending_withdraw_ndlp,
@@ -84,12 +69,12 @@ const UserPositionValue = ({
 
   const hasDeposit = useMemo(() => {
     if (!isAuthenticated) return false;
-    return user_total_liquidity_by_unit > 0;
-  }, [isAuthenticated, user_total_liquidity_by_unit]);
+    return totalLiquidityByUnit > 0;
+  }, [isAuthenticated, totalLiquidityByUnit]);
 
-  const net_pnl_by_unit = useMemo(() => {
+  const netPNL = useMemo(() => {
     // TODO
-    return keyMetric == "usd" ? 12 : -0.0000001;
+    return keyMetric == "USD" ? 12 : -0.0000001;
   }, [keyMetric]);
 
   return (
@@ -111,7 +96,7 @@ const UserPositionValue = ({
                 className="w-8 h-8 mr-2"
               />
               <span className="font-mono text-white text-3xl font-semibold">
-                {showFormatNumber(user_total_liquidity || 0, 2, 6)}
+                {showFormatNumber(totalLiquidity || 0, 2, 6)}
               </span>
             </div>
             <div className="flex items-center flex-wrap gap-2 mt-2 max-sm:flex-col max-sm:gap-1 max-sm:items-start">
@@ -121,7 +106,7 @@ const UserPositionValue = ({
                 </span>
                 <FormatNumberByMetrics
                   unit={unit}
-                  number={user_total_liquidity_by_unit}
+                  number={totalLiquidityByUnit}
                   className="font-mono text-white text-base md:text-xl font-medium"
                   collateralClassName="md:w-5 md:h-5 w-4 h-4"
                 />
@@ -132,7 +117,7 @@ const UserPositionValue = ({
                 </span>
                 <FormatNumberByMetrics
                   unit={unit}
-                  number={net_pnl_by_unit}
+                  number={netPNL}
                   className="font-mono text-white text-sm md:text-xl font-medium"
                   collateralClassName="md:w-5 md:h-5 w-4 h-4"
                   indicator
@@ -149,6 +134,7 @@ const UserPositionValue = ({
           />
           <EstLPBreakdown data={data} />
           <PnlBreakdown data={data} unitMetric={unit} keyMetric={keyMetric} />
+          <Cashflow data={data} unitMetric={unit} keyMetric={keyMetric} />
         </div>
       </ConditionRenderer>
     </DetailWrapper>
