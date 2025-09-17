@@ -122,8 +122,7 @@ const VaultDetail = () => {
       },
       {
         label: "NDLP Price",
-        tooltip:
-          "Price of 1 NDLP token based on the vault’s total value. (Unit USD)",
+        tooltip: `Price of 1 NDLP token based on the vault’s total value. (Unit ${unit})`,
         value: !isLoadingVaultDetails
           ? formatCollateralUsdNumber({
               value_usd: vaultDetails?.ndlp_price_usd,
@@ -134,7 +133,7 @@ const VaultDetail = () => {
         prefix: unitIcon,
       },
     ];
-  }, [vaultDetails, unitIcon, isUsd, isLoadingVaultDetails]);
+  }, [vaultDetails, unitIcon, isUsd, isLoadingVaultDetails, unit]);
 
   if ((!vaultDetails || !isValidVault) && !isLoadingVaultDetails) {
     return <Navigate to="/" replace />;
