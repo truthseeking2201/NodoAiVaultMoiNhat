@@ -172,12 +172,15 @@ const NdlpPriceChart = ({
     const range = maxPercentage - minPercentage;
     const padding = Math.max(range * 0.1, 5); // At least 5% padding
 
-    const min = Math.floor(minPercentage - padding);
+    let min = Math.floor(minPercentage - padding);
     let max = Math.ceil(maxPercentage + padding);
 
-    // For all negative data, ensure we include 0% in the range so red zone is visible
-    if (maxPercentage <= 0) {
-      max = Math.max(max, 5); // Include some positive space to show the red zone properly
+    // Always ensure 0% is included in the range
+    if (min > 0) {
+      min = 0; // If all data is positive, start from 0%
+    }
+    if (max < 0) {
+      max = 0; // If all data is negative, end at 0%
     }
 
     // Ensure we have reasonable bounds
@@ -202,7 +205,14 @@ const NdlpPriceChart = ({
       ticks.push(i);
     }
 
-    return ticks;
+    // Always include 0% as baseline if it's within the range and not already included
+    if (min <= 0 && max >= 0 && !ticks.includes(0)) {
+      ticks.push(0);
+    }
+
+    // Sort ticks to maintain order
+    const sortedTicks = ticks.sort((a, b) => a - b);
+    return sortedTicks;
   }, [yAxisRange]);
 
   const referenceAreaBounds = useMemo(() => {
@@ -212,8 +222,8 @@ const NdlpPriceChart = ({
       return {
         greenTop: yAxisMax,
         greenBottom: 0,
-        yellowTop: -2,
-        yellowBottom: 2,
+        yellowTop: 0,
+        yellowBottom: -10,
         redBottom: yAxisMin,
         referenceLineY: 0,
       };
@@ -229,33 +239,22 @@ const NdlpPriceChart = ({
     if (minPercentage >= 0) {
       // All positive data - green zone starts from minimum data value
       greenBottom = minPercentage;
-      yellowTop = -2;
-      yellowBottom = Math.max(yAxisMin, -5);
+      yellowTop = 0;
+      yellowBottom = -10;
       // Reference line should be at the minimum data value (start of green zone)
       referenceLineY = minPercentage;
     } else if (maxPercentage <= 0) {
-      // All negative data - red zone covers entire visible range
+      // All negative data - yellow zone from 0% to -10%, red zone below -10%
       greenBottom = yAxisMax; // No green zone visible
       yellowTop = 0;
-      yellowBottom = 0;
+      yellowBottom = -10;
       // Reference line should be at 0%
       referenceLineY = 0;
     } else {
-      // Mixed data - check if we need yellow zone
+      // Mixed data - yellow zone from 0% to -10%
       greenBottom = 0;
-      
-      // Only show yellow zone if there are values close to 0%
-      const hasValuesNearZero = percentages.some(p => p >= -2 && p <= 2);
-      
-      if (hasValuesNearZero) {
-        yellowTop = 0;
-        yellowBottom = -10;
-      } else {
-        // No yellow zone needed, red zone covers all negative values
-        yellowTop = 0;
-        yellowBottom = 0;
-      }
-      
+      yellowTop = 0;
+      yellowBottom = -10;
       // Reference line should be at 0%
       referenceLineY = 0;
     }
