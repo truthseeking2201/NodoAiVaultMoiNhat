@@ -173,12 +173,12 @@ const NdlpPriceChart = ({
     const padding = Math.max(range * 0.1, 5); // At least 5% padding
 
     const min = Math.floor(minPercentage - padding);
-    const max = Math.ceil(maxPercentage + padding);
+    let max = Math.ceil(maxPercentage + padding);
 
-    // Center the range around 0% (percentage line in the middle)
-    // const centerOffset = (min + max) / 2;
-    // min = Math.floor(min - centerOffset);
-    // max = Math.ceil(max - centerOffset);
+    // For all negative data, ensure we include 0% in the range so red zone is visible
+    if (maxPercentage <= 0) {
+      max = Math.max(max, 5); // Include some positive space to show the red zone properly
+    }
 
     // Ensure we have reasonable bounds
     const finalMin = Math.max(min, -100);
@@ -215,17 +215,17 @@ const NdlpPriceChart = ({
         yellowTop: -2,
         yellowBottom: 2,
         redBottom: yAxisMin,
-        referenceLineY: 0
+        referenceLineY: 0,
       };
     }
 
     const percentages = chartData.map((item) => item.percentage);
     const minPercentage = Math.min(...percentages);
     const maxPercentage = Math.max(...percentages);
-    
+
     // Calculate dynamic zones based on data
     let greenBottom, yellowTop, yellowBottom, referenceLineY;
-    
+
     if (minPercentage >= 0) {
       // All positive data - green zone starts from minimum data value
       greenBottom = minPercentage;
@@ -234,35 +234,44 @@ const NdlpPriceChart = ({
       // Reference line should be at the minimum data value (start of green zone)
       referenceLineY = minPercentage;
     } else if (maxPercentage <= 0) {
-      // All negative data - green zone starts from 0%
-      greenBottom = 0;
-      yellowTop = Math.min(yAxisMax, 5);
-      yellowBottom = Math.max(yAxisMin + 20, 2);
+      // All negative data - red zone covers entire visible range
+      greenBottom = yAxisMax; // No green zone visible
+      yellowTop = 0;
+      yellowBottom = 0;
       // Reference line should be at 0%
       referenceLineY = 0;
     } else {
-      // Mixed data - green zone starts from 0%
+      // Mixed data - check if we need yellow zone
       greenBottom = 0;
-      yellowTop = 2;
-      yellowBottom = -2;
+      
+      // Only show yellow zone if there are values close to 0%
+      const hasValuesNearZero = percentages.some(p => p >= -2 && p <= 2);
+      
+      if (hasValuesNearZero) {
+        yellowTop = 0;
+        yellowBottom = -10;
+      } else {
+        // No yellow zone needed, red zone covers all negative values
+        yellowTop = 0;
+        yellowBottom = 0;
+      }
+      
       // Reference line should be at 0%
       referenceLineY = 0;
     }
-    
+
     return {
       greenTop: yAxisMax,
       greenBottom,
       yellowTop,
       yellowBottom,
       redBottom: yAxisMin,
-      referenceLineY
+      referenceLineY,
     };
   }, [chartData, yAxisRange]);
 
   if ((!chartData || chartData?.length === 0) && !isFetching) {
-    return (
-      <ChartNoData type="ndlp-price" />
-    );
+    return <ChartNoData type="ndlp-price" />;
   }
 
   return (
@@ -282,7 +291,7 @@ const NdlpPriceChart = ({
         <ResponsiveContainer width="100%" height={isMobile ? 278 : 300}>
           <LineChart
             data={chartData}
-            margin={{ top: 20, left: -10, right: 10, bottom: 10 }}
+            margin={{ top: 20, left: 0, right: 10, bottom: 10 }}
             width={isMobile ? 364 : 500}
             height={isMobile ? 278 : 300}
           >
@@ -346,12 +355,16 @@ const NdlpPriceChart = ({
               fill="url(#yellowGradient)" 
             />
             <ReferenceArea
-              y1={Math.min(yAxisRange[0], referenceAreaBounds.yellowBottom - 1)}
+              y1={yAxisRange[0]}
               y2={referenceAreaBounds.yellowBottom}
               fill="url(#redGradient)"
               radius={[0, 0, 10, 10]}
             />
-            <ReferenceLine y={referenceAreaBounds.referenceLineY} stroke="#6b7280" strokeDasharray="3 3" />
+            <ReferenceLine
+              y={referenceAreaBounds.referenceLineY}
+              stroke="#6b7280"
+              strokeDasharray="3 3"
+            />
             <XAxis
               dataKey="time"
               axisLine={false}
