@@ -12,7 +12,7 @@ const FormatUsdCollateralAmount = ({
   collateralClassName?: string;
 }) => {
   if (!text)
-    return collateralIcon === "usd" ? (
+    return collateralIcon === "USD" ? (
       "$--"
     ) : (
       <div className="flex items-center gap-1">
@@ -25,7 +25,7 @@ const FormatUsdCollateralAmount = ({
       </div>
     );
 
-  if (collateralIcon === "usd") {
+  if (collateralIcon === "USD") {
     return <div className={className}>{`$${text}`}</div>;
   }
   return (

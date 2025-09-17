@@ -243,7 +243,7 @@ interface VaultMetricUnitState {
 }
 
 const vaultMetricUnitStore = create<VaultMetricUnitState>((set) => ({
-  unit: "usd",
+  unit: "USD",
   vault_id: null,
   decimals: 2,
   setMetricUnit: (unit: string, vault_id: string, decimals: number) =>
@@ -257,14 +257,14 @@ export const useVaultMetricUnitStore = (vault_id?: string) => {
 
   if (vaultId !== vault_id) {
     return {
-      unit: "usd",
+      unit: "USD",
       isUsd: true,
       setMetricUnit,
     };
   }
   return {
     unit,
-    isUsd: unit === "usd",
+    isUsd: unit === "USD",
     setMetricUnit,
   };
 };

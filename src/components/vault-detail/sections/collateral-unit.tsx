@@ -11,7 +11,7 @@ const CollateralUnit = ({
   vault_id: string;
 }) => {
   const { unit, setMetricUnit } = useVaultMetricUnitStore(vault_id);
-  const usdValue = "usd";
+  const usdValue = "USD";
   const { assets } = useUserAssetsStore();
   const depositTokens = JSON.parse(
     localStorage.getItem("cached-deposit-tokens") || "[]"
