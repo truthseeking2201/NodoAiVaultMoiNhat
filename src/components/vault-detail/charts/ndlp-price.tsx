@@ -168,24 +168,24 @@ const NdlpPriceChart = ({
     const minPercentage = Math.min(...percentages);
     const maxPercentage = Math.max(...percentages);
 
-    // For 1D period, use default range of -15% to +15%
-    if (!isWeek) {
-      return [-15, 15];
-    }
-
-    // For weekly period, use dynamic range
+    // Calculate dynamic range with padding
     const range = maxPercentage - minPercentage;
     const padding = Math.max(range * 0.1, 5); // At least 5% padding
 
     const min = Math.floor(minPercentage - padding);
     const max = Math.ceil(maxPercentage + padding);
 
+    // Center the range around 0% (percentage line in the middle)
+    // const centerOffset = (min + max) / 2;
+    // min = Math.floor(min - centerOffset);
+    // max = Math.ceil(max - centerOffset);
+
     // Ensure we have reasonable bounds
     const finalMin = Math.max(min, -100);
     const finalMax = Math.min(max, 100);
 
     return [finalMin, finalMax];
-  }, [chartData, isWeek]);
+  }, [chartData]);
 
   const yAxisTicks = useMemo(() => {
     const [min, max] = yAxisRange;
@@ -205,6 +205,60 @@ const NdlpPriceChart = ({
     return ticks;
   }, [yAxisRange]);
 
+  const referenceAreaBounds = useMemo(() => {
+    const [yAxisMin, yAxisMax] = yAxisRange;
+    
+    if (!chartData.length) {
+      return {
+        greenTop: yAxisMax,
+        greenBottom: 0,
+        yellowTop: -2,
+        yellowBottom: 2,
+        redBottom: yAxisMin,
+        referenceLineY: 0
+      };
+    }
+
+    const percentages = chartData.map((item) => item.percentage);
+    const minPercentage = Math.min(...percentages);
+    const maxPercentage = Math.max(...percentages);
+    
+    // Calculate dynamic zones based on data
+    let greenBottom, yellowTop, yellowBottom, referenceLineY;
+    
+    if (minPercentage >= 0) {
+      // All positive data - green zone starts from minimum data value
+      greenBottom = minPercentage;
+      yellowTop = -2;
+      yellowBottom = Math.max(yAxisMin, -5);
+      // Reference line should be at the minimum data value (start of green zone)
+      referenceLineY = minPercentage;
+    } else if (maxPercentage <= 0) {
+      // All negative data - green zone starts from 0%
+      greenBottom = 0;
+      yellowTop = Math.min(yAxisMax, 5);
+      yellowBottom = Math.max(yAxisMin + 20, 2);
+      // Reference line should be at 0%
+      referenceLineY = 0;
+    } else {
+      // Mixed data - green zone starts from 0%
+      greenBottom = 0;
+      yellowTop = 2;
+      yellowBottom = -2;
+      // Reference line should be at 0%
+      referenceLineY = 0;
+    }
+    
+    return {
+      greenTop: yAxisMax,
+      greenBottom,
+      yellowTop,
+      yellowBottom,
+      redBottom: yAxisMin,
+      referenceLineY
+    };
+  }, [chartData, yAxisRange]);
+
   if ((!chartData || chartData?.length === 0) && !isFetching) {
     return (
       <ChartNoData type="ndlp-price" />
@@ -213,9 +267,11 @@ const NdlpPriceChart = ({
 
   return (
     <div className="flex flex-col gap-3 md:gap-6">
-      <span className="text-white md:text-sm text-xs font-medium ">
-        Track the NDLP price of this vault over time
-      </span>
+      <div className="flex items-center justify-between">
+        <span className="text-white md:text-sm text-xs font-medium ">
+          Track the NDLP price of this vault over time
+        </span>
+      </div>
       <div
         className="w-full rounded-[10.742px] border-[0.671px] border-white/5 p-1"
         style={{
@@ -279,19 +335,23 @@ const NdlpPriceChart = ({
               </linearGradient>
             </defs>
             <ReferenceArea
-              y1={0}
-              y2={yAxisRange[1]}
+              y1={referenceAreaBounds.greenBottom}
+              y2={referenceAreaBounds.greenTop}
               fill="url(#greenGradient)"
               radius={[10, 10, 0, 0]}
             />
-            <ReferenceArea y1={-5} y2={0} fill="url(#yellowGradient)" />
+            <ReferenceArea 
+              y1={referenceAreaBounds.yellowBottom} 
+              y2={referenceAreaBounds.yellowTop} 
+              fill="url(#yellowGradient)" 
+            />
             <ReferenceArea
-              y1={yAxisRange[0]}
-              y2={-5}
+              y1={Math.min(yAxisRange[0], referenceAreaBounds.yellowBottom - 1)}
+              y2={referenceAreaBounds.yellowBottom}
               fill="url(#redGradient)"
               radius={[0, 0, 10, 10]}
             />
-            <ReferenceLine y={0} stroke="#6b7280" strokeDasharray="3 3" />
+            <ReferenceLine y={referenceAreaBounds.referenceLineY} stroke="#6b7280" strokeDasharray="3 3" />
             <XAxis
               dataKey="time"
               axisLine={false}

@@ -268,7 +268,7 @@ const PositionPriceChart = ({
   if ((!chartData || chartData?.length === 0) && !isLoading) {
     onEmptyStateChange(true);
     return (
-      <ChartNoData>
+      <ChartNoData type="position-price">
         <div className="text-white/60 text-sm mb-6 text-center">
           {period === PERIOD_TABS[0].value ? (
             <span>
