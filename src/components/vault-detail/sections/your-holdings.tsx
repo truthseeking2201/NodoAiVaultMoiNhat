@@ -32,6 +32,7 @@ type YourHoldingProps = {
   isDetailLoading: boolean;
   vault_id: string;
   vault: BasicVaultDetailsType;
+  activeTab: number;
 };
 
 const COLORS = [
@@ -89,6 +90,7 @@ const YourHoldings = ({
   isDetailLoading,
   vault_id,
   vault,
+  activeTab,
 }: YourHoldingProps) => {
   const [expanded, setExpanded] = useState(false);
   const { isAuthenticated } = useWallet();
@@ -108,6 +110,12 @@ const YourHoldings = ({
     ndlp_balance,
     isAuthenticated
   );
+
+  useEffect(() => {
+    if (activeTab === 1) {
+      refetch();
+    }
+  }, [activeTab, refetch]);
 
   const user_total_liquidity = calculateUserHoldings(
     ndlp_balance,
@@ -219,6 +227,7 @@ const YourHoldings = ({
                   value_usd: user_total_liquidity,
                   value_collateral: user_total_liquidity,
                   isUsd,
+                  unit,
                 })}
               />
             </div>
@@ -519,6 +528,7 @@ const YourHoldings = ({
                           value_collateral:
                             userHoldingData?.user_total_rewards_collateral,
                           isUsd,
+                          unit,
                         })}
                       />
                     ) : (
@@ -564,6 +574,7 @@ const YourHoldings = ({
                       value_collateral:
                         userHoldingData?.user_total_deposit_collateral,
                       isUsd,
+                      unit,
                     })}
                     className="font-mono"
                     collateralClassName="w-4 h-4"
@@ -588,6 +599,7 @@ const YourHoldings = ({
                       value_collateral:
                         userHoldingData?.user_total_withdraw_collateral,
                       isUsd,
+                      unit,
                     })}
                     className="font-mono"
                     collateralClassName="w-4 h-4"
@@ -617,6 +629,7 @@ const YourHoldings = ({
                             value_collateral:
                               userHoldingData?.user_rewards_24h_collateral,
                             isUsd,
+                            unit,
                           })}
                           className="font-mono"
                           collateralClassName="w-4 h-4"
@@ -692,6 +705,7 @@ const YourHoldings = ({
                       value_collateral:
                         userHoldingData?.user_break_event_price_collateral,
                       isUsd,
+                      unit,
                     })}
                   />
                 </div>
