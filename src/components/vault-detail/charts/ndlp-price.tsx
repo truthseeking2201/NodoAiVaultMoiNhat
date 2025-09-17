@@ -397,7 +397,8 @@ const NdlpPriceChart = ({
             <Line
               type="monotone"
               dataKey="percentage"
-              stroke="url(#customLineGradient)"
+              // stroke="url(#customLineGradient)"
+              stroke="#F3D2B5"
               strokeWidth={2}
               dot={({ cx, cy, index }) =>
                 index === lastItemIndex ? (
