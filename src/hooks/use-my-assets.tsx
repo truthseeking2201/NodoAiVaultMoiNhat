@@ -111,7 +111,6 @@ export const useFetchAssets = () => {
           decimal: token.decimals,
         });
       });
-
       const uniqueTokensResponse = response.filter(
         (token, index, self) =>
           index ===

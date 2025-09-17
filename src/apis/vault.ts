@@ -68,6 +68,8 @@ const URLS = {
   estimateDualDeposit: (vaultId: string) =>
     `/data-management/external/vaults/${vaultId}/estimate-deposit-dual`,
   depositTokens: `data-management/external/vaults/list-deposit-tokens`,
+  ndlpPriceChart: (vaultId: string, range: string) =>
+    `/data-management/external/user/ndlp-price-chart?vault_id=${vaultId}&range=${range}`,
 };
 
 export const getLatestWithdrawal = (sender_address: string) => {
@@ -183,4 +185,8 @@ export const getEstimateDualDeposit = (vaultId: string) => {
 
 export const getDepositTokens = () => {
   return http.get(URLS.depositTokens);
+};
+
+export const getNdlpPriceChart = (vaultId: string, range: string) => {
+  return http.get(URLS.ndlpPriceChart(vaultId, range));
 };

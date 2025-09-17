@@ -118,7 +118,7 @@ export const RowValue = ({
   valueClassName,
 }: {
   label: string;
-  value: string | number;
+  value: string | number | React.ReactNode;
   labelClassName?: string;
   valueClassName?: string;
 }) => (

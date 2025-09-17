@@ -7,7 +7,9 @@ type DetailWrapperProps = {
   children?: React.ReactNode;
   className?: string;
   isLoading?: boolean;
+  hasTitlePadding?: boolean;
   loadingStyle?: string;
+  titleClassName?: string;
 };
 
 export const DetailWrapper = ({
@@ -16,7 +18,9 @@ export const DetailWrapper = ({
   children,
   className = "",
   isLoading = false,
+  hasTitlePadding = true,
   loadingStyle = "default",
+  titleClassName = "",
 }: DetailWrapperProps) => {
   return (
     <div className="rounded-lg bg-[#1C1C1C]">
@@ -44,7 +48,8 @@ export const DetailWrapper = ({
         <>
           <div
             className={cn(
-              "md:flex block items-center justify-between md:flex-row flex-col gap-2 md:p-5 py-3 px-4"
+              "md:flex block items-center justify-between md:flex-row flex-col gap-2 md:p-5 py-3 px-4",
+              titleClassName
             )}
           >
             <div className={cn("text-white font-bold md:text-lg text-base")}>
@@ -52,7 +57,7 @@ export const DetailWrapper = ({
             </div>
             {titleComponent && (
               <div
-                className={cn("md:flex items-center gap-2 block mt-4 md:mt-0")}
+                className={cn("md:flex items-center gap-2 block", hasTitlePadding && "mt-4 md:mt-0")}
               >
                 {titleComponent}
               </div>

@@ -12,18 +12,26 @@ import VaultAnalytics from "@/components/vault-detail/sections/vault-analytics";
 import VaultInfo from "@/components/vault-detail/sections/vault-info";
 import YourHoldings from "@/components/vault-detail/sections/your-holdings";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
-import { useGetDepositVaults, useVaultBasicDetails } from "@/hooks";
-import { formatAmount } from "@/lib/utils";
+import {
+  useGetDepositVaults,
+  useVaultBasicDetails,
+  useVaultMetricUnitStore,
+} from "@/hooks";
+import { cn, formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
+import UnderlineTabs from "@/components/ui/underline-tab";
+import NdlpStatus from "@/components/vault-detail/sections/ndlp-status";
+import CollateralUnit from "@/components/vault-detail/sections/collateral-unit";
+import { formatCollateralUsdNumber } from "@/components/vault-detail/helpers";
 
 export type VaultInfo = {
   label: string;
   value: string;
-  prefix?: string;
+  prefix?: string | JSX.Element;
   suffix?: string;
   tooltip?: any;
 };
@@ -40,6 +48,8 @@ const VaultDetail = () => {
     refetch: refetchDepositVaults,
   } = useGetDepositVaults();
 
+  const [activeTab, setActiveTab] = useState(0);
+  const { isUsd, unit } = useVaultMetricUnitStore(vault_id);
   const depositVault = depositVaults?.find(
     (vault) => vault.vault_id === vault_id
   );
@@ -58,6 +68,20 @@ const VaultDetail = () => {
     navigate("/", { replace: true });
   };
 
+  const unitIcon = useMemo(
+    () =>
+      isUsd ? (
+        "$"
+      ) : (
+        <img
+          src={`/coins/${unit?.toLowerCase()}.png`}
+          className="w-4 h-4"
+          alt={unit}
+        />
+      ),
+    [isUsd, unit]
+  );
+
   const vaultInfo = useMemo(() => {
     return [
       {
@@ -75,37 +99,41 @@ const VaultDetail = () => {
         label: "TVL",
         tooltip: "Total Liquidity Value at the current market price",
         value: !isLoadingVaultDetails
-          ? formatAmount({
-              amount: vaultDetails?.total_value_usd,
+          ? formatCollateralUsdNumber({
+              value_usd: vaultDetails?.total_value_usd,
+              value_collateral: vaultDetails?.total_value_collateral,
+              isUsd,
             })
           : "--",
-        prefix: "$",
+        prefix: unitIcon,
       },
       {
         label: "24h Rewards",
         tooltip:
           "Total LP fees and token incentives earned by the vault in the last 24 hours. Updates every 1 hour.",
         value: !isLoadingVaultDetails
-          ? formatAmount({
-              amount: vaultDetails?.rewards_24h_usd,
+          ? formatCollateralUsdNumber({
+              value_usd: vaultDetails?.rewards_24h_usd,
+              value_collateral: vaultDetails?.rewards_24h_collateral,
+              isUsd,
             })
           : "--",
-        prefix: "$",
+        prefix: unitIcon,
       },
       {
         label: "NDLP Price",
-        tooltip:
-          "Price of 1 NDLP token based on the vault’s total value. (Unit USD)",
+        tooltip: `Price of 1 NDLP token based on the vault’s total value. (Unit ${unit})`,
         value: !isLoadingVaultDetails
-          ? formatAmount({
-              amount: vaultDetails?.ndlp_price_usd,
-              precision: 4,
+          ? formatCollateralUsdNumber({
+              value_usd: vaultDetails?.ndlp_price_usd,
+              value_collateral: vaultDetails?.ndlp_price,
+              isUsd,
             })
           : "--",
-        prefix: "$",
+        prefix: unitIcon,
       },
     ];
-  }, [vaultDetails, isLoadingVaultDetails]);
+  }, [vaultDetails, unitIcon, isUsd, isLoadingVaultDetails, unit]);
 
   if ((!vaultDetails || !isValidVault) && !isLoadingVaultDetails) {
     return <Navigate to="/" replace />;
@@ -125,6 +153,7 @@ const VaultDetail = () => {
     <PageContainer
       backgroundImage={DetailsBackground}
       className="max-md:py-4 py-8"
+      backgroundSize={isMd ? "cover" : "contain"}
     >
       <Button
         variant="outline"
@@ -135,6 +164,7 @@ const VaultDetail = () => {
         <ChevronLeft className="!w-6 !h-6" />
         AI Vaults
       </Button>
+
       <HeaderDetail
         vault={vaultDetails}
         exchange={exchange}
@@ -143,93 +173,162 @@ const VaultDetail = () => {
         vaultDetails={vaultDetails}
         isDetailLoading={isDetailLoading}
       />
-      <ConditionRenderer
-        when={isLg}
-        fallback={
-          <div>
-            <YourHoldings
-              isDetailLoading={isDetailLoading}
-              vault_id={vault_id}
-              vault={vaultDetails}
-            />
-            <div className="mt-4" />
-            <DepositWithdraw
-              vault_id={vault_id}
-              isDetailLoading={isDetailLoading}
-            />
-            <div className="mt-4" />
-            <VaultAnalytics
-              vault_id={vault_id}
-              isDetailLoading={isDetailLoading}
-              vault={vaultDetails}
-            />
-            <div className="mt-4" />
-            <HelpfulInfo isDetailLoading={isDetailLoading} />
-            <div className="mt-4" />
-            <VaultActivities
-              isDetailLoading={isDetailLoading}
-              vault_id={vault_id}
-            />
-            <div className="mt-4" />
-
-            <StrategyExplanation
-              vault={vaultDetails}
-              isDetailLoading={isDetailLoading}
-            />
-
-            <div className="mt-4" />
-            <VaultInfo
-              vaultDetails={vaultDetails}
-              isDetailLoading={isDetailLoading}
-            />
-          </div>
-        }
-      >
-        <div className="flex gap-8 mb-[76px]">
-          {/* Left sessions */}
-          <div className="flex-1">
-            <VaultAnalytics
-              vault_id={vault_id}
-              isDetailLoading={isDetailLoading}
-              vault={vaultDetails}
-            />
-
-            <div className="mt-6" />
-            <VaultActivities
-              isDetailLoading={isDetailLoading}
-              vault_id={vault_id}
-            />
-
-            <div className="mt-6" />
-            <StrategyExplanation
-              vault={vaultDetails}
-              isDetailLoading={isDetailLoading}
-            />
-
-            <div className="mt-6" />
-            <VaultInfo
-              vaultDetails={vaultDetails}
-              isDetailLoading={isDetailLoading}
-            />
-          </div>
-          {/* Right sessions */}
-          <div className="xl:w-[450px] w-[380px]">
-            <YourHoldings
-              isDetailLoading={isDetailLoading}
-              vault_id={vault_id}
-              vault={vaultDetails}
-            />
-            <div className="mt-6" />
-            <DepositWithdraw
-              vault_id={vault_id}
-              isDetailLoading={isDetailLoading}
-            />
-
-            <div className="mt-6" />
-            <HelpfulInfo isDetailLoading={isDetailLoading} />
-          </div>
+      <ConditionRenderer when={isMd}>
+        <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
+          <UnderlineTabs
+            activeTab={activeTab}
+            labels={["Overview", "Your Holdings"]}
+            labelClassName="max-md:text-base max-md:px-0"
+            tabClassName="max-md:space-x-4"
+            onActiveTabChange={setActiveTab}
+          />
+          <CollateralUnit
+            collateralToken={vaultDetails?.collateral_token}
+            vault_id={vault_id}
+          />
         </div>
       </ConditionRenderer>
+      <div
+        className={cn("flex md:gap-8 mb-[76px]", activeTab !== 1 && "hidden")}
+      >
+        <div className="flex-1">
+          <ConditionRenderer when={isLg}>
+            <YourHoldings
+              isDetailLoading={isDetailLoading}
+              vault_id={vault_id}
+              vault={vaultDetails}
+            />
+          </ConditionRenderer>
+        </div>
+        <div className="xl:w-[450px] w-[380px]">
+          <DepositWithdraw
+            vault_id={vault_id}
+            isDetailLoading={isDetailLoading}
+          />
+          <ConditionRenderer when={!isMd}>
+            <div className="mt-4" />
+            <div className="mb-3 flex justify-between">
+              <UnderlineTabs
+                activeTab={activeTab}
+                labels={["Overview", "Your Holdings"]}
+                labelClassName="max-md:text-base max-md:px-0"
+                tabClassName="max-md:space-x-4"
+                onActiveTabChange={setActiveTab}
+                key={activeTab}
+              />
+              <CollateralUnit
+                collateralToken={vaultDetails?.collateral_token}
+                vault_id={vault_id}
+              />
+            </div>
+            <YourHoldings
+              isDetailLoading={isDetailLoading}
+              vault_id={vault_id}
+              vault={vaultDetails}
+            />
+          </ConditionRenderer>
+        </div>
+      </div>
+
+      <div className={cn(activeTab !== 0 && "hidden")}>
+        <ConditionRenderer
+          when={isLg}
+          fallback={
+            <div>
+              <DepositWithdraw
+                vault_id={vault_id}
+                isDetailLoading={isDetailLoading}
+              />
+              <div className="mt-4" />
+              <ConditionRenderer when={!isMd}>
+                <div className="mb-3 flex justify-between">
+                  <UnderlineTabs
+                    activeTab={activeTab}
+                    labels={["Overview", "Your Holdings"]}
+                    labelClassName="max-md:text-base max-md:px-0"
+                    tabClassName="max-md:space-x-4"
+                    onActiveTabChange={setActiveTab}
+                    key={activeTab}
+                  />
+                  <CollateralUnit
+                    collateralToken={vaultDetails?.collateral_token}
+                    vault_id={vault_id}
+                  />
+                </div>
+              </ConditionRenderer>
+              <VaultAnalytics
+                vault_id={vault_id}
+                isDetailLoading={isDetailLoading}
+                vault={vaultDetails}
+              />
+              <div className="mt-4" />
+              <NdlpStatus
+                vaultId={vault_id || ""}
+                isDetailLoading={isDetailLoading}
+              />
+              <div className="mt-4" />
+              <HelpfulInfo isDetailLoading={isDetailLoading} />
+              <div className="mt-4" />
+              <VaultActivities
+                isDetailLoading={isDetailLoading}
+                vault_id={vault_id}
+              />
+              <div className="mt-4" />
+              <StrategyExplanation
+                vault={vaultDetails}
+                isDetailLoading={isDetailLoading}
+              />
+              <div className="mt-4" />
+              <VaultInfo
+                vaultDetails={vaultDetails}
+                isDetailLoading={isDetailLoading}
+              />
+            </div>
+          }
+        >
+          <div className="flex gap-8 mb-[76px]">
+            {/* Left sessions */}
+            <div className="flex-1">
+              <VaultAnalytics
+                vault_id={vault_id}
+                isDetailLoading={isDetailLoading}
+                vault={vaultDetails}
+              />
+
+              <div className="mt-6" />
+              <NdlpStatus
+                isDetailLoading={isDetailLoading}
+                vaultId={vault_id || ""}
+              />
+              <div className="mt-6" />
+              <VaultActivities
+                isDetailLoading={isDetailLoading}
+                vault_id={vault_id}
+              />
+              <div className="mt-6" />
+              <StrategyExplanation
+                vault={vaultDetails}
+                isDetailLoading={isDetailLoading}
+              />
+              <div className="mt-6" />
+              <VaultInfo
+                vaultDetails={vaultDetails}
+                isDetailLoading={isDetailLoading}
+              />
+            </div>
+            {/* Right sessions */}
+            <div className="xl:w-[450px] w-[380px] sticky top-[10px] self-start">
+              <DepositWithdraw
+                vault_id={vault_id}
+                isDetailLoading={isDetailLoading}
+              />
+
+              <div className="mt-6" />
+              <HelpfulInfo isDetailLoading={isDetailLoading} />
+            </div>
+          </div>
+        </ConditionRenderer>
+      </div>
     </PageContainer>
   );
 };

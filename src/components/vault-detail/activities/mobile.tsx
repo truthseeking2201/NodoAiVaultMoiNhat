@@ -19,16 +19,25 @@ import {
 import { renamingType } from "@/components/vault-detail/activities/utils";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import ExternalIcon from "@/assets/icons/external-gradient.svg?react";
+import { VaultActivityTransaction } from "@/types/vault";
+import { useVaultMetricUnitStore } from "@/hooks";
+import { formatNumber } from "@/lib/number";
+import FormatUsdCollateralAmount from "../sections/format-usd-collateral-amount";
+import { formatCollateralUsdNumber } from "../helpers";
 
 const MobileList = ({
   paginatedTransactions,
   isFetched,
+  vault_id,
   handleSelectTransaction,
 }: {
-  paginatedTransactions: any[];
+  paginatedTransactions: VaultActivityTransaction[];
   isFetched: boolean;
+  vault_id: string;
   handleSelectTransaction: (transaction: any) => void;
 }) => {
+  const { isUsd, unit } = useVaultMetricUnitStore(vault_id);
+
   return (
     <ConditionRenderer
       when={isFetched}
@@ -79,7 +88,17 @@ const MobileList = ({
             <RowTokens tokens={tx.tokens} />
             <RowValue
               label="Value"
-              value={formatCurrency(tx.value, 0, 0, 2, "currency", "USD")}
+              value={
+                <FormatUsdCollateralAmount
+                  collateralIcon={unit}
+                  collateralClassName="w-4 h-4"
+                  text={formatCollateralUsdNumber({
+                    value_usd: tx.value_usd,
+                    value_collateral: tx.value_collateral,
+                    isUsd,
+                  })}
+                />
+              }
             />
             <RowTime timestamp={tx.time} />
             <RowAction label="Tx Hash">

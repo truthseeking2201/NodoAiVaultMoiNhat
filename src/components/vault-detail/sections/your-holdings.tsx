@@ -13,6 +13,7 @@ import {
   useGetLpToken,
   useGetVaultConfig,
   useUserHolding,
+  useVaultMetricUnitStore,
   useWallet,
 } from "@/hooks";
 import { formatNumber } from "@/lib/number";
@@ -24,6 +25,8 @@ import { calculateUserHoldings } from "@/utils/helpers";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import ConditionRenderer from "@/components/shared/condition-renderer";
+import FormatUsdCollateralAmount from "./format-usd-collateral-amount";
+import { formatCollateralUsdNumber } from "../helpers";
 
 type YourHoldingProps = {
   isDetailLoading: boolean;
@@ -94,6 +97,7 @@ const YourHoldings = ({
   >("nonDeposit");
 
   const { isMobile } = useBreakpoint();
+  const { unit, isUsd } = useVaultMetricUnitStore(vault_id);
 
   const { vaultConfig } = useGetVaultConfig(vault_id);
   const lpToken = useGetLpToken(vault?.vault_lp_token, vault_id);
@@ -105,24 +109,24 @@ const YourHoldings = ({
     isAuthenticated
   );
 
-  const user_total_liquidity_usd = calculateUserHoldings(
+  const user_total_liquidity = calculateUserHoldings(
     ndlp_balance,
     vault?.user_pending_withdraw_ndlp,
     vault?.vault_lp_token_decimals,
-    data?.ndlp_price_usd
+    isUsd ? data?.ndlp_price_usd : data?.ndlp_price
   );
 
   const userHoldingData = useMemo(() => {
     return {
       ...data,
-      user_total_liquidity_usd: user_total_liquidity_usd || 0,
+      user_total_liquidity,
       user_total_deposit_usd: data?.user_total_deposit_usd || 0,
       user_ndlp_balance: lpToken?.balance || 0,
       user_vault_rewards:
         data?.user_vault_rewards || vault?.reward_tokens || [],
       user_vault_tokens: data?.user_vault_tokens || vault?.change_24h || [],
     };
-  }, [data, vault, lpToken, user_total_liquidity_usd]);
+  }, [data, vault, lpToken, user_total_liquidity]);
 
   const pieData = useMemo(() => {
     const totalAmountInUsd = userHoldingData?.user_vault_tokens?.reduce(
@@ -166,17 +170,17 @@ const YourHoldings = ({
 
   useEffect(() => {
     if (isAuthenticated && userHoldingData) {
-      if (user_total_liquidity_usd > 0 && hasValue) {
+      if (user_total_liquidity > 0 && hasValue) {
         setUserState("holding");
-      } else if (user_total_liquidity_usd > 0 && !hasValue) {
+      } else if (user_total_liquidity > 0 && !hasValue) {
         setUserState("pending");
-      } else if (user_total_liquidity_usd === 0) {
+      } else if (user_total_liquidity === 0) {
         setUserState("nonDeposit");
       }
     } else {
       setUserState("nonDeposit");
     }
-  }, [isAuthenticated, userHoldingData, user_total_liquidity_usd, hasValue]);
+  }, [isAuthenticated, userHoldingData, user_total_liquidity, hasValue]);
 
   useEffect(() => {
     setExpanded(isAuthenticated);
@@ -208,16 +212,15 @@ const YourHoldings = ({
                 }
                 labelClassName="text-white/60 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
               />
-
-              <div className="md:text-xl text-base font-mono font-semibold text-white">
-                {userHoldingData?.user_total_liquidity_usd
-                  ? `$${formatNumber(
-                      userHoldingData?.user_total_liquidity_usd,
-                      0,
-                      2
-                    )}`
-                  : "$--"}
-              </div>
+              <FormatUsdCollateralAmount
+                className="md:text-xl text-base font-mono font-semibold text-white"
+                collateralIcon={unit}
+                text={formatCollateralUsdNumber({
+                  value_usd: user_total_liquidity,
+                  value_collateral: user_total_liquidity,
+                  isUsd,
+                })}
+              />
             </div>
             <Button
               variant="outline"
@@ -428,7 +431,8 @@ const YourHoldings = ({
                     }
                     labelClassName="text-white/60 md:text-xs text-[10px] mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
-                  <div className="font-mono text-white md:text-xl text-sm">
+                  <div className="font-mono text-white md:text-xl text-sm flex items-center gap-1">
+                    <img src={`/coins/ndlp.png`} className="w-5 h-5" />
                     {userHoldingData?.user_ndlp_balance && isAuthenticated
                       ? formatNumber(
                           userHoldingData?.user_ndlp_balance,
@@ -497,7 +501,7 @@ const YourHoldings = ({
                     )}
                   </div>
                   <div
-                    className="font-mono md:text-xl text-sm"
+                    className="font-mono md:text-xl text-sm font-medium"
                     style={{
                       color:
                         userState === "holding" &&
@@ -508,11 +512,15 @@ const YourHoldings = ({
                   >
                     {userState === "holding" &&
                     userHoldingData?.user_total_rewards_usd ? (
-                      `+$${formatNumber(
-                        userHoldingData?.user_total_rewards_usd,
-                        0,
-                        userHoldingData?.user_total_rewards_usd < 1 ? 6 : 2
-                      )}`
+                      <FormatUsdCollateralAmount
+                        collateralIcon={unit}
+                        text={formatCollateralUsdNumber({
+                          value_usd: userHoldingData?.user_total_rewards_usd,
+                          value_collateral:
+                            userHoldingData?.user_total_rewards_collateral,
+                          isUsd,
+                        })}
+                      />
                     ) : (
                       <span className="text-[#00FFB2]">
                         <span className="font-medium">Farming</span>
@@ -549,16 +557,17 @@ const YourHoldings = ({
                     labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
-                  <span className="font-mono">
-                    $
-                    {isAuthenticated
-                      ? formatNumber(
-                          userHoldingData?.user_total_deposit_usd,
-                          0,
-                          userHoldingData?.user_total_deposit_usd < 1 ? 6 : 2
-                        )
-                      : "0"}
-                  </span>
+                  <FormatUsdCollateralAmount
+                    collateralIcon={unit}
+                    text={formatCollateralUsdNumber({
+                      value_usd: userHoldingData?.user_total_deposit_usd,
+                      value_collateral:
+                        userHoldingData?.user_total_deposit_collateral,
+                      isUsd,
+                    })}
+                    className="font-mono"
+                    collateralClassName="w-4 h-4"
+                  />
                 </div>
                 <div className="flex items-center text-xs my-1">
                   <LabelWithTooltip
@@ -572,18 +581,17 @@ const YourHoldings = ({
                     labelClassName="text-white/80 text-xs mb-1 underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2 "></span>
-                  <span className="font-mono">
-                    $
-                    {isAuthenticated
-                      ? formatNumber(
-                          userHoldingData?.user_total_withdraw_usd || 0,
-                          0,
-                          Number(userHoldingData?.user_total_withdraw_usd) < 1
-                            ? 6
-                            : 2
-                        )
-                      : "0"}
-                  </span>
+                  <FormatUsdCollateralAmount
+                    collateralIcon={unit}
+                    text={formatCollateralUsdNumber({
+                      value_usd: userHoldingData?.user_total_withdraw_usd,
+                      value_collateral:
+                        userHoldingData?.user_total_withdraw_collateral,
+                      isUsd,
+                    })}
+                    className="font-mono"
+                    collateralClassName="w-4 h-4"
+                  />
                 </div>
                 <div className="flex items-center text-xs">
                   <LabelWithTooltip
@@ -602,11 +610,17 @@ const YourHoldings = ({
                   <span className="font-mono">
                     {isAuthenticated ? (
                       userHoldingData?.user_rewards_24h_usd > 0 ? (
-                        `$${formatNumber(
-                          userHoldingData?.user_rewards_24h_usd,
-                          0,
-                          userHoldingData?.user_rewards_24h_usd < 1 ? 6 : 2
-                        )}`
+                        <FormatUsdCollateralAmount
+                          collateralIcon={unit}
+                          text={formatCollateralUsdNumber({
+                            value_usd: userHoldingData?.user_rewards_24h_usd,
+                            value_collateral:
+                              userHoldingData?.user_rewards_24h_collateral,
+                            isUsd,
+                          })}
+                          className="font-mono"
+                          collateralClassName="w-4 h-4"
+                        />
                       ) : (
                         <span className="text-[#00FFB2]">
                           <span>Farming</span>
@@ -669,18 +683,17 @@ const YourHoldings = ({
                     labelClassName="text-white/80 text-xs font-sans underline underline-offset-4 decoration-dotted decoration-gray-600"
                   />
                   <span className="flex-1 border-b border-dashed border-[#505050] mx-2"></span>
-                  <span className="font-mono">
-                    $
-                    {isAuthenticated
-                      ? formatNumber(
-                          userHoldingData?.user_break_event_price_usd,
-                          0,
-                          userHoldingData?.user_break_event_price_usd < 1
-                            ? 6
-                            : 2
-                        )
-                      : "0"}
-                  </span>
+                  <FormatUsdCollateralAmount
+                    className="font-mono"
+                    collateralClassName="w-4 h-4"
+                    collateralIcon={unit}
+                    text={formatCollateralUsdNumber({
+                      value_usd: userHoldingData?.user_break_event_price_usd,
+                      value_collateral:
+                        userHoldingData?.user_break_event_price_collateral,
+                      isUsd,
+                    })}
+                  />
                 </div>
               </HoldingCard>
             </motion.div>
