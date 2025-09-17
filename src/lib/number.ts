@@ -85,7 +85,9 @@ export const getDecimalAmount = (
   amount: BigNumber | number | string,
   decimals = 18
 ) => {
-  return new BigNumber(amount).times(new BigNumber(10).pow(decimals));
+  return new BigNumber(amount)
+    .times(new BigNumber(10).pow(decimals))
+    .decimalPlaces(0, BigNumber.ROUND_DOWN);
 };
 export const getBalanceAmount = (
   amount: BigNumber | number | string,

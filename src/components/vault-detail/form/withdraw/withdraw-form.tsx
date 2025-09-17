@@ -279,7 +279,7 @@ export default function WithdrawForm({
             },
             pattern: {
               value: new RegExp(
-                `^\\d*\\.?\\d{0,${lpData?.lp_decimals | max_decimals}}$`
+                `^\\d*\\.?\\d{0,${lpData?.lp_decimals || max_decimals}}$`
               ),
               message: "Invalid withdrawal amount",
             },
@@ -291,7 +291,7 @@ export default function WithdrawForm({
               balanceInput={balanceInput}
               balanceInputUsd={balanceInputUsd}
               rightInput={rightInput}
-              maxDecimals={lpData?.lp_decimals | max_decimals}
+              maxDecimals={lpData?.lp_decimals || max_decimals}
               label="Withdraw"
               onChange={onChange}
               onBlur={onBlur}
