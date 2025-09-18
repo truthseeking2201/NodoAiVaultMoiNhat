@@ -206,7 +206,7 @@ export const useWithdrawVault = () => {
         tx.pure.u64(profitData.last_credit_time),
         tx.pure(
           "vector<vector<u8>>",
-          [profitData.signer_publickey].map((key) =>
+          profitData.signer_public_keys.map((key) =>
             Array.from(Buffer.from(key, "hex"))
           )
         ),
