@@ -57,7 +57,7 @@ const DesktopHeader = () => {
           to={route.path}
           className={({ isActive }) =>
             `flex items-center gap-2 p-2 rounded-lg transition-all duration-200 text-white hover:opacity-100 ${
-              isActive
+              isActive || pageRoutes.length == 1
                 ? "opacity-100 font-medium"
                 : "opacity-50 font-normal mb-1"
             }`
