@@ -62,7 +62,7 @@ const Banner = () => {
           <div className="flex items-center gap-2 mb-2">
             <span className="text-white text-base font-medium">✦</span>
             <span className="bg-clip-text text-transparent bg-[linear-gradient(90deg,_#FFE8C9_0%,_#F9F4E9_25%,_#E3F6FF_60%,_#C9D4FF_100%)] lg:text-2xl text-xl lg:font-bold font-medium">
-              Total Prize Pool
+              Total Weekly Prize Pool
             </span>
             <span className="text-white text-base font-medium">✦</span>
           </div>
