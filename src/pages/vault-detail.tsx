@@ -19,6 +19,7 @@ import { useMemo } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
+import ApyTooltipContent from "@/components/vault/list/apy-tooltip-content";
 
 export type VaultInfo = {
   label: string;
@@ -26,6 +27,7 @@ export type VaultInfo = {
   prefix?: string;
   suffix?: string;
   tooltip?: any;
+  tooltipClassName?: string;
 };
 
 const VaultDetail = () => {
@@ -59,17 +61,16 @@ const VaultDetail = () => {
   };
 
   const vaultInfo = useMemo(() => {
+    const formattedApy = formatAmount({
+      amount: vaultDetails?.vault_apy,
+    });
     return [
       {
         label: "APY",
-        tooltip:
-          "Your real yearly return with hourly compounding, based on the average APR of the last 7 days. Updates every 1 hour.",
-        value: !isLoadingVaultDetails
-          ? formatAmount({
-              amount: vaultDetails?.vault_apy,
-            })
-          : "--",
+        tooltip: <ApyTooltipContent apy={formattedApy} />,
+        value: !isLoadingVaultDetails ? formattedApy : "--",
         suffix: "%",
+        tooltipClassName: "md:min-w-[352px] w-full",
       },
       {
         label: "TVL",

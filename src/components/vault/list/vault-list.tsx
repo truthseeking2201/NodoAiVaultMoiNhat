@@ -17,7 +17,10 @@ import { cn } from "@/lib/utils";
 import { useWithdrawVault } from "@/hooks/use-withdraw-vault";
 import { formatPercentage } from "@/lib/utils";
 import { formatNumber, showFormatNumber } from "@/lib/number";
-import { DepositVaultConfig, UserHoldingTokens } from "@/types/vault-config.types";
+import {
+  DepositVaultConfig,
+  UserHoldingTokens,
+} from "@/types/vault-config.types";
 import { calculateUserHoldings } from "@/utils/helpers";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +33,7 @@ import VaultRewards from "./vault-rewards";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserHoldingTooltip from "./user-holding-tooltip";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ApyTooltipContent from "./apy-tooltip-content";
 
 const OPTIONS_CHAINS = [
   { value: "all", label: "All Chains" },
@@ -302,9 +306,14 @@ export default function VaultList() {
         classTitle: "text-white/80 text-left w-[100px]",
         keySort: "vault_apy",
         render: (value: any, record: any) => (
-          <span className="text-green-increase font-medium font-mono text-base break-all">
-            {record.vault_apy_show}
-          </span>
+          <LabelWithTooltip
+            hasIcon={false}
+            label={record.vault_apy_show}
+            labelClassName="text-green-increase font-medium font-mono text-base break-all"
+            contentClassName="md:min-w-[352px] w-full"
+            type="underline"
+            tooltipContent={<ApyTooltipContent apy={record.vault_apy_show} />}
+          />
         ),
       },
       {
