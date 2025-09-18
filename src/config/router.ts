@@ -1,7 +1,7 @@
 export const PATH_ROUTER: Record<string, string> = {
   VAULTS: "/",
   VAULT_DETAIL: "/vault/:vault_id",
-  LEADERBOARDS: "/leaderboards",
+  // LEADERBOARDS: "/leaderboards",
 };
 
 export const getPathVaultDetail = (vaultId: string) => {
