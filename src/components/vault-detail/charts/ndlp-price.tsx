@@ -130,6 +130,39 @@ const NdlpPriceChart = ({
   const { isMobile } = useBreakpoint();
   const { isUsd } = useVaultMetricUnitStore();
 
+  const getZoneMessage = useMemo(
+    () => (chartData: ChartDataPoint[]) => {
+      const finalPercentage = chartData[chartData.length - 1]?.percentage || 0;
+
+      if (finalPercentage < -10) {
+        return (
+          <>
+            Your position is in{" "}
+            <span className="text-red-default font-medium">Risk Zone</span>.
+            High liquidation risk - consider delaying withdrawal
+          </>
+        );
+      } else if (finalPercentage >= -10 && finalPercentage < 0) {
+        return (
+          <>
+            Your position is in{" "}
+            <span className="text-yellow-warning font-medium">Wait Zone</span>.
+            Consider waiting 1-3 days for price recovery
+          </>
+        );
+      } else {
+        return (
+          <>
+            Your position is in{" "}
+            <span className="text-green-increase font-medium">Profit Zone</span>
+            . Optimal withdrawal conditions
+          </>
+        );
+      }
+    },
+    []
+  );
+
   const isWeek = useMemo(() => {
     return periodTab === PERIOD_TABS[1].value;
   }, [periodTab]);
@@ -217,7 +250,7 @@ const NdlpPriceChart = ({
 
   const referenceAreaBounds = useMemo(() => {
     const [yAxisMin, yAxisMax] = yAxisRange;
-    
+
     if (!chartData.length) {
       return {
         greenTop: yAxisMax,
@@ -276,8 +309,8 @@ const NdlpPriceChart = ({
   return (
     <div className="flex flex-col gap-3 md:gap-6">
       <div className="flex items-center justify-between">
-        <span className="text-white md:text-sm text-xs font-medium ">
-          Track the NDLP price of this vault over time
+        <span className="text-white md:text-sm text-xs font-medium">
+          {getZoneMessage(chartData)}
         </span>
       </div>
       <div
@@ -348,10 +381,10 @@ const NdlpPriceChart = ({
               fill="url(#greenGradient)"
               radius={[10, 10, 0, 0]}
             />
-            <ReferenceArea 
-              y1={referenceAreaBounds.yellowBottom} 
-              y2={referenceAreaBounds.yellowTop} 
-              fill="url(#yellowGradient)" 
+            <ReferenceArea
+              y1={referenceAreaBounds.yellowBottom}
+              y2={referenceAreaBounds.yellowTop}
+              fill="url(#yellowGradient)"
             />
             <ReferenceArea
               y1={yAxisRange[0]}

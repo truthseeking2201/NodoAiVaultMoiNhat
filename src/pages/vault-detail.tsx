@@ -242,12 +242,6 @@ const VaultDetail = () => {
               isDetailLoading={isDetailLoading}
               vault={vaultDetails}
             />
-
-            <div className="mt-6" />
-            <NdlpStatus
-              isDetailLoading={isDetailLoading}
-              vaultId={vault_id || ""}
-            />
             <div className="mt-6" />
             <VaultActivities
               isDetailLoading={isDetailLoading}
@@ -273,6 +267,11 @@ const VaultDetail = () => {
               vault_id={vault_id}
               vault={vaultDetails}
               activeTab={activeTab}
+            />
+            <div className="mt-6" />
+            <NdlpStatus
+              isDetailLoading={isDetailLoading}
+              vaultId={vault_id || ""}
             />
           </div>
           {/* Left sessions - end */}
