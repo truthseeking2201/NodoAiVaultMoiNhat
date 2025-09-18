@@ -52,15 +52,15 @@ const CollateralUnit = ({
           value={`${collateralAsset?.symbol}`}
           className="max-md:p-1"
         >
-          <div className="flex items-center gap-1 min-w-[50px]">
-            <div className="text-base max-md:text-xs font-medium">
-              {collateralAsset?.display_name}
-            </div>
+          <div className="flex items-center gap-1 max-md:gap-0.5 min-w-[50px]">
             <img
               src={collateralAsset?.image_url}
               alt={collateralAsset?.display_name}
               className="w-4 h-4 rounded-full"
             />
+            <div className="text-base max-md:text-xs font-medium">
+              {collateralAsset?.display_name}
+            </div>
           </div>
         </TabsTrigger>
         <TabsTrigger key={usdValue} value={usdValue} className="max-md:p-1">
