@@ -41,6 +41,7 @@ export default {
         },
         red: {
           error: "#FF8077",
+          default: "#FF7474",
         },
         yellow: {
           warning: "#FFA822",

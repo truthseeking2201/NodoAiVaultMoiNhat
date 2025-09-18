@@ -31,7 +31,7 @@ const NdlpStatus = ({ vaultId, isDetailLoading }: NdlpStatusProps) => {
 
   return (
     <DetailWrapper
-      title="NDLP Price"
+      title="My NDLP Performance"
       titleClassName="flex flex-row"
       hasTitlePadding={false}
       isLoading={isDetailLoading}
