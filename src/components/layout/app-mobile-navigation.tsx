@@ -1,10 +1,10 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { PATH_ROUTER } from "@/config/router";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import Icon from "@/components/icon";
 
-const pageRoutes = [
+const rawPageRoutes = [
   {
     icon: "Vault",
     label: "Vaults",
@@ -16,10 +16,12 @@ const pageRoutes = [
     path: PATH_ROUTER.LEADERBOARDS,
   },
 ] as const;
+const pageRoutes = rawPageRoutes.filter((i) => i.path);
 
 export function MobileNavigation() {
   const [show, setShow] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const pathname = useLocation()?.pathname;
 
   useEffect(() => {
     const container = document.getElementById("main-layout-content");
@@ -38,6 +40,10 @@ export function MobileNavigation() {
     return () => container.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  if (pageRoutes.length == 1 && pathname == pageRoutes[0].path) {
+    return;
+  }
+
   return (
     <div
       className={cn(
@@ -52,7 +58,9 @@ export function MobileNavigation() {
             to={route.path}
             className={({ isActive }) =>
               `w-full flex flex-col items-center gap-1 p-0 rounded-lg transition-colors duration-200 text-white ${
-                isActive ? "opacity-100  " : "opacity-50 "
+                isActive || pageRoutes.length == 1
+                  ? "opacity-100  "
+                  : "opacity-50 "
               }`
             }
           >
