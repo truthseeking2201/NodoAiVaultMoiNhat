@@ -25,30 +25,37 @@ const VaultDetail = lazy(() =>
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <MainLayout>
-            <Home />
-          </MainLayout>
-        }
-      />
-      <Route
-        path={PATH_ROUTER.VAULT_DETAIL}
-        element={
-          <MainLayout>
-            <VaultDetail />
-          </MainLayout>
-        }
-      />
-      <Route
-        path={PATH_ROUTER.LEADERBOARDS}
-        element={
-          <MainLayout>
-            <Leaderboards />
-          </MainLayout>
-        }
-      />
+      {PATH_ROUTER.VAULTS && (
+        <Route
+          path={PATH_ROUTER.VAULTS}
+          element={
+            <MainLayout>
+              <Home />
+            </MainLayout>
+          }
+        />
+      )}
+      {PATH_ROUTER.VAULT_DETAIL && (
+        <Route
+          path={PATH_ROUTER.VAULT_DETAIL}
+          element={
+            <MainLayout>
+              <VaultDetail />
+            </MainLayout>
+          }
+        />
+      )}
+      {PATH_ROUTER.LEADERBOARDS && (
+        <Route
+          path={PATH_ROUTER.LEADERBOARDS}
+          element={
+            <MainLayout>
+              <Leaderboards />
+            </MainLayout>
+          }
+        />
+      )}
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

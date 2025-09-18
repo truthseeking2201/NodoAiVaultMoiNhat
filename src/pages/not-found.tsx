@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,11 +12,11 @@ export default function NotFound() {
       <PageContainer className="flex flex-col items-center justify-center min-h-[70vh] text-center">
         <h1 className="text-6xl font-bold gradient-text-nova mb-4">404</h1>
         <h2 className="text-2xl font-semibold mb-4">Page Not Found</h2>
-        <p className="text-white/60 mb-8 max-w-md">
+        <p className="text-white/60 mb-8 max-w-lg">
           The page you are looking for doesn't exist or has been moved.
         </p>
-        <Button 
-          onClick={() => navigate('/')} 
+        <Button
+          onClick={() => navigate("/")}
           className="gradient-bg-nova hover:shadow-neon-nova"
         >
           Return to Home
