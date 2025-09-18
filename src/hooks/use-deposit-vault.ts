@@ -376,7 +376,7 @@ export const useDepositDualVault = (vaultId: string) => {
       await validateDepositGasFee(suiClient, address);
 
       const profitData: any = await executionProfitData(vaultConfig.vault_id);
-      if (!profitData || !profitData?.signature) {
+      if (!profitData || !profitData?.signatures?.length) {
         throw new Error("Failed to get signature");
       }
 
