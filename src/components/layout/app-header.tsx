@@ -24,7 +24,7 @@ import { useWallet, useWhitelistWallet } from "@/hooks";
 import { cn } from "@/lib/utils";
 import UnderlineTabs from "../ui/underline-tab";
 
-const pageRoutes = [
+const rawPageRoutes = [
   {
     icon: "Vault",
     label: "Vaults",
@@ -41,6 +41,7 @@ const pageRoutes = [
   //   path: "/dashboard",
   // },
 ] as const;
+const pageRoutes = rawPageRoutes.filter((i) => i.path);
 
 const DesktopHeader = () => {
   const navigate = useNavigate();
