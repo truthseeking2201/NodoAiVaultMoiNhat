@@ -1,5 +1,6 @@
 import { formatNumber } from "@/lib/number";
 import { formatPercentage } from "@/lib/utils";
+import { PieChart, Pie, Cell } from "recharts";
 
 const mockData = {
   apy: 118.62,
@@ -20,32 +21,42 @@ type ApyTooltipContentProps = {
   // campaign_apr: number;
 };
 
-const Chart = () => {
+const PIE_COLORS = ["#07D993", "#CCFF00", "#A88BFA"];
+
+const Chart = ({
+  data,
+}: {
+  data?: { base_apr: number; nodo_incentive_apr: number; campaign_apr: number };
+}) => {
+  const pieData = [
+    { name: "Base APR (7D avg)", value: data?.base_apr },
+    { name: "NODO Incentives APR", value: data?.nodo_incentive_apr },
+    { name: "Campaign APR (OKX)", value: data?.campaign_apr },
+  ];
   return (
-    <div>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="78"
-        height="78"
-        viewBox="0 0 78 78"
-        fill="none"
-      >
-        <path
-          d="M59.186 14.7292C63.5347 18.3402 66.8343 23.0524 68.7401 28.3739C70.6459 33.6954 71.088 39.4309 70.0203 44.9817C68.9527 50.5324 66.4143 55.6947 62.6704 59.9294C58.9265 64.1642 54.1143 67.3162 48.7363 69.0562"
-          stroke="#34D399"
-          stroke-width="14"
-        />
-        <path
-          d="M48.7845 69.0406C44.1169 70.559 39.1596 70.9682 34.3062 70.2357C29.4528 69.5032 24.8371 67.6492 20.8256 64.8208C16.8141 61.9924 13.5173 58.2677 11.1971 53.9424C8.87682 49.6171 7.59705 44.8104 7.45938 39.9039C7.32171 34.9975 8.32994 30.1266 10.404 25.678C12.478 21.2294 15.5608 17.3256 19.4074 14.2768C23.254 11.228 27.7585 9.118 32.5632 8.1145C37.3678 7.11099 42.3403 7.24158 47.0857 8.4959"
-          stroke="#B398FF"
-          stroke-width="14"
-        />
-        <path
-          d="M44.9617 8.01223C50.5271 9.07911 55.7027 11.6242 59.9455 15.3806"
-          stroke="#CCFF00"
-          stroke-width="14"
-        />
-      </svg>
+    <div className="flex items-start justify-start w-[75px] h-[75px]">
+      <PieChart width={75} height={75}>
+        <Pie
+          data={pieData}
+          cx={35}
+          cy={35}
+          innerRadius={20}
+          outerRadius={34}
+          startAngle={90}
+          endAngle={450}
+          dataKey="value"
+          paddingAngle={0}
+          cornerRadius={0}
+        >
+          {pieData.map((entry, idx) => (
+            <Cell
+              key={`cell-${idx}`}
+              fill={PIE_COLORS[idx % PIE_COLORS.length]}
+              stroke="none"
+            />
+          ))}
+        </Pie>
+      </PieChart>
     </div>
   );
 };
@@ -61,7 +72,7 @@ const ApyTooltipContent = ({ apy }: ApyTooltipContentProps) => {
       </div>
 
       <div className="mt-3 flex gap-4">
-        <Chart />
+        <Chart data={mockData} />
         <div className="w-full">
           <div className="flex items-center gap-3">
             <div className="bg-green-increase w-[5px] h-[22px] rounded-[20px]" />
