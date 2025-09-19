@@ -27,6 +27,7 @@ import ConditionRenderer from "@/components/shared/condition-renderer";
 import UnderlineTabs from "@/components/ui/underline-tab";
 import NdlpStatus from "@/components/vault-detail/sections/ndlp-status";
 import CollateralUnit from "@/components/vault-detail/sections/collateral-unit";
+import VaultNdlpStatus from "@/components/vault-detail/sections/vault-ndlp-status";
 import { formatCollateralUsdNumber } from "@/components/vault-detail/helpers";
 import BigNumber from "bignumber.js";
 
@@ -248,6 +249,11 @@ const VaultDetail = () => {
         <div className="flex-1">
           {/* Overview */}
           <div className={cn(activeTab !== 0 && "hidden")}>
+            <VaultNdlpStatus
+              vaultId={vault_id}
+              isDetailLoading={isDetailLoading}
+            />
+            <div className="mt-6" />
             <VaultAnalytics
               vault_id={vault_id}
               isDetailLoading={isDetailLoading}
@@ -273,16 +279,16 @@ const VaultDetail = () => {
           </div>
           {/* Your Holdings */}
           <div className={cn(activeTab !== 1 && "hidden")}>
+            <NdlpStatus
+              isDetailLoading={isDetailLoading}
+              vaultId={vault_id}
+            />
+            <div className="mt-6" />
             <YourHoldings
               isDetailLoading={isDetailLoading}
               vault_id={vault_id}
               vault={vaultDetails}
               activeTab={activeTab}
-            />
-            <div className="mt-6" />
-            <NdlpStatus
-              isDetailLoading={isDetailLoading}
-              vaultId={vault_id || ""}
             />
           </div>
           {/* Left sessions - end */}

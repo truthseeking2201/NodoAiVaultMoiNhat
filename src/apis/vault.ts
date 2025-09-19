@@ -70,6 +70,8 @@ const URLS = {
   depositTokens: `data-management/external/vaults/list-deposit-tokens`,
   ndlpPriceChart: (vaultId: string, range: string) =>
     `/data-management/external/user/ndlp-price-chart?vault_id=${vaultId}&range=${range}`,
+  vaultNdlpPriceChart: (vaultId: string, range: string) =>
+    `/data-management/external/vaults/${vaultId}/ndlp-price-chart?range=${range}`,
 };
 
 export const getLatestWithdrawal = (sender_address: string) => {
@@ -189,4 +191,8 @@ export const getDepositTokens = () => {
 
 export const getNdlpPriceChart = (vaultId: string, range: string) => {
   return http.get(URLS.ndlpPriceChart(vaultId, range));
+};
+
+export const getVaultNdlpPriceChart = (vaultId: string, range: string) => {
+  return http.get(URLS.vaultNdlpPriceChart(vaultId, range));
 };
