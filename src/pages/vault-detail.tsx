@@ -14,12 +14,13 @@ import YourHoldings from "@/components/vault-detail/sections/your-holdings";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import { useGetDepositVaults, useVaultBasicDetails } from "@/hooks";
 import { formatAmount } from "@/lib/utils";
-import { BasicVaultDetailsType } from "@/types/vault-config.types";
+import { BasicVaultDetailsType, VaultApr } from "@/types/vault-config.types";
 import { useMemo } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import ApyTooltipContent from "@/components/vault/list/apy-tooltip-content";
+import { mockAPYData } from "@/components/vault/list/vault-list";
 
 export type VaultInfo = {
   label: string;
@@ -62,12 +63,12 @@ const VaultDetail = () => {
 
   const vaultInfo = useMemo(() => {
     const formattedApy = formatAmount({
-      amount: vaultDetails?.vault_apy,
+      amount: mockAPYData.daily_compounding_apy,
     });
     return [
       {
         label: "APY",
-        tooltip: <ApyTooltipContent apy={formattedApy} />,
+        tooltip: <ApyTooltipContent {...(mockAPYData as VaultApr)} />,
         value: !isLoadingVaultDetails ? formattedApy : "--",
         suffix: "%",
         tooltipClassName: "md:min-w-[352px] w-full",

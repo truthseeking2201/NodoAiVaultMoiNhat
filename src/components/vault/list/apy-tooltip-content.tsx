@@ -1,42 +1,33 @@
 import { formatNumber } from "@/lib/number";
-import { formatPercentage } from "@/lib/utils";
+import { cn, formatPercentage } from "@/lib/utils";
+import { VaultApr } from "@/types/vault-config.types";
+import { useMemo } from "react";
 import { PieChart, Pie, Cell } from "recharts";
 
-const mockData = {
-  apy: 118.62,
-  base_apr: 20.5,
-  nodo_incentive_apr: 7.44,
-  campaign_apr: 50.36,
-};
-
-const incentives = {
-  usdc: 3000,
-  xp_share: 500000000,
-};
-
-type ApyTooltipContentProps = {
-  apy: string;
-  // base_apr: number;
-  // nodo_incentive_apr: number;
-  // campaign_apr: number;
-};
-
 const PIE_COLORS = ["#07D993", "#CCFF00", "#A88BFA"];
-
 const Chart = ({
   data,
 }: {
-  data?: { base_apr: number; nodo_incentive_apr: number; campaign_apr: number };
+  data?: {
+    rolling_7day_apr: number;
+    nodo_incentive_apr: number;
+    campaign_apr: number;
+  };
 }) => {
-  const pieData = [
-    { name: "Base APR (7D avg)", value: data?.base_apr },
-    { name: "NODO Incentives APR", value: data?.nodo_incentive_apr },
-    { name: "Campaign APR (OKX)", value: data?.campaign_apr },
-  ];
+  const pieData = useMemo(
+    () => [
+      { name: "Base APR (7D avg)", value: +data?.rolling_7day_apr },
+      { name: "NODO Incentives APR", value: +data?.nodo_incentive_apr },
+      { name: "Campaign APR (OKX)", value: +data?.campaign_apr },
+    ],
+    [data]
+  );
+
   return (
     <div className="flex items-start justify-start w-[75px] h-[75px]">
       <PieChart width={75} height={75}>
         <Pie
+          isAnimationActive={false}
           data={pieData}
           cx={35}
           cy={35}
@@ -61,24 +52,41 @@ const Chart = ({
   );
 };
 
-const ApyTooltipContent = ({ apy }: ApyTooltipContentProps) => {
+const ApyTooltipContent = ({
+  rolling_7day_apr,
+  nodo_incentive_apr,
+  campaign_aprs,
+  total_apr_precompounding,
+  daily_compounding_apy,
+  nodo_incentives,
+}: VaultApr) => {
+  const campaign_apr = campaign_aprs.reduce(
+    (acc, campaign) => acc + campaign.apr,
+    0
+  );
   return (
     <div className="p-1">
       <div className="font-sans text-sm mb-1">
         Total APY · Daily compounding
       </div>
       <div className="text-xl font-mono font-semibold text-green-increase">
-        {apy}
+        {formatPercentage(+daily_compounding_apy || 0)}
       </div>
 
       <div className="mt-3 flex gap-4">
-        <Chart data={mockData} />
+        <Chart
+          data={{
+            rolling_7day_apr: Number(rolling_7day_apr),
+            nodo_incentive_apr: Number(nodo_incentive_apr),
+            campaign_apr,
+          }}
+        />
         <div className="w-full">
           <div className="flex items-center gap-3">
             <div className="bg-green-increase w-[5px] h-[22px] rounded-[20px]" />
             <div className="flex items-center justify-between w-full">
               <div>Base APR (7D avg)</div>
-              <div>{mockData.base_apr}%</div>
+              <div>{formatPercentage(+rolling_7day_apr || 0)}</div>
             </div>
           </div>
 
@@ -86,7 +94,7 @@ const ApyTooltipContent = ({ apy }: ApyTooltipContentProps) => {
             <div className="bg-[#CCFF00] w-[5px] h-[22px] rounded-[20px]" />
             <div className="flex items-center justify-between w-full">
               <div>NODO Incentives APR</div>
-              <div>{mockData.nodo_incentive_apr}%</div>
+              <div>{formatPercentage(+nodo_incentive_apr || 0)}</div>
             </div>
           </div>
 
@@ -94,7 +102,7 @@ const ApyTooltipContent = ({ apy }: ApyTooltipContentProps) => {
             <div className="bg-[#A88BFA] w-[5px] h-[22px] rounded-[20px]" />
             <div className="flex items-center justify-between w-full">
               <div>Campaign APR (OKX)</div>
-              <div>{mockData.campaign_apr}%</div>
+              <div>{formatPercentage(campaign_apr)}</div>
             </div>
           </div>
         </div>
@@ -107,7 +115,7 @@ const ApyTooltipContent = ({ apy }: ApyTooltipContentProps) => {
           Total APR Pre-Compounding:
         </div>
         <div className="font-semibold text-sm text-green-increase">
-          {formatPercentage(mockData.base_apr || 0)}
+          {formatPercentage(+total_apr_precompounding || 0)}
         </div>
       </div>
       <div className="flex items-center justify-between mb-3">
@@ -115,7 +123,7 @@ const ApyTooltipContent = ({ apy }: ApyTooltipContentProps) => {
           APY (Daily Compounding)
         </div>
         <div className="font-semibold text-sm">
-          {formatPercentage(mockData.apy || 0)}
+          {formatPercentage(+daily_compounding_apy || 0)}
         </div>
       </div>
       <div className="flex items-center gap-1">
@@ -124,16 +132,24 @@ const ApyTooltipContent = ({ apy }: ApyTooltipContentProps) => {
         </div>
         <div className=" bg-white/30 h-[1px] w-auto" />
       </div>
-      <div className="flex items-center gap-2 mb-1">
-        <img src={`/coins/usdc.png`} alt="usdc" className="w-6 h-6" />
-        <div className="text-sm">{formatNumber(incentives.usdc)} USDC</div>
-      </div>
-      <div className="flex items-center gap-2">
-        <img src={`/coins/xp.png`} alt="xp_share" className="w-6 h-6" />
-        <div className="text-sm">
-          {formatNumber(incentives.xp_share)} XP Shares
+
+      {nodo_incentives.map((incentive, index) => (
+        <div
+          className={cn(
+            "flex items-center gap-2",
+            index !== nodo_incentives.length - 1 && "mb-1"
+          )}
+        >
+          <img
+            src={`/coins/${incentive.token_symbol.toLowerCase()}.png`}
+            alt={incentive.token_symbol}
+            className="w-6 h-6"
+          />
+          <div className="text-sm">
+            {formatNumber(incentive.daily_amount)} {incentive.token_symbol}
+          </div>
         </div>
-      </div>
+      ))}
       <div className="mt-3 text-[10px] font-mono">
         Updated 30s ago · Subject to change
       </div>
