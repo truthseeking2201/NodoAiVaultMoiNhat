@@ -123,9 +123,16 @@ const ApyTooltipContent = ({
             campaign_apr,
           }}
         />
-        <div className="w-full">
+        <div
+          className={cn(
+            "w-full flex flex-col justify-center ",
+            Number(daily_compounding_apy) === 0 && "gap-0.5"
+          )}
+        >
           <div className="flex items-center gap-3">
-            <div className="bg-green-increase w-[5px] h-[22px] rounded-[20px]" />
+            {Number(daily_compounding_apy) > 0 && (
+              <div className="bg-green-increase w-[5px] h-[22px] rounded-[20px]" />
+            )}
             <div className="flex items-center justify-between w-full">
               <div>Base APR (7D avg)</div>
               <div>{formatPercentage(+rolling_7day_apr || 0)}</div>
@@ -133,20 +140,44 @@ const ApyTooltipContent = ({
           </div>
 
           <div className="flex items-center gap-3 mt-1">
-            <div className="bg-[#CCFF00] w-[5px] h-[22px] rounded-[20px]" />
+            {Number(daily_compounding_apy) > 0 && (
+              <div className="bg-[#CCFF00] w-[5px] h-[22px] rounded-[20px]" />
+            )}
             <div className="flex items-center justify-between w-full">
               <div>NODO Incentives APR</div>
               <div>{formatPercentage(+nodo_incentive_apr || 0)}</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 mt-1">
-            <div className="bg-[#A88BFA] w-[5px] h-[22px] rounded-[20px]" />
-            <div className="flex items-center justify-between w-full">
-              <div>Campaign APR (OKX)</div>
-              <div>{formatPercentage(campaign_apr)}</div>
+          {campaign_aprs.length > 0 ? (
+            <div className="mt-1 flex flex-col gap-1">
+              {campaign_aprs.map((campaign) => (
+                <div className="flex items-center gap-3">
+                  <div className="bg-[#A88BFA] w-[5px] h-[22px] rounded-[20px]" />
+                  <div
+                    className="flex items-center justify-between w-full"
+                    key={campaign.label}
+                  >
+                    <div>Campaign APR ({campaign.label})</div>
+                    <div>{formatPercentage(campaign.apr)}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center gap-3 mt-1">
+              {Number(daily_compounding_apy) > 0 && (
+                <div className="bg-[#A88BFA] w-[5px] h-[22px] rounded-[20px]" />
+              )}
+              <div
+                className="flex items-center justify-between w-full"
+                key="campaign"
+              >
+                <div>Campaign APR (OKX)</div>
+                <div>{formatPercentage(campaign_apr)}</div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -178,7 +209,7 @@ const ApyTooltipContent = ({
       {nodo_incentives.map((incentive, index) => (
         <div
           className={cn(
-            "flex items-center gap-2",
+            "flex items-center gap-2 mt-2",
             index !== nodo_incentives.length - 1 && "mb-1"
           )}
         >

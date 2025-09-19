@@ -105,7 +105,7 @@ const HOLDING_TYPE = [
   },
 ];
 
-export const mockAPYData = {
+const mockAPYData = {
   rolling_7day_apr: "118.62",
   nodo_incentive_apr: "7.44",
   campaign_aprs: [
@@ -120,10 +120,6 @@ export const mockAPYData = {
     {
       token_symbol: "USDC",
       daily_amount: 3000,
-    },
-    {
-      token_symbol: "XP",
-      daily_amount: 5000000000,
     },
   ],
 };
