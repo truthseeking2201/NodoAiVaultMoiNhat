@@ -140,13 +140,22 @@ const ApyTooltipContent = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 mt-1">
-            <div className="bg-[#A88BFA] w-[5px] h-[22px] rounded-[20px]" />
-            <div className="flex items-center justify-between w-full">
-              <div>Campaign APR (OKX)</div>
-              <div>{formatPercentage(campaign_apr)}</div>
+          {campaign_aprs.length > 0 && (
+            <div className="mt-1 flex flex-col gap-1">
+              {campaign_aprs.map((campaign) => (
+                <div className="flex items-center gap-3">
+                  <div className="bg-[#A88BFA] w-[5px] h-[22px] rounded-[20px]" />
+                  <div
+                    className="flex items-center justify-between w-full"
+                    key={campaign.label}
+                  >
+                    <div>Campaign APR ({campaign.label})</div>
+                    <div>{formatPercentage(campaign.apr)}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -178,7 +187,7 @@ const ApyTooltipContent = ({
       {nodo_incentives.map((incentive, index) => (
         <div
           className={cn(
-            "flex items-center gap-2",
+            "flex items-center gap-2 mt-2",
             index !== nodo_incentives.length - 1 && "mb-1"
           )}
         >

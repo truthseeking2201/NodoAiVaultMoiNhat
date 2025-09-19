@@ -20,7 +20,6 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import ApyTooltipContent from "@/components/vault/list/apy-tooltip-content";
-import { mockAPYData } from "@/components/vault/list/vault-list";
 
 export type VaultInfo = {
   label: string;
