@@ -305,6 +305,16 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         collateralToken: vault?.collateral_token,
         slippage: Number(slippage),
         onDepositSuccessCallback: handleDepositSuccessCallback,
+        onDepositFailedCallback: (error) => {
+          toast({
+            title: "Deposit failed",
+            description: error?.message || error,
+            variant: "error",
+            duration: 5000,
+            icon: <IconErrorToast />,
+          });
+          setLoading(false);
+        },
       });
     } catch (error) {
       toast({

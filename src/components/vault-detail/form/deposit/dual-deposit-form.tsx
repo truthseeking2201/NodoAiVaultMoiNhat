@@ -265,6 +265,16 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         tick_upper: estimateDualDeposit?.tick_upper,
         tick_lower: estimateDualDeposit?.tick_lower,
         onDepositSuccessCallback: handleDepositSuccessCallback,
+        onDepositFailedCallback: (error) => {
+          toast({
+            title: "Deposit failed",
+            description: error?.message || error,
+            variant: "error",
+            duration: 5000,
+            icon: <IconErrorToast />,
+          });
+          setLoading(false);
+        },
       });
     } catch (error) {
       toast({
