@@ -44,6 +44,38 @@ const CustomLegend = () => {
   );
 };
 
+const CustomTick: FC<{ x?: number; y?: number; payload?: { value: number } }> = ({ x, y, payload }) => {
+  const { vault_id } = useParams();
+  const { unit } = useVaultMetricUnitStore(vault_id);
+  
+  if (!payload || x === undefined || y === undefined) return null;
+
+  const value = payload.value;
+  let decimalPlaces = 2;
+  if (Math.abs(value) < 0.001) {
+    decimalPlaces = 8;
+  } else if (Math.abs(value) < 0.01) {
+    decimalPlaces = 6;
+  } else if (Math.abs(value) < 0.1) {
+    decimalPlaces = 4;
+  } else if (Math.abs(value) < 1) {
+    decimalPlaces = 3;
+  }
+
+  return (
+    <foreignObject x={10} y={y - 8} width={50} height={16}>
+      <div className="flex items-center justify-start h-full">
+        <FormatUsdCollateralAmount
+          collateralIcon={unit}
+          className="font-mono text-xs text-white"
+          collateralClassName="w-3 h-3"
+          text={formatNumber(value, 0, decimalPlaces)}
+        />
+      </div>
+    </foreignObject>
+  );
+};
+
 const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
   const { vault_id } = useParams();
   const { unit, isUsd } = useVaultMetricUnitStore(vault_id);
@@ -167,24 +199,6 @@ const VaultNdlpPriceChart = ({
     return ticks;
   }, [yAxisRange]);
 
-  // Memoized tick formatter that regenerates when unit changes
-  const tickFormatter = useMemo(() => {
-    return (value: number) => {
-      let decimalPlaces = 2;
-      if (Math.abs(value) < 0.001) {
-        decimalPlaces = 8; // For very small values like 0.000857
-      } else if (Math.abs(value) < 0.01) {
-        decimalPlaces = 6;
-      } else if (Math.abs(value) < 0.1) {
-        decimalPlaces = 4;
-      } else if (Math.abs(value) < 1) {
-        decimalPlaces = 3;
-      }
-      const numValue = formatNumber(value, 0, decimalPlaces);
-      const finalValue = isUsd ? `$${numValue}` : numValue;
-      return finalValue;
-    };
-  }, [isUsd]);
 
   if ((!chartData || chartData?.length === 0) && !isFetching) {
     return <ChartNoData type="ndlp-price" />;
@@ -202,7 +216,7 @@ const VaultNdlpPriceChart = ({
         <ResponsiveContainer width="100%" height={isMobile ? 278 : 300}>
           <LineChart
             data={chartData}
-            margin={{ top: 20, left: 60, right: 20, bottom: 20 }}
+            margin={{ top: 20, left: 20, right: 20, bottom: 20 }}
             width={isMobile ? 364 : 500}
             height={isMobile ? 278 : 300}
           >
@@ -216,17 +230,13 @@ const VaultNdlpPriceChart = ({
                 strokeWidth={2}
               />
             ))}
-
             <YAxis
-              domain={[yAxisRange[0] * 0.99, yAxisRange[1] * 1.01]} // Add 1% buffer to domain
               ticks={yAxisTicks}
-              tickFormatter={tickFormatter}
+              tick={<CustomTick />}
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "#FFFFFF", fontSize: 12 }}
               tickMargin={10}
             />
-
             <Legend content={<CustomLegend />} />
             <Tooltip content={<CustomTooltip />} />
             <Line
