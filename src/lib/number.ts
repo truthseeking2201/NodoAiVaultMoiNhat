@@ -64,6 +64,8 @@ export const showFormatNumberOption = (
   prefix = "",
   ratio = 1
 ) => {
+  if (number === null || number === undefined) return "--";
+
   if (Number(number) < ratio) {
     return showFormatNumber(number, 0, maxPrecisionUnder, prefix);
   }

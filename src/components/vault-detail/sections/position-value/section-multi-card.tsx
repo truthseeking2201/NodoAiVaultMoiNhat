@@ -1,4 +1,5 @@
 import { VaultHoldingType } from "@/types/vault-config.types";
+import { useVaultMetricUnitStore } from "@/hooks";
 import { WrapCard } from "./wrap-card";
 import { FormatNumberByMetrics } from "./format-number-by-metrics";
 import { useMemo, ReactNode } from "react";
@@ -29,39 +30,35 @@ const Card = ({
 
 export const SectionMultiCard = ({
   data,
-  unitMetric,
-  keyMetric,
-  lpSymbol,
+  lpToken,
 }: {
   data: VaultHoldingType;
-  unitMetric: string;
-  keyMetric: string;
-  lpSymbol: string;
+  lpToken: any;
 }) => {
+  const { unit, key } = useVaultMetricUnitStore(data?.vault_id);
+
   const reward24h = useMemo(() => {
-    return data?.[`user_rewards_${keyMetric}`] || 0;
-  }, [data, keyMetric]);
+    return data?.[`user_rewards_${key}`] || 0;
+  }, [data, key]);
 
   const breakEvent = useMemo(() => {
-    return data?.[`user_break_event_price_${keyMetric}`] || 0;
-  }, [data, keyMetric]);
+    return data?.[`user_break_event_price_${key}`] || 0;
+  }, [data, key]);
 
   const lpPrice = useMemo(() => {
-    return data?.[`ndlp_price_${keyMetric}`] || 0;
-  }, [data, keyMetric]);
+    return data?.[`ndlp_price_${key}`] || 0;
+  }, [data, key]);
 
   const sharesPercent = useMemo(() => {
     return Number(data?.user_shares_percent || 0) * 100;
   }, [data]);
 
   const userLp = useMemo(() => {
-    // TODO
-    return 4652;
-  }, [data]);
+    return lpToken?.balance || "0";
+  }, [lpToken]);
 
   const totalLp = useMemo(() => {
-    // TODO
-    return 1000000;
+    return data?.vault_total_supply || 0;
   }, [data]);
 
   const valueClass = "font-mono text-white text-lg md:text-xl font-medium";
@@ -77,7 +74,7 @@ export const SectionMultiCard = ({
       >
         {reward24h > 0 ? (
           <FormatNumberByMetrics
-            unit={unitMetric}
+            unit={unit}
             number={reward24h}
             className={valueClass}
             collateralClassName={collateralClass}
@@ -101,9 +98,9 @@ export const SectionMultiCard = ({
         title="Break-even"
         rightMobile={
           <div className="text-xs text-white/60 ">
-            {`Current ${lpSymbol} price: `}
+            {`Current ${lpToken?.symbol || ""} price: `}
             <FormatNumberByMetrics
-              unit={unitMetric}
+              unit={unit}
               number={lpPrice}
               className="text-white"
               showUnit
@@ -113,7 +110,7 @@ export const SectionMultiCard = ({
         }
       >
         <FormatNumberByMetrics
-          unit={unitMetric}
+          unit={unit}
           number={breakEvent}
           className={valueClass}
           collateralClassName={collateralClass}
@@ -126,7 +123,7 @@ export const SectionMultiCard = ({
         <div className="text-xs mt-1 text-white">
           <span className="text-white/60">≈</span>{" "}
           {showFormatNumberOption(userLp)} / {showFormatNumberOption(totalLp)}
-          <span className="text-white/60"> {lpSymbol}</span>
+          <span className="text-white/60"> {lpToken?.symbol || ""}</span>
         </div>
       </Card>
     </section>

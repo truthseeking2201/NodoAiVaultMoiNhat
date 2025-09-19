@@ -1,4 +1,5 @@
 import { VaultHoldingType } from "@/types/vault-config.types";
+import { useVaultMetricUnitStore } from "@/hooks";
 import { WrapCard } from "./wrap-card";
 import { FormatNumberByMetrics } from "./format-number-by-metrics";
 import { useMemo } from "react";
@@ -13,28 +14,12 @@ import {
 } from "@/components/ui/tooltip";
 import { ChevronRight } from "lucide-react";
 
-export const PnlBreakdown = ({
-  data,
-  unitMetric,
-  keyMetric,
-}: {
-  data: VaultHoldingType;
-  unitMetric: string;
-  keyMetric: string;
-}) => {
+export const PnlBreakdown = ({ data }: { data: VaultHoldingType }) => {
+  const { unit, key } = useVaultMetricUnitStore(data?.vault_id);
+
   const totalRewards = useMemo(() => {
-    return Number(data?.[`user_total_rewards_${keyMetric}`] || 0);
-  }, [data, keyMetric]);
-
-  const impermanentLoss = useMemo(() => {
-    // TODO
-    return data?.[`ndlp_price_${keyMetric}`] || 0;
-  }, [data, keyMetric]);
-
-  const netPNL = useMemo(() => {
-    // TODO
-    return unitMetric == "USD" ? 12 : -0.0000001;
-  }, [unitMetric]);
+    return Number(data?.[`user_total_rewards_${key}`] || 0);
+  }, [data, key]);
 
   const valueClass =
     "font-mono text-white md:text-sm text-[13px] font-semibold";
@@ -96,7 +81,7 @@ export const PnlBreakdown = ({
         <RowItem.Value>
           {totalRewards > 0 ? (
             <FormatNumberByMetrics
-              unit={unitMetric}
+              unit={unit}
               number={totalRewards}
               className={valueClass}
               collateralClassName={collateralClass}
@@ -125,8 +110,8 @@ export const PnlBreakdown = ({
         classNameLabel={labelClass}
       >
         <FormatNumberByMetrics
-          unit={unitMetric}
-          number={impermanentLoss}
+          unit={unit}
+          number={data?.[`impermanent_loss_${key}`] || 0}
           className={valueClass}
           collateralClassName={collateralClass}
           indicator
@@ -137,8 +122,8 @@ export const PnlBreakdown = ({
 
       <RowItem label="Net P&L" classNameLabel="text-white text-base font-bold">
         <FormatNumberByMetrics
-          unit={unitMetric}
-          number={netPNL}
+          unit={unit}
+          number={data?.[`net_pnl_${key}`] || 0}
           className="md:text-lg text-[15px]"
           collateralClassName={collateralClass}
           indicator

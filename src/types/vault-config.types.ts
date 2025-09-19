@@ -353,6 +353,7 @@ export type VaultHoldingType = {
   code: string;
   timestamp: string;
   user_ndlp_balance: number;
+  vault_total_supply: string;
   ndlp_price: string;
   ndlp_price_usd: string;
   user_total_liquidity_usd: number;

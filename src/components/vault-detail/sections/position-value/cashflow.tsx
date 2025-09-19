@@ -1,4 +1,5 @@
 import { VaultHoldingType } from "@/types/vault-config.types";
+import { useVaultMetricUnitStore } from "@/hooks";
 import { WrapCard } from "./wrap-card";
 import { FormatNumberByMetrics } from "./format-number-by-metrics";
 import { ReactNode } from "react";
@@ -12,15 +13,9 @@ const Card = ({ children, title }: { children: ReactNode; title: string }) => {
   );
 };
 
-export const Cashflow = ({
-  data,
-  unitMetric,
-  keyMetric,
-}: {
-  data: VaultHoldingType;
-  unitMetric: string;
-  keyMetric: string;
-}) => {
+export const Cashflow = ({ data }: { data: VaultHoldingType }) => {
+  const { unit, key } = useVaultMetricUnitStore(data?.vault_id);
+
   const valueClass = "font-mono text-white text-sm";
   const collateralClass = "w-4 h-4";
 
@@ -32,16 +27,16 @@ export const Cashflow = ({
       <div className="grid grid-cols-2 gap-4">
         <Card title="Total Deposits">
           <FormatNumberByMetrics
-            unit={unitMetric}
-            number={data?.[`user_total_deposit_${keyMetric}`] || 0}
+            unit={unit}
+            number={data?.[`user_total_deposit_${key}`] || 0}
             className={valueClass}
             collateralClassName={collateralClass}
           />
         </Card>
         <Card title="Total Withdrawals">
           <FormatNumberByMetrics
-            unit={unitMetric}
-            number={data?.[`user_total_withdraw_${keyMetric}`] || 0}
+            unit={unit}
+            number={data?.[`user_total_withdraw_${key}`] || 0}
             className={valueClass}
             collateralClassName={collateralClass}
           />

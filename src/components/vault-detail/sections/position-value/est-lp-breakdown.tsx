@@ -103,7 +103,7 @@ export const EstLPBreakdown = ({ data }: { data: VaultHoldingType }) => {
 
   const time = useMemo(() => {
     if (data?.timestamp) {
-      return formatDate(data?.timestamp, "hh:mm:ss");
+      return formatDate(data?.timestamp, "HH:mm:ss");
     }
     return "";
   }, [data]);

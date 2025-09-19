@@ -73,9 +73,8 @@ const UserPositionValue = ({
   }, [isAuthenticated, totalLiquidityByUnit]);
 
   const netPNL = useMemo(() => {
-    // TODO
-    return keyMetric == "USD" ? 12 : -0.0000001;
-  }, [keyMetric]);
+    return data?.[`net_pnl_${keyMetric}`] || 0;
+  }, [data, keyMetric]);
 
   return (
     <DetailWrapper
@@ -126,15 +125,10 @@ const UserPositionValue = ({
             </div>
           </section>
           {/*  */}
-          <SectionMultiCard
-            data={data}
-            unitMetric={unit}
-            keyMetric={keyMetric}
-            lpSymbol={lpToken?.symbol || ""}
-          />
+          <SectionMultiCard data={data} lpToken={lpToken} />
           <EstLPBreakdown data={data} />
-          <PnlBreakdown data={data} unitMetric={unit} keyMetric={keyMetric} />
-          <Cashflow data={data} unitMetric={unit} keyMetric={keyMetric} />
+          <PnlBreakdown data={data} />
+          <Cashflow data={data} />
         </div>
       </ConditionRenderer>
     </DetailWrapper>
