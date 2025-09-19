@@ -2,17 +2,17 @@ import { memo, useState } from "react";
 import { DetailWrapper } from "@/components/vault-detail/detail-wrapper";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PERIOD_TABS } from "@/components/vault-detail/constant";
-import NdlpPrice from "../charts/ndlp-price";
+import MyNdlpPriceChart from "../charts/my-ndlp-price";
 import { useQuery } from "@tanstack/react-query";
 import { getNdlpPriceChart } from "@/apis/vault";
 import { useWallet } from "@/hooks/use-wallet";
 
-interface NdlpStatusProps {
+interface MyNdlpStatusProps {
   vaultId: string;
   isDetailLoading: boolean;
 }
 
-const NdlpStatus = ({ vaultId, isDetailLoading }: NdlpStatusProps) => {
+const MyNdlpStatus = ({ vaultId, isDetailLoading }: MyNdlpStatusProps) => {
   const [positionPeriodTab, setPositionPeriodTab] = useState(
     PERIOD_TABS[0].value
   );
@@ -22,6 +22,7 @@ const NdlpStatus = ({ vaultId, isDetailLoading }: NdlpStatusProps) => {
     data: ndlpPriceData,
     isFetching,
     isFetched,
+    isLoading
   } = useQuery({
     queryKey: ["ndlpPriceChart", vaultId, positionPeriodTab],
     queryFn: () => getNdlpPriceChart(vaultId, positionPeriodTab),
@@ -50,14 +51,15 @@ const NdlpStatus = ({ vaultId, isDetailLoading }: NdlpStatusProps) => {
         </Tabs>
       }
     >
-      <NdlpPrice
+      <MyNdlpPriceChart
         periodTab={positionPeriodTab}
         ndlpPriceData={ndlpPriceData}
         isFetching={isFetching}
         isFetched={isFetched}
+        isLoading={isLoading}
       />
     </DetailWrapper>
   );
 };
 
-export default memo(NdlpStatus);
+export default memo(MyNdlpStatus);

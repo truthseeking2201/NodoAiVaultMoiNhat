@@ -25,7 +25,7 @@ import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import UnderlineTabs from "@/components/ui/underline-tab";
-import NdlpStatus from "@/components/vault-detail/sections/ndlp-status";
+import MyNdlpStatus from "@/components/vault-detail/sections/my-ndlp-status";
 import CollateralUnit from "@/components/vault-detail/sections/collateral-unit";
 import VaultNdlpStatus from "@/components/vault-detail/sections/vault-ndlp-status";
 import { formatCollateralUsdNumber } from "@/components/vault-detail/helpers";
@@ -279,11 +279,15 @@ const VaultDetail = () => {
           </div>
           {/* Your Holdings */}
           <div className={cn(activeTab !== 1 && "hidden")}>
-            <NdlpStatus
-              isDetailLoading={isDetailLoading}
-              vaultId={vault_id}
-            />
-            <div className="mt-6" />
+            {process.env.NODE_ENV !== "production" && (
+              <>
+                <MyNdlpStatus
+                  isDetailLoading={isDetailLoading}
+                  vaultId={vault_id}
+                />
+                <div className="mt-6" />
+              </>
+            )}
             <YourHoldings
               isDetailLoading={isDetailLoading}
               vault_id={vault_id}

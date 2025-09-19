@@ -20,6 +20,8 @@ import { useVaultMetricUnitStore } from "@/hooks";
 import FormatUsdCollateralAmount from "../sections/format-usd-collateral-amount";
 import { useParams } from "react-router-dom";
 import ChartNoData from "./empty-data";
+import { Skeleton } from "@/components/ui/skeleton";
+import ConditionRenderer from "@/components/shared/condition-renderer";
 
 const CustomLegend = () => {
   const { isMobile } = useBreakpoint();
@@ -44,10 +46,14 @@ const CustomLegend = () => {
   );
 };
 
-const CustomTick: FC<{ x?: number; y?: number; payload?: { value: number } }> = ({ x, y, payload }) => {
+const CustomTick: FC<{
+  x?: number;
+  y?: number;
+  payload?: { value: number };
+}> = ({ x, y, payload }) => {
   const { vault_id } = useParams();
   const { unit } = useVaultMetricUnitStore(vault_id);
-  
+
   if (!payload || x === undefined || y === undefined) return null;
 
   const value = payload.value;
@@ -116,6 +122,7 @@ interface NdlpPriceChartProps {
   ndlpPriceData?: any;
   isFetching: boolean;
   isFetched: boolean;
+  isLoading: boolean;
 }
 
 const VaultNdlpPriceChart = ({
@@ -123,6 +130,7 @@ const VaultNdlpPriceChart = ({
   ndlpPriceData,
   isFetching,
   isFetched,
+  isLoading,
 }: NdlpPriceChartProps) => {
   const { isMobile } = useBreakpoint();
   const { vault_id } = useParams();
@@ -150,20 +158,22 @@ const VaultNdlpPriceChart = ({
 
   const lastItemIndex = chartData.length - 1;
 
-  const yAxisRange = useMemo(() => {    
+  const yAxisRange = useMemo(() => {
     if (!chartData || chartData.length === 0) {
       return [0, 100];
     }
 
-    const rates = chartData.map((item) => item.ndlpRate).filter(rate => rate != null && !isNaN(rate));
-    
+    const rates = chartData
+      .map((item) => item.ndlpRate)
+      .filter((rate) => rate != null && !isNaN(rate));
+
     if (rates.length === 0) {
-      return [0, 100]; 
+      return [0, 100];
     }
 
     const minRate = Math.min(...rates);
     const maxRate = Math.max(...rates);
-    
+
     // Add more padding to the range to ensure all reference lines are visible
     const padding = (maxRate - minRate) * 0.2 || 1; // Increased from 0.1 to 0.2 (20% padding)
     const paddedMin = Math.max(0, minRate - padding);
@@ -178,10 +188,10 @@ const VaultNdlpPriceChart = ({
 
     const tickCount = 6;
     const tickInterval = range / (tickCount - 1);
-  
+
     const ticks = [];
     for (let i = 0; i < tickCount; i++) {
-      const tickValue = min + (i * tickInterval);
+      const tickValue = min + i * tickInterval;
       let decimalPlaces = 2;
       if (Math.abs(tickValue) < 0.001) {
         decimalPlaces = 8; // For very small values like 0.000857
@@ -192,93 +202,97 @@ const VaultNdlpPriceChart = ({
       } else if (Math.abs(tickValue) < 1) {
         decimalPlaces = 3;
       }
-      
+
       ticks.push(Number(tickValue.toFixed(decimalPlaces)));
     }
-    
+
     return ticks;
   }, [yAxisRange]);
-
 
   if ((!chartData || chartData?.length === 0) && !isFetching) {
     return <ChartNoData type="ndlp-price" />;
   }
 
   return (
-    <div className="flex flex-col gap-3 md:gap-6">
-      <div
-        className="w-full rounded-[10.742px] border-[0.671px] border-white/5 p-1"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 33%, rgba(251, 191, 36, 0.02) 33%, rgba(251, 191, 36, 0.05) 66%, rgba(239, 68, 68, 0.02) 66%, rgba(239, 68, 68, 0.05) 100%), #0A0A0A",
-        }}
-      >
-        <ResponsiveContainer width="100%" height={isMobile ? 278 : 300}>
-          <LineChart
-            data={chartData}
-            margin={{ top: 20, left: 20, right: 20, bottom: 20 }}
-            width={isMobile ? 364 : 500}
-            height={isMobile ? 278 : 300}
-          >
-            {/* Horizontal reference lines for each Y-axis tick */}
-            {yAxisTicks.map((tickValue, index) => (
-              <ReferenceLine
-                key={`ref-line-${index}`}
-                y={tickValue}
-                stroke="rgba(255, 255, 255, 0.1)"
-                strokeDasharray="2 2"
-                strokeWidth={2}
+    <ConditionRenderer
+      when={!isLoading}
+      fallback={<Skeleton className="w-full h-[310px]" />}
+    >
+      <div className="flex flex-col gap-3 md:gap-6">
+        <div
+          className="w-full rounded-[10.742px] border-[0.671px] border-white/5 p-1"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 33%, rgba(251, 191, 36, 0.02) 33%, rgba(251, 191, 36, 0.05) 66%, rgba(239, 68, 68, 0.02) 66%, rgba(239, 68, 68, 0.05) 100%), #0A0A0A",
+          }}
+        >
+          <ResponsiveContainer width="100%" height={isMobile ? 278 : 300}>
+            <LineChart
+              data={chartData}
+              margin={{ top: 20, left: 20, right: 20, bottom: 20 }}
+              width={isMobile ? 364 : 500}
+              height={isMobile ? 278 : 300}
+            >
+              {/* Horizontal reference lines for each Y-axis tick */}
+              {yAxisTicks.map((tickValue, index) => (
+                <ReferenceLine
+                  key={`ref-line-${index}`}
+                  y={tickValue}
+                  stroke="rgba(255, 255, 255, 0.1)"
+                  strokeDasharray="2 2"
+                  strokeWidth={2}
+                />
+              ))}
+              <YAxis
+                ticks={yAxisTicks}
+                tick={<CustomTick />}
+                axisLine={false}
+                tickLine={false}
+                tickMargin={10}
               />
-            ))}
-            <YAxis
-              ticks={yAxisTicks}
-              tick={<CustomTick />}
-              axisLine={false}
-              tickLine={false}
-              tickMargin={10}
-            />
-            <Legend content={<CustomLegend />} />
-            <Tooltip content={<CustomTooltip />} />
-            <Line
-              type="monotone"
-              dataKey="ndlpRate"
-              stroke="#F3D2B5"
-              strokeWidth={2}
-              dot={({ cx, cy, index }) =>
-                index === lastItemIndex ? (
-                  <Fragment key={index}>
-                    <circle
-                      cx={cx}
-                      cy={cy}
-                      r={8}
-                      fill="white"
-                      style={{ filter: "blur(4px)" }}
-                      className="animate-pulse"
-                    />
-                    <circle
-                      cx={cx}
-                      cy={cy}
-                      r={6}
-                      fill="black"
-                      stroke="#fff"
-                      strokeWidth={2.5}
-                    />
-                    <style>
-                      {`
+              <Legend content={<CustomLegend />} />
+              <Tooltip content={<CustomTooltip />} />
+              <Line
+                type="monotone"
+                dataKey="ndlpRate"
+                stroke="#F3D2B5"
+                strokeWidth={2}
+                dot={({ cx, cy, index }) =>
+                  index === lastItemIndex ? (
+                    <Fragment key={index}>
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={8}
+                        fill="white"
+                        style={{ filter: "blur(4px)" }}
+                        className="animate-pulse"
+                      />
+                      <circle
+                        cx={cx}
+                        cy={cy}
+                        r={6}
+                        fill="black"
+                        stroke="#fff"
+                        strokeWidth={2.5}
+                      />
+                      <style>
+                        {`
                     @keyframes fadeInDot {
                     from { opacity: 0; }
                     to { opacity: 1; }
                     }
                   `}
-                    </style>
-                  </Fragment>
-                ) : null
-              }
-            />
-          </LineChart>
-        </ResponsiveContainer>
+                      </style>
+                    </Fragment>
+                  ) : null
+                }
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
-    </div>
+    </ConditionRenderer>
   );
 };
 
