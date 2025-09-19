@@ -279,11 +279,15 @@ const VaultDetail = () => {
           </div>
           {/* Your Holdings */}
           <div className={cn(activeTab !== 1 && "hidden")}>
-            <MyNdlpStatus
-              isDetailLoading={isDetailLoading}
-              vaultId={vault_id}
-            />
-            <div className="mt-6" />
+            {process.env.NODE_ENV !== "production" && (
+              <>
+                <MyNdlpStatus
+                  isDetailLoading={isDetailLoading}
+                  vaultId={vault_id}
+                />
+                <div className="mt-6" />
+              </>
+            )}
             <YourHoldings
               isDetailLoading={isDetailLoading}
               vault_id={vault_id}
