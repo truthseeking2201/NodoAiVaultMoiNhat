@@ -158,7 +158,7 @@ const ApyTooltipContent = ({
                     className="flex items-center justify-between w-full"
                     key={campaign.label}
                   >
-                    <div>Campaign APR ({campaign.label})</div>
+                    <div>{campaign.label}</div>
                     <div>{formatPercentage(campaign.apr)}</div>
                   </div>
                 </div>
