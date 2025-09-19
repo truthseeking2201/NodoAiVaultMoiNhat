@@ -44,8 +44,25 @@ const Chart = ({
     [data, calculatePercentage]
   );
 
-  if (!total) {
-    return null;
+  if (!total || total <= 0) {
+    return (
+      <div className="flex items-start justify-start w-[75px] h-[75px]">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="79"
+          height="78"
+          viewBox="0 0 79 78"
+          fill="none"
+        >
+          <path
+            d="M49.2845 69.0406C45.342 70.3232 41.1854 70.8167 37.0521 70.4928C32.9188 70.169 28.8898 69.0343 25.1951 67.1534C21.5003 65.2725 18.2122 62.6823 15.5185 59.5307C12.8248 56.379 10.7783 52.7277 9.4957 48.7851C8.21312 44.8426 7.71965 40.686 8.04346 36.5527C8.36727 32.4194 9.50201 28.3904 11.3829 24.6957C13.2638 21.0009 15.854 17.7129 19.0056 15.0192C22.1573 12.3255 25.8086 10.2789 29.7512 8.99631C33.6937 7.71373 37.8503 7.22026 41.9836 7.54407C46.1169 7.86788 50.1459 9.00262 53.8406 10.8835C57.5354 12.7644 60.8235 15.3546 63.5172 18.5063C66.2109 21.6579 68.2574 25.3092 69.54 29.2518C70.8226 33.1944 71.316 37.3509 70.9922 41.4842C70.6684 45.6175 69.5337 49.6465 67.6528 53.3412C65.7719 57.036 63.1817 60.3241 60.0301 63.0178C56.8784 65.7115 53.2271 67.758 49.2845 69.0406L49.2845 69.0406Z"
+            stroke="white"
+            stroke-opacity="0.15"
+            stroke-width="14"
+          />
+        </svg>
+      </div>
+    );
   }
 
   return (
@@ -136,7 +153,7 @@ const ApyTooltipContent = ({
       <div className="my-3 bg-white/30 h-[1px]" />
 
       <div className="flex items-center justify-between mb-2">
-        <div className="font-sans text-xs text-white/70">
+        <div className="font-sans text-xs text-white/70 opacity-80">
           Total APR Pre-Compounding:
         </div>
         <div className="font-semibold text-sm text-green-increase">
@@ -144,7 +161,7 @@ const ApyTooltipContent = ({
         </div>
       </div>
       <div className="flex items-center justify-between mb-3">
-        <div className="font-sans text-xs text-white/70">
+        <div className="font-sans text-xs text-white/70 opacity-80">
           APY (Daily Compounding)
         </div>
         <div className="font-semibold text-sm">
