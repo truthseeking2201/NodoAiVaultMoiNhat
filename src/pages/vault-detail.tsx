@@ -63,12 +63,24 @@ const VaultDetail = () => {
 
   const vaultInfo = useMemo(() => {
     const formattedApy = formatAmount({
-      amount: mockAPYData.daily_compounding_apy,
+      amount: vaultDetails?.daily_compounding_apy || 0,
     });
     return [
       {
         label: "APY",
-        tooltip: <ApyTooltipContent {...(mockAPYData as VaultApr)} />,
+        tooltip: (
+          <ApyTooltipContent
+            {...({
+              rolling_7day_apr: vaultDetails?.rolling_7day_apr || 0,
+              nodo_incentive_apr: vaultDetails?.nodo_incentive_apr || 0,
+              campaign_aprs: vaultDetails?.campaign_aprs || [],
+              total_apr_precompounding:
+                vaultDetails?.total_apr_precompounding || 0,
+              daily_compounding_apy: vaultDetails?.daily_compounding_apy || 0,
+              nodo_incentives: vaultDetails?.nodo_incentives || [],
+            } as VaultApr)}
+          />
+        ),
         value: !isLoadingVaultDetails ? formattedApy : "--",
         suffix: "%",
         tooltipClassName: "md:min-w-[352px] w-full",

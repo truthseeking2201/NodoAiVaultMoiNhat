@@ -222,8 +222,6 @@ export default function VaultList() {
           : "+" + showUsd(withdrawal_vault?.user_reward_earned_usd || "0"),
         is_loading_withdrawal: isLoadingWithdrawal,
         withdrawing: withdrawal,
-
-        ...mockAPYData,
       };
     }) as VaultItemData[];
   }, [data, ndlpAssets, isLoadingWithdrawal, dataWithdrawals, idsClaimed]);

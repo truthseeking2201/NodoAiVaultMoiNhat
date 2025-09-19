@@ -343,7 +343,7 @@ export type BasicVaultDetailsType = {
   user_investment_usd?: number;
   collateral_price_feed_id: string;
   change_24h: Array<UserHoldingTokens>;
-};
+} & VaultApr;
 
 export type VaultHoldingType = {
   vault_id: string;

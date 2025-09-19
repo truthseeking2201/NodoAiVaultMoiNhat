@@ -1,7 +1,7 @@
 import { formatNumber } from "@/lib/number";
 import { cn, formatPercentage } from "@/lib/utils";
 import { VaultApr } from "@/types/vault-config.types";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { PieChart, Pie, Cell } from "recharts";
 
 const PIE_COLORS = ["#07D993", "#CCFF00", "#A88BFA"];
@@ -14,14 +14,39 @@ const Chart = ({
     campaign_apr: number;
   };
 }) => {
+  const total =
+    Number(data?.rolling_7day_apr) +
+    Number(data?.nodo_incentive_apr) +
+    Number(data?.campaign_apr);
+
+  const calculatePercentage = useCallback(
+    (value: number) => {
+      return (value / total) * 100;
+    },
+    [total]
+  );
+
   const pieData = useMemo(
     () => [
-      { name: "Base APR (7D avg)", value: +data?.rolling_7day_apr },
-      { name: "NODO Incentives APR", value: +data?.nodo_incentive_apr },
-      { name: "Campaign APR (OKX)", value: +data?.campaign_apr },
+      {
+        name: "Base APR (7D avg)",
+        value: calculatePercentage(Number(data?.rolling_7day_apr)),
+      },
+      {
+        name: "NODO Incentives APR",
+        value: calculatePercentage(Number(data?.nodo_incentive_apr)),
+      },
+      {
+        name: "Campaign APR (OKX)",
+        value: calculatePercentage(Number(data?.campaign_apr)),
+      },
     ],
-    [data]
+    [data, calculatePercentage]
   );
+
+  if (!total) {
+    return null;
+  }
 
   return (
     <div className="flex items-start justify-start w-[75px] h-[75px]">
@@ -126,11 +151,11 @@ const ApyTooltipContent = ({
           {formatPercentage(+daily_compounding_apy || 0)}
         </div>
       </div>
-      <div className="flex items-center gap-1">
-        <div className="text-xs font-mono text-white/80 mb-1 mt-3 flex-1">
+      <div className="flex items-center gap-1 mt-3">
+        <div className="text-xs font-mono text-white/80 mb-1flex-1 uppercase">
           NODO Incentives (per day)
         </div>
-        <div className=" bg-white/30 h-[1px] w-auto" />
+        <div className="bg-white/30 h-[1px] w-[131px]" />
       </div>
 
       {nodo_incentives.map((incentive, index) => (
