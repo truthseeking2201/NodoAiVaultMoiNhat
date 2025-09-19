@@ -44,6 +44,12 @@ export interface ChartDataPoint {
   breakEvenPrice?: number;
 }
 
+export interface VaultChartDataPoint {
+  time: string;
+  ndlpRate: number;
+  ndlpRateUsd: number;
+}
+
 // Mock data for user position charts - Daily (24 hours)
 export const mockDataLiveChart: ChartDataPoint[] = [
   { time: "2025-09-14T15:00:00Z", percentage: 0.0, price: 100.0 },

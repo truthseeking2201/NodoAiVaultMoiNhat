@@ -14,19 +14,22 @@ import YourHoldings from "@/components/vault-detail/sections/your-holdings";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import {
   useGetDepositVaults,
+  useGetLpToken,
   useVaultBasicDetails,
   useVaultMetricUnitStore,
 } from "@/hooks";
 import { cn, formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import UnderlineTabs from "@/components/ui/underline-tab";
 import NdlpStatus from "@/components/vault-detail/sections/ndlp-status";
 import CollateralUnit from "@/components/vault-detail/sections/collateral-unit";
+import VaultNdlpStatus from "@/components/vault-detail/sections/vault-ndlp-status";
 import { formatCollateralUsdNumber } from "@/components/vault-detail/helpers";
+import BigNumber from "bignumber.js";
 
 export type VaultInfo = {
   label: string;
@@ -47,6 +50,9 @@ const VaultDetail = () => {
     isFetching: isFetchingDepositVaults,
     refetch: refetchDepositVaults,
   } = useGetDepositVaults();
+  const lpToken = useGetLpToken(vaultDetails?.vault_lp_token, vault_id);
+  const hasLPBalance =
+    lpToken?.balance && new BigNumber(lpToken?.balance).gt(0);
 
   const [activeTab, setActiveTab] = useState(0);
   const { isUsd, unit } = useVaultMetricUnitStore(vault_id);
@@ -141,6 +147,12 @@ const VaultDetail = () => {
       },
     ];
   }, [vaultDetails, unitIcon, isUsd, isLoadingVaultDetails, unit]);
+
+  useEffect(() => {
+    if (hasLPBalance) {
+      setActiveTab(1);
+    }
+  }, [hasLPBalance]);
 
   if ((!vaultDetails || !isValidVault) && !isLoadingVaultDetails) {
     return <Navigate to="/" replace />;
@@ -237,6 +249,11 @@ const VaultDetail = () => {
         <div className="flex-1">
           {/* Overview */}
           <div className={cn(activeTab !== 0 && "hidden")}>
+            <VaultNdlpStatus
+              vaultId={vault_id}
+              isDetailLoading={isDetailLoading}
+            />
+            <div className="mt-6" />
             <VaultAnalytics
               vault_id={vault_id}
               isDetailLoading={isDetailLoading}
@@ -262,16 +279,16 @@ const VaultDetail = () => {
           </div>
           {/* Your Holdings */}
           <div className={cn(activeTab !== 1 && "hidden")}>
+            <NdlpStatus
+              isDetailLoading={isDetailLoading}
+              vaultId={vault_id}
+            />
+            <div className="mt-6" />
             <YourHoldings
               isDetailLoading={isDetailLoading}
               vault_id={vault_id}
               vault={vaultDetails}
               activeTab={activeTab}
-            />
-            <div className="mt-6" />
-            <NdlpStatus
-              isDetailLoading={isDetailLoading}
-              vaultId={vault_id || ""}
             />
           </div>
           {/* Left sessions - end */}
