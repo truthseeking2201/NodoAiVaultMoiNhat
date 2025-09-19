@@ -21,6 +21,7 @@ const VaultNdlpStatus = ({ vaultId, isDetailLoading }: NdlpStatusProps) => {
     data: vaultNdlpPriceData,
     isFetching,
     isFetched,
+    isLoading,
   } = useQuery({
     queryKey: ["vaultNdlpPriceChart", vaultId, positionPeriodTab],
     queryFn: () => getVaultNdlpPriceChart(vaultId, positionPeriodTab),
@@ -54,6 +55,7 @@ const VaultNdlpStatus = ({ vaultId, isDetailLoading }: NdlpStatusProps) => {
         ndlpPriceData={vaultNdlpPriceData}
         isFetching={isFetching}
         isFetched={isFetched}
+        isLoading={isLoading}
       />
     </DetailWrapper>
   );
