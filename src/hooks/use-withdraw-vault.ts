@@ -173,7 +173,7 @@ export const useWithdrawVault = () => {
       }
 
       const profitData: any = await executionProfitData(configLp.vault_id);
-      if (!profitData || !profitData?.signature) {
+      if (!profitData || !profitData?.signatures?.length) {
         throw new Error("Failed to get signature");
       }
 
@@ -206,13 +206,13 @@ export const useWithdrawVault = () => {
         tx.pure.u64(profitData.last_credit_time),
         tx.pure(
           "vector<vector<u8>>",
-          [profitData.signer_publickey].map((key) =>
+          profitData.signer_public_keys.map((key) =>
             Array.from(Buffer.from(key, "hex"))
           )
         ),
         tx.pure(
           "vector<vector<u8>>",
-          [profitData.signature].map((key) =>
+          profitData?.signatures.map((key) =>
             Array.from(Buffer.from(key, "hex"))
           )
         ),
