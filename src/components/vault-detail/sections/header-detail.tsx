@@ -86,7 +86,12 @@ const Statistic = ({
                         {info.label}
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent className="shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3 max-w-[229px] text-white/80 text-xs">
+                    <TooltipContent
+                      className={cn(
+                        "shadow-[0_2px_4px_rgba(255,255,255,0.25)] p-3 max-w-[229px] text-white/80 text-xs",
+                        info.tooltipClassName
+                      )}
+                    >
                       {info.tooltip}
                     </TooltipContent>
                   </Tooltip>
