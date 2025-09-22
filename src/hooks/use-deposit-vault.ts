@@ -300,7 +300,6 @@ export const useDepositVault = (vaultId: string) => {
               err = new Error("Single deposit error: " + error.message);
             }
             captureSentryError(err, address);
-            onDepositFailedCallback?.(error as any);
           },
         }
       );
@@ -546,7 +545,9 @@ export const useDepositDualVault = (vaultId: string) => {
             // );
 
             if (!isSuccess) {
-              const err = new Error("Transaction failed. No events found.");
+              const err = new Error(
+                "Transaction failed. No events found. Please try again."
+              );
               captureSentryError(
                 new Error(`Dual deposit error: ${err.message}`),
                 address
@@ -570,7 +571,6 @@ export const useDepositDualVault = (vaultId: string) => {
               err = new Error("Dual deposit error: " + error.message);
             }
             captureSentryError(err, address);
-            onDepositFailedCallback?.(error as any);
           },
         }
       );
