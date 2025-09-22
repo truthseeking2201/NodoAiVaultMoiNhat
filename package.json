@@ -18,8 +18,8 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
-    "@mysten/dapp-kit": "0.16.2",
-    "@mysten/sui": "1.29.1",
+    "@mysten/dapp-kit": "0.18.0",
+    "@mysten/sui": "1.38.0",
     "@pythnetwork/pyth-sui-js": "^2.2.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.1",
