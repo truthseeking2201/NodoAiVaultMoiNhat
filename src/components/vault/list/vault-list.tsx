@@ -10,7 +10,6 @@ import { getPathVaultDetail } from "@/config/router";
 import {
   useGetDepositVaults,
   useNdlpAssetsStore,
-  useVaultObjectStore,
   useGetVaultsWithdrawal,
   useRefreshAssetsBalance,
 } from "@/hooks";
@@ -21,6 +20,7 @@ import { formatNumber, showFormatNumber } from "@/lib/number";
 import {
   DepositVaultConfig,
   UserHoldingTokens,
+  VaultApr,
 } from "@/types/vault-config.types";
 import { calculateUserHoldings } from "@/utils/helpers";
 import { useCallback, useMemo, useState, useRef, useEffect } from "react";
@@ -34,6 +34,7 @@ import VaultRewards from "./vault-rewards";
 import { Skeleton } from "@/components/ui/skeleton";
 import UserHoldingTooltip from "./user-holding-tooltip";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ApyTooltipContent from "./apy-tooltip-content";
 import PriceChange from "@/components/shared/price-change";
 
 const OPTIONS_CHAINS = [
@@ -76,21 +77,22 @@ type Withdrawing = {
   is_ready: boolean;
 };
 
-export type VaultItemData = DepositVaultConfig & {
-  exchange_name: string;
-  exchange_image: string;
-  exchange_code: string;
-  token_pools: TokenPool[];
-  user_holdings: number;
-  user_holdings_show?: string | number;
-  total_value_usd_show?: string | number;
-  rewards_24h_usd_show?: string | number;
-  vault_apy_show?: string | number;
-  rewards_earned_show?: string;
-  is_loading_withdrawal: boolean;
-  withdrawing: Withdrawing | null;
-  change_24h: UserHoldingTokens[];
-};
+export type VaultItemData = DepositVaultConfig &
+  VaultApr & {
+    exchange_name: string;
+    exchange_image: string;
+    exchange_code: string;
+    token_pools: TokenPool[];
+    user_holdings: number;
+    user_holdings_show?: string | number;
+    total_value_usd_show?: string | number;
+    rewards_24h_usd_show?: string | number;
+    vault_apy_show?: string | number;
+    rewards_earned_show?: string;
+    is_loading_withdrawal: boolean;
+    withdrawing: Withdrawing | null;
+    change_24h: UserHoldingTokens[];
+  };
 
 const HOLDING_TYPE = [
   {
@@ -103,6 +105,25 @@ const HOLDING_TYPE = [
   },
 ];
 
+const mockAPYData = {
+  rolling_7day_apr: "118.62",
+  nodo_incentive_apr: "7.44",
+  campaign_aprs: [
+    {
+      label: "OKX",
+      apr: 50.39,
+    },
+  ],
+  total_apr_precompounding: "78.30",
+  daily_compounding_apy: "118.62",
+  nodo_incentives: [
+    {
+      token_symbol: "USDC",
+      daily_amount: 3000,
+    },
+  ],
+};
+
 export default function VaultList() {
   const { isLoading, data = [] } = useGetDepositVaults();
   const {
@@ -112,7 +133,6 @@ export default function VaultList() {
   } = useGetVaultsWithdrawal();
   const { redeemWithVaultId } = useWithdrawVault();
   const navigate = useNavigate();
-  const { vaultObjects } = useVaultObjectStore();
   const { assets: ndlpAssets } = useNdlpAssetsStore();
   const { refreshAllBalance } = useRefreshAssetsBalance();
   const { isMd } = useBreakpoint();
@@ -307,10 +327,42 @@ export default function VaultList() {
         classTitle: "text-white/80 text-left w-[100px]",
         keySort: "vault_apy",
         render: (value: any, record: any) => (
-          <span className="text-green-increase font-medium font-mono text-base break-all">
-            {record.vault_apy_show}
-          </span>
+          <LabelWithTooltip
+            hasIcon={false}
+            label={formatPercentage(record.daily_compounding_apy)}
+            labelClassName="text-green-increase font-medium font-mono text-base break-all"
+            contentClassName="md:min-w-[352px] w-full shadow-[0_2px_4px_rgba(255,255,255,0.25)]"
+            type="underline"
+            tooltipContent={<ApyTooltipContent {...record} />}
+          />
         ),
+      },
+      {
+        title: (
+          <LabelWithTooltip
+            hasIcon={false}
+            label="Collateral"
+            labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
+            tooltipContent="The base token of this vault. All values (TVL, holdings, rewards) are measured in this token."
+          />
+        ),
+        dataIndex: "collateral",
+        classTitle: "text-white/80 justify-start w-[60px]",
+        classCell: "justify-center",
+        render: (_: any, record: any) => {
+          const collateralToken = record?.tokens.find(
+            (token: any) => token.token_address === record.collateral_token
+          );
+          return (
+            <div className="flex items-center justify-center">
+              <img
+                src={`coins/${collateralToken?.token_symbol?.toLowerCase()}.png`}
+                alt={collateralToken?.token_symbol}
+                className="w-6 h-6"
+              />
+            </div>
+          );
+        },
       },
       {
         title: (
@@ -407,7 +459,12 @@ export default function VaultList() {
                         : "--"}
                       {token?.percent_change && (
                         <>
-                          <PriceChange priceChange={token.percent_change} showParentheses={false} showPeriod={false} className="text-sm" />
+                          <PriceChange
+                            priceChange={token.percent_change}
+                            showParentheses={false}
+                            showPeriod={false}
+                            className="text-sm"
+                          />
                           <span className="text-sm text-white">(24h)</span>
                         </>
                       )}

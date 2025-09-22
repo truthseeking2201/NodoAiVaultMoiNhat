@@ -345,7 +345,7 @@ export type BasicVaultDetailsType = {
   user_investment_usd?: number;
   collateral_price_feed_id: string;
   change_24h: Array<UserHoldingTokens>;
-};
+} & VaultApr;
 
 export type VaultHoldingType = {
   vault_id: string;
@@ -415,4 +415,24 @@ export type WithdrawalRequests = {
   vault_id: string;
   user_reward_earned_usd: string;
   withdrawals: WithdrawalRequest[];
+};
+
+export type VaultApr = {
+  rolling_7day_apr: string;
+  nodo_incentive_apr: string;
+  campaign_aprs: {
+    label: string;
+    apr: number;
+  }[];
+  total_apr_precompounding: string;
+  daily_compounding_apy: string;
+  nodo_incentives: {
+    token_address: string;
+    daily_amount: number;
+    daily_amount_tokens: number;
+    token_symbol: string;
+    daily_amount_usd: number;
+    decimals: number;
+    price_usd: number;
+  }[];
 };

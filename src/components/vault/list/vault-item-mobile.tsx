@@ -1,11 +1,13 @@
 import { RowItem } from "@/components/ui/row-item";
 import { VaultItemData } from "./vault-list";
-import { cn } from "@/lib/utils";
+import { cn, formatPercentage } from "@/lib/utils";
 import Web3Button from "@/components/ui/web3-button";
 import { ButtonGradient } from "@/components/ui/button-gradient";
 import VaultHolding from "./vault-holding";
 import VaultRewards from "./vault-rewards";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
+import ApyTooltipContent from "./apy-tooltip-content";
 
 type VaultCardProps = {
   item: VaultItemData;
@@ -85,7 +87,16 @@ const VaultItemMobile = ({
         classNameValue={cn(classValue, "text-green-increase")}
         label="APY"
       >
-        {item.vault_apy_show}
+        {/* {item.vault_apy_show} */}
+
+        <LabelWithTooltip
+          hasIcon={false}
+          label={formatPercentage(+item.daily_compounding_apy || 0)}
+          labelClassName="text-green-increase font-medium font-mono text-base break-all"
+          contentClassName="md:min-w-[352px] w-full shadow-[0_2px_4px_rgba(255,255,255,0.25)]"
+          type="underline"
+          tooltipContent={<ApyTooltipContent {...item} />}
+        />
       </RowItem>
 
       <RowItem
