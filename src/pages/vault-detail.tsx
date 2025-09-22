@@ -14,19 +14,22 @@ import UserPositionValue from "@/components/vault-detail/sections/user-position-
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import {
   useGetDepositVaults,
+  useGetLpToken,
   useVaultBasicDetails,
   useVaultMetricUnitStore,
 } from "@/hooks";
 import { cn, formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import UnderlineTabs from "@/components/ui/underline-tab";
-import NdlpStatus from "@/components/vault-detail/sections/ndlp-status";
+import MyNdlpStatus from "@/components/vault-detail/sections/my-ndlp-status";
 import CollateralUnit from "@/components/vault-detail/sections/collateral-unit";
+import VaultNdlpStatus from "@/components/vault-detail/sections/vault-ndlp-status";
 import { formatCollateralUsdNumber } from "@/components/vault-detail/helpers";
+import BigNumber from "bignumber.js";
 
 export type VaultInfo = {
   label: string;
@@ -47,6 +50,9 @@ const VaultDetail = () => {
     isFetching: isFetchingDepositVaults,
     refetch: refetchDepositVaults,
   } = useGetDepositVaults();
+  const lpToken = useGetLpToken(vaultDetails?.vault_lp_token, vault_id);
+  const hasLPBalance =
+    lpToken?.balance && new BigNumber(lpToken?.balance).gt(0);
 
   // const [activeTab, setActiveTab] = useState(0);
   const [activeTab, setActiveTab] = useState(1);
@@ -108,6 +114,7 @@ const VaultDetail = () => {
               value_usd: vaultDetails?.total_value_usd,
               value_collateral: vaultDetails?.total_value_collateral,
               isUsd,
+              unit,
             })
           : "--",
         prefix: unitIcon,
@@ -121,6 +128,7 @@ const VaultDetail = () => {
               value_usd: vaultDetails?.rewards_24h_usd,
               value_collateral: vaultDetails?.rewards_24h_collateral,
               isUsd,
+              unit,
             })
           : "--",
         prefix: unitIcon,
@@ -133,12 +141,19 @@ const VaultDetail = () => {
               value_usd: vaultDetails?.ndlp_price_usd,
               value_collateral: vaultDetails?.ndlp_price,
               isUsd,
+              unit,
             })
           : "--",
         prefix: unitIcon,
       },
     ];
   }, [vaultDetails, unitIcon, isUsd, isLoadingVaultDetails, unit]);
+
+  useEffect(() => {
+    if (hasLPBalance) {
+      setActiveTab(1);
+    }
+  }, [hasLPBalance]);
 
   if ((!vaultDetails || !isValidVault) && !isLoadingVaultDetails) {
     return <Navigate to="/" replace />;
@@ -205,8 +220,8 @@ const VaultDetail = () => {
         <div
           className={cn(
             isBreakMobile && "w-full",
-            !isBreakMobile &&
-              "xl:w-[450px] w-[380px] sticky top-[10px] self-start"
+            !isBreakMobile && "xl:w-[450px] w-[380px]",
+            window.innerHeight > 900 && "sticky top-[10px] self-start"
           )}
         >
           <DepositWithdraw
@@ -235,16 +250,15 @@ const VaultDetail = () => {
         <div className="flex-1">
           {/* Overview */}
           <div className={cn(activeTab !== 0 && "hidden")}>
+            <VaultNdlpStatus
+              vaultId={vault_id}
+              isDetailLoading={isDetailLoading}
+            />
+            <div className="mt-6" />
             <VaultAnalytics
               vault_id={vault_id}
               isDetailLoading={isDetailLoading}
               vault={vaultDetails}
-            />
-
-            <div className="mt-6" />
-            <NdlpStatus
-              isDetailLoading={isDetailLoading}
-              vaultId={vault_id || ""}
             />
             <div className="mt-6" />
             <VaultActivities
@@ -266,10 +280,20 @@ const VaultDetail = () => {
           </div>
           {/* Your Holdings */}
           <div className={cn(activeTab !== 1 && "hidden")}>
+            {process.env.NODE_ENV !== "production" && (
+              <>
+                <MyNdlpStatus
+                  isDetailLoading={isDetailLoading}
+                  vaultId={vault_id}
+                />
+                <div className="mt-6" />
+              </>
+            )}
             <UserPositionValue
               isDetailLoading={isDetailLoading}
               vault_id={vault_id}
               vault={vaultDetails}
+              activeTab={activeTab}
             />
           </div>
           {/* Left sessions - end */}

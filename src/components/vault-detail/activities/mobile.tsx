@@ -96,6 +96,7 @@ const MobileList = ({
                     value_usd: tx.value_usd,
                     value_collateral: tx.value_collateral,
                     isUsd,
+                    unit,
                   })}
                 />
               }

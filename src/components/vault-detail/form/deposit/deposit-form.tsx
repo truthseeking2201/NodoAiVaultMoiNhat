@@ -159,13 +159,14 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
       .toNumber();
   }, [depositAmount, collateralToken, tokenPrices]);
 
-  const { data: swapDepositInfo } = useSwapDepositInfo(
-    vault_id,
-    collateralToken?.token_address?.toLowerCase() !==
-      vault?.collateral_token?.toLowerCase()
-      ? collateralToken?.token_address || ""
-      : ""
-  );
+  const { data: swapDepositInfo, isLoading: isLoadingSwapDepositInfo } =
+    useSwapDepositInfo(
+      vault_id,
+      collateralToken?.token_address?.toLowerCase() !==
+        vault?.collateral_token?.toLowerCase()
+        ? collateralToken?.token_address || ""
+        : ""
+    );
 
   // Debounced effect for estimate deposit API call
   useEffect(() => {
@@ -304,6 +305,16 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         collateralToken: vault?.collateral_token,
         slippage: Number(slippage),
         onDepositSuccessCallback: handleDepositSuccessCallback,
+        onDepositFailedCallback: (error) => {
+          toast({
+            title: "Deposit failed",
+            description: error?.message || error,
+            variant: "error",
+            duration: 5000,
+            icon: <IconErrorToast />,
+          });
+          setLoading(false);
+        },
       });
     } catch (error) {
       toast({
@@ -445,6 +456,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
             !rate ||
             !collateralToken ||
             isCalculating ||
+            isLoadingSwapDepositInfo ||
             ["checking", "cannot"].includes(canDepositStatus)
           }
           onClick={() => {

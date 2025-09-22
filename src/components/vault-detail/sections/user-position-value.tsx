@@ -6,7 +6,7 @@ import { SectionMultiCard } from "@/components/vault-detail/sections/position-va
 import { EstLPBreakdown } from "@/components/vault-detail/sections/position-value/est-lp-breakdown";
 import { PnlBreakdown } from "@/components/vault-detail/sections/position-value/pnl-breakdown";
 import { Cashflow } from "@/components/vault-detail/sections/position-value/cashflow";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 
 import {
   useGetLpToken,
@@ -25,12 +25,14 @@ type UserPositionValueProps = {
   isDetailLoading: boolean;
   vault: BasicVaultDetailsType;
   vault_id: string;
+  activeTab: number;
 };
 
 const UserPositionValue = ({
   isDetailLoading,
   vault,
   vault_id,
+  activeTab,
 }: UserPositionValueProps) => {
   const { isAuthenticated } = useWallet();
   const { unit, isUsd, key: keyMetric } = useVaultMetricUnitStore(vault_id);
@@ -40,11 +42,11 @@ const UserPositionValue = ({
     return lpToken?.balance || "0";
   }, [lpToken?.balance]);
 
-  const { data, isLoading: isLoadingHolding } = useUserHolding(
-    vault_id,
-    ndlp_balance,
-    isAuthenticated
-  );
+  const {
+    data,
+    isLoading: isLoadingHolding,
+    refetch,
+  } = useUserHolding(vault_id, ndlp_balance, isAuthenticated);
 
   const isLoading = useMemo(() => {
     return isLoadingHolding || isDetailLoading;
@@ -75,6 +77,12 @@ const UserPositionValue = ({
   const netPNL = useMemo(() => {
     return data?.[`net_pnl_${keyMetric}`] || 0;
   }, [data, keyMetric]);
+
+  useEffect(() => {
+    if (activeTab === 1) {
+      refetch();
+    }
+  }, [activeTab, refetch]);
 
   return (
     <DetailWrapper
