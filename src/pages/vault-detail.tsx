@@ -56,8 +56,7 @@ const VaultDetail = () => {
   const hasLPBalance =
     lpToken?.balance && new BigNumber(lpToken?.balance).gt(0);
 
-  // const [activeTab, setActiveTab] = useState(0);
-  const [activeTab, setActiveTab] = useState(1);
+  const [activeTab, setActiveTab] = useState(0);
   const { isUsd, unit } = useVaultMetricUnitStore(vault_id);
   const depositVault = depositVaults?.find(
     (vault) => vault.vault_id === vault_id
