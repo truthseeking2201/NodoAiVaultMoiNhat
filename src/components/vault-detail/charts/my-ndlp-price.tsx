@@ -100,7 +100,7 @@ const CustomLegend = () => {
   );
 };
 
-const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
+const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload }) => {
   const { vault_id } = useParams();
   const { unit } = useVaultMetricUnitStore(vault_id);
   if (!active || !payload || !payload.length) return null;
@@ -116,7 +116,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
   return (
     <div className="bg-black p-3 border border-white/20 rounded-lg shadow-lg w-[280px]">
       <div className="text-xs font-bold text-white mb-[6px]">
-        {formatDate(label, "dd MMM yyyy HH:mm")}
+        {formatDate(priceData.time, "dd MMM yyyy HH:mm")}
       </div>
       <div className="flex items-end justify-between mb-1">
         <span className="font-medium text-xs text-white/80">NDLP Price: </span>
@@ -545,7 +545,11 @@ const MyNdlpPriceChart = ({
                         cy={cy}
                         r={8}
                         fill="white"
-                        style={{ filter: "blur(4px)" }}
+                        style={{
+                          filter: "blur(3px)",
+                          opacity: 0,
+                          animation: "fadeInDot 1s 1.25s forwards",
+                        }}
                         className="animate-pulse"
                       />
                       <circle
@@ -555,6 +559,10 @@ const MyNdlpPriceChart = ({
                         fill="black"
                         stroke="#fff"
                         strokeWidth={2.5}
+                        style={{
+                          opacity: 0,
+                          animation: "fadeInDot 1s 1.25s forwards",
+                        }}
                       />
                       <style>
                         {`
