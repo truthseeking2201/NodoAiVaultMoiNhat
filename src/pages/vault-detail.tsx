@@ -292,7 +292,7 @@ const VaultDetail = () => {
           </div>
           {/* Your Holdings */}
           <div className={cn(activeTab !== 1 && "hidden")}>
-            {process.env.NODE_ENV !== "production" && (
+            {import.meta.env.VITE_APP_ENV !== "production" && (
               <>
                 <MyNdlpStatus
                   isDetailLoading={isDetailLoading}
