@@ -210,7 +210,7 @@ export const useUserHolding = (
   isAuthenticated: boolean
 ) => {
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["user-holding", vaultId],
+    queryKey: ["user-holding", vaultId, ndlp_balance],
     queryFn: async () => {
       const response = await getUserHolding(vaultId, ndlp_balance);
       return response as unknown as VaultHoldingType;
