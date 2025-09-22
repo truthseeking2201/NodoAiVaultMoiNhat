@@ -82,9 +82,9 @@ const CustomTick: FC<{
   );
 };
 
-const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
+const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload }) => {
   const { vault_id } = useParams();
-  const { unit, isUsd } = useVaultMetricUnitStore(vault_id);
+  const { unit } = useVaultMetricUnitStore(vault_id);
   if (!active || !payload || !payload.length) return null;
 
   const priceData = payload[0]?.payload;
@@ -96,7 +96,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
   return (
     <div className="bg-black p-3 border border-white/20 rounded-lg shadow-lg w-[250px]">
       <div className="text-xs font-bold text-white mb-[6px]">
-        {formatDate(label, "dd MMM yyyy HH:mm")}
+        {formatDate(priceData.time, "dd MMM yyyy HH:mm")}
       </div>
       {ndlpPrice && (
         <div className="flex items-end justify-between mb-1">
@@ -265,7 +265,11 @@ const VaultNdlpPriceChart = ({
                         cy={cy}
                         r={8}
                         fill="white"
-                        style={{ filter: "blur(4px)" }}
+                        style={{
+                          filter: "blur(3px)",
+                          opacity: 0,
+                          animation: "fadeInDot 1s 1.25s forwards",
+                        }}
                         className="animate-pulse"
                       />
                       <circle
@@ -275,6 +279,10 @@ const VaultNdlpPriceChart = ({
                         fill="black"
                         stroke="#fff"
                         strokeWidth={2.5}
+                        style={{
+                          opacity: 0,
+                          animation: "fadeInDot 1s 1.25s forwards",
+                        }}
                       />
                       <style>
                         {`
