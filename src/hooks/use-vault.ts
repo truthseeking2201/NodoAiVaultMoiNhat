@@ -30,16 +30,6 @@ import { mockSCVaultConfigs, mockVaultHoldings } from "@/mocks";
 
 // get vault config from SUI chain
 export const useGetVaultConfig = (vaultId: string) => {
-  if (isMockMode) {
-    const vaultConfig =
-      mockSCVaultConfigs[vaultId] || mockSCVaultConfigs["0xvault-usdc-sui"];
-    return {
-      vaultConfig,
-      isLoading: false,
-      refetch: async () => vaultConfig,
-    };
-  }
-
   const { data, isLoading, refetch } = useSuiClientQuery(
     "getObject",
     {
@@ -53,8 +43,19 @@ export const useGetVaultConfig = (vaultId: string) => {
     {
       staleTime: REFETCH_VAULT_DATA_INTERVAL,
       refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
+      enabled: !isMockMode,
     }
   );
+
+  if (isMockMode) {
+    const vaultConfig =
+      mockSCVaultConfigs[vaultId] || mockSCVaultConfigs["0xvault-usdc-sui"];
+    return {
+      vaultConfig,
+      isLoading: false,
+      refetch: async () => vaultConfig,
+    };
+  }
 
   const content = data?.data?.content as unknown as {
     fields: SCVaultConfig;
@@ -75,10 +76,6 @@ export const useGetAllVaults = (vaultIds: string[]) => {
     }
   }, [setVaultObjects]);
 
-  if (isMockMode) {
-    return;
-  }
-
   const { data } = useSuiClientQuery(
     "multiGetObjects",
     {
@@ -89,13 +86,13 @@ export const useGetAllVaults = (vaultIds: string[]) => {
       },
     },
     {
-      enabled: !!vaultIds.length,
+      enabled: !!vaultIds.length && !isMockMode,
       staleTime: REFETCH_VAULT_DATA_INTERVAL,
       refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
     }
   );
   useEffect(() => {
-    if (data) {
+    if (!isMockMode && data) {
       const vaults = data.map((item) => {
         const content = item.data?.content as unknown as {
           fields: SCVaultConfig;
@@ -237,6 +234,18 @@ export const useUserHolding = (
   ndlp_balance: string,
   isAuthenticated: boolean
 ) => {
+  const queryResult = useQuery({
+    queryKey: ["user-holding", vaultId, ndlp_balance],
+    queryFn: async () => {
+      const response = await getUserHolding(vaultId, ndlp_balance);
+      return response as unknown as VaultHoldingType;
+    },
+    enabled: !!vaultId && isAuthenticated && !isMockMode,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
+  });
+
   if (isMockMode) {
     const mockData =
       mockVaultHoldings[vaultId] || mockVaultHoldings["0xvault-usdc-sui"];
@@ -247,18 +256,7 @@ export const useUserHolding = (
       refetch: async () => mockData,
     };
   }
-
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["user-holding", vaultId, ndlp_balance],
-    queryFn: async () => {
-      const response = await getUserHolding(vaultId, ndlp_balance);
-      return response as unknown as VaultHoldingType;
-    },
-    enabled: !!vaultId && isAuthenticated,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
-  });
+  const { data, isLoading, refetch } = queryResult;
 
   return {
     data: !!vaultId && isAuthenticated ? data : null,
