@@ -38,6 +38,7 @@ interface TableRenderProps {
   classRowBody?: string;
   numRowLoading?: number;
   headerClassName?: string;
+  tableClassName?: string;
   changeSort?: (key: string) => void;
   onRowClick?: (el: any) => void;
 }
@@ -53,18 +54,20 @@ export function TableRender({
   classRowBody = "",
   numRowLoading = 5,
   headerClassName = "",
+  tableClassName = "",
   onRowClick = () => {},
 }: TableRenderProps) {
   /**
    * RENDER
    */
   return (
-    <Table className="w-full">
-      <TableHeader className={headerClassName}>
-        <TableRow className=" hover:bg-transparent">
-          {columns.map((el, index) => (
-            <TableHead
-              key={`head-${index}`}
+    <div className={tableClassName}>
+      <Table className={tableClassName}>
+        <TableHeader className={headerClassName}>
+          <TableRow className=" hover:bg-transparent">
+            {columns.map((el, index) => (
+              <TableHead
+                key={`head-${index}`}
               className={cn(
                 "text-xs tracking-wide text-075 px-6",
                 el.keySort ? "cursor-pointer" : "",
@@ -195,6 +198,7 @@ export function TableRender({
           </TableRow>
         )}
       </TableBody>
-    </Table>
+      </Table>
+    </div>
   );
 }

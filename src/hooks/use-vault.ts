@@ -25,9 +25,21 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { useVaultObjectStore } from "./use-store";
 import { useWallet } from "./use-wallet";
+import { isMockMode } from "@/config/mock";
+import { mockSCVaultConfigs, mockVaultHoldings } from "@/mocks";
 
 // get vault config from SUI chain
 export const useGetVaultConfig = (vaultId: string) => {
+  if (isMockMode) {
+    const vaultConfig =
+      mockSCVaultConfigs[vaultId] || mockSCVaultConfigs["0xvault-usdc-sui"];
+    return {
+      vaultConfig,
+      isLoading: false,
+      refetch: async () => vaultConfig,
+    };
+  }
+
   const { data, isLoading, refetch } = useSuiClientQuery(
     "getObject",
     {
@@ -55,6 +67,18 @@ export const useGetVaultConfig = (vaultId: string) => {
 };
 
 export const useGetAllVaults = (vaultIds: string[]) => {
+  const { setVaultObjects } = useVaultObjectStore();
+
+  useEffect(() => {
+    if (isMockMode) {
+      setVaultObjects(Object.values(mockSCVaultConfigs));
+    }
+  }, [setVaultObjects]);
+
+  if (isMockMode) {
+    return;
+  }
+
   const { data } = useSuiClientQuery(
     "multiGetObjects",
     {
@@ -70,8 +94,6 @@ export const useGetAllVaults = (vaultIds: string[]) => {
       refetchInterval: REFETCH_VAULT_DATA_INTERVAL,
     }
   );
-
-  const { setVaultObjects } = useVaultObjectStore();
   useEffect(() => {
     if (data) {
       const vaults = data.map((item) => {
@@ -110,14 +132,20 @@ export const useGetVaultsWithdrawal = () => {
 };
 
 export const useVaultBasicDetails = (vaultId: string) => {
-  const { address } = useWallet();
+  const { address, isAuthenticated } = useWallet();
+  const canFetch = isMockMode || (!!address && isAuthenticated);
   return useQuery<BasicVaultDetailsType, Error>({
-    queryKey: ["vault-basic-details", vaultId],
+    queryKey: [
+      "vault-basic-details",
+      vaultId,
+      address ?? "guest",
+      isAuthenticated,
+    ],
     queryFn: async () => {
       const response = await getVaultBasicDetails(vaultId, address);
       return response as unknown as BasicVaultDetailsType;
     },
-    enabled: !!vaultId,
+    enabled: !!vaultId && canFetch,
     refetchOnWindowFocus: true,
     retry: 1,
     staleTime: 60000,
@@ -209,6 +237,17 @@ export const useUserHolding = (
   ndlp_balance: string,
   isAuthenticated: boolean
 ) => {
+  if (isMockMode) {
+    const mockData =
+      mockVaultHoldings[vaultId] || mockVaultHoldings["0xvault-usdc-sui"];
+
+    return {
+      data: mockData,
+      isLoading: false,
+      refetch: async () => mockData,
+    };
+  }
+
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["user-holding", vaultId, ndlp_balance],
     queryFn: async () => {

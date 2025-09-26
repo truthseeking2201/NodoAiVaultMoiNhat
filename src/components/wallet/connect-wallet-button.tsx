@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Web3Button from "@/components/ui/web3-button";
 import { USDC_CONFIG } from "@/config";
+import { isMockMode } from "@/config/mock";
 import {
   useRefreshAssetsBalance,
   useUserAssetsStore,
@@ -57,6 +58,11 @@ export const ConnectWalletButton = memo(() => {
   const collateralToken = useMemo(
     () => assets.find((asset) => asset.coin_type === USDC_CONFIG.coinType),
     [assets]
+  );
+
+  const displayedBalance = useMemo(
+    () => (isMockMode ? 1_000_000 : Number(collateralToken?.balance || 0)),
+    [collateralToken?.balance]
   );
 
   useEffect(() => {
@@ -191,7 +197,7 @@ export const ConnectWalletButton = memo(() => {
                       />
 
                       <span className="font-mono text-sm">
-                        {formatNumber(collateralToken?.balance || 0, 0, 2)}{" "}
+                        {formatNumber(displayedBalance, 0, 2)}{" "}
                         {collateralToken?.display_name || "USDC"}
                       </span>
                     </div>

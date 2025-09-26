@@ -18,6 +18,9 @@ import { cn } from "@/lib/utils";
 import { Link as RouterLink } from "react-router-dom";
 import Icon from "../icon";
 
+const FOOTER_CONTAINER =
+  "w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 max-w-[1480px] 2xl:max-w-[1640px]";
+
 const Box = ({ children }: { children: React.ReactNode }) => {
   const { isSm } = useBreakpoint();
   return (
@@ -85,7 +88,12 @@ export function AppFooter() {
           "linear-gradient(90deg, rgba(255, 232, 201, 0.08) 0%, rgba(249, 244, 233, 0.08) 25%, rgba(227, 246, 255, 0.08) 60%, rgba(201, 212, 255, 0.08) 100%)",
       }}
     >
-      <div className="max-w-[var(--layout-desktop-breakpoint-xl)] mx-auto px-9 pt-9 max-md:px-5 max-md:pt-10 relative z-10">
+      <div
+        className={cn(
+          FOOTER_CONTAINER,
+          "pt-9 max-md:px-5 max-md:pt-10 relative z-10"
+        )}
+      >
         <div className="flex justify-between ">
           <div>
             <img src="/nodo-logo-tm.png" className="h-[48px] mb-5" />
@@ -212,7 +220,7 @@ export function AppFooter() {
       </div>
 
       <div className="border-t border-white/10 bg-transparent font-sans md:italic flex text-sm">
-        <div className="max-w-[var(--layout-desktop-breakpoint-xl)] mx-auto w-full px-9 py-4">
+        <div className={cn(FOOTER_CONTAINER, "w-full py-4")}>
           <div className="flex max-md:flex-col max-md:items-center justify-between text-white/70">
             <div className="flex items-center">
               <span className="max-md:mr-6">

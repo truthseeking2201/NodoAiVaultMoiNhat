@@ -119,16 +119,6 @@ export const PnlBreakdown = ({ data }: { data: VaultHoldingType }) => {
       </RowItem>
 
       <hr className="w-full border-t border-white/15 mt-3 mb-3" />
-
-      <RowItem label="Net P&L" classNameLabel="text-white text-base font-bold">
-        <FormatNumberByMetrics
-          unit={unit}
-          number={data?.[`net_pnl_${key}`] || 0}
-          className="md:text-lg text-[15px]"
-          collateralClassName={collateralClass}
-          indicator
-        />
-      </RowItem>
     </WrapCard>
   );
 };

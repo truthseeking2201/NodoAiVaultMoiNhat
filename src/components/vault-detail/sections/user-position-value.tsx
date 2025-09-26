@@ -118,18 +118,6 @@ const UserPositionValue = ({
                   collateralClassName="md:w-5 md:h-5 w-4 h-4"
                 />
               </div>
-              <div className="flex items-center">
-                <span className="mr-2 font-sans text-sm md:text-xl text-white/60">
-                  Net P&L
-                </span>
-                <FormatNumberByMetrics
-                  unit={unit}
-                  number={netPNL}
-                  className="font-mono text-white text-sm md:text-xl font-medium"
-                  collateralClassName="md:w-5 md:h-5 w-4 h-4"
-                  indicator
-                />
-              </div>
             </div>
           </section>
           {/*  */}

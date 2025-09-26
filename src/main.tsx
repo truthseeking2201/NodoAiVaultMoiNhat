@@ -1,4 +1,6 @@
-// Sentry initialization should be imported first!
+// Load required polyfills before instrumenting the app
+import "./polyfills/node";
+// Sentry initialization should be imported immediately after polyfills
 import "./instrument";
 import { createRoot } from "react-dom/client";
 import App from "./App";

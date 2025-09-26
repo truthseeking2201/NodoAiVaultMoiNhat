@@ -3,6 +3,7 @@ import { IconErrorToast } from "@/components/ui/icon-error-toast";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import Web3Button from "@/components/ui/web3-button";
 import SuccessfulToast from "./successful-toast";
+import { isMockMode } from "@/config/mock";
 import {
   useGetLpToken,
   useGetVaultConfig,
@@ -86,7 +87,11 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         token_id: token?.token_id,
         symbol: token?.token_symbol,
         decimals: token.decimal,
-        balance: isAuthenticated ? asset?.balance || "0" : "0",
+        balance: isAuthenticated
+          ? isMockMode
+            ? "1000000"
+            : asset?.balance || "0"
+          : "0",
         token_address: token?.token_address,
         price_feed_id: token?.price_feed_id,
       };

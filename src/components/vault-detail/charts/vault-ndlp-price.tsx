@@ -148,7 +148,7 @@ const VaultNdlpPriceChart = ({
       for (const item of ndlpPriceData) {
         dataPoints.push({
           time: item.timestamp,
-          ndlpRate: isUsd ? item.ndlp_rate_usd : item.ndlp_rate,
+          ndlpRate: isUsd ? item.ndlp_price_usd : item.ndlp_price,
         });
       }
     }

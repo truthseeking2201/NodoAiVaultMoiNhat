@@ -96,6 +96,23 @@ const http = axios.create({
   timeout: 300000,
 });
 
+const hasActiveSession = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return (
+    !!localStorage.getItem("access_token") ||
+    !!localStorage.getItem("refresh_token")
+  );
+};
+
+const safeTriggerWalletDisconnect = () => {
+  if (hasActiveSession()) {
+    triggerWalletDisconnect();
+  }
+};
+
 // Request interceptor: add Authorization header with valid token
 http.interceptors.request.use(
   async (config) => {
@@ -108,7 +125,7 @@ http.interceptors.request.use(
       // If token refresh fails, continue without auth header
       console.warn("Failed to get valid token:", error.status);
       if (error?.status === 401) {
-        triggerWalletDisconnect();
+        safeTriggerWalletDisconnect();
       }
     }
     return config;
@@ -157,7 +174,7 @@ http.interceptors.response.use(
           refreshError?.message === NOT_REFRESH_TOKEN_ERROR
         ) {
           // Clear tokens and disconnect wallet on refresh failure
-          triggerWalletDisconnect();
+          safeTriggerWalletDisconnect();
           return Promise.reject(
             "Your session has expired. Please login again."
           );
@@ -168,7 +185,7 @@ http.interceptors.response.use(
 
     if (error.response && error.response.status) {
       if (error.response.status === 401) {
-        triggerWalletDisconnect();
+        safeTriggerWalletDisconnect();
       }
       err.status = error.response.status;
     }

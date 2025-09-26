@@ -20,6 +20,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useNdlpAssetsStore, useUserAssetsStore } from "./use-store";
 import { NdlpTokenPrice } from "./use-token-price";
 import { useWallet } from "./use-wallet";
+import { isMockMode } from "@/config/mock";
 
 const getCoinsBalance = async (
   suiClient: SuiClient,
@@ -138,14 +139,33 @@ export const useFetchAssets = () => {
     isFetching: allCoinObjectsFetching,
     refetch: allCoinObjectsRefetch,
   } = useQuery({
-    queryKey: ["allCoinObjects", address],
-    queryFn: () =>
-      getCoinsBalance(
+    queryKey: [
+      "allCoinObjects",
+      address,
+      isMockMode ? "mock" : "live",
+    ],
+    queryFn: () => {
+      if (!depositTokens?.length) {
+        return Promise.resolve([]);
+      }
+      if (isMockMode) {
+        const balances = depositTokens.map((token) => ({
+          coinType: token.token_address,
+          totalBalance: new BigNumber(1_000_000)
+            .multipliedBy(new BigNumber(10).pow(token.decimal))
+            .toFixed(0),
+        }));
+        return Promise.resolve(balances);
+      }
+      return getCoinsBalance(
         suiClient,
         address || "",
         depositTokens?.map((token) => token.token_address)
-      ),
-    enabled: isAuthenticated && !!address && depositTokens?.length > 0,
+      );
+    },
+    enabled:
+      (isMockMode && (depositTokens?.length ?? 0) > 0) ||
+      (isAuthenticated && !!address && depositTokens?.length > 0),
     refetchOnWindowFocus: false,
   });
 
@@ -191,22 +211,21 @@ export const useFetchAssets = () => {
         return acc;
       }, []) || [];
 
-    if (assets.length > 0) {
-      const updatedAssets = assets.map((asset) => {
-        const balance = getBalanceAmountForInput(
-          asset.raw_balance,
-          asset.decimals,
-          asset.decimals
-        ).toString();
-        return {
-          ...asset,
-          raw_balance: new BigNumber(asset.raw_balance).toString(),
-          balance: balance,
-        };
-      });
+    const updatedAssets = assets.map((asset) => {
+      const decimals = asset.decimals ?? 0;
+      const balance = getBalanceAmountForInput(
+        asset.raw_balance,
+        decimals,
+        decimals
+      ).toString();
+      return {
+        ...asset,
+        raw_balance: new BigNumber(asset.raw_balance || "0").toString(),
+        balance,
+      };
+    });
 
-      setAssets(updatedAssets);
-    }
+    setAssets(updatedAssets);
   }, [
     allCoinObjects,
     updated,
@@ -220,6 +239,10 @@ export const useFetchAssets = () => {
 
   useEffect(() => {
     if (isRefetch) {
+      if (isMockMode) {
+        setUpdated(false);
+        return;
+      }
       allCoinObjectsRefetch().then(() => {
         setUpdated(false);
       });
@@ -228,7 +251,7 @@ export const useFetchAssets = () => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isAuthenticated) {
+    if (!isMockMode && isAuthenticated) {
       interval = setInterval(() => {
         allCoinObjectsRefetch().then(() => {
           setUpdated(false);
@@ -259,15 +282,45 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
     isFetching: allCoinObjectsNDLPFetching,
     refetch: allCoinObjectsNDLPRefetch,
   } = useQuery({
-    queryKey: ["allCoinObjectsNDLP", address],
-    queryFn: () =>
-      getCoinsBalanceWithUsdPrice(
+    queryKey: [
+      "allCoinObjectsNDLP",
+      address,
+      isMockMode ? "mock" : "live",
+    ],
+    queryFn: () => {
+      if (!vaults?.length) {
+        return Promise.resolve([]);
+      }
+      if (isMockMode) {
+        const balances = vaults.map((vault) => ({
+          coinType: vault.vault_lp_token,
+          totalBalance: new BigNumber(1_000_000)
+            .multipliedBy(
+              new BigNumber(10).pow(vault.vault_lp_token_decimals || 6)
+            )
+            .toFixed(0),
+          usd_price: vault.ndlp_price_usd || "0",
+          vault: {
+            pool: {
+              pool_name: vault.pool.pool_name,
+            },
+            exchange_id: vault.exchange_id,
+            vault_name: vault.vault_name,
+            vault_id: vault.vault_id,
+          },
+        }));
+        return Promise.resolve(balances);
+      }
+      return getCoinsBalanceWithUsdPrice(
         suiClient,
         address || "",
         ndlpCoinTypes,
         vaults
-      ),
-    enabled: isAuthenticated && !!address && ndlpCoinTypes.length > 0,
+      );
+    },
+    enabled:
+      (isMockMode && ndlpCoinTypes.length > 0) ||
+      (isAuthenticated && !!address && ndlpCoinTypes.length > 0),
     refetchOnWindowFocus: false,
   });
 
@@ -305,27 +358,26 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
         return acc;
       }, []) || [];
 
-    if (assets.length > 0) {
-      const updatedAssets = assets.map((asset) => {
-        const balance = getBalanceAmountForInput(
-          asset.raw_balance,
-          asset.decimals,
-          asset.decimals
-        ).toString();
-        return {
-          ...asset,
-          raw_balance: new BigNumber(asset.raw_balance).toString(),
-          balance: balance,
-          balance_usd: asset.usd_price
-            ? new BigNumber(balance)
-                .multipliedBy(new BigNumber(asset.usd_price))
-                .toString()
-            : "",
-        };
-      });
+    const updatedAssets = assets.map((asset) => {
+      const decimals = asset.decimals ?? 0;
+      const balance = getBalanceAmountForInput(
+        asset.raw_balance,
+        decimals,
+        decimals
+      ).toString();
+      return {
+        ...asset,
+        raw_balance: new BigNumber(asset.raw_balance || "0").toString(),
+        balance,
+        balance_usd: asset.usd_price
+          ? new BigNumber(balance)
+              .multipliedBy(new BigNumber(asset.usd_price))
+              .toString()
+          : "",
+      };
+    });
 
-      setAssets(updatedAssets);
-    }
+    setAssets(updatedAssets);
   }, [
     allCoinObjectsNDLP,
     updated,
@@ -339,6 +391,10 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
 
   useEffect(() => {
     if (isRefetch) {
+      if (isMockMode) {
+        setUpdated(false);
+        return;
+      }
       allCoinObjectsNDLPRefetch().then(() => {
         setUpdated(false);
       });
@@ -347,7 +403,7 @@ export const useFetchNDLPAssets = (vaults: DepositVaultConfig[]) => {
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (isAuthenticated) {
+    if (!isMockMode && isAuthenticated) {
       interval = setInterval(() => {
         allCoinObjectsNDLPRefetch().then(() => {
           setUpdated(false);

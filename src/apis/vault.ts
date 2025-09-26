@@ -3,6 +3,23 @@ import {
   WithdrawalRequests,
 } from "@/types/vault-config.types";
 import http from "@/utils/http";
+import { isMockMode } from "@/config/mock";
+import {
+  mockDepositVaults,
+  mockExecutionProfitData,
+  mockNdlpPriceChart,
+  mockVaultActivities,
+  mockVaultAnalytics,
+  mockVaultBasicDetails,
+  mockVaultDepositTokens,
+  mockVaultEstimateWithdraw,
+  mockVaultEstimateWithdrawDual,
+  mockVaultEstimatesDeposit,
+  mockVaultHoldings,
+  mockVaultNdlpPriceChart,
+  mockVaultSwapDepositInfo,
+  mockWithdrawalRequests,
+} from "@/mocks";
 
 const NODO_URL = import.meta.env.VITE_NODO_APP_URL;
 
@@ -75,14 +92,23 @@ const URLS = {
 };
 
 export const getLatestWithdrawal = (sender_address: string) => {
+  if (isMockMode) {
+    return Promise.resolve(mockWithdrawalRequests[0]);
+  }
   return http.get(URLS.latestWithdrawal);
 };
 
 export const executionWithdrawal = (payload: any) => {
+  if (isMockMode) {
+    return Promise.resolve({ success: true, payload });
+  }
   return http.post(URLS.executionWithdrawals, payload);
 };
 
 export const executionProfitData = (vault_id: string) => {
+  if (isMockMode) {
+    return Promise.resolve(mockExecutionProfitData);
+  }
   return http.get(URLS.executionProfitData(vault_id));
 };
 
@@ -100,16 +126,45 @@ export const getWithdrawalRequestsMultiTokens = (params: any) => {
 
 export const getVaultsActivities = (payload: any) => {
   const { page, limit, action_type, vault_id } = payload;
+  if (isMockMode) {
+    return Promise.resolve({
+      ...mockVaultActivities,
+      list: mockVaultActivities.list?.map((item) => ({
+        ...item,
+        vault_address:
+          vault_id && vault_id !== "default" ? vault_id : item.vault_address,
+        type:
+          action_type && action_type !== ""
+            ? (action_type as typeof item.type)
+            : item.type,
+      })),
+      page,
+      limit,
+    });
+  }
   return http.get(URLS.positionRequests(page, limit, action_type, vault_id));
 };
 
 export const getDepositVaults = (accountAddress?: string) => {
+  if (isMockMode) {
+    const enriched = mockDepositVaults.map((vault) => ({
+      ...vault,
+      ready: true,
+      user_pending_withdraw_ndlp: vault.user_pending_withdraw_ndlp || "0",
+    }));
+    return Promise.resolve(enriched) as Promise<DepositVaultConfig[]>;
+  }
   return http.get(URLS.depositVaults(accountAddress)) as Promise<
     DepositVaultConfig[]
   >;
 };
 
 export const getVaultsWithdrawal = (accountAddress?: string) => {
+  if (isMockMode) {
+    return Promise.resolve(mockWithdrawalRequests) as Promise<
+      WithdrawalRequests[]
+    >;
+  }
   return http.get(URLS.vaultsWithdrawal(accountAddress)) as Promise<
     WithdrawalRequests[]
   >;
@@ -120,6 +175,9 @@ export const getVaultAnalytics = (
   type: string,
   range: string
 ) => {
+  if (isMockMode) {
+    return Promise.resolve(mockVaultAnalytics(vaultId, type, range));
+  }
   return http.get(URLS.vaultAnalytics(vaultId, type, range));
 };
 
@@ -127,6 +185,12 @@ export const getVaultBasicDetails = (
   vaultId: string,
   walletAddress: string
 ) => {
+  if (isMockMode) {
+    const data =
+      mockVaultBasicDetails[vaultId] ||
+      mockVaultBasicDetails["0xvault-usdc-sui"];
+    return Promise.resolve(data);
+  }
   return http.get(URLS.vaultBasicDetails(vaultId, walletAddress));
 };
 
@@ -134,6 +198,11 @@ export const getEstimateWithdraw = (
   vaultId: string,
   params: { ndlp_amount: string; payout_token: string }
 ) => {
+  if (isMockMode) {
+    return Promise.resolve(
+      mockVaultEstimateWithdraw[vaultId] || mockVaultEstimateWithdraw["0xvault-usdc-sui"]
+    );
+  }
   return http.get(
     URLS.estimateWithdraw(vaultId, params.ndlp_amount, params.payout_token)
   );
@@ -143,6 +212,12 @@ export const getEstimateWithdrawDual = (
   vaultId: string,
   ndlp_amount: string
 ) => {
+  if (isMockMode) {
+    return Promise.resolve(
+      mockVaultEstimateWithdrawDual[vaultId] ||
+        mockVaultEstimateWithdrawDual["0xvault-usdc-sui"]
+    );
+  }
   return http.get(URLS.getEstimateWithdrawDual(vaultId, ndlp_amount));
 };
 
@@ -150,6 +225,12 @@ export const getEstimateDeposit = (
   vaultId: string,
   params: { amount: string; deposit_token: string }
 ) => {
+  if (isMockMode) {
+    return Promise.resolve(
+      mockVaultEstimatesDeposit[vaultId] ||
+        mockVaultEstimatesDeposit["0xvault-usdc-sui"]
+    );
+  }
   return http.get(
     URLS.estimateDeposit(
       vaultId,
@@ -160,6 +241,12 @@ export const getEstimateDeposit = (
 };
 
 export const getSwapDepositInfo = (vaultId: string, token_address: string) => {
+  if (isMockMode) {
+    return Promise.resolve(
+      mockVaultSwapDepositInfo[vaultId] ||
+        mockVaultSwapDepositInfo["0xvault-usdc-sui"]
+    );
+  }
   return http.get(
     URLS.swapDepositInfo(vaultId, encodeURIComponent(token_address))
   );
@@ -170,6 +257,9 @@ export const checkCanDeposit = (
   token_address: string,
   amount: string
 ) => {
+  if (isMockMode) {
+    return Promise.resolve({ can_deposit: true });
+  }
   return http.get(
     URLS.checkCanDeposit(vaultId, token_address, amount)
   ) as Promise<{
@@ -178,21 +268,41 @@ export const checkCanDeposit = (
 };
 
 export const getUserHolding = (vaultId: string, ndlp_balance: string) => {
+  if (isMockMode) {
+    const data =
+      mockVaultHoldings[vaultId] || mockVaultHoldings["0xvault-usdc-sui"];
+    return Promise.resolve(data);
+  }
   return http.get(URLS.userHolding(vaultId, ndlp_balance));
 };
 
 export const getEstimateDualDeposit = (vaultId: string) => {
+  if (isMockMode) {
+    return Promise.resolve(
+      mockVaultEstimateWithdrawDual[vaultId] ||
+        mockVaultEstimateWithdrawDual["0xvault-usdc-sui"]
+    );
+  }
   return http.get(URLS.estimateDualDeposit(vaultId));
 };
 
 export const getDepositTokens = () => {
+  if (isMockMode) {
+    return Promise.resolve(mockVaultDepositTokens);
+  }
   return http.get(URLS.depositTokens);
 };
 
 export const getNdlpPriceChart = (vaultId: string, range: string) => {
+  if (isMockMode) {
+    return Promise.resolve(mockNdlpPriceChart);
+  }
   return http.get(URLS.ndlpPriceChart(vaultId, range));
 };
 
 export const getVaultNdlpPriceChart = (vaultId: string, range: string) => {
+  if (isMockMode) {
+    return Promise.resolve(mockVaultNdlpPriceChart);
+  }
   return http.get(URLS.vaultNdlpPriceChart(vaultId, range));
 };

@@ -1,6 +1,7 @@
 import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { useWallet } from "./use-wallet";
 import { Transaction } from "@mysten/sui/transactions";
+import { isMockMode } from "@/config/mock";
 
 interface UseMergeCoinsResult {
   mergeCoins: (coinType: string) => Promise<string | undefined>;
@@ -15,6 +16,9 @@ export const useMergeCoins = (): UseMergeCoinsResult => {
   const suiClient = useSuiClient();
 
   const mergeCoins = async (coinType: string): Promise<string | undefined> => {
+    if (isMockMode) {
+      return Promise.resolve(`mock-merged-${coinType}`);
+    }
     if (!address) {
       throw new Error("No account connected");
     }

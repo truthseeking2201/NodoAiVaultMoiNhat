@@ -105,6 +105,8 @@ const HOLDING_TYPE = [
   },
 ];
 
+const HIDDEN_VAULT_IDS = ["0xvault-btc-eth"];
+
 const mockAPYData = {
   rolling_7day_apr: "118.62",
   nodo_incentive_apr: "7.44",
@@ -159,69 +161,71 @@ export default function VaultList() {
   };
 
   const mapData = useMemo(() => {
-    return data.map((vault) => {
-      const ndlpBalance =
-        ndlpAssets.find((asset) => asset.coin_type === vault.vault_lp_token)
-          ?.balance || "0";
-      const user_holdings = Number(
-        calculateUserHoldings(
-          ndlpBalance,
-          vault?.user_pending_withdraw_ndlp,
-          vault?.vault_lp_token_decimals,
-          vault?.ndlp_price_usd
-        )
-      );
-      const vault_apy = Number(vault?.vault_apy || 0);
-      const exchange = EXCHANGE_CODES_MAP[vault?.exchange_id];
-      const tokens = vault.pool.pool_name.split("-");
+    return data
+      .filter((vault) => !HIDDEN_VAULT_IDS.includes(vault.vault_id))
+      .map((vault) => {
+        const ndlpBalance =
+          ndlpAssets.find((asset) => asset.coin_type === vault.vault_lp_token)
+            ?.balance || "0";
+        const user_holdings = Number(
+          calculateUserHoldings(
+            ndlpBalance,
+            vault?.user_pending_withdraw_ndlp,
+            vault?.vault_lp_token_decimals,
+            vault?.ndlp_price_usd
+          )
+        );
+        const vault_apy = Number(vault?.vault_apy || 0);
+        const exchange = EXCHANGE_CODES_MAP[vault?.exchange_id];
+        const tokens = vault.pool.pool_name.split("-");
 
-      const withdrawal_vault = dataWithdrawals?.find(
-        (i) => vault.vault_id === i.vault_id
-      );
-      let withdrawal = null;
-      if (
-        withdrawal_vault &&
-        withdrawal_vault.withdrawals.length &&
-        !idsClaimed.includes(vault.vault_id)
-      ) {
-        const tmp = withdrawal_vault.withdrawals[0];
-        withdrawal = {
-          receive_amount_usd: showUsd(tmp.receive_amount_usd),
-          countdown: tmp.countdown,
-          is_over_time: new Date().getTime() >= tmp.countdown,
-          is_ready: tmp.is_ready,
-        };
-      }
-
-      return {
-        ...vault,
-        exchange_name: exchange.name,
-        exchange_image: exchange.image,
-        exchange_code: exchange.code,
-        user_holdings: user_holdings,
-        token_pools: tokens.map((i) => {
-          const token = vault.tokens.find((v) => v.token_symbol === i);
-          return {
-            name: i,
-            image: `/coins/${i?.toLowerCase()}.png`,
-            min_deposit_amount: token?.min_deposit_amount,
-            min_deposit_amount_usd: token?.min_deposit_amount_usd,
+        const withdrawal_vault = dataWithdrawals?.find(
+          (i) => vault.vault_id === i.vault_id
+        );
+        let withdrawal = null;
+        if (
+          withdrawal_vault &&
+          withdrawal_vault.withdrawals.length &&
+          !idsClaimed.includes(vault.vault_id)
+        ) {
+          const tmp = withdrawal_vault.withdrawals[0];
+          withdrawal = {
+            receive_amount_usd: showUsd(tmp.receive_amount_usd),
+            countdown: tmp.countdown,
+            is_over_time: new Date().getTime() >= tmp.countdown,
+            is_ready: tmp.is_ready,
           };
-        }),
+        }
 
-        user_holdings_show: showUsd(user_holdings),
-        total_value_usd_show: showUsd(vault?.total_value_usd),
-        rewards_24h_usd_show: showUsd(vault?.rewards_24h_usd),
-        vault_apy_show: vault?.vault_apy
-          ? formatPercentage(vault_apy < 0 ? 0 : vault_apy)
-          : "--",
-        rewards_earned_show: !Number(user_holdings)
-          ? "--"
-          : "+" + showUsd(withdrawal_vault?.user_reward_earned_usd || "0"),
-        is_loading_withdrawal: isLoadingWithdrawal,
-        withdrawing: withdrawal,
-      };
-    }) as VaultItemData[];
+        return {
+          ...vault,
+          exchange_name: exchange.name,
+          exchange_image: exchange.image,
+          exchange_code: exchange.code,
+          user_holdings: user_holdings,
+          token_pools: tokens.map((i) => {
+            const token = vault.tokens.find((v) => v.token_symbol === i);
+            return {
+              name: i,
+              image: `/coins/${i?.toLowerCase()}.png`,
+              min_deposit_amount: token?.min_deposit_amount,
+              min_deposit_amount_usd: token?.min_deposit_amount_usd,
+            };
+          }),
+
+          user_holdings_show: showUsd(user_holdings),
+          total_value_usd_show: showUsd(vault?.total_value_usd),
+          rewards_24h_usd_show: showUsd(vault?.rewards_24h_usd),
+          vault_apy_show: vault?.vault_apy
+            ? formatPercentage(vault_apy < 0 ? 0 : vault_apy)
+            : "--",
+          rewards_earned_show: !Number(user_holdings)
+            ? "--"
+            : "+" + showUsd(withdrawal_vault?.user_reward_earned_usd || "0"),
+          is_loading_withdrawal: isLoadingWithdrawal,
+          withdrawing: withdrawal,
+        };
+      }) as VaultItemData[];
   }, [data, ndlpAssets, isLoadingWithdrawal, dataWithdrawals, idsClaimed]);
 
   // Filter logic: if 'all' is selected, show all; else filter by selected DEXs
@@ -717,18 +721,21 @@ export default function VaultList() {
           </div>
         }
       >
-        <div className="rounded-md overflow-hidden bg-[#181818] border border-t-0 rounded-t-none border-[rgba(255, 255, 255, 0.20)]">
-          <TableRender
-            headerClassName="p-4 h-[70px] border-b"
-            data={sortedData}
-            columns={columns}
-            rowsColspan={rowsColspan}
-            isLoading={isLoading}
-            labelNodata="No vaults found"
-            paramsSearch={paramsSort}
-            changeSort={handleSort}
-            onRowClick={handleRowClick}
-          />
+        <div className="rounded-md bg-[#181818] border border-t-0 rounded-t-none border-[rgba(255, 255, 255, 0.20)]">
+          <div className="overflow-x-auto">
+            <TableRender
+              headerClassName="p-4 h-[70px] border-b"
+              tableClassName="min-w-[1280px]"
+              data={sortedData}
+              columns={columns}
+              rowsColspan={rowsColspan}
+              isLoading={isLoading}
+              labelNodata="No vaults found"
+              paramsSearch={paramsSort}
+              changeSort={handleSort}
+              onRowClick={handleRowClick}
+            />
+          </div>
         </div>
       </ConditionRenderer>
     </div>

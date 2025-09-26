@@ -32,7 +32,11 @@ export default function NodoAIVaults() {
           <HeroBanner />
         </Suspense>
       )}
-      <PageContainer className={`${isMd ? "py-8" : "py-6"}`}>
+      <PageContainer
+        className={`${
+          isMd ? "py-8" : "py-6"
+        } max-w-none sm:px-6 lg:px-8 xl:px-10 xl:max-w-[1480px] 2xl:max-w-[1640px]`}
+      >
         {isMd && (
           <Suspense fallback={<Skeleton className="h-64 w-full" />}>
             <HeroBanner />

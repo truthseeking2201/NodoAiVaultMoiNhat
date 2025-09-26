@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { createJSONStorage, devtools } from "zustand/middleware";
 import { useVaultBasicDetails } from "./use-vault";
 import { LP_TOKEN_CONFIG } from "@/config";
+import { isMockMode } from "@/config/mock";
 import { persist } from "zustand/middleware";
 
 interface DepositVaultState {
@@ -208,6 +209,15 @@ export const useGetLpToken = (coinType: string, vaultId: string) => {
 
   if (asset) {
     return asset;
+  }
+
+  if (isMockMode && !asset) {
+    return {
+      ...LP_TOKEN_CONFIG,
+      balance: "1000000",
+      usd_price: "0",
+      decimals: vaultDetails?.vault_lp_token_decimals,
+    };
   }
 
   // if asset is not found, check if it is a lp token in vault details

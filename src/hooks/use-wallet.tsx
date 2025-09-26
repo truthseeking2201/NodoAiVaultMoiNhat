@@ -1,6 +1,12 @@
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { create } from "zustand";
+import {
+  isMockMode,
+  MOCK_WALLET_ADDRESS,
+  MOCK_WALLET_NAME,
+} from "@/config/mock";
+
 interface WalletState {
   isConnectWalletDialogOpen: boolean;
   isAuthenticated: boolean;
@@ -10,7 +16,7 @@ interface WalletState {
 
 const useWalletStore = create<WalletState>((set) => ({
   isConnectWalletDialogOpen: false,
-  isAuthenticated: false,
+  isAuthenticated: isMockMode,
   setIsConnectWalletDialogOpen: (isConnectWalletDialogOpen: boolean) =>
     set({ isConnectWalletDialogOpen }),
   setIsAuthenticated: (isAuthenticated: boolean) => set({ isAuthenticated }),
@@ -18,13 +24,18 @@ const useWalletStore = create<WalletState>((set) => ({
 
 export const useWallet = () => {
   const account = useCurrentAccount();
-  const walletConnectionInfo = JSON.parse(
-    localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
-  );
+  const storedConnectionInfo =
+    typeof window !== "undefined"
+      ? localStorage.getItem("sui-dapp-kit:wallet-connection-info")
+      : null;
+  const walletConnectionInfo = storedConnectionInfo
+    ? JSON.parse(storedConnectionInfo)
+    : {};
   const lastConnectedAccountAddress =
     walletConnectionInfo?.state?.lastConnectedAccountAddress;
 
-  const address = account?.address || lastConnectedAccountAddress;
+  const derivedAddress = account?.address || lastConnectedAccountAddress;
+  const address = isMockMode ? MOCK_WALLET_ADDRESS : derivedAddress;
   const {
     isConnectWalletDialogOpen,
     setIsConnectWalletDialogOpen,
@@ -32,7 +43,30 @@ export const useWallet = () => {
     setIsAuthenticated,
   } = useWalletStore((state) => state);
 
+  useEffect(() => {
+    if (!isMockMode) return;
+    setIsAuthenticated(true);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("access_token", "mock-access-token");
+      localStorage.setItem("refresh_token", "mock-refresh-token");
+      localStorage.setItem(
+        "sui-dapp-kit:wallet-connection-info",
+        JSON.stringify({
+          state: {
+            lastConnectedAccountAddress: MOCK_WALLET_ADDRESS,
+            lastConnectedWalletName: MOCK_WALLET_NAME,
+          },
+        })
+      );
+      localStorage.setItem("current-address", MOCK_WALLET_ADDRESS);
+      localStorage.setItem("last_wallet", MOCK_WALLET_NAME);
+    }
+  }, [setIsAuthenticated]);
+
   const calculateIsAuthenticated = useMemo(() => {
+    if (isMockMode) {
+      return true;
+    }
     if (isAuthenticated) return true;
 
     const access_token = localStorage.getItem("access_token");
@@ -40,9 +74,10 @@ export const useWallet = () => {
   }, [address, isAuthenticated]);
 
   return {
-    isConnected: !!address,
+    isConnected: isMockMode ? true : !!address,
     isConnectWalletDialogOpen,
-    openConnectWalletDialog: () => setIsConnectWalletDialogOpen(true),
+    openConnectWalletDialog: () =>
+      setIsConnectWalletDialogOpen(isMockMode ? false : true),
     closeConnectWalletDialog: () => setIsConnectWalletDialogOpen(false),
     setIsAuthenticated,
     isAuthenticated: calculateIsAuthenticated,

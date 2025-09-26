@@ -6,6 +6,7 @@ import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import Web3Button from "@/components/ui/web3-button";
 import SuccessfulToast from "./successful-toast";
 import { SUI_CONFIG, USDC_CONFIG } from "@/config";
+import { isMockMode } from "@/config/mock";
 import {
   useEstimateDeposit,
   useGetLpToken,
@@ -92,7 +93,11 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         token_id: token?.token_id,
         symbol: token?.token_symbol,
         decimals: token.decimal,
-        balance: isAuthenticated ? asset?.balance || "0" : "0",
+        balance: isAuthenticated
+          ? isMockMode
+            ? "1000000"
+            : asset?.balance || "0"
+          : "0",
         token_address: token?.token_address,
         min_deposit_amount: token?.min_deposit_amount,
         min_deposit_amount_usd: token?.min_deposit_amount_usd,

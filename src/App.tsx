@@ -12,7 +12,14 @@ import { getFullnodeUrl } from "@mysten/sui/client";
 import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { BrowserRouter } from "react-router-dom";
 import GlobalLoading from "./components/shared/global-loading";
 import AppRoutes from "./routes";
@@ -37,31 +44,66 @@ import { captureSentryError } from "./utils/logger";
 
 const useSetWalletDisconnectHandler = () => {
   const { mutateAsync: disconnect } = useDisconnectWallet();
-  const { setIsAuthenticated } = useWallet();
+  const { setIsAuthenticated, isAuthenticated, isConnected, address } =
+    useWallet();
   const { setAssets } = useUserAssetsStore();
   const { setAssets: setNdlpAssets } = useNdlpAssetsStore();
+  const isDisconnectingRef = useRef(false);
+
+  const clearSession = useCallback(() => {
+    setIsAuthenticated(false);
+    setAssets([]);
+    setNdlpAssets([]);
+
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("current-address");
+      localStorage.removeItem("whitelisted_address");
+      localStorage.removeItem("last_wallet");
+    }
+  }, [setIsAuthenticated, setAssets, setNdlpAssets]);
+
+  const hasActiveSession = useCallback(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return (
+      !!localStorage.getItem("access_token") ||
+      !!localStorage.getItem("refresh_token") ||
+      !!address ||
+      isAuthenticated
+    );
+  }, [address, isAuthenticated]);
 
   useEffect(() => {
-    setWalletDisconnectHandler(async () => {
-      try {
-        await disconnect();
-        setIsAuthenticated(false);
-        setAssets([]);
-        setNdlpAssets([]);
-
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        localStorage.removeItem("current-address");
-        localStorage.removeItem("whitelisted_address");
-        localStorage.removeItem("last_wallet");
-      } catch (error) {
-        console.error("Error disconnecting wallet:", error);
-        localStorage.clear();
-        location.reload();
+    setWalletDisconnectHandler(() => {
+      if (isDisconnectingRef.current || !hasActiveSession()) {
         return;
       }
+
+      isDisconnectingRef.current = true;
+
+      (async () => {
+        try {
+          if (isConnected) {
+            await disconnect();
+          }
+        } catch (error) {
+          console.error("Error disconnecting wallet:", error);
+        } finally {
+          clearSession();
+          isDisconnectingRef.current = false;
+        }
+      })();
     });
-  }, [disconnect, setIsAuthenticated, setAssets, setNdlpAssets]);
+  }, [
+    disconnect,
+    isConnected,
+    hasActiveSession,
+    clearSession,
+  ]);
 };
 
 const ConfigWrapper = ({ children }: { children: React.ReactNode }) => {

@@ -15,7 +15,6 @@ import { useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import BigNumber from "bignumber.js";
-import { Buffer } from "buffer";
 import { useGetVaultConfig, useVaultBasicDetails } from "./use-vault";
 import { useWallet } from "./use-wallet";
 import { captureSentryError, logger } from "@/utils/logger";
@@ -24,6 +23,8 @@ import { EstimateDualDepositToken } from "@/types/deposit-token.types";
 import { useSplitCoin } from "./use-split-coin";
 import { bcs } from "@mysten/sui/bcs";
 import { getPriceOracle } from "@/services/pyth-services";
+import { isMockMode } from "@/config/mock";
+import { hexToBytes, sleep } from "@/lib/utils";
 
 type DepositCoin = {
   coin_type: string;
@@ -140,6 +141,17 @@ export const useDepositVault = (vaultId: string) => {
     onDepositFailedCallback,
   }: DepositArgs) => {
     try {
+      if (isMockMode) {
+        const mockResult = {
+          digest: `mock-deposit-${Date.now()}`,
+          coin_type: coin.coin_type,
+          amount,
+        };
+        await sleep(400);
+        onDepositSuccessCallback?.(mockResult);
+        return mockResult;
+      }
+
       const packageId = vaultConfig.metadata.package_id;
       if (!address) {
         throw new Error("No account connected");
@@ -173,15 +185,11 @@ export const useDepositVault = (vaultId: string) => {
         tx.pure.u64(profitData.last_credit_time),
         tx.pure(
           "vector<vector<u8>>",
-          profitData.signer_public_keys.map((key) =>
-            Array.from(Buffer.from(key, "hex"))
-          )
+          profitData.signer_public_keys.map((key) => hexToBytes(key))
         ),
         tx.pure(
           "vector<vector<u8>>",
-          profitData.signatures.map((key) =>
-            Array.from(Buffer.from(key, "hex"))
-          )
+          profitData.signatures.map((key) => hexToBytes(key))
         ),
         tx.object(CLOCK),
       ];
@@ -380,6 +388,17 @@ export const useDepositDualVault = (vaultId: string) => {
     onDepositFailedCallback,
   }: DualDepositArgs) => {
     try {
+      if (isMockMode) {
+        const mockResult = {
+          digest: `mock-dual-deposit-${Date.now()}`,
+          coinA,
+          coinB,
+        };
+        await sleep(500);
+        onDepositSuccessCallback?.(mockResult);
+        return mockResult;
+      }
+
       const packageId = vaultConfig.metadata.package_id;
       if (!address) {
         throw new Error("No account connected");
@@ -456,15 +475,11 @@ export const useDepositDualVault = (vaultId: string) => {
         tx.pure.u64(profitData.last_credit_time),
         tx.pure(
           "vector<vector<u8>>",
-          profitData.signer_public_keys.map((key) =>
-            Array.from(Buffer.from(key, "hex"))
-          )
+          profitData.signer_public_keys.map((key) => hexToBytes(key))
         ),
         tx.pure(
           "vector<vector<u8>>",
-          profitData.signatures.map((key) =>
-            Array.from(Buffer.from(key, "hex"))
-          )
+          profitData.signatures.map((key) => hexToBytes(key))
         ),
         tx.pure.vector("u8", serialized.toBytes()),
         tx.object(CLOCK),

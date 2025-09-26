@@ -1,13 +1,11 @@
-import {
-  SuiPriceServiceConnection,
-  SuiPythClient,
-} from "@pythnetwork/pyth-sui-js";
-
 export const getPriceOracle = async (
   priceIDs: string[],
   suiClient: any,
   transaction: any
 ) => {
+  const { SuiPriceServiceConnection, SuiPythClient } =
+    await import("@pythnetwork/pyth-sui-js");
+
   /// Get the off-chain data.
   const connection = new SuiPriceServiceConnection(
     "https://hermes.pyth.network/", // Use this for Mainnet

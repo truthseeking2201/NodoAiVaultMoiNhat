@@ -1,4 +1,3 @@
-import { Buffer } from "buffer";
 import React, { useMemo } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useWallet } from "./use-wallet";
@@ -16,7 +15,7 @@ import {
   getBalanceAmount,
   showFormatNumber,
 } from "@/lib/number";
-import { sleep, getImage } from "@/lib/utils";
+import { getImage, hexToBytes, sleep } from "@/lib/utils";
 import LpType, { TokenType } from "@/types/lp.type";
 import DataClaimType from "@/types/data-claim.types.d";
 import BigNumber from "bignumber.js";
@@ -29,6 +28,7 @@ import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import { IconCheckSuccess } from "@/components/ui/icon-check-success";
 import { IconErrorToast } from "@/components/ui/icon-error-toast";
+import { isMockMode } from "@/config/mock";
 
 const successIcon: React.ReactNode = React.createElement(IconCheckSuccess, {
   size: 14,
@@ -56,31 +56,7 @@ export const useWithdrawVault = () => {
     configLp: LpType,
     configVault: any
   ): Promise<DataClaimType[]> => {
-    try {
-      if (!configVault?.id_pending_redeems || !senderAddress) return null;
-      const data: any = await suiClient.getDynamicFieldObject({
-        parentId: configVault?.id_pending_redeems,
-        name: {
-          type: "address",
-          value: senderAddress,
-        },
-      });
-
-      const values = data?.data?.content?.fields?.value || [];
-      if (!values?.length) return [];
-      let dataRequest: any = null;
-
-      for (let index = 0; index < 10; index++) {
-        dataRequest = await getWithdrawalRequestsMultiTokens({
-          wallet_address: senderAddress,
-          vault_id: configLp.vault_id,
-        });
-        if (dataRequest.length) {
-          break;
-        }
-        await sleep(2000);
-      }
-
+    const mapRequests = (dataRequest: any[]) => {
       return dataRequest?.map((val) => {
         const tokenWithdraw = {
           token_symbol: configLp.lp_symbol,
@@ -109,10 +85,12 @@ export const useWithdrawVault = () => {
         });
         const conversionRate = {
           from_symbol: tokenWithdraw.token_symbol,
-          to_symbol: tokenReceives[0].token_symbol,
-          rate: new BigNumber(tokenReceives[0].amount)
-            .dividedBy(withdrawAmount)
-            .toNumber(),
+          to_symbol: tokenReceives[0]?.token_symbol || tokenWithdraw.token_symbol,
+          rate: tokenReceives[0]?.amount
+            ? new BigNumber(tokenReceives[0].amount)
+                .dividedBy(withdrawAmount || 1)
+                .toNumber()
+            : 1,
         };
 
         return {
@@ -122,8 +100,47 @@ export const useWithdrawVault = () => {
           tokenReceives: tokenReceives,
           conversionRate: conversionRate,
           configLp: configLp,
-        };
+        } as DataClaimType;
       });
+    };
+
+    try {
+      if (!senderAddress) return null;
+
+      if (isMockMode) {
+        const dataRequest: any = await getWithdrawalRequestsMultiTokens({
+          wallet_address: senderAddress,
+          vault_id: configLp.vault_id,
+        });
+        if (!dataRequest?.length) return [];
+        return mapRequests(dataRequest);
+      }
+
+      if (!configVault?.id_pending_redeems) return null;
+      const data: any = await suiClient.getDynamicFieldObject({
+        parentId: configVault?.id_pending_redeems,
+        name: {
+          type: "address",
+          value: senderAddress,
+        },
+      });
+
+      const values = data?.data?.content?.fields?.value || [];
+      if (!values?.length) return [];
+      let dataRequest: any = null;
+
+      for (let index = 0; index < 10; index++) {
+        dataRequest = await getWithdrawalRequestsMultiTokens({
+          wallet_address: senderAddress,
+          vault_id: configLp.vault_id,
+        });
+        if (dataRequest.length) {
+          break;
+        }
+        await sleep(2000);
+      }
+
+      return mapRequests(dataRequest);
     } catch (error) {
       console.error("Error withdrawal request:", error);
       return [];
@@ -165,6 +182,23 @@ export const useWithdrawVault = () => {
     tokenReceives: TokenType[]
   ) => {
     try {
+      if (isMockMode) {
+        await sleep(400);
+        const mockResult = {
+          digest: `mock-withdraw-${Date.now()}`,
+          amountLp,
+          tokens: tokenReceives,
+        };
+        toast({
+          title: "Withdrawal simulated",
+          description: "Mock withdrawal completed successfully",
+          variant: "success",
+          duration: 4000,
+          icon: successIcon,
+        });
+        return mockResult;
+      }
+
       if (!address) {
         throw new Error("No account connected");
       }
@@ -207,14 +241,12 @@ export const useWithdrawVault = () => {
         tx.pure(
           "vector<vector<u8>>",
           profitData.signer_public_keys.map((key) =>
-            Array.from(Buffer.from(key, "hex"))
+            hexToBytes(key)
           )
         ),
         tx.pure(
           "vector<vector<u8>>",
-          profitData?.signatures.map((key) =>
-            Array.from(Buffer.from(key, "hex"))
-          )
+          profitData?.signatures.map((key) => hexToBytes(key))
         ),
         tx.object(configLp.clock),
       ];
@@ -260,6 +292,20 @@ export const useWithdrawVault = () => {
    */
   const redeem = async (configLp: LpType) => {
     try {
+      if (isMockMode) {
+        await sleep(400);
+        toast({
+          title: "Claim simulated",
+          description: "Mock claim executed successfully",
+          variant: "success",
+          duration: 4000,
+          icon: successIcon,
+        });
+        return {
+          digest: `mock-claim-${Date.now()}`,
+        };
+      }
+
       if (!address) {
         throw new Error("No account connected");
       }
@@ -304,12 +350,12 @@ export const useWithdrawVault = () => {
           tx.pure.u64(dataSignature.expire_time),
           tx.pure(
             "vector<vector<u8>>",
-            dataSignature.pks.map((key) => Array.from(Buffer.from(key, "hex")))
+            dataSignature.pks.map((key) => hexToBytes(key))
           ),
           tx.pure(
             "vector<vector<u8>>",
             dataSignature.signatures.map((key) =>
-              Array.from(Buffer.from(key, "hex"))
+              hexToBytes(key)
             )
           ),
           tx.object(configLp.clock),

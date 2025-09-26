@@ -24,6 +24,9 @@ import { useWallet, useWhitelistWallet } from "@/hooks";
 import { cn } from "@/lib/utils";
 import UnderlineTabs from "../ui/underline-tab";
 
+const DESKTOP_CONTAINER =
+  "w-full mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 xl:px-10 max-w-[1480px] 2xl:max-w-[1640px]";
+
 const rawPageRoutes = [
   {
     icon: "Vault",
@@ -70,12 +73,7 @@ const DesktopHeader = () => {
     []
   );
   return (
-    <div
-      className={cn(
-        "container flex items-center justify-between max-lg:px-4",
-        visibleRibbon ? "pt-4" : "pt-0"
-      )}
-    >
+    <div className={cn(DESKTOP_CONTAINER, visibleRibbon ? "pt-4" : "pt-0")}>
       {/* Left side */}
       <div className="flex items-center gap-6 cursor-pointer">
         <div className="relative" onClick={() => navigate("/")}>

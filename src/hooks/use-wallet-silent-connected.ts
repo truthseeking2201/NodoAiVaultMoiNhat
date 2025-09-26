@@ -5,6 +5,7 @@ import {
   useWallets,
 } from "@mysten/dapp-kit";
 import { useEffect } from "react";
+import { isMockMode } from "@/config/mock";
 
 export const useWalletSilentConnected = () => {
   const wallets = useWallets();
@@ -12,6 +13,9 @@ export const useWalletSilentConnected = () => {
   const currentAccount = useCurrentAccount();
 
   useEffect(() => {
+    if (isMockMode) {
+      return;
+    }
     const walletConnectionInfo = JSON.parse(
       localStorage.getItem("sui-dapp-kit:wallet-connection-info") || "{}"
     );
