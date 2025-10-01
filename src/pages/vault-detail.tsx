@@ -20,7 +20,7 @@ import {
 } from "@/hooks";
 import { cn, formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType, VaultApr } from "@/types/vault-config.types";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
@@ -35,6 +35,7 @@ import { LpSimulatorCard } from "@/components/vault-detail/simulator/lp-simulato
 import { LpSimulatorModal } from "@/components/vault-detail/simulator/lp-simulator-modal";
 import { LpSimulatorMobileCTA } from "@/components/vault-detail/simulator/lp-simulator-mobile-cta";
 import { useLpSimulatorStore, ensureSimulatorInput } from "@/hooks/use-lp-simulator";
+import { getPathVaultCommunity } from "@/config/router";
 
 export type VaultInfo = {
   label: string;
@@ -82,6 +83,17 @@ const VaultDetail = () => {
     refetchDepositVaults();
     navigate("/", { replace: true });
   };
+
+  const handleTabSwitch = useCallback(
+    (index: number) => {
+      if (index === 2 && vault_id) {
+        navigate(getPathVaultCommunity(vault_id));
+        return;
+      }
+      setActiveTab(index);
+    },
+    [navigate, vault_id]
+  );
 
   const isBreakMobile = useMemo(() => {
     return !isLg;
@@ -220,10 +232,10 @@ const VaultDetail = () => {
         <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
           <UnderlineTabs
             activeTab={activeTab}
-            labels={["Overview", "Your Holdings"]}
+            labels={["Overview", "Your Holdings", "Community"]}
             labelClassName="max-md:text-base max-md:px-0"
             tabClassName="max-md:space-x-4"
-            onActiveTabChange={setActiveTab}
+            onActiveTabChange={handleTabSwitch}
           />
           <div className="flex items-center gap-3">
             <CollateralUnit
@@ -275,10 +287,10 @@ const VaultDetail = () => {
           <div className="mt-4 mb-3 flex justify-between">
             <UnderlineTabs
               activeTab={activeTab}
-              labels={["Overview", "Your Holdings"]}
+              labels={["Overview", "Your Holdings", "Community"]}
               labelClassName="max-md:text-base max-md:px-0"
               tabClassName="max-md:space-x-4"
-              onActiveTabChange={setActiveTab}
+              onActiveTabChange={handleTabSwitch}
               key={activeTab}
             />
             <div className="flex items-center gap-2">
