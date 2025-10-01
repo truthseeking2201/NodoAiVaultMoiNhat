@@ -32,10 +32,8 @@ import VaultItemMobile from "./vault-item-mobile";
 import VaultHolding from "./vault-holding";
 import VaultRewards from "./vault-rewards";
 import { Skeleton } from "@/components/ui/skeleton";
-import UserHoldingTooltip from "./user-holding-tooltip";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ApyTooltipContent from "./apy-tooltip-content";
-import PriceChange from "@/components/shared/price-change";
 
 const OPTIONS_CHAINS = [
   { value: "all", label: "All Chains" },
@@ -461,17 +459,6 @@ export default function VaultList() {
                             Number(token.amount) < 1 ? 6 : 2
                           )
                         : "--"}
-                      {token?.percent_change && (
-                        <>
-                          <PriceChange
-                            priceChange={token.percent_change}
-                            showParentheses={false}
-                            showPeriod={false}
-                            className="text-sm"
-                          />
-                          <span className="text-sm text-white">(24h)</span>
-                        </>
-                      )}
                     </div>
                   ))
                 ) : (
@@ -488,20 +475,7 @@ export default function VaultList() {
             )}
             {record.is_loading_withdrawal ? (
               <Skeleton className="w-[80px] h-5 mt-1" />
-            ) : (
-              <div id="compound-container">
-                {record.rewards_earned_show !== "--" && (
-                  <div className="bg-[#0D314A] flex justify-between items-center px-2 py-1 rounded-md mt-1">
-                    <div className="text-xs text-white">
-                      <UserHoldingTooltip>Compound Rewards:</UserHoldingTooltip>
-                    </div>
-                    <div className="text-xs text-[#5AE5F2] font-mono">
-                      {record.rewards_earned_show}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            ) : null}
           </div>
         ),
       },

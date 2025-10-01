@@ -87,4 +87,12 @@
     background: linear-gradient(120deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 100%);
     pointer-events: none;
   }
+
+  .slider-gradient [data-slot=track] {
+    background: linear-gradient(90deg, #FF8A65 0%, #26A69A 100%);
+  }
+
+  .slider-gradient [data-slot=range] {
+    background: rgba(255, 255, 255, 0.15);
+  }
 }
