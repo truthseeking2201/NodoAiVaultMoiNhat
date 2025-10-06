@@ -4,7 +4,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Countdown, { zeroPad } from "react-countdown";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import UserHoldingTooltip from "./user-holding-tooltip";
 import IconReady from "@/components/vault-detail/form/withdraw/icon-ready";
 import { formatNumber } from "@/lib/number";
 
@@ -65,7 +64,7 @@ const VaultHolding = ({
   return (
     <div className="flex flex-col justify-center gap-1">
       {!isOnlyWithdrawing &&
-        (item.user_holdings_show || item.rewards_earned_show) && (
+        item.user_holdings_show && (
           <div className="my-1.5" id="vault-holding-section">
             {holdingShowMode === HOLDING_TYPE[0].value &&
               item.user_holdings_show && (
@@ -91,19 +90,6 @@ const VaultHolding = ({
                                 Number(token.amount) < 1 ? 6 : 2
                               )
                             : "--"}
-                          {token?.percent_change && (
-                            <>
-                            <span
-                              className={cn(
-                                `text-sm ml-1`,
-                                token.percent_change >= 0
-                                ? "text-green-increase"
-                                : "text-red-400"
-                              )}
-                              >{`(${token.percent_change}%)`}</span>
-                              <span className="text-sm text-white">(24h)</span>
-                              </>
-                          )}
                         </div>
                       ))
                     ) : (
@@ -126,33 +112,6 @@ const VaultHolding = ({
                   {item.user_holdings_show}
                 </RowItem>
               )}
-            {item.rewards_earned_show && (
-              <RowItem
-                classNameLabel={classLabel}
-                className={cn(classRow, "block mt-2")}
-                classNameValue={classValue}
-                label=""
-              >
-                {item.is_loading_withdrawal ? (
-                  <Skeleton className="w-[100px] h-5" />
-                ) : (
-                  <>
-                    {item.rewards_earned_show !== "--" && (
-                      <div className="bg-[#0D314A] flex justify-between items-center px-2 py-1 rounded-md">
-                        <div className="text-xs text-white">
-                          <UserHoldingTooltip>
-                            Compound Rewards:
-                          </UserHoldingTooltip>
-                        </div>
-                        <div className="text-xs text-[#5AE5F2] font-mono">
-                          {item.rewards_earned_show}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </RowItem>
-            )}
           </div>
         )}
 

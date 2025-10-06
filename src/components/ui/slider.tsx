@@ -1,12 +1,19 @@
 
-import * as React from "react"
-import * as SliderPrimitive from "@radix-ui/react-slider"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import * as SliderPrimitive from "@radix-ui/react-slider";
+import { cn } from "@/lib/utils";
+
+interface SliderProps
+  extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
+  trackClassName?: string;
+  rangeClassName?: string;
+  thumbClassName?: string;
+}
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
->(({ className, ...props }, ref) => (
+  SliderProps
+>(({ className, trackClassName, rangeClassName, thumbClassName, ...props }, ref) => (
   <SliderPrimitive.Root
     ref={ref}
     className={cn(
@@ -15,18 +22,30 @@ const Slider = React.forwardRef<
     )}
     {...props}
   >
-    <SliderPrimitive.Track className="relative h-[2px] w-full grow overflow-hidden rounded-full bg-[#28304B]">
-      <SliderPrimitive.Range className="absolute h-full bg-gradient-to-r from-[#FF8800] to-[#FFA822]" />
+    <SliderPrimitive.Track
+      data-slot="track"
+      className={cn(
+        "relative h-[4px] w-full grow overflow-hidden rounded-full bg-white/12",
+        trackClassName
+      )}
+    >
+      <SliderPrimitive.Range
+        data-slot="range"
+        className={cn(
+          "absolute h-full bg-gradient-to-r from-[#FF8A65] to-[#26A69A]",
+          rangeClassName
+        )}
+      />
     </SliderPrimitive.Track>
-    <SliderPrimitive.Thumb 
-      className="block h-3.5 w-3.5 rounded-full border border-white/30 bg-[#FF8800] ring-offset-background transition-all hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F59E0B] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-      style={{ 
-        transition: "transform 80ms cubic-bezier(.22,1,.36,1)",
-        boxShadow: "0 2px 4px -1px rgba(0,0,0,0.4)"
-      }}
+    <SliderPrimitive.Thumb
+      data-slot="thumb"
+      className={cn(
+        "block h-4 w-4 rounded-full border border-white/40 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.35)] transition-transform duration-150 ease-out hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2",
+        thumbClassName
+      )}
     />
   </SliderPrimitive.Root>
-))
-Slider.displayName = SliderPrimitive.Root.displayName
+));
+Slider.displayName = SliderPrimitive.Root.displayName;
 
-export { Slider }
+export { Slider };

@@ -6,7 +6,11 @@ import Web3Button from "@/components/ui/web3-button";
 import { ButtonGradient } from "@/components/ui/button-gradient";
 import { SORT_TYPE } from "@/config/constants-types";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
-import { getPathVaultDetail } from "@/config/router";
+import {
+  getPathVaultDetail,
+  getPathVaultCommunity,
+  getPathCommunityPoolDetail,
+} from "@/config/router";
 import {
   useGetDepositVaults,
   useNdlpAssetsStore,
@@ -32,10 +36,17 @@ import VaultItemMobile from "./vault-item-mobile";
 import VaultHolding from "./vault-holding";
 import VaultRewards from "./vault-rewards";
 import { Skeleton } from "@/components/ui/skeleton";
-import UserHoldingTooltip from "./user-holding-tooltip";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ApyTooltipContent from "./apy-tooltip-content";
-import PriceChange from "@/components/shared/price-change";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { CreatePoolModal, JoinPoolModal } from "@/features/community";
 
 const OPTIONS_CHAINS = [
   { value: "all", label: "All Chains" },
@@ -155,6 +166,12 @@ export default function VaultList() {
     HOLDING_TYPE[0].value
   );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [communityVault, setCommunityVault] = useState<
+    { vaultId: string; name: string } | null
+  >(null);
+  const [communityDialogOpen, setCommunityDialogOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
 
   const showUsd = (num, emty = "--") => {
     return num ? showFormatNumber(num, 2, 2, "$") : emty;
@@ -461,17 +478,6 @@ export default function VaultList() {
                             Number(token.amount) < 1 ? 6 : 2
                           )
                         : "--"}
-                      {token?.percent_change && (
-                        <>
-                          <PriceChange
-                            priceChange={token.percent_change}
-                            showParentheses={false}
-                            showPeriod={false}
-                            className="text-sm"
-                          />
-                          <span className="text-sm text-white">(24h)</span>
-                        </>
-                      )}
                     </div>
                   ))
                 ) : (
@@ -488,20 +494,7 @@ export default function VaultList() {
             )}
             {record.is_loading_withdrawal ? (
               <Skeleton className="w-[80px] h-5 mt-1" />
-            ) : (
-              <div id="compound-container">
-                {record.rewards_earned_show !== "--" && (
-                  <div className="bg-[#0D314A] flex justify-between items-center px-2 py-1 rounded-md mt-1">
-                    <div className="text-xs text-white">
-                      <UserHoldingTooltip>Compound Rewards:</UserHoldingTooltip>
-                    </div>
-                    <div className="text-xs text-[#5AE5F2] font-mono">
-                      {record.rewards_earned_show}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            ) : null}
           </div>
         ),
       },
@@ -526,12 +519,28 @@ export default function VaultList() {
         dataIndex: "action",
         classTitle: "justify-end",
         render: (_: any, record: any) => (
-          <Web3Button
-            onClick={() => handleRowClick(record)}
-            className="w-[86px] ml-auto"
-          >
-            Deposit
-          </Web3Button>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              className="border-white/20 text-white/80 hover:text-white hover:border-white/40"
+              onClick={(event) => {
+                event.stopPropagation();
+                setCommunityVault({
+                  vaultId: record.vault_id,
+                  name: record.vault_name,
+                });
+                setCommunityDialogOpen(true);
+              }}
+            >
+              Community
+            </Button>
+            <Web3Button
+              onClick={() => handleRowClick(record)}
+              className="w-[86px]"
+            >
+              Deposit
+            </Web3Button>
+          </div>
         ),
       },
     ],
@@ -597,6 +606,34 @@ export default function VaultList() {
     [paramsSort]
   );
 
+  const handleCommunityNavigate = () => {
+    if (!communityVault) return;
+    navigate(getPathVaultCommunity(communityVault.vaultId));
+    setCommunityDialogOpen(false);
+  };
+
+  const handleOpenCreate = () => {
+    setCommunityDialogOpen(false);
+    setCreateModalOpen(true);
+  };
+
+  const handleOpenJoin = () => {
+    setCommunityDialogOpen(false);
+    setJoinModalOpen(true);
+  };
+
+  const handlePoolCreated = (poolId: string) => {
+    if (!communityVault) return;
+    setCreateModalOpen(false);
+    navigate(getPathCommunityPoolDetail(communityVault.vaultId, poolId));
+  };
+
+  const handlePoolJoined = (poolId: string) => {
+    if (!communityVault) return;
+    setJoinModalOpen(false);
+    navigate(getPathCommunityPoolDetail(communityVault.vaultId, poolId));
+  };
+
   const optionDexs = useMemo(() => {
     return [
       { value: "all", label: "All DEXs" },
@@ -637,8 +674,15 @@ export default function VaultList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapData]);
 
+  useEffect(() => {
+    if (!communityDialogOpen && !createModalOpen && !joinModalOpen) {
+      setCommunityVault(null);
+    }
+  }, [communityDialogOpen, createModalOpen, joinModalOpen]);
+
   return (
-    <div className="w-full mx-auto max-md:p-4 max-md:rounded-lg max-md:pt-6 max-md:bg-[#121212]">
+    <>
+      <div className="w-full mx-auto max-md:p-4 max-md:rounded-lg max-md:pt-6 max-md:bg-[#121212]">
       {isMd && (
         <div
           className="text-white font-sans text-[22px] font-bold leading-normal tracking-[-1.2px] mb-6"
@@ -712,6 +756,13 @@ export default function VaultList() {
                   reloadDataWithdraw={refetchVaultsWithdrawal}
                   onRowClick={handleRowClick}
                   onClaim={onClaim}
+                  onOpenCommunity={(vault) => {
+                    setCommunityVault({
+                      vaultId: vault.vault_id,
+                      name: vault.vault_name,
+                    });
+                    setCommunityDialogOpen(true);
+                  }}
                   HOLDING_TYPE={HOLDING_TYPE}
                   holdingShowMode={holdingShowMode}
                   setHoldingShowMode={setHoldingShowMode}
@@ -739,5 +790,58 @@ export default function VaultList() {
         </div>
       </ConditionRenderer>
     </div>
+
+      <Dialog
+        open={communityDialogOpen && !!communityVault}
+        onOpenChange={(open) => setCommunityDialogOpen(open)}
+      >
+        <DialogContent className="max-w-[420px] border border-white/10 bg-[#101214] text-white">
+          <DialogHeader>
+            <DialogTitle>Community Pools</DialogTitle>
+            <DialogDescription className="text-white/60 text-sm">
+              {communityVault?.name || "This vault"} · choose how you want to collaborate with friends.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Button
+              className="w-full bg-white text-black hover:bg-white/90"
+              onClick={handleCommunityNavigate}
+            >
+              View Community Directory
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full border-white/20 text-white/80 hover:text-white hover:border-white/40"
+              onClick={handleOpenCreate}
+            >
+              Create Pool
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full border-white/20 text-white/80 hover:text-white hover:border-white/40"
+              onClick={handleOpenJoin}
+            >
+              Join with Invite
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {communityVault && (
+        <CreatePoolModal
+          open={createModalOpen}
+          onOpenChange={setCreateModalOpen}
+          vaultId={communityVault.vaultId}
+          onCreated={handlePoolCreated}
+        />
+      )}
+      {communityVault && (
+        <JoinPoolModal
+          open={joinModalOpen}
+          onOpenChange={setJoinModalOpen}
+          onJoined={handlePoolJoined}
+        />
+      )}
+    </>
   );
 }

@@ -20,7 +20,7 @@ import {
 } from "@/hooks";
 import { cn, formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType, VaultApr } from "@/types/vault-config.types";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
@@ -31,6 +31,11 @@ import VaultNdlpStatus from "@/components/vault-detail/sections/vault-ndlp-statu
 import { formatCollateralUsdNumber } from "@/components/vault-detail/helpers";
 import ApyTooltipContent from "@/components/vault/list/apy-tooltip-content";
 import BigNumber from "bignumber.js";
+import { LpSimulatorCard } from "@/components/vault-detail/simulator/lp-simulator-card";
+import { LpSimulatorModal } from "@/components/vault-detail/simulator/lp-simulator-modal";
+import { LpSimulatorMobileCTA } from "@/components/vault-detail/simulator/lp-simulator-mobile-cta";
+import { useLpSimulatorStore, ensureSimulatorInput } from "@/hooks/use-lp-simulator";
+import { getPathVaultCommunity } from "@/config/router";
 
 export type VaultInfo = {
   label: string;
@@ -46,6 +51,9 @@ const VaultDetail = () => {
   const { data: vaultDetails, isLoading: isLoadingVaultDetails } =
     useVaultBasicDetails(vault_id);
   const { isLg, isMd } = useBreakpoint();
+  const setSimulatorDrawerOpen = useLpSimulatorStore((state) => state.setDrawerOpen);
+  const markSimulatorOpen = useLpSimulatorStore((state) => state.markFirstOpen);
+  const dismissSimulatorMobileCTA = useLpSimulatorStore((state) => state.dismissMobileCTA);
   const {
     data: depositVaults,
     isLoading: isLoadingDepositVaults,
@@ -75,6 +83,17 @@ const VaultDetail = () => {
     refetchDepositVaults();
     navigate("/", { replace: true });
   };
+
+  const handleTabSwitch = useCallback(
+    (index: number) => {
+      if (index === 2 && vault_id) {
+        navigate(getPathVaultCommunity(vault_id));
+        return;
+      }
+      setActiveTab(index);
+    },
+    [navigate, vault_id]
+  );
 
   const isBreakMobile = useMemo(() => {
     return !isLg;
@@ -167,6 +186,10 @@ const VaultDetail = () => {
     }
   }, [hasLPBalance]);
 
+  useEffect(() => {
+    ensureSimulatorInput(vault_id);
+  }, [vault_id]);
+
   if ((!vaultDetails || !isValidVault) && !isLoadingVaultDetails) {
     return <Navigate to="/" replace />;
   }
@@ -209,15 +232,31 @@ const VaultDetail = () => {
         <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
           <UnderlineTabs
             activeTab={activeTab}
-            labels={["Overview", "Your Holdings"]}
+            labels={["Overview", "Your Holdings", "Community"]}
             labelClassName="max-md:text-base max-md:px-0"
             tabClassName="max-md:space-x-4"
-            onActiveTabChange={setActiveTab}
+            onActiveTabChange={handleTabSwitch}
           />
-          <CollateralUnit
-            collateralToken={vaultDetails?.collateral_token}
-            vault_id={vault_id}
-          />
+          <div className="flex items-center gap-3">
+            <CollateralUnit
+              collateralToken={vaultDetails?.collateral_token}
+              vault_id={vault_id}
+            />
+            <Button
+              variant="outline"
+              className="border-white/20 text-white/80 hover:text-white hover:bg-white/10"
+              onClick={() => {
+                if (vault_id) {
+                  ensureSimulatorInput(vault_id);
+                  markSimulatorOpen(vault_id);
+                  dismissSimulatorMobileCTA(vault_id);
+                }
+                setSimulatorDrawerOpen(true);
+              }}
+            >
+              Simulate IL
+            </Button>
+          </div>
         </div>
       </ConditionRenderer>
 
@@ -248,16 +287,33 @@ const VaultDetail = () => {
           <div className="mt-4 mb-3 flex justify-between">
             <UnderlineTabs
               activeTab={activeTab}
-              labels={["Overview", "Your Holdings"]}
+              labels={["Overview", "Your Holdings", "Community"]}
               labelClassName="max-md:text-base max-md:px-0"
               tabClassName="max-md:space-x-4"
-              onActiveTabChange={setActiveTab}
+              onActiveTabChange={handleTabSwitch}
               key={activeTab}
             />
-            <CollateralUnit
-              collateralToken={vaultDetails?.collateral_token}
-              vault_id={vault_id}
-            />
+            <div className="flex items-center gap-2">
+              <CollateralUnit
+                collateralToken={vaultDetails?.collateral_token}
+                vault_id={vault_id}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-white/20 text-white/80 hover:text-white hover:bg-white/10"
+                onClick={() => {
+                if (vault_id) {
+                  ensureSimulatorInput(vault_id);
+                  markSimulatorOpen(vault_id);
+                  dismissSimulatorMobileCTA(vault_id);
+                }
+                setSimulatorDrawerOpen(true);
+              }}
+            >
+                Simulate IL
+              </Button>
+            </div>
           </div>
         </ConditionRenderer>
         {/* Left sessions - start */}
@@ -309,10 +365,17 @@ const VaultDetail = () => {
               vault={vaultDetails}
               activeTab={activeTab}
             />
+            {vault_id && (
+              <div className="mt-6">
+                <LpSimulatorCard vaultId={vault_id} />
+              </div>
+            )}
           </div>
           {/* Left sessions - end */}
         </div>
       </div>
+      <LpSimulatorModal vaultId={vault_id} />
+      <LpSimulatorMobileCTA vaultId={vault_id} />
     </PageContainer>
   );
 };
