@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { recompute, upsertEvent, utcDayKey } from "./logic";
-import { StreakEvent, StreakRecord } from "./types";
+import {
+  computeStats,
+  markRewards,
+  recompute,
+  upsertEvent,
+  utcDayKey,
+} from "./logic";
+import { StreakEvent, StreakRecord, StreakReward } from "./types";
 
 const baseRecord: StreakRecord = {
   vaultId: "vault-1",
@@ -94,5 +100,40 @@ describe("recompute", () => {
     expect(result.longest).toBe(4);
     expect(result.lastCountedDay).toBe("");
     expect(result.lastEventAt).toBe(0);
+  });
+});
+
+describe("computeStats", () => {
+  const sampleRewards: StreakReward[] = [
+    { threshold: 3, label: "Flair" },
+    { threshold: 7, label: "Badge" },
+    { threshold: 14, label: "Boost" },
+  ];
+
+  const baseEvents: StreakEvent[] = [
+    { vaultId: "vault-1", wallet: "wallet-1", type: "snapshot", at: Date.UTC(2024, 8, 1, 12), dayKey: "2024-09-01" },
+    { vaultId: "vault-1", wallet: "wallet-1", type: "deposit", at: Date.UTC(2024, 8, 1, 15), dayKey: "2024-09-01", amountUsd: 150 },
+    { vaultId: "vault-1", wallet: "wallet-1", type: "snapshot", at: Date.UTC(2024, 8, 2, 12), dayKey: "2024-09-02" },
+    { vaultId: "vault-1", wallet: "wallet-1", type: "deposit", at: Date.UTC(2024, 8, 4, 12), dayKey: "2024-09-04", amountUsd: 120 },
+    { vaultId: "vault-1", wallet: "wallet-1", type: "snapshot", at: Date.UTC(2024, 8, 5, 12), dayKey: "2024-09-05" },
+  ];
+
+  it("summarises streak stats correctly", () => {
+    const today = Date.UTC(2024, 8, 6);
+    const stats = computeStats(baseEvents, sampleRewards, today);
+
+    expect(stats.current).toBeGreaterThan(0);
+    expect(stats.longest).toBeGreaterThan(0);
+    expect(stats.activeDays7).toBe(4);
+    expect(stats.deposits7).toBe(2);
+    expect(stats.depositSum7).toBe(270);
+    expect(stats.nextMilestone).toBeGreaterThanOrEqual(stats.current);
+  });
+
+  it("marks rewards as claimed", () => {
+    const marked = markRewards(sampleRewards, 7);
+    expect(marked[0].claimed).toBe(true);
+    expect(marked[1].claimed).toBe(true);
+    expect(marked[2].claimed).toBe(false);
   });
 });

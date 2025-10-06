@@ -1,13 +1,22 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { getStore, setStore, subscribe } from "../mock/store";
 import {
+  computeStats,
   getMilestoneProgress,
+  markRewards,
   recompute,
   sortEventsDescending,
   utcDayKey,
   upsertEvent,
 } from "../logic";
-import { QualifyingEvent, StreakEvent, StreakRecord } from "../types";
+import {
+  QualifyingEvent,
+  StreakEvent,
+  StreakRecord,
+  StreakReward,
+  StreakStats,
+} from "../types";
+import { seedStreakDemo } from "../mock/seed-streak";
 
 const buildKey = (wallet: string, vaultId: string) => `${wallet}::${vaultId}`;
 
@@ -34,6 +43,7 @@ export type LogEventPayload = {
   wallet: string;
   at: number;
   type: QualifyingEvent;
+  amountUsd?: number;
 };
 
 export function useStreak(vaultId: string, wallet?: string) {
@@ -58,14 +68,44 @@ export function useStreak(vaultId: string, wallet?: string) {
 
   const sortedEvents = useMemo(() => sortEventsDescending(events), [events]);
 
-  const currentCount = record?.current ?? 0;
+  const rewards = useMemo<StreakReward[]>(() => {
+    if (!key) return [];
+    const list = store.rewards?.[key];
+    return Array.isArray(list) ? list : [];
+  }, [key, store.rewards]);
+
+  const ascendingEvents = useMemo(
+    () => [...events].sort((a, b) => a.at - b.at),
+    [events]
+  );
+
+  const computedRecord = useMemo(() => {
+    if (!wallet) return null;
+    const baseRecord = record ?? createBaseRecord({ vaultId, wallet });
+    if (!ascendingEvents.length) return record ?? baseRecord;
+    const dayKeys = collectDayKeys(ascendingEvents);
+    const recomputed = recompute(baseRecord, dayKeys);
+    const lastEventAt = ascendingEvents.reduce(
+      (max, event) => (event.at > max ? event.at : max),
+      0
+    );
+    return { ...recomputed, lastEventAt };
+  }, [record, ascendingEvents, vaultId, wallet]);
+
+  const stats: StreakStats = useMemo(
+    () => computeStats(ascendingEvents, rewards),
+    [ascendingEvents, rewards]
+  );
+
+  const resolvedRecord = computedRecord;
+  const currentCount = resolvedRecord?.current ?? 0;
   const progress = useMemo(
     () => getMilestoneProgress(currentCount),
     [currentCount]
   );
 
   const logEvent = useCallback(
-    ({ vaultId: vId, wallet: w, at, type }: LogEventPayload) => {
+    ({ vaultId: vId, wallet: w, at, type, amountUsd }: LogEventPayload) => {
       if (!wallet || !key || !w || !vId) return;
       const event: StreakEvent = {
         vaultId: vId,
@@ -73,6 +113,7 @@ export function useStreak(vaultId: string, wallet?: string) {
         type,
         at,
         dayKey: utcDayKey(at),
+        amountUsd,
       };
 
       const latestStore = getStore();
@@ -104,6 +145,7 @@ export function useStreak(vaultId: string, wallet?: string) {
           ...latestStore.records,
           [key]: nextRecord,
         },
+        rewards: latestStore.rewards,
       });
     },
     [wallet, key]
@@ -131,10 +173,17 @@ export function useStreak(vaultId: string, wallet?: string) {
   );
 
   return {
-    record,
+    record: resolvedRecord,
     events: sortedEvents,
+    rewards: markRewards(rewards, currentCount),
+    stats,
     progress,
     logEvent,
     ensureSnapshotForToday,
+    seedDemo: () => {
+      if (wallet) {
+        seedStreakDemo(vaultId, wallet);
+      }
+    },
   } as const;
 }

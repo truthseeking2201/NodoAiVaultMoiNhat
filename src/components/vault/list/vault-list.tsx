@@ -47,6 +47,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CreatePoolModal, JoinPoolModal } from "@/features/community";
+import { COMMUNITY_COPY } from "@/features/community/ui/copy";
+import { Users } from "lucide-react";
 
 const OPTIONS_CHAINS = [
   { value: "all", label: "All Chains" },
@@ -368,8 +370,8 @@ export default function VaultList() {
           />
         ),
         dataIndex: "collateral",
-        classTitle: "text-white/80 justify-start w-[60px]",
-        classCell: "justify-center",
+        classTitle: "text-white/80 justify-start w-[56px] sm:w-[64px] lg:w-[72px]",
+        classCell: "justify-center min-w-0",
         render: (_: any, record: any) => {
           const collateralToken = record?.tokens.find(
             (token: any) => token.token_address === record.collateral_token
@@ -405,10 +407,11 @@ export default function VaultList() {
           />
         ),
         dataIndex: "rewards",
-        classTitle: "text-white/80 text-left w-[130px]",
+        classTitle:
+          "text-white/80 text-left w-[96px] sm:w-[112px] lg:w-[128px] xl:w-[136px]",
         keySort: "rewards_24h_usd",
         render: (value: any, record: any) => (
-          <span className="text-white font-medium font-mono text-base">
+          <span className="text-white font-medium font-mono text-base whitespace-nowrap tabular-nums">
             {record.rewards_24h_usd_show}
           </span>
         ),
@@ -454,16 +457,18 @@ export default function VaultList() {
           </div>
         ),
         dataIndex: "holdings",
-        classTitle: "text-white/80 w-[250px]",
+        classTitle:
+          "text-white/80 w-[140px] sm:w-[160px] md:w-[180px] lg:w-[200px] xl:w-[240px]",
+        classCell: "min-w-0",
         keySort: "user_holdings",
         render: (_: any, record: any) => (
-          <div id="holding-container">
+          <div id="holding-container" className="min-w-0">
             {holdingShowMode === HOLDING_TYPE[0].value ? (
-              <div className="text-white font-medium font-mono text-base">
+              <div className="text-white font-medium font-mono text-base min-w-0">
                 {record.change_24h && record.change_24h.length > 0 ? (
                   record.change_24h.map((token, index: number) => (
                     <div
-                      className="flex items-center gap-1"
+                      className="flex min-w-0 items-center gap-1"
                       key={`${index}-${token.token_symbol}`}
                     >
                       <img
@@ -471,13 +476,15 @@ export default function VaultList() {
                         alt={token.token_name}
                         className="inline-block w-4 h-4 mr-1"
                       />
-                      {Number(token.amount) > 0
-                        ? formatNumber(
-                            token.amount,
-                            0,
-                            Number(token.amount) < 1 ? 6 : 2
-                          )
-                        : "--"}
+                      <span className="truncate">
+                        {Number(token.amount) > 0
+                          ? formatNumber(
+                              token.amount,
+                              0,
+                              Number(token.amount) < 1 ? 6 : 2
+                            )
+                          : "--"}
+                      </span>
                     </div>
                   ))
                 ) : (
@@ -488,7 +495,7 @@ export default function VaultList() {
                 )}
               </div>
             ) : (
-              <div className="text-white font-medium font-mono text-base">
+              <div className="text-white font-medium font-mono text-base min-w-0 truncate">
                 {record.user_holdings_show}
               </div>
             )}
@@ -508,8 +515,9 @@ export default function VaultList() {
           />
         ),
         dataIndex: "rewards",
-        classTitle: "text-white/80 justify-start w-[60px]",
-        classCell: "justify-start",
+        classTitle:
+          "text-white/80 justify-start w-[68px] sm:w-[80px] lg:w-[96px]",
+        classCell: "justify-start min-w-0",
         render: (_: any, record: any) => {
           return <VaultRewards item={record} />;
         },
@@ -518,11 +526,27 @@ export default function VaultList() {
         title: "Action",
         dataIndex: "action",
         classTitle: "justify-end",
+        classCell: "min-w-0",
         render: (_: any, record: any) => (
-          <div className="flex justify-end gap-2">
+          <div className="ml-auto flex items-center gap-2">
             <Button
               variant="outline"
-              className="border-white/20 text-white/80 hover:text-white hover:border-white/40"
+              className="inline-flex h-8 w-8 items-center justify-center border-white/15 text-white/70 transition hover:border-white/40 hover:text-white xl:hidden"
+              onClick={(event) => {
+                event.stopPropagation();
+                setCommunityVault({
+                  vaultId: record.vault_id,
+                  name: record.vault_name,
+                });
+                setCommunityDialogOpen(true);
+              }}
+              aria-label="Open community actions"
+            >
+              <Users className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden h-8 px-3 text-xs border-white/15 text-white/80 transition hover:border-white/40 hover:text-white xl:inline-flex"
               onClick={(event) => {
                 event.stopPropagation();
                 setCommunityVault({
@@ -536,7 +560,7 @@ export default function VaultList() {
             </Button>
             <Web3Button
               onClick={() => handleRowClick(record)}
-              className="w-[86px]"
+              className="h-8 px-3 text-xs"
             >
               Deposit
             </Web3Button>
@@ -797,7 +821,7 @@ export default function VaultList() {
       >
         <DialogContent className="max-w-[420px] border border-white/10 bg-[#101214] text-white">
           <DialogHeader>
-            <DialogTitle>Community Pools</DialogTitle>
+            <DialogTitle>{COMMUNITY_COPY.title}</DialogTitle>
             <DialogDescription className="text-white/60 text-sm">
               {communityVault?.name || "This vault"} · choose how you want to collaborate with friends.
             </DialogDescription>
@@ -807,21 +831,21 @@ export default function VaultList() {
               className="w-full bg-white text-black hover:bg-white/90"
               onClick={handleCommunityNavigate}
             >
-              View Community Directory
+              View Community Vaults
             </Button>
             <Button
               variant="outline"
               className="w-full border-white/20 text-white/80 hover:text-white hover:border-white/40"
               onClick={handleOpenCreate}
             >
-              Create Pool
+              {COMMUNITY_COPY.cta.create}
             </Button>
             <Button
               variant="outline"
               className="w-full border-white/20 text-white/80 hover:text-white hover:border-white/40"
               onClick={handleOpenJoin}
             >
-              Join with Invite
+              {COMMUNITY_COPY.cta.join}
             </Button>
           </div>
         </DialogContent>

@@ -157,6 +157,7 @@ export const useDepositVault = (vaultId: string) => {
             wallet: address,
             at: Date.now(),
             type: "deposit",
+            amountUsd: amount,
           });
         }
         return mockResult;
@@ -408,11 +409,15 @@ export const useDepositDualVault = (vaultId: string) => {
         await sleep(500);
         onDepositSuccessCallback?.(mockResult);
         if (address) {
+          const parsedAmountA = Number(coinA.amount);
+          const parsedAmountB = Number(coinB.amount);
+          const amountUsd = parsedAmountA + parsedAmountB || undefined;
           logEvent({
             vaultId,
             wallet: address,
             at: Date.now(),
             type: "deposit",
+            amountUsd,
           });
         }
         return mockResult;
