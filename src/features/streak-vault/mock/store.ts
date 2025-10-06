@@ -1,8 +1,9 @@
-import { StreakEvent, StreakRecord } from "../types";
+import { StreakEvent, StreakRecord, StreakReward } from "../types";
 
 type Store = {
   events: StreakEvent[];
   records: Record<string, StreakRecord>;
+  rewards?: Record<string, StreakReward[]>;
 };
 
 const STORAGE_KEY = "STREAK_V1";
@@ -10,6 +11,7 @@ const STORAGE_KEY = "STREAK_V1";
 const defaultStore: Store = {
   events: [],
   records: {},
+  rewards: {},
 };
 
 const getLocalStorage = () => {
@@ -33,9 +35,14 @@ if (storage) {
       if (parsed && typeof parsed === "object") {
         mem = {
           events: Array.isArray(parsed.events) ? parsed.events : [],
-          records: typeof parsed.records === "object" && parsed.records !== null
-            ? parsed.records
-            : {},
+          records:
+            typeof parsed.records === "object" && parsed.records !== null
+              ? parsed.records
+              : {},
+          rewards:
+            typeof parsed.rewards === "object" && parsed.rewards !== null
+              ? parsed.rewards
+              : {},
         };
       }
     }

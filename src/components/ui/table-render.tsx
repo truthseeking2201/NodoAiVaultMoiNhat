@@ -62,8 +62,15 @@ export function TableRender({
    */
   return (
     <div className={tableClassName}>
-      <Table className={tableClassName}>
-        <TableHeader className={headerClassName}>
+      <Table className={cn("table-fixed", tableClassName)}>
+        <TableHeader
+          className={cn(
+            headerClassName,
+            "[&>tr>th:first-child]:pl-4 [&>tr>th:last-child]:pr-4",
+            "md:[&>tr>th:first-child]:pl-6 md:[&>tr>th:last-child]:pr-6",
+            "xl:[&>tr>th:first-child]:pl-8 xl:[&>tr>th:last-child]:pr-8"
+          )}
+        >
           <TableRow className=" hover:bg-transparent">
             {columns.map((el, index) => (
               <TableHead
@@ -107,7 +114,13 @@ export function TableRender({
           ))}
         </TableRow>
       </TableHeader>
-      <TableBody>
+      <TableBody
+        className={cn(
+          "[&>tr>td:first-child]:pl-4 [&>tr>td:last-child]:pr-4",
+          "md:[&>tr>td:first-child]:pl-6 md:[&>tr>td:last-child]:pr-6",
+          "xl:[&>tr>td:first-child]:pl-8 xl:[&>tr>td:last-child]:pr-8"
+        )}
+      >
         {isLoading ? (
           Array(data?.length || numRowLoading)
             .fill(0)
@@ -123,7 +136,7 @@ export function TableRender({
                   <TableCell
                     key={`loading-${index}`}
                     className={cn(
-                      "px-6 py-3 h-[50.5px] align-middle",
+                      "px-6 py-3 h-[50.5px] align-middle whitespace-nowrap overflow-hidden text-ellipsis min-w-0",
                       column?.classCell
                     )}
                   >
@@ -150,7 +163,7 @@ export function TableRender({
                   <TableCell
                     key={`${index}-cell-${ydx}`}
                     className={cn(
-                      "px-6 py-3 h-[50.5px] align-middle",
+                      "px-6 py-3 h-[50.5px] align-middle whitespace-nowrap overflow-hidden text-ellipsis min-w-0",
                       column?.classCell
                     )}
                   >
