@@ -27,6 +27,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import FormatUsdCollateralAmount from "./format-usd-collateral-amount";
 import { formatCollateralUsdNumber } from "../helpers";
+import StreakCard from "@/features/streak-vault/ui/StreakCard";
 
 type YourHoldingProps = {
   isDetailLoading: boolean;
@@ -93,7 +94,7 @@ const YourHoldings = ({
   activeTab,
 }: YourHoldingProps) => {
   const [expanded, setExpanded] = useState(false);
-  const { isAuthenticated } = useWallet();
+  const { isAuthenticated, address } = useWallet();
   const [userState, setUserState] = useState<
     "nonDeposit" | "pending" | "holding"
   >("nonDeposit");
@@ -105,6 +106,7 @@ const YourHoldings = ({
   const lpToken = useGetLpToken(vault?.vault_lp_token, vault_id);
 
   const ndlp_balance = lpToken?.balance || "0";
+  const hasNDLP = Number(ndlp_balance) > 0;
   const { data, refetch } = useUserHolding(
     vault_id,
     ndlp_balance,
@@ -427,6 +429,13 @@ const YourHoldings = ({
                     )}
                   </div>
                 </div>
+              </HoldingCard>
+              <HoldingCard>
+                <StreakCard
+                  vaultId={vault_id}
+                  wallet={isAuthenticated ? address : undefined}
+                  hasNDLP={hasNDLP}
+                />
               </HoldingCard>
               <div className="flex gap-4">
                 <HoldingCard>
