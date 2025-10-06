@@ -316,6 +316,49 @@ const RewardsList = ({ rewards }: { rewards: StreakReward[] }) => {
   );
 };
 
+const MiniStatsRow = ({ stats }: { stats: StreakStats }) => {
+  const items = [
+    {
+      label: "Active (7d/30d)",
+      value: `${stats.activeDays7}/${stats.activeDays30}`,
+    },
+    {
+      label: "Consistency (7d)",
+      value: `${Math.round(stats.consistency7 * 100)}%`,
+    },
+    {
+      label: "Deposits (7d)",
+      value: `${stats.deposits7} · $${formatNumber(
+        stats.depositSum7,
+        0,
+        stats.depositSum7 < 1000 ? 2 : 0
+      )}`,
+    },
+    {
+      label: "Last event",
+      value: formatLocalTime(stats.lastEventAt),
+    },
+  ];
+
+  return (
+    <div className="grid gap-2 md:grid-cols-4">
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2"
+        >
+          <div className="text-[10px] uppercase tracking-[0.18em] text-white/40">
+            {item.label}
+          </div>
+          <div className="font-mono text-sm text-white tabular-nums">
+            {item.value}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const HistoryGroup = ({
   group,
 }: {
