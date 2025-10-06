@@ -11,6 +11,7 @@ import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { VaultInfo } from "@/pages/vault-detail";
+import { StreakWidget } from "@/features/streak-vault/ui/StreakWidget";
 
 type VaultInfoProps = {
   vault: any;
@@ -23,6 +24,7 @@ type VaultInfoProps = {
   vaultInfo: any;
   isDetailLoading: boolean;
   vaultDetails?: BasicVaultDetailsType;
+  vaultId?: string;
 };
 
 const PairIcons = ({ tokens }: { tokens: string[] }) => {
@@ -120,9 +122,20 @@ const HeaderDetail = ({
   vaultInfo = [],
   isDetailLoading,
   vaultDetails,
+  vaultId,
 }: VaultInfoProps) => {
   const { isMd } = useBreakpoint();
   const isMobile = !isMd;
+  const showStreak = Boolean(vaultId);
+  const renderStreakWidget = () => {
+    if (!showStreak) {
+      if (isDetailLoading) {
+        return <Skeleton className="h-10 w-[160px] rounded-xl" />;
+      }
+      return null;
+    }
+    return <StreakWidget vaultId={vaultId!} />;
+  };
 
   if (isMobile) {
     if (isDetailLoading) {
@@ -147,7 +160,7 @@ const HeaderDetail = ({
       );
     }
     return (
-      <header className="mb-6 flex items-center justify-between">
+      <header className="mb-6">
         <div className="w-full flex items-center justify-between">
           <div>
             <PairIcons tokens={tokens} />
@@ -182,6 +195,7 @@ const HeaderDetail = ({
           </div>
           <Statistic vaultInfo={vaultInfo} isMobile={isMobile} />
         </div>
+        <div className="mt-3 flex justify-end">{renderStreakWidget()}</div>
       </header>
     );
   }
@@ -231,18 +245,20 @@ const HeaderDetail = ({
       <ConditionRenderer
         when={isDetailLoading}
         fallback={
-          <div className="flex items-end gap-10">
+          <div className="flex items-end gap-6">
             <Statistic vaultInfo={vaultInfo} isMobile={isMobile} />
+            {renderStreakWidget()}
           </div>
         }
       >
-        <div className="flex items-end gap-10">
+        <div className="flex items-end gap-6">
           {vaultInfo.map((info) => (
             <div key={info.label} className="flex flex-col items-end space-y-2">
               <Skeleton className="h-3 w-[50px] rounded bg-gray-700" />
               <Skeleton className="h-5 w-[80px] rounded bg-gray-700" />
             </div>
           ))}
+          <Skeleton className="h-10 w-[160px] rounded-xl" />
         </div>
       </ConditionRenderer>
     </header>

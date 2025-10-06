@@ -12,12 +12,14 @@ import VaultAnalytics from "@/components/vault-detail/sections/vault-analytics";
 import VaultInfo from "@/components/vault-detail/sections/vault-info";
 import UserPositionValue from "@/components/vault-detail/sections/user-position-value";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
+import { useStreak } from "@/features/streak-vault/hooks/use-streak";
 import {
   useGetDepositVaults,
   useGetLpToken,
   useVaultBasicDetails,
   useVaultMetricUnitStore,
 } from "@/hooks";
+import { useWallet } from "@/hooks/use-wallet";
 import { cn, formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType, VaultApr } from "@/types/vault-config.types";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -36,6 +38,7 @@ import { LpSimulatorModal } from "@/components/vault-detail/simulator/lp-simulat
 import { LpSimulatorMobileCTA } from "@/components/vault-detail/simulator/lp-simulator-mobile-cta";
 import { useLpSimulatorStore, ensureSimulatorInput } from "@/hooks/use-lp-simulator";
 import { getPathVaultCommunity } from "@/config/router";
+import { isMockMode } from "@/config/mock";
 
 export type VaultInfo = {
   label: string;
@@ -50,6 +53,8 @@ const VaultDetail = () => {
   const { vault_id } = useParams();
   const { data: vaultDetails, isLoading: isLoadingVaultDetails } =
     useVaultBasicDetails(vault_id);
+  const { address } = useWallet();
+  const { ensureSnapshotForToday } = useStreak(vault_id ?? "", address ?? undefined);
   const { isLg, isMd } = useBreakpoint();
   const setSimulatorDrawerOpen = useLpSimulatorStore((state) => state.setDrawerOpen);
   const markSimulatorOpen = useLpSimulatorStore((state) => state.markFirstOpen);
@@ -61,8 +66,17 @@ const VaultDetail = () => {
     refetch: refetchDepositVaults,
   } = useGetDepositVaults();
   const lpToken = useGetLpToken(vaultDetails?.vault_lp_token, vault_id);
-  const hasLPBalance =
-    lpToken?.balance && new BigNumber(lpToken?.balance).gt(0);
+  const lpBalance = lpToken?.balance ?? "0";
+  const hasLPBalance = new BigNumber(lpBalance).gt(0);
+
+  useEffect(() => {
+    if (!isMockMode || !vault_id) {
+      return;
+    }
+    if (new BigNumber(lpBalance).gt(0)) {
+      ensureSnapshotForToday(true);
+    }
+  }, [lpBalance, ensureSnapshotForToday, vault_id]);
 
   const [activeTab, setActiveTab] = useState(0);
   const { isUsd, unit } = useVaultMetricUnitStore(vault_id);
@@ -227,6 +241,7 @@ const VaultDetail = () => {
         vaultInfo={vaultInfo}
         vaultDetails={vaultDetails}
         isDetailLoading={isDetailLoading}
+        vaultId={vault_id}
       />
       <ConditionRenderer when={!isBreakMobile}>
         <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">

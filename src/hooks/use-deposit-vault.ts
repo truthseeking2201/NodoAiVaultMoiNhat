@@ -1,4 +1,5 @@
 import { executionProfitData, getEstimateDualDeposit } from "@/apis/vault";
+import { useStreak } from "@/features/streak-vault/hooks/use-streak";
 import { SUI_CONFIG } from "@/config/coin-config";
 import {
   CLOCK,
@@ -128,6 +129,7 @@ export const useDepositVault = (vaultId: string) => {
   const { address } = useWallet();
   const suiClient = useSuiClient();
   const { data: vaultConfig } = useVaultBasicDetails(vaultId);
+  const { logEvent } = useStreak(vaultId, address ?? undefined);
 
   const { smartSplitCoin } = useSplitCoin();
 
@@ -149,6 +151,14 @@ export const useDepositVault = (vaultId: string) => {
         };
         await sleep(400);
         onDepositSuccessCallback?.(mockResult);
+        if (address) {
+          logEvent({
+            vaultId,
+            wallet: address,
+            at: Date.now(),
+            type: "deposit",
+          });
+        }
         return mockResult;
       }
 
@@ -378,6 +388,7 @@ export const useDepositDualVault = (vaultId: string) => {
   const suiClient = useSuiClient();
   const { data: vaultConfig } = useVaultBasicDetails(vaultId);
   const { smartSplitCoin } = useSplitCoin();
+  const { logEvent } = useStreak(vaultId, address ?? undefined);
 
   const deposit = async ({
     coinA,
@@ -396,6 +407,14 @@ export const useDepositDualVault = (vaultId: string) => {
         };
         await sleep(500);
         onDepositSuccessCallback?.(mockResult);
+        if (address) {
+          logEvent({
+            vaultId,
+            wallet: address,
+            at: Date.now(),
+            type: "deposit",
+          });
+        }
         return mockResult;
       }
 
