@@ -13,6 +13,7 @@ type Props = {
   wallet?: string;
   hasNDLP: boolean;
   className?: string;
+  variant?: "standalone" | "embedded";
 };
 
 const s = (value: number) => (value === 1 ? "" : "s");
@@ -37,6 +38,7 @@ export default function StreakCard({
   wallet,
   hasNDLP,
   className,
+  variant = "standalone",
 }: Props) {
   const {
     record,
@@ -87,13 +89,13 @@ export default function StreakCard({
     });
   }, [current, stats.nextMilestone]);
 
+  const containerClass =
+    variant === "embedded"
+      ? "flex w-full flex-col gap-3"
+      : "flex w-full flex-col gap-3 rounded-[12px] border border-[#2A2A2A] bg-white/10 px-3 py-3 md:px-4";
+
   return (
-    <div
-      className={cn(
-        "flex w-full flex-col gap-3 rounded-[12px] border border-[#2A2A2A] bg-white/10 px-3 py-3 md:px-4",
-        className
-      )}
-    >
+    <div className={cn(containerClass, className)}>
       <div className="flex items-center justify-between">
         <LabelWithTooltip
           hasIcon={false}

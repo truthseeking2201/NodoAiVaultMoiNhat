@@ -11,6 +11,7 @@ import VaultActivities from "@/components/vault-detail/sections/vault-activities
 import VaultAnalytics from "@/components/vault-detail/sections/vault-analytics";
 import VaultInfo from "@/components/vault-detail/sections/vault-info";
 import UserPositionValue from "@/components/vault-detail/sections/user-position-value";
+import VaultStreak from "@/components/vault-detail/sections/vault-streak";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import { useStreak } from "@/features/streak-vault/hooks/use-streak";
 import {
@@ -218,6 +219,8 @@ const VaultDetail = () => {
     image: "",
   };
 
+  const enableSimulator = import.meta.env.VITE_ENABLE_IL_SIMULATOR === "true";
+
   return (
     <PageContainer
       backgroundImage={DetailsBackground}
@@ -257,20 +260,22 @@ const VaultDetail = () => {
               collateralToken={vaultDetails?.collateral_token}
               vault_id={vault_id}
             />
-            <Button
-              variant="outline"
-              className="border-white/20 text-white/80 hover:text-white hover:bg-white/10"
-              onClick={() => {
-                if (vault_id) {
-                  ensureSimulatorInput(vault_id);
-                  markSimulatorOpen(vault_id);
-                  dismissSimulatorMobileCTA(vault_id);
-                }
-                setSimulatorDrawerOpen(true);
-              }}
-            >
-              Simulate IL
-            </Button>
+            {enableSimulator && (
+              <Button
+                variant="outline"
+                className="border-white/20 text-white/80 hover:text-white hover:bg-white/10"
+                onClick={() => {
+                  if (vault_id) {
+                    ensureSimulatorInput(vault_id);
+                    markSimulatorOpen(vault_id);
+                    dismissSimulatorMobileCTA(vault_id);
+                  }
+                  setSimulatorDrawerOpen(true);
+                }}
+              >
+                Simulate IL
+              </Button>
+            )}
           </div>
         </div>
       </ConditionRenderer>
@@ -313,21 +318,23 @@ const VaultDetail = () => {
                 collateralToken={vaultDetails?.collateral_token}
                 vault_id={vault_id}
               />
-              <Button
-                size="sm"
-                variant="outline"
-                className="border-white/20 text-white/80 hover:text-white hover:bg-white/10"
-                onClick={() => {
-                if (vault_id) {
-                  ensureSimulatorInput(vault_id);
-                  markSimulatorOpen(vault_id);
-                  dismissSimulatorMobileCTA(vault_id);
-                }
-                setSimulatorDrawerOpen(true);
-              }}
-            >
-                Simulate IL
-              </Button>
+              {enableSimulator && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="border-white/20 text-white/80 hover:text-white hover:bg-white/10"
+                  onClick={() => {
+                    if (vault_id) {
+                      ensureSimulatorInput(vault_id);
+                      markSimulatorOpen(vault_id);
+                      dismissSimulatorMobileCTA(vault_id);
+                    }
+                    setSimulatorDrawerOpen(true);
+                  }}
+                >
+                  Simulate IL
+                </Button>
+              )}
             </div>
           </div>
         </ConditionRenderer>
@@ -374,12 +381,25 @@ const VaultDetail = () => {
                 <div className="mt-6" />
               </>
             )}
+
+            {vault_id && (
+              <>
+                <VaultStreak
+                  isDetailLoading={isDetailLoading}
+                  vaultId={vault_id}
+                  vault={vaultDetails}
+                />
+                <div className="mt-6" />
+              </>
+            )}
+
             <UserPositionValue
               isDetailLoading={isDetailLoading}
               vault_id={vault_id}
               vault={vaultDetails}
               activeTab={activeTab}
             />
+
             {vault_id && (
               <div className="mt-6">
                 <LpSimulatorCard vaultId={vault_id} />

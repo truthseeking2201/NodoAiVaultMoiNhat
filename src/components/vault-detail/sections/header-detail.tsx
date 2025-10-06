@@ -11,7 +11,6 @@ import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { VaultInfo } from "@/pages/vault-detail";
-import { StreakWidget } from "@/features/streak-vault/ui/StreakWidget";
 
 type VaultInfoProps = {
   vault: any;
@@ -126,17 +125,6 @@ const HeaderDetail = ({
 }: VaultInfoProps) => {
   const { isMd } = useBreakpoint();
   const isMobile = !isMd;
-  const showStreak = Boolean(vaultId);
-  const renderStreakWidget = () => {
-    if (!showStreak) {
-      if (isDetailLoading) {
-        return <Skeleton className="h-10 w-[160px] rounded-xl" />;
-      }
-      return null;
-    }
-    return <StreakWidget vaultId={vaultId!} />;
-  };
-
   if (isMobile) {
     if (isDetailLoading) {
       return (
@@ -195,7 +183,6 @@ const HeaderDetail = ({
           </div>
           <Statistic vaultInfo={vaultInfo} isMobile={isMobile} />
         </div>
-        <div className="mt-3 flex justify-end">{renderStreakWidget()}</div>
       </header>
     );
   }
@@ -244,12 +231,7 @@ const HeaderDetail = ({
       )}
       <ConditionRenderer
         when={isDetailLoading}
-        fallback={
-          <div className="flex items-end gap-6">
-            <Statistic vaultInfo={vaultInfo} isMobile={isMobile} />
-            {renderStreakWidget()}
-          </div>
-        }
+        fallback={<Statistic vaultInfo={vaultInfo} isMobile={isMobile} />}
       >
         <div className="flex items-end gap-6">
           {vaultInfo.map((info) => (
@@ -258,7 +240,6 @@ const HeaderDetail = ({
               <Skeleton className="h-5 w-[80px] rounded bg-gray-700" />
             </div>
           ))}
-          <Skeleton className="h-10 w-[160px] rounded-xl" />
         </div>
       </ConditionRenderer>
     </header>
