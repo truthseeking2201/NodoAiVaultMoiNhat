@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
-import { MILESTONES } from "../logic";
+import { MILESTONES, utcDayKey } from "../logic";
 import { useStreak } from "../hooks/use-streak";
 import { StreakModal } from "./StreakModal";
 
@@ -35,10 +35,15 @@ export const StreakWidget = ({ vaultId, className, disabled }: StreakWidgetProps
 
   const wallet = address ?? undefined;
   const streak = useStreak(vaultId, wallet);
-  const { record, rewards, stats, progress, events, seedDemo } = streak;
+  const { record, rewards, stats, progress, events, seedDemo, logEvent } = streak;
 
   const current = record?.current ?? 0;
   const hasWallet = Boolean(wallet);
+  const todayKey = useMemo(() => utcDayKey(Date.now()), []);
+  const coveredToday = useMemo(
+    () => events.some((event) => event.dayKey === todayKey),
+    [events, todayKey]
+  );
 
   useEffect(() => {
     const previous = prevCurrent.current;
@@ -151,6 +156,19 @@ export const StreakWidget = ({ vaultId, className, disabled }: StreakWidgetProps
         vaultId={vaultId}
         wallet={wallet}
         onSeedDemo={seedDemo}
+        onPrimaryAction={
+          coveredToday || !wallet
+            ? undefined
+            : () =>
+                logEvent({
+                  vaultId,
+                  wallet,
+                  at: Date.now(),
+                  type: "deposit",
+                  amountUsd: 150,
+                })
+        }
+        coveredToday={coveredToday}
       />
     </Dialog>
   );
