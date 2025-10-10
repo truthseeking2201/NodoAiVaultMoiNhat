@@ -6,11 +6,7 @@ import Web3Button from "@/components/ui/web3-button";
 import { ButtonGradient } from "@/components/ui/button-gradient";
 import { SORT_TYPE } from "@/config/constants-types";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
-import {
-  getPathVaultDetail,
-  getPathVaultCommunity,
-  getPathCommunityPoolDetail,
-} from "@/config/router";
+import { getPathVaultDetail } from "@/config/router";
 import {
   useGetDepositVaults,
   useNdlpAssetsStore,
@@ -38,16 +34,7 @@ import VaultRewards from "./vault-rewards";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ApyTooltipContent from "./apy-tooltip-content";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CreatePoolModal, JoinPoolModal } from "@/features/community";
-import { COMMUNITY_COPY } from "@/features/community/ui/copy";
 import { Users } from "lucide-react";
 
 const OPTIONS_CHAINS = [
@@ -168,13 +155,6 @@ export default function VaultList() {
     HOLDING_TYPE[0].value
   );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [communityVault, setCommunityVault] = useState<
-    { vaultId: string; name: string } | null
-  >(null);
-  const [communityDialogOpen, setCommunityDialogOpen] = useState(false);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [joinModalOpen, setJoinModalOpen] = useState(false);
-
   const showUsd = (num, emty = "--") => {
     return num ? showFormatNumber(num, 2, 2, "$") : emty;
   };
@@ -529,35 +509,6 @@ export default function VaultList() {
         classCell: "min-w-0",
         render: (_: any, record: any) => (
           <div className="ml-auto flex items-center gap-2">
-            <Button
-              variant="outline"
-              className="inline-flex h-8 w-8 items-center justify-center border-white/15 text-white/70 transition hover:border-white/40 hover:text-white xl:hidden"
-              onClick={(event) => {
-                event.stopPropagation();
-                setCommunityVault({
-                  vaultId: record.vault_id,
-                  name: record.vault_name,
-                });
-                setCommunityDialogOpen(true);
-              }}
-              aria-label="Open community actions"
-            >
-              <Users className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              className="hidden h-8 px-3 text-xs border-white/15 text-white/80 transition hover:border-white/40 hover:text-white xl:inline-flex"
-              onClick={(event) => {
-                event.stopPropagation();
-                setCommunityVault({
-                  vaultId: record.vault_id,
-                  name: record.vault_name,
-                });
-                setCommunityDialogOpen(true);
-              }}
-            >
-              Community
-            </Button>
             <Web3Button
               onClick={() => handleRowClick(record)}
               className="h-8 px-3 text-xs"
@@ -630,34 +581,6 @@ export default function VaultList() {
     [paramsSort]
   );
 
-  const handleCommunityNavigate = () => {
-    if (!communityVault) return;
-    navigate(getPathVaultCommunity(communityVault.vaultId));
-    setCommunityDialogOpen(false);
-  };
-
-  const handleOpenCreate = () => {
-    setCommunityDialogOpen(false);
-    setCreateModalOpen(true);
-  };
-
-  const handleOpenJoin = () => {
-    setCommunityDialogOpen(false);
-    setJoinModalOpen(true);
-  };
-
-  const handlePoolCreated = (poolId: string) => {
-    if (!communityVault) return;
-    setCreateModalOpen(false);
-    navigate(getPathCommunityPoolDetail(communityVault.vaultId, poolId));
-  };
-
-  const handlePoolJoined = (poolId: string) => {
-    if (!communityVault) return;
-    setJoinModalOpen(false);
-    navigate(getPathCommunityPoolDetail(communityVault.vaultId, poolId));
-  };
-
   const optionDexs = useMemo(() => {
     return [
       { value: "all", label: "All DEXs" },
@@ -697,12 +620,6 @@ export default function VaultList() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapData]);
-
-  useEffect(() => {
-    if (!communityDialogOpen && !createModalOpen && !joinModalOpen) {
-      setCommunityVault(null);
-    }
-  }, [communityDialogOpen, createModalOpen, joinModalOpen]);
 
   return (
     <>
@@ -780,13 +697,6 @@ export default function VaultList() {
                   reloadDataWithdraw={refetchVaultsWithdrawal}
                   onRowClick={handleRowClick}
                   onClaim={onClaim}
-                  onOpenCommunity={(vault) => {
-                    setCommunityVault({
-                      vaultId: vault.vault_id,
-                      name: vault.vault_name,
-                    });
-                    setCommunityDialogOpen(true);
-                  }}
                   HOLDING_TYPE={HOLDING_TYPE}
                   holdingShowMode={holdingShowMode}
                   setHoldingShowMode={setHoldingShowMode}
@@ -815,57 +725,6 @@ export default function VaultList() {
       </ConditionRenderer>
     </div>
 
-      <Dialog
-        open={communityDialogOpen && !!communityVault}
-        onOpenChange={(open) => setCommunityDialogOpen(open)}
-      >
-        <DialogContent className="max-w-[420px] border border-white/10 bg-[#101214] text-white">
-          <DialogHeader>
-            <DialogTitle>{COMMUNITY_COPY.title}</DialogTitle>
-            <DialogDescription className="text-white/60 text-sm">
-              {communityVault?.name || "This vault"} · choose how you want to collaborate with friends.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <Button
-              className="w-full bg-white text-black hover:bg-white/90"
-              onClick={handleCommunityNavigate}
-            >
-              View Community Vaults
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full border-white/20 text-white/80 hover:text-white hover:border-white/40"
-              onClick={handleOpenCreate}
-            >
-              {COMMUNITY_COPY.cta.create}
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full border-white/20 text-white/80 hover:text-white hover:border-white/40"
-              onClick={handleOpenJoin}
-            >
-              {COMMUNITY_COPY.cta.join}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {communityVault && (
-        <CreatePoolModal
-          open={createModalOpen}
-          onOpenChange={setCreateModalOpen}
-          vaultId={communityVault.vaultId}
-          onCreated={handlePoolCreated}
-        />
-      )}
-      {communityVault && (
-        <JoinPoolModal
-          open={joinModalOpen}
-          onOpenChange={setJoinModalOpen}
-          onJoined={handlePoolJoined}
-        />
-      )}
     </>
   );
 }

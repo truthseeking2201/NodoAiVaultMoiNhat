@@ -56,7 +56,15 @@ const DEFAULT_DEPOSIT_TOKEN = {
   token_id: 0,
 };
 
-const DepositForm = ({ vault_id }: { vault_id: string }) => {
+const DepositForm = ({
+  vault_id,
+  prefillAmountUsd,
+  onPrefillHandled,
+}: {
+  vault_id: string;
+  prefillAmountUsd?: number | null;
+  onPrefillHandled?: () => void;
+}) => {
   const { openConnectWalletDialog, isConnected } = useWallet();
   const { refreshAllBalance } = useRefreshAssetsBalance();
   const { assets } = useUserAssetsStore();
@@ -186,6 +194,45 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     const subscription = watch(debouncedCb);
     return () => subscription.unsubscribe();
   }, [watch, collateralToken]);
+
+  useEffect(() => {
+    if (!prefillAmountUsd || prefillAmountUsd <= 0) {
+      return;
+    }
+    const tokenId =
+      typeof collateralToken?.token_id === "number"
+        ? collateralToken.token_id
+        : null;
+    const price = tokenId !== null ? tokenPrices?.[tokenId] ?? 0 : 0;
+    const decimals = Math.min(collateralToken?.decimals ?? 6, 6);
+    const amount = price
+      ? new BigNumber(prefillAmountUsd)
+          .dividedBy(price)
+          .decimalPlaces(decimals, BigNumber.ROUND_DOWN)
+          .toString()
+      : new BigNumber(prefillAmountUsd)
+          .decimalPlaces(decimals, BigNumber.ROUND_DOWN)
+          .toString();
+
+    if (collateralToken?.token_address) {
+      setValue("token", collateralToken.token_address, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    }
+    setValue("amount", amount, {
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+    setDebounceAmount(amount);
+    onPrefillHandled?.();
+  }, [
+    collateralToken,
+    onPrefillHandled,
+    prefillAmountUsd,
+    setValue,
+    tokenPrices,
+  ]);
 
   const estimatedDepositAmount = useMemo(() => {
     return getDecimalAmount(

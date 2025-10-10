@@ -22,20 +22,6 @@ const VaultDetail = lazy(() =>
   })
 );
 
-const CommunityDirectory = lazy(() =>
-  import("./pages/community-directory").catch((e) => {
-    console.error("Error loading CommunityDirectory:", e);
-    return { default: () => <GlobalLoading /> };
-  })
-);
-
-const CommunityPoolDetail = lazy(() =>
-  import("./pages/community-pool-detail").catch((e) => {
-    console.error("Error loading CommunityPoolDetail:", e);
-    return { default: () => <GlobalLoading /> };
-  })
-);
-
 const AppRoutes = () => {
   return (
     <Routes>
@@ -55,26 +41,6 @@ const AppRoutes = () => {
           element={
             <MainLayout>
               <VaultDetail />
-            </MainLayout>
-          }
-        />
-      )}
-      {PATH_ROUTER.VAULT_COMMUNITY && (
-        <Route
-          path={PATH_ROUTER.VAULT_COMMUNITY}
-          element={
-            <MainLayout>
-              <CommunityDirectory />
-            </MainLayout>
-          }
-        />
-      )}
-      {PATH_ROUTER.VAULT_COMMUNITY_POOL && (
-        <Route
-          path={PATH_ROUTER.VAULT_COMMUNITY_POOL}
-          element={
-            <MainLayout>
-              <CommunityPoolDetail />
             </MainLayout>
           }
         />

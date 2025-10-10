@@ -8,7 +8,6 @@ import VaultRewards from "./vault-rewards";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LabelWithTooltip } from "@/components/ui/label-with-tooltip";
 import ApyTooltipContent from "./apy-tooltip-content";
-import { Button } from "@/components/ui/button";
 
 type VaultCardProps = {
   item: VaultItemData;
@@ -16,7 +15,6 @@ type VaultCardProps = {
   reloadDataWithdraw: () => void;
   onRowClick: (item: VaultItemData) => void;
   onClaim: (item: VaultItemData) => void;
-  onOpenCommunity: (item: VaultItemData) => void;
   HOLDING_TYPE: { label: string; value: string }[];
   holdingShowMode: string;
   setHoldingShowMode: (mode: string) => void;
@@ -27,7 +25,6 @@ const VaultItemMobile = ({
   idLoadingClaim,
   onRowClick,
   onClaim,
-  onOpenCommunity,
   reloadDataWithdraw = () => {},
   HOLDING_TYPE,
   holdingShowMode,
@@ -162,16 +159,6 @@ const VaultItemMobile = ({
       </div>
 
       <div className="mt-4 flex flex-col gap-2">
-        <Button
-          variant="outline"
-          className="w-full text-sm h-[36px] border-white/20 text-white/80 hover:text-white hover:border-white/40"
-          onClick={(event) => {
-            event.stopPropagation();
-            onOpenCommunity(item);
-          }}
-        >
-          Community
-        </Button>
         <Web3Button
           onClick={(e) => {
             e.stopPropagation();

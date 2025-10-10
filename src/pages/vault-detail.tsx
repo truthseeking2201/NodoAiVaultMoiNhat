@@ -38,8 +38,9 @@ import { LpSimulatorCard } from "@/components/vault-detail/simulator/lp-simulato
 import { LpSimulatorModal } from "@/components/vault-detail/simulator/lp-simulator-modal";
 import { LpSimulatorMobileCTA } from "@/components/vault-detail/simulator/lp-simulator-mobile-cta";
 import { useLpSimulatorStore, ensureSimulatorInput } from "@/hooks/use-lp-simulator";
-import { getPathVaultCommunity } from "@/config/router";
 import { isMockMode } from "@/config/mock";
+import { MissionsCard } from "@/components/rewards/MissionsCard";
+import { dispatchMissionDepositPrefill } from "@/lib/mission-events";
 
 export type VaultInfo = {
   label: string;
@@ -49,6 +50,9 @@ export type VaultInfo = {
   tooltip?: any;
   tooltipClassName?: string;
 };
+
+const SAFETY_TIERS = ["SAFE", "CAUTIOUS", "WAIT", "AVOID"] as const;
+type SafetyTier = (typeof SAFETY_TIERS)[number];
 
 const VaultDetail = () => {
   const { vault_id } = useParams();
@@ -99,16 +103,9 @@ const VaultDetail = () => {
     navigate("/", { replace: true });
   };
 
-  const handleTabSwitch = useCallback(
-    (index: number) => {
-      if (index === 2 && vault_id) {
-        navigate(getPathVaultCommunity(vault_id));
-        return;
-      }
-      setActiveTab(index);
-    },
-    [navigate, vault_id]
-  );
+  const handleTabSwitch = useCallback((index: number) => {
+    setActiveTab(index);
+  }, []);
 
   const isBreakMobile = useMemo(() => {
     return !isLg;
@@ -221,6 +218,46 @@ const VaultDetail = () => {
 
   const enableSimulator = import.meta.env.VITE_ENABLE_IL_SIMULATOR === "true";
 
+  const safetyTier = useMemo<SafetyTier>(() => {
+    const details = vaultDetails as Record<string, any> | null | undefined;
+    const rawCandidates = [
+      details?.safety?.tier,
+      details?.safety_tier,
+      details?.safetyTier,
+      details?.safety_status?.tier,
+    ];
+    const normalized = rawCandidates
+      .map((value) =>
+        typeof value === "string" ? value.toUpperCase() : undefined
+      )
+      .find(
+        (value): value is SafetyTier =>
+          !!value && SAFETY_TIERS.includes(value as SafetyTier)
+      );
+    return normalized ?? "SAFE";
+  }, [vaultDetails]);
+
+  const isDepositDisabledBySafety =
+    safetyTier === "WAIT" || safetyTier === "AVOID";
+
+  const safetyDisabledCopy = useMemo(() => {
+    if (safetyTier === "WAIT") {
+      return "Please wait ~6 hours. System re-checks automatically.";
+    }
+    if (safetyTier === "AVOID") {
+      return "Halted until conditions improve.";
+    }
+    return undefined;
+  }, [safetyTier]);
+
+  const handleMissionPrefill = useCallback(
+    (amountUsd: number) => {
+      setActiveTab(0);
+      dispatchMissionDepositPrefill(amountUsd);
+    },
+    [setActiveTab]
+  );
+
   return (
     <PageContainer
       backgroundImage={DetailsBackground}
@@ -250,7 +287,7 @@ const VaultDetail = () => {
         <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
           <UnderlineTabs
             activeTab={activeTab}
-            labels={["Overview", "Your Holdings", "Community"]}
+            labels={["Overview", "Your Holdings"]}
             labelClassName="max-md:text-base max-md:px-0"
             tabClassName="max-md:space-x-4"
             onActiveTabChange={handleTabSwitch}
@@ -297,17 +334,24 @@ const VaultDetail = () => {
               "sticky top-[10px] self-start"
           )}
         >
-          <DepositWithdraw
-            vault_id={vault_id}
-            isDetailLoading={isDetailLoading}
-          />
+          <div className="space-y-6">
+            <DepositWithdraw
+              vault_id={vault_id}
+              isDetailLoading={isDetailLoading}
+            />
+            <MissionsCard
+              onDepositPrefill={handleMissionPrefill}
+              isDepositDisabled={isDepositDisabledBySafety}
+              disabledReason={safetyDisabledCopy}
+            />
+          </div>
         </div>
         {/* Right sessions - end */}
         <ConditionRenderer when={isBreakMobile}>
           <div className="mt-4 mb-3 flex justify-between">
             <UnderlineTabs
               activeTab={activeTab}
-              labels={["Overview", "Your Holdings", "Community"]}
+              labels={["Overview", "Your Holdings"]}
               labelClassName="max-md:text-base max-md:px-0"
               tabClassName="max-md:space-x-4"
               onActiveTabChange={handleTabSwitch}
