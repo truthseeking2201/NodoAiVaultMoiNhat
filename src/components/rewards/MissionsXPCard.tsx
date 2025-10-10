@@ -72,7 +72,7 @@ export function MissionsXPCard({
       <div className="mb-3">
         <p
           id="missions-xp-card-heading"
-          className="text-xs uppercase tracking-wide text-white/60"
+          className="text-base font-bold text-white md:text-lg"
         >
           Complete missions to get more rewards
         </p>

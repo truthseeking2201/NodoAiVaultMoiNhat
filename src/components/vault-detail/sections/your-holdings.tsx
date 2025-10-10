@@ -27,13 +27,49 @@ import { AnimatePresence, motion } from "framer-motion";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import FormatUsdCollateralAmount from "./format-usd-collateral-amount";
 import { formatCollateralUsdNumber } from "../helpers";
-import StreakCard from "@/features/streak-vault/ui/StreakCard";
+import { StreakTrackerCard } from "@/components/streak/StreakTrackerCard";
+import { utcDayKey } from "@/features/streak-vault/logic";
+import { useStreak } from "@/features/streak-vault/hooks/use-streak";
+import type { StreakReward } from "@/features/streak-vault/types";
+import { dispatchMissionDepositPrefill } from "@/lib/mission-events";
 
 type YourHoldingProps = {
   isDetailLoading: boolean;
   vault_id: string;
   vault: BasicVaultDetailsType;
   activeTab: number;
+};
+
+const STREAK_REWARD_XP: Record<number, number> = {
+  1: 100,
+  3: 300,
+  7: 1_000,
+  14: 2_400,
+  30: 6_000,
+};
+
+const getMsUntilNextUtcMidnight = () => {
+  const now = new Date();
+  const next = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + 1
+  );
+  return Math.max(0, next - now.getTime());
+};
+
+const toMilestones = (rewards: StreakReward[] | undefined) => {
+  if (!rewards?.length) {
+    return Object.entries(STREAK_REWARD_XP).map(([day, xp]) => ({
+      days: Number(day),
+      xp,
+    }));
+  }
+
+  return rewards.map((reward) => ({
+    days: reward.threshold,
+    xp: STREAK_REWARD_XP[reward.threshold] ?? 0,
+  }));
 };
 
 const COLORS = [
@@ -107,6 +143,24 @@ const YourHoldings = ({
 
   const ndlp_balance = lpToken?.balance || "0";
   const hasNDLP = Number(ndlp_balance) > 0;
+  const {
+    record: streakRecord,
+    events: streakEvents,
+    rewards: streakRewards,
+    ensureSnapshotForToday: ensureStreakSnapshot,
+  } = useStreak(
+    vault_id,
+    isAuthenticated ? address : undefined
+  );
+  const streakMilestones = useMemo(
+    () => toMilestones(streakRewards),
+    [streakRewards]
+  );
+  const streakResetInMs = getMsUntilNextUtcMidnight();
+
+  useEffect(() => {
+    ensureStreakSnapshot(hasNDLP);
+  }, [ensureStreakSnapshot, hasNDLP]);
   const { data, refetch } = useUserHolding(
     vault_id,
     ndlp_balance,
@@ -431,10 +485,15 @@ const YourHoldings = ({
                 </div>
               </HoldingCard>
               <HoldingCard>
-                <StreakCard
-                  vaultId={vault_id}
-                  wallet={isAuthenticated ? address : undefined}
-                  hasNDLP={hasNDLP}
+                <StreakTrackerCard
+                  current={streakRecord?.current ?? 0}
+                  longest={streakRecord?.longest ?? 0}
+                  todayDone={streakEvents.some(
+                    (event) => event.dayKey === utcDayKey(Date.now())
+                  )}
+                  resetInMs={streakResetInMs}
+                  milestones={streakMilestones}
+                  onDeposit={() => dispatchMissionDepositPrefill(0)}
                 />
               </HoldingCard>
               <div className="flex gap-4">

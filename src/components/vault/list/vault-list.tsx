@@ -36,6 +36,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ApyTooltipContent from "./apy-tooltip-content";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
+import { TVLCell } from "./tvl-cell";
 
 const OPTIONS_CHAINS = [
   { value: "all", label: "All Chains" },
@@ -311,59 +312,29 @@ export default function VaultList() {
         ),
         dataIndex: "tvl",
         keySort: "total_value_usd",
-        render: (value: any, record: any) => (
-          <span className="text-white font-medium font-mono text-base">
-            {record.total_value_usd_show}
-          </span>
-        ),
-      },
-      {
-        title: (
-          <LabelWithTooltip
-            hasIcon={false}
-            label="APY"
-            labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
-            tooltipContent="Your real yearly return with hourly compounding, based on the average APR of the last 7 days. Updates every 1 hour."
-          />
-        ),
-        dataIndex: "apy",
-        classTitle: "text-white/80 text-left w-[100px]",
-        keySort: "vault_apy",
-        render: (value: any, record: any) => (
-          <LabelWithTooltip
-            hasIcon={false}
-            label={formatPercentage(record.daily_compounding_apy)}
-            labelClassName="text-green-increase font-medium font-mono text-base break-all"
-            contentClassName="md:min-w-[352px] w-full shadow-[0_2px_4px_rgba(255,255,255,0.25)]"
-            type="underline"
-            tooltipContent={<ApyTooltipContent {...record} />}
-          />
-        ),
-      },
-      {
-        title: (
-          <LabelWithTooltip
-            hasIcon={false}
-            label="Collateral"
-            labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
-            tooltipContent="The base token of this vault. All values (TVL, holdings, rewards) are measured in this token."
-          />
-        ),
-        dataIndex: "collateral",
-        classTitle: "text-white/80 justify-start w-[56px] sm:w-[64px] lg:w-[72px]",
-        classCell: "justify-center min-w-0",
-        render: (_: any, record: any) => {
-          const collateralToken = record?.tokens.find(
-            (token: any) => token.token_address === record.collateral_token
+        render: (_: any, record: VaultItemData) => {
+          const collateralToken = record.tokens.find(
+            (token) => token.token_address === record.collateral_token
           );
+          const tokenSymbol = collateralToken?.token_symbol;
+          const tokenIconUrl =
+            collateralToken?.icon_url ??
+            (tokenSymbol ? `/coins/${tokenSymbol.toLowerCase()}.png` : undefined);
+
+          const capValue =
+            record.capacity_usd ?? record.tvl_cap_usd ?? record.total_value_cap;
+          const capUsd =
+            capValue == null
+              ? undefined
+              : Number(capValue) || undefined;
+
           return (
-            <div className="flex items-center justify-center">
-              <img
-                src={`coins/${collateralToken?.token_symbol?.toLowerCase()}.png`}
-                alt={collateralToken?.token_symbol}
-                className="w-6 h-6"
-              />
-            </div>
+            <TVLCell
+              tvlUsd={Number(record.total_value_usd) || 0}
+              capUsd={capUsd}
+              tokenIconUrl={tokenIconUrl}
+              tokenSymbol={tokenSymbol}
+            />
           );
         },
       },
