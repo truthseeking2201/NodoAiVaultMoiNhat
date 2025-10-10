@@ -39,8 +39,8 @@ import { LpSimulatorModal } from "@/components/vault-detail/simulator/lp-simulat
 import { LpSimulatorMobileCTA } from "@/components/vault-detail/simulator/lp-simulator-mobile-cta";
 import { useLpSimulatorStore, ensureSimulatorInput } from "@/hooks/use-lp-simulator";
 import { isMockMode } from "@/config/mock";
-import { MissionsXPCard } from "@/components/rewards/MissionsXPCard";
 import { dispatchMissionDepositPrefill } from "@/lib/mission-events";
+import { QuestTab } from "@/components/quest/QuestTab";
 
 export type VaultInfo = {
   label: string;
@@ -250,13 +250,9 @@ const VaultDetail = () => {
     return undefined;
   }, [safetyTier]);
 
-  const handleMissionPrefill = useCallback(
-    (amountUsd: number) => {
-      setActiveTab(0);
-      dispatchMissionDepositPrefill(amountUsd);
-    },
-    [setActiveTab]
-  );
+  const handleMissionPrefill = useCallback((amountUsd: number) => {
+    dispatchMissionDepositPrefill(amountUsd);
+  }, []);
 
   return (
     <PageContainer
@@ -287,7 +283,7 @@ const VaultDetail = () => {
         <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
           <UnderlineTabs
             activeTab={activeTab}
-            labels={["Overview", "Your Holdings"]}
+            labels={["Overview", "Your Holdings", "Quest"]}
             labelClassName="max-md:text-base max-md:px-0"
             tabClassName="max-md:space-x-4"
             onActiveTabChange={handleTabSwitch}
@@ -339,11 +335,6 @@ const VaultDetail = () => {
               vault_id={vault_id}
               isDetailLoading={isDetailLoading}
             />
-            <MissionsXPCard
-              onDepositPrefill={handleMissionPrefill}
-              isDepositDisabled={isDepositDisabledBySafety}
-              disabledReason={safetyDisabledCopy}
-            />
           </div>
         </div>
         {/* Right sessions - end */}
@@ -351,7 +342,7 @@ const VaultDetail = () => {
           <div className="mt-4 mb-3 flex justify-between">
             <UnderlineTabs
               activeTab={activeTab}
-              labels={["Overview", "Your Holdings"]}
+              labels={["Overview", "Your Holdings", "Quest"]}
               labelClassName="max-md:text-base max-md:px-0"
               tabClassName="max-md:space-x-4"
               onActiveTabChange={handleTabSwitch}
@@ -449,6 +440,16 @@ const VaultDetail = () => {
                 <LpSimulatorCard vaultId={vault_id} />
               </div>
             )}
+          </div>
+          {/* Quest */}
+          <div className={cn(activeTab !== 2 && "hidden")}>
+            <QuestTab
+              vaultId={vault_id}
+              vault={vaultDetails ?? undefined}
+              onDepositPrefill={handleMissionPrefill}
+              isDepositDisabled={isDepositDisabledBySafety}
+              disabledReason={safetyDisabledCopy}
+            />
           </div>
           {/* Left sessions - end */}
         </div>

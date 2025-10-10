@@ -35,7 +35,7 @@ const ICONS: Record<Mission["icon"], JSX.Element> = {
   users: <Users size={16} className="text-white/70" />,
 };
 
-const DEFAULT_MISSIONS: Mission[] = [
+export const DEFAULT_MISSIONS: Mission[] = [
   {
     id: "welcome_5",
     icon: "wallet",
