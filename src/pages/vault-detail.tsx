@@ -39,7 +39,7 @@ import { LpSimulatorModal } from "@/components/vault-detail/simulator/lp-simulat
 import { LpSimulatorMobileCTA } from "@/components/vault-detail/simulator/lp-simulator-mobile-cta";
 import { useLpSimulatorStore, ensureSimulatorInput } from "@/hooks/use-lp-simulator";
 import { isMockMode } from "@/config/mock";
-import { MissionsCard } from "@/components/rewards/MissionsCard";
+import { MissionsXPCard } from "@/components/rewards/MissionsXPCard";
 import { dispatchMissionDepositPrefill } from "@/lib/mission-events";
 
 export type VaultInfo = {
@@ -339,7 +339,7 @@ const VaultDetail = () => {
               vault_id={vault_id}
               isDetailLoading={isDetailLoading}
             />
-            <MissionsCard
+            <MissionsXPCard
               onDepositPrefill={handleMissionPrefill}
               isDepositDisabled={isDepositDisabledBySafety}
               disabledReason={safetyDisabledCopy}

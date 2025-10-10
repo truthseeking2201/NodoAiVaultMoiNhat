@@ -41,22 +41,26 @@ export function LpSimulatorCard({ vaultId }: LpSimulatorCardProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0E0F10]">
+    <div className="glass-card rounded-xl border border-white/10 bg-white/5 p-5 text-white shadow-[0_2px_20px_rgba(0,0,0,0.25)] backdrop-blur-sm md:p-6">
       <button
         type="button"
         onClick={toggle}
-        className="flex w-full items-center justify-between px-5 py-4"
+        className="flex w-full items-center justify-between text-left"
+        aria-expanded={expanded}
       >
-        <div className="text-left">
-          <div className="text-white font-semibold text-base">
+        <div className="space-y-1">
+          <div className="text-lg font-semibold tracking-tight text-white">
             LP Outcome Simulator
           </div>
-          <p className="text-white/60 text-sm mt-1">
+          <p className="text-[11px] uppercase tracking-wide text-white/50">
             {headlineCopy}
           </p>
         </div>
-        <motion.div animate={{ rotate: expanded ? 180 : 0 }}>
-          <ChevronDown className="h-5 w-5 text-white" />
+        <motion.div
+          animate={{ rotate: expanded ? 180 : 0 }}
+          className="rounded-full border border-white/15 bg-white/10 p-2"
+        >
+          <ChevronDown className="h-4 w-4 text-white/80" />
         </motion.div>
       </button>
       <AnimatePresence initial={false}>
@@ -66,18 +70,18 @@ export function LpSimulatorCard({ vaultId }: LpSimulatorCardProps) {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.24 }}
-            className="px-5 pb-6 pt-2"
+            className="pt-4"
           >
             <LpSimulator
               value={input}
               onChange={(next) => updateInput(vaultId, next)}
               withPadding={false}
             />
-            <div className="mt-4 flex justify-end">
+            <div className="mt-6 border-t border-white/10 pt-4 flex justify-end">
               <Button
                 variant="outline"
                 size="sm"
-                className="border-white/20 text-white/80 hover:text-white hover:border-white/40"
+                className="border-white/20 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white"
                 onClick={() => {
                   ensureSimulatorInput(vaultId);
                   markFirstOpen(vaultId);
