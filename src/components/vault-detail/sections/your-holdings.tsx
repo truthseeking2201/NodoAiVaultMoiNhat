@@ -494,6 +494,7 @@ const YourHoldings = ({
                   resetInMs={streakResetInMs}
                   milestones={streakMilestones}
                   onDeposit={() => dispatchMissionDepositPrefill(0)}
+                  showTitle={false}
                 />
               </HoldingCard>
               <div className="flex gap-4">

@@ -36,6 +36,7 @@ type StreakTrackerCardProps = {
   milestones?: Milestone[];
   onDeposit?: () => void;
   className?: string;
+  showTitle?: boolean;
 };
 
 const formatTimeLeft = (ms: number) => {
@@ -53,6 +54,7 @@ export function StreakTrackerCard({
   milestones = DEFAULT_MILESTONES,
   onDeposit,
   className,
+  showTitle = true,
 }: StreakTrackerCardProps) {
   const { achieved, nextMilestone, maxDays } = useMemo(() => {
     const maxDays = milestones[milestones.length - 1]?.days ?? 1;
@@ -75,42 +77,49 @@ export function StreakTrackerCard({
     (current / Math.max(1, maxDays)) * 100
   );
 
+  const statusChip = (
+    <div
+      className={cn(
+        "rounded-full border px-3 py-1 text-[11px] uppercase tracking-wide shadow-[0_0_20px_rgba(0,0,0,0.1)]",
+        todayDone
+          ? "border-emerald-400/20 bg-emerald-400/12 text-emerald-200"
+          : "border-white/12 bg-white/6 text-white/70"
+      )}
+      aria-live="polite"
+    >
+      {todayDone ? "Today completed" : `Resets in ${formatTimeLeft(resetInMs)}`}
+    </div>
+  );
+
   return (
     <Card
       className={cn(
         "glass-card rounded-xl border border-white/10 bg-white/5 p-6 text-white shadow-[0_2px_20px_rgba(0,0,0,0.25)] backdrop-blur-sm",
         className
       )}
-      aria-labelledby="streak-tracker-heading"
+      aria-labelledby={showTitle ? "streak-tracker-heading" : undefined}
+      aria-label={!showTitle ? "Streak tracker" : undefined}
     >
-      <div className="mb-3 flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <p
-            id="streak-tracker-heading"
-            className="text-base font-bold text-white md:text-lg"
-          >
-            Streak Tracker
-          </p>
-          <Info className="h-4 w-4 text-white/50" aria-hidden="true" />
+      {showTitle ? (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <p
+              id="streak-tracker-heading"
+              className="text-base font-bold text-white md:text-lg"
+            >
+              Streak Tracker
+            </p>
+            <Info className="h-4 w-4 text-white/50" aria-hidden="true" />
+          </div>
+          {statusChip}
         </div>
-        <div
-          className={cn(
-            "rounded-full border px-2 py-1 text-[11px] uppercase tracking-wide",
-            todayDone
-              ? "border-emerald-400/30 bg-emerald-400/15 text-emerald-200"
-              : "border-white/15 bg-white/5 text-white/70"
-          )}
-          aria-live="polite"
-        >
-          {todayDone
-            ? "Today completed"
-            : `Resets in ${formatTimeLeft(resetInMs)}`}
-        </div>
-      </div>
+      ) : (
+        <div className="mb-3 flex justify-end">{statusChip}</div>
+      )}
 
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="rounded-full border border-white/10 bg-white/8 p-2">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="rounded-full border border-white/10 bg-white/7 p-2">
             <Flame className="h-4 w-4 text-amber-400" aria-hidden="true" />
           </div>
           <div className="text-xs uppercase tracking-wide text-white/60">
@@ -122,17 +131,19 @@ export function StreakTrackerCard({
         </div>
       </div>
 
-      <div className="mb-2 flex items-center justify-between text-xs text-white/60">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 text-xs text-white/60">
         <span>Milestones &amp; Rewards</span>
-        <span>
-          Longest:{" "}
-          <span className="text-white/80 tabular-nums">{longest}</span>
+        <span className="flex items-center gap-1">
+          <span className="text-white/60">Longest</span>
+          <span className="rounded-full border border-white/12 bg-white/6 px-2 py-1 text-white/75 tabular-nums">
+            {longest}
+          </span>
         </span>
       </div>
 
       <TooltipProvider delayDuration={100}>
-        <div className="relative mb-3">
-          <div className="h-2 w-full rounded-full border border-white/10 bg-white/12" />
+        <div className="relative mb-4">
+          <div className="h-2 w-full rounded-full border border-white/10 bg-white/9" />
           <div
             className="absolute left-0 top-0 h-2 rounded-full bg-gradient-to-r from-emerald-400/70 to-emerald-400"
             style={{ width: `${progressPercentage}%` }}
@@ -181,7 +192,7 @@ export function StreakTrackerCard({
         </div>
       </TooltipProvider>
 
-      <div className="mb-4 flex items-center gap-2 overflow-x-auto pb-1 text-[13px] no-scrollbar">
+      <div className="mb-5 flex items-center gap-2 overflow-x-auto pb-1 text-[13px] no-scrollbar">
         {milestones.map((milestone) => {
           const isAchieved = achieved.includes(milestone.days);
           const isNext = milestone.days === nextMilestone.days && !isAchieved;
@@ -191,8 +202,8 @@ export function StreakTrackerCard({
               className={cn(
                 "inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1",
                 isAchieved
-                  ? "border-white/15 bg-white/6 text-white/65"
-                  : "border-white/15 bg-white/10 text-white/85",
+                  ? "border-white/12 bg-white/6 text-white/70"
+                  : "border-white/15 bg-white/9 text-white/85",
                 isNext && "ring-2 ring-amber-400/30"
               )}
               aria-live={isNext ? "polite" : "off"}
@@ -213,7 +224,7 @@ export function StreakTrackerCard({
         })}
       </div>
 
-      <div className="flex items-center justify-between text-xs text-white/60">
+      <div className="flex items-center justify-between text-xs text-white/65">
         <span>
           Next:{" "}
           <span className="text-white/85">
@@ -235,4 +246,3 @@ export function StreakTrackerCard({
     </Card>
   );
 }
-

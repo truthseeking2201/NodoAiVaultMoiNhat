@@ -101,6 +101,7 @@ const VaultStreak = ({ vaultId, vault, isDetailLoading }: VaultStreakProps) => {
         onDeposit={() =>
           dispatchMissionDepositPrefill(0)
         }
+        showTitle={false}
       />
     </DetailWrapper>
   );
