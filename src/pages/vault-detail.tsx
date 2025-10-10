@@ -9,6 +9,7 @@ import HelpfulInfo from "@/components/vault-detail/sections/helpful-info";
 import StrategyExplanation from "@/components/vault-detail/sections/strategy-explanation";
 import VaultActivities from "@/components/vault-detail/sections/vault-activities";
 import VaultAnalytics from "@/components/vault-detail/sections/vault-analytics";
+import { SafetyInsightsCard } from "@/components/vault-detail/sections/safety-insights-card";
 import VaultInfo from "@/components/vault-detail/sections/vault-info";
 import UserPositionValue from "@/components/vault-detail/sections/user-position-value";
 import VaultStreak from "@/components/vault-detail/sections/vault-streak";
@@ -346,6 +347,8 @@ const VaultDetail = () => {
               vaultId={vault_id}
               isDetailLoading={isDetailLoading}
             />
+            <div className="mt-6" />
+            <SafetyInsightsCard vaultId={vault_id} />
             <div className="mt-6" />
             <VaultAnalytics
               vault_id={vault_id}

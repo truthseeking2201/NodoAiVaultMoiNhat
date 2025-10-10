@@ -8,3 +8,4 @@ export { default as ArrowDecreasing } from "./arrow-decreasing.svg?react";
 export { default as ArrowIncreasing } from "./arrow-increasing.svg?react";
 export { default as ArrowRightContained } from "./arrow-right-contained.svg?react";
 export { default as Leaderboards } from "./leaderboards.svg?react";
+export { default as Shield } from "./shield.svg?react";
