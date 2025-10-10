@@ -46,12 +46,12 @@ const Roster = ({
       <div className="px-4 py-4 border-b border-white/10">
         <div className="text-white font-semibold text-base">Roster</div>
         <p className="text-white/50 text-xs mt-1">
-          Track roles, join dates, and observer status for everyone in this pool.
+          Track roles, join dates, and observer status for everyone in this vault.
         </p>
       </div>
       {members.length === 0 ? (
         <div className="px-4 py-6 text-sm text-white/60 text-center">
-          Nobody has joined this pool yet.
+          Nobody has joined this vault yet.
         </div>
       ) : (
         <div className="divide-y divide-white/10">

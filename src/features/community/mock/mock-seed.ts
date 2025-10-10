@@ -1,5 +1,50 @@
-import { MockState, setMockDB, getMockDB } from "./mock-db";
-import { ScoreMetric } from "../types";
+import { MockState, setMockDB, getMockDB, updateMockDB } from "./mock-db";
+import { Pool, PoolMember, ScoreMetric } from "../types";
+
+const rand = (min: number, max: number) => Math.random() * (max - min) + min;
+const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
+const now = () => Date.now();
+
+const OWNER_WALLETS = [
+  "0xA1",
+  "0xB2",
+  "0xC3",
+  "0xD4",
+  "0xE5",
+  "0xF6",
+  "0x17",
+  "0x28",
+  "0x39",
+  "0x4A",
+];
+
+const BASE_NAMES = [
+  "Alpha",
+  "Bravo",
+  "Charlie",
+  "Delta",
+  "Echo",
+  "Foxtrot",
+  "Gamma",
+  "Helios",
+  "Iota",
+  "Juno",
+  "Kilo",
+  "Lima",
+  "Meteor",
+  "Nova",
+  "Orion",
+  "Pegasus",
+  "Quasar",
+  "Raptor",
+  "Sierra",
+  "Titan",
+];
+
+const randomUUID = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `pool-${Math.random().toString(36).slice(2, 10)}`;
 
 const defaultWallet = "0xUSER";
 
@@ -219,4 +264,79 @@ export const seedCommunityMock = (wallet: string = defaultWallet) => {
   ]);
 
   setMockDB(next);
+};
+
+export const ensurePublicItemsFor = (vaultId: string, count = 20) => {
+  if (!vaultId) return;
+
+  updateMockDB((db) => {
+    const existing = db.pools.filter(
+      (pool) => pool.vaultId === vaultId && pool.visibility === "public"
+    );
+    if (existing.length >= count) {
+      return;
+    }
+
+    const need = count - existing.length;
+    const startIndex = existing.length;
+
+    for (let i = 0; i < need; i++) {
+      const base = BASE_NAMES[(startIndex + i) % BASE_NAMES.length];
+      const ownerWallet = pick(OWNER_WALLETS);
+      const poolId = randomUUID();
+      const createdAt = now() - Math.floor(rand(1, 21)) * 86_400_000;
+
+      const pool: Pool = {
+        poolId,
+        vaultId,
+        name: `${base} Vault`,
+        visibility: "public",
+        maxMembers: Math.floor(rand(6, 12)),
+        ownerWallet,
+        eligibilityThresholdUSD:
+          Math.random() < 0.5 ? undefined : Math.round(rand(100, 500)),
+        scoring: Math.random() < 0.5 ? "pnl_pct_weekly" : "pnl_usd_weekly",
+        createdAt,
+      };
+
+      const memberCount = Math.min(
+        pool.maxMembers,
+        Math.max(3, Math.floor(rand(3, pool.maxMembers)))
+      );
+      const members: PoolMember[] = [];
+
+      for (let m = 0; m < memberCount; m++) {
+        const wallet =
+          m === 0
+            ? ownerWallet
+            : `0x${Math.floor(Math.random() * 1e16)
+                .toString(16)
+                .padStart(8, "0")}`;
+
+        members.push({
+          poolId,
+          wallet,
+          role: m === 0 ? "owner" : "member",
+          joinedAt: createdAt + Math.floor(rand(1, 3)) * 3_600_000,
+          status: "active",
+        });
+
+        const key = `${wallet}_${vaultId}`;
+        const deposits = Math.round(rand(200, 3000));
+        const drift = rand(-0.12, 0.18);
+        const current = Math.max(0, Math.round(deposits * (1 + drift)));
+        db.holdings[key] = {
+          totalDepositsUSD: deposits,
+          totalWithdrawalsUSD: 0,
+          currentValueUSD: current,
+          ndlp: Math.max(0, Math.round(deposits * 0.98)),
+          alias: wallet.slice(0, 6).toUpperCase(),
+          updatedAt: now(),
+        };
+      }
+
+      db.pools.push(pool);
+      db.members.push(...members);
+    }
+  });
 };

@@ -526,9 +526,9 @@ export default function VaultList() {
         title: "Action",
         dataIndex: "action",
         classTitle: "justify-end",
-        classCell: "min-w-0",
+        classCell: "min-w-0 text-right",
         render: (_: any, record: any) => (
-          <div className="ml-auto flex items-center gap-2">
+          <div className="inline-flex items-center justify-end gap-2">
             <Button
               variant="outline"
               className="inline-flex h-8 w-8 items-center justify-center border-white/15 text-white/70 transition hover:border-white/40 hover:text-white xl:hidden"

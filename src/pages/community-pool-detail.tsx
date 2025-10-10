@@ -26,7 +26,7 @@ const CommunityPoolDetailPage = () => {
           className="px-0 text-white/70 hover:text-white"
           onClick={() => navigate(getPathVaultCommunity(vault_id))}
         >
-          Back to Community
+          Back to Community Vaults
         </Button>
       </div>
       <PoolDetail poolId={pool_id} vaultIdFallback={vault_id} />

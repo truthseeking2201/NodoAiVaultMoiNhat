@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { usePools } from "../hooks/use-community";
 import CreatePoolModal from "./CreatePoolModal";
 import JoinPoolModal from "./JoinPoolModal";
+import { COMMUNITY_COPY } from "./copy";
 
 const PoolCard = ({
   pool,
@@ -97,7 +98,7 @@ const PoolDirectory = ({ vaultId, vaultName, collateralIcon }: PoolDirectoryProp
     if (currentQuery.isError) {
       return (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-6 text-sm text-red-200">
-          {(currentQuery.error as Error)?.message || "Unable to load pools"}
+          {(currentQuery.error as Error)?.message || "Unable to load vaults"}
         </div>
       );
     }
@@ -107,8 +108,8 @@ const PoolDirectory = ({ vaultId, vaultName, collateralIcon }: PoolDirectoryProp
       return (
         <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-10 text-center text-sm text-white/60">
           {activeTab === "mine"
-            ? "You are not part of any pools yet. Create one or join with an invite."
-            : "No public pools found for this vault yet."}
+            ? COMMUNITY_COPY.emptyMine
+            : COMMUNITY_COPY.emptyPublic}
         </div>
       );
     }
@@ -136,9 +137,11 @@ const PoolDirectory = ({ vaultId, vaultName, collateralIcon }: PoolDirectoryProp
             )}
             <span>{vaultName}</span>
           </div>
-          <h1 className="mt-2 text-2xl font-semibold text-white">Community Pools</h1>
+          <h1 className="mt-2 text-2xl font-semibold text-white">
+            {COMMUNITY_COPY.title}
+          </h1>
           <p className="text-white/50 text-sm mt-1">
-            Form squads, compare PnL, and invite teammates to share vault performance.
+            {COMMUNITY_COPY.subtitle}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -147,13 +150,13 @@ const PoolDirectory = ({ vaultId, vaultName, collateralIcon }: PoolDirectoryProp
             className="border-white/20 text-white/80 hover:text-white hover:border-white/40"
             onClick={() => setJoinOpen(true)}
           >
-            Join via Invite
+            {COMMUNITY_COPY.cta.join}
           </Button>
           <Button
             className="bg-white text-black hover:bg-white/90"
             onClick={() => setCreateOpen(true)}
           >
-            Create Pool
+            {COMMUNITY_COPY.cta.create}
           </Button>
         </div>
       </div>
@@ -161,10 +164,10 @@ const PoolDirectory = ({ vaultId, vaultName, collateralIcon }: PoolDirectoryProp
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="bg-white/5 border border-white/10">
           <TabsTrigger value="mine" className="text-sm">
-            Your Pools
+            {COMMUNITY_COPY.tabs.mine}
           </TabsTrigger>
           <TabsTrigger value="public" className="text-sm">
-            Public Pools
+            {COMMUNITY_COPY.tabs.public}
           </TabsTrigger>
         </TabsList>
       </Tabs>

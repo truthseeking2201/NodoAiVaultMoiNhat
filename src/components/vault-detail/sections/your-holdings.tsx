@@ -207,7 +207,20 @@ const YourHoldings = ({
     >
       <ConditionRenderer
         when={userState !== "nonDeposit"}
-        fallback={<UnSignedHolding />}
+        fallback={
+          <div className="pb-4 flex flex-col gap-4">
+            <UnSignedHolding />
+            {isAuthenticated && (
+              <HoldingCard>
+                <StreakCard
+                  vaultId={vault_id}
+                  wallet={isAuthenticated ? address : undefined}
+                  hasNDLP={hasNDLP}
+                />
+              </HoldingCard>
+            )}
+          </div>
+        }
       >
         <div className="pb-4">
           <div className="flex items-center justify-between">

@@ -100,10 +100,10 @@ const PoolDetail = ({ poolId, vaultIdFallback }: PoolDetailProps) => {
   };
 
   const handleLeave = async () => {
-    if (!window.confirm("Leave this pool?")) return;
+    if (!window.confirm("Leave this vault?")) return;
     try {
       await leaveMutation.mutateAsync(poolId);
-      toast({ title: "Left pool", description: "You can rejoin later with an invite." });
+      toast({ title: "Left vault", description: "You can rejoin later with an invite." });
       navigate(`/vault/${vaultId}/community`);
     } catch (error: any) {
       toast({
@@ -129,7 +129,7 @@ const PoolDetail = ({ poolId, vaultIdFallback }: PoolDetailProps) => {
   };
 
   const handleTransferOwnership = async (wallet: string) => {
-    if (!window.confirm("Transfer pool ownership?")) return;
+    if (!window.confirm("Transfer vault ownership?")) return;
     try {
       await transferMutation.mutateAsync(wallet);
       toast({ title: "Ownership transferred" });
@@ -165,9 +165,9 @@ const PoolDetail = ({ poolId, vaultIdFallback }: PoolDetailProps) => {
     if (error.code === "private_pool") {
       return (
         <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-center text-white/70 space-y-3">
-          <h2 className="text-xl font-semibold text-white">Private pool</h2>
+          <h2 className="text-xl font-semibold text-white">Private vault</h2>
           <p className="text-sm text-white/60">
-            You need an invite token to access this community pool.
+            You need an invite token to access this community vault.
           </p>
           <Button
             className="bg-white text-black hover:bg-white/90"
@@ -181,7 +181,7 @@ const PoolDetail = ({ poolId, vaultIdFallback }: PoolDetailProps) => {
     }
     return (
       <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-6 text-center text-sm text-red-200">
-        {error.message || "Unable to load pool"}
+        {error.message || "Unable to load vault"}
       </div>
     );
   }
@@ -199,7 +199,7 @@ const PoolDetail = ({ poolId, vaultIdFallback }: PoolDetailProps) => {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs text-white/50">
-              <span>{pool.visibility === "private" ? "Private" : "Public"} pool</span>
+              <span>{pool.visibility === "private" ? "Private" : "Public"} vault</span>
               <span>·</span>
               <span>{pool.activeMembers}/{pool.maxMembers} members</span>
             </div>

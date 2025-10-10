@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { PoolDirectory, startCommunityMockTimers } from "@/features/community";
+import {
+  PoolDirectory,
+  startCommunityMockTimers,
+} from "@/features/community";
+import { ensurePublicItemsFor } from "@/features/community/mock/mock-seed";
 import { useVaultBasicDetails } from "@/hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -14,6 +18,10 @@ const CommunityDirectoryPage = () => {
   useEffect(() => {
     startCommunityMockTimers(queryClient);
   }, [queryClient]);
+
+  useEffect(() => {
+    ensurePublicItemsFor(safeVaultId, 20);
+  }, [safeVaultId]);
 
   if (!vault_id) {
     return <Navigate to="/" replace />;

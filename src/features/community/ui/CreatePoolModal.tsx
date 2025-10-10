@@ -84,14 +84,14 @@ const CreatePoolModal = ({ open, onOpenChange, vaultId, onCreated }: CreatePoolM
         scoring: form.scoring,
       });
       toast({
-        title: "Pool created",
+        title: "Vault created",
         description: "Invite your friends or share the link to get started.",
       });
       onOpenChange(false);
       onCreated?.(result.poolId, result.inviteUrl);
     } catch (error: any) {
       toast({
-        title: "Unable to create pool",
+        title: "Unable to create vault",
         description: error?.message || "Something went wrong",
         variant: "error",
       });
@@ -102,16 +102,16 @@ const CreatePoolModal = ({ open, onOpenChange, vaultId, onCreated }: CreatePoolM
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[520px] border border-white/10 bg-[#101214] text-white">
         <DialogHeader>
-          <DialogTitle>Create Community Pool</DialogTitle>
+          <DialogTitle>Create Community Vault</DialogTitle>
           <DialogDescription className="text-white/60 text-sm">
-            Configure a private or public group to track performance with your squad. Assets remain in individual wallets.
+            Configure a private or public vault to track performance with your squad. Assets remain in individual wallets.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div>
             <Label htmlFor="pool-name" className="text-xs text-white/70">
-              Pool name
+              Vault name
             </Label>
             <Input
               id="pool-name"
@@ -147,7 +147,7 @@ const CreatePoolModal = ({ open, onOpenChange, vaultId, onCreated }: CreatePoolM
               ))}
             </div>
             <p className="text-[11px] text-white/40 mt-1">
-              Private pools require an invite link; public pools appear in the directory.
+              Private vaults require an invite link; public vaults appear in the directory.
             </p>
           </div>
 
@@ -242,7 +242,7 @@ const CreatePoolModal = ({ open, onOpenChange, vaultId, onCreated }: CreatePoolM
             disabled={!isValid || createPool.isPending}
             onClick={handleSubmit}
           >
-            {createPool.isPending ? "Creating..." : "Create pool"}
+            {createPool.isPending ? "Creating..." : "Create vault"}
           </Button>
         </DialogFooter>
       </DialogContent>

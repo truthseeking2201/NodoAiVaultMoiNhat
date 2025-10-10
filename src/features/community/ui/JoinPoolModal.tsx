@@ -58,7 +58,7 @@ const JoinPoolModal = ({ open, onOpenChange, onJoined }: JoinPoolModalProps) => 
     setTokenError(null);
     try {
       const { poolId } = await joinMutation.mutateAsync({ inviteToken: token });
-      toast({ title: "Joined pool", description: "Welcome aboard." });
+      toast({ title: "Joined vault", description: "Welcome aboard." });
       onOpenChange(false);
       onJoined?.(poolId);
     } catch (error: any) {
@@ -70,9 +70,9 @@ const JoinPoolModal = ({ open, onOpenChange, onJoined }: JoinPoolModalProps) => 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[420px] border border-white/10 bg-[#101214] text-white">
         <DialogHeader>
-          <DialogTitle>Join Pool</DialogTitle>
+          <DialogTitle>Join Vault</DialogTitle>
           <DialogDescription className="text-white/60 text-sm">
-            Paste an invite link or token to join a community pool. If the pool is full or the invite expired, you will see an error message below.
+            Paste an invite link or token to join a community vault. If the vault is full or the invite expired, you will see an error message below.
           </DialogDescription>
         </DialogHeader>
         <div className="py-2 space-y-4">
@@ -107,7 +107,7 @@ const JoinPoolModal = ({ open, onOpenChange, onJoined }: JoinPoolModalProps) => 
             disabled={joinMutation.isPending}
             onClick={handleSubmit}
           >
-            {joinMutation.isPending ? "Joining..." : "Join pool"}
+            {joinMutation.isPending ? "Joining..." : "Join vault"}
           </Button>
         </DialogFooter>
       </DialogContent>

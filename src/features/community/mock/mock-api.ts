@@ -225,7 +225,7 @@ export const getPoolDetail = async (
     const isMember = !!activeMembers.find((member) => member.wallet === viewer);
 
     if (pool.visibility === "private" && !isMember) {
-      throw new CommunityError("private_pool", "Private pool. Invite required");
+    throw new CommunityError("private_pool", "Private vault. Invite required");
     }
 
     const roster = members.map((member) => {
@@ -284,7 +284,7 @@ const assertCapacity = (pool: Pool, dbMembers: PoolMember[]) => {
     (member) => member.poolId === pool.poolId && member.status === "active"
   );
   if (activeMembers.length >= pool.maxMembers) {
-    throw new CommunityError("pool_full", "Pool is full");
+    throw new CommunityError("pool_full", "Vault is full");
   }
 };
 
