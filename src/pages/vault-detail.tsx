@@ -39,7 +39,6 @@ import { LpSimulatorCard } from "@/components/vault-detail/simulator/lp-simulato
 import { LpSimulatorModal } from "@/components/vault-detail/simulator/lp-simulator-modal";
 import { LpSimulatorMobileCTA } from "@/components/vault-detail/simulator/lp-simulator-mobile-cta";
 import { useLpSimulatorStore, ensureSimulatorInput } from "@/hooks/use-lp-simulator";
-import { getPathVaultCommunity } from "@/config/router";
 import { isMockMode } from "@/config/mock";
 
 export type VaultInfo = {
@@ -100,16 +99,9 @@ const VaultDetail = () => {
     navigate("/", { replace: true });
   };
 
-  const handleTabSwitch = useCallback(
-    (index: number) => {
-      if (index === 2 && vault_id) {
-        navigate(getPathVaultCommunity(vault_id));
-        return;
-      }
-      setActiveTab(index);
-    },
-    [navigate, vault_id]
-  );
+  const handleTabSwitch = useCallback((index: number) => {
+    setActiveTab(index);
+  }, []);
 
   const isBreakMobile = useMemo(() => {
     return !isLg;
@@ -251,7 +243,7 @@ const VaultDetail = () => {
         <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
           <UnderlineTabs
             activeTab={activeTab}
-            labels={["Overview", "Your Holdings", "Community"]}
+            labels={["Overview", "Your Holdings"]}
             labelClassName="max-md:text-base max-md:px-0"
             tabClassName="max-md:space-x-4"
             onActiveTabChange={handleTabSwitch}
@@ -308,7 +300,7 @@ const VaultDetail = () => {
           <div className="mt-4 mb-3 flex justify-between">
             <UnderlineTabs
               activeTab={activeTab}
-              labels={["Overview", "Your Holdings", "Community"]}
+              labels={["Overview", "Your Holdings"]}
               labelClassName="max-md:text-base max-md:px-0"
               tabClassName="max-md:space-x-4"
               onActiveTabChange={handleTabSwitch}
