@@ -9,7 +9,7 @@ import useBreakpoint from "@/hooks/use-breakpoint";
 import { useWallet } from "@/hooks";
 import { showFormatNumber } from "@/lib/number";
 import { compareSuiAddresses } from "@/lib/address";
-import { USDC_CONFIG, XP_CONFIG, GEMS_CONFIG } from "@/config/coin-config";
+import { USDC_CONFIG, XP_CONFIG } from "@/config/coin-config";
 import { LeaderboardItem, Columns } from "./helper";
 import { LEADERBOARD_TIME_FILTER } from "@/config/constants-types";
 
@@ -38,7 +38,6 @@ export default function DataTableLeaderboards({
       const rewardConfigs = [
         { value: el.reward_usdc, ...USDC_CONFIG },
         { value: el.reward_xp_shares, ...XP_CONFIG },
-        { value: el.reward_gems, ...GEMS_CONFIG },
       ];
 
       const rewards = rewardConfigs

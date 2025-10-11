@@ -8,7 +8,6 @@ import {
 } from "@/hooks/use-lp-simulator";
 import LpSimulator from "@/components/simulator/lp-simulator";
 import { Button } from "@/components/ui/button";
-import { DetailWrapper } from "@/components/vault-detail/detail-wrapper";
 
 interface LpSimulatorCardProps {
   vaultId: string;
@@ -18,7 +17,9 @@ export function LpSimulatorCard({ vaultId }: LpSimulatorCardProps) {
   const expanded = useLpSimulatorStore(
     (state) => state.inlineExpanded[vaultId] ?? false
   );
-  const setInlineExpanded = useLpSimulatorStore((state) => state.setInlineExpanded);
+  const setInlineExpanded = useLpSimulatorStore(
+    (state) => state.setInlineExpanded
+  );
   const markFirstOpen = useLpSimulatorStore((state) => state.markFirstOpen);
   const dismissMobileCTA = useLpSimulatorStore((state) => state.dismissMobileCTA);
   const setModalOpen = useLpSimulatorStore((state) => state.setDrawerOpen);
@@ -31,7 +32,8 @@ export function LpSimulatorCard({ vaultId }: LpSimulatorCardProps) {
     ensureSimulatorInput(vaultId);
   }, [vaultId]);
 
-  const headlineCopy = "Model price paths and compare LP returns against holding.";
+  const headlineCopy =
+    "Model price paths and compare LP returns against holding.";
 
   const toggle = () => {
     setInlineExpanded(vaultId, !expanded);
@@ -42,29 +44,29 @@ export function LpSimulatorCard({ vaultId }: LpSimulatorCardProps) {
   };
 
   return (
-    <DetailWrapper
-      title="LP Outcome Simulator"
-      titleComponent={
-        <div className="flex items-center gap-x-4">
+    <div className="glass-card rounded-xl border border-white/10 bg-white/5 p-5 text-white shadow-[0_2px_20px_rgba(0,0,0,0.25)] backdrop-blur-sm md:p-6">
+      <button
+        type="button"
+        onClick={toggle}
+        className="flex w-full items-center justify-between text-left"
+        aria-expanded={expanded}
+      >
+        <div className="space-y-1">
+          <div className="text-lg font-semibold tracking-tight text-white">
+            LP Outcome Simulator
+          </div>
           <p className="text-[11px] uppercase tracking-wide text-white/50">
             {headlineCopy}
           </p>
-          <button
-            type="button"
-            onClick={toggle}
-            className="flex items-center justify-between text-left"
-            aria-expanded={expanded}
-          >
-            <motion.div
-              animate={{ rotate: expanded ? 180 : 0 }}
-              className="rounded-full border border-white/15 bg-white/10 p-2"
-            >
-              <ChevronDown className="h-4 w-4 text-white/80" />
-            </motion.div>
-          </button>
         </div>
-      }
-    >
+        <motion.div
+          animate={{ rotate: expanded ? 180 : 0 }}
+          className="rounded-full border border-white/15 bg-white/10 p-2"
+        >
+          <ChevronDown className="h-4 w-4 text-white/80" />
+        </motion.div>
+      </button>
+
       <AnimatePresence initial={false}>
         {expanded && (
           <motion.div
@@ -97,6 +99,6 @@ export function LpSimulatorCard({ vaultId }: LpSimulatorCardProps) {
           </motion.div>
         )}
       </AnimatePresence>
-    </DetailWrapper>
+    </div>
   );
 }

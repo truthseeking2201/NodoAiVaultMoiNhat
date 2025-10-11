@@ -3,7 +3,7 @@ import CountUp from "@/components/ui/count-up";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useConfigLeaderboard } from "@/hooks/use-leaderboards";
-import { USDC_CONFIG, XP_CONFIG, GEMS_CONFIG } from "@/config/coin-config";
+import { USDC_CONFIG, XP_CONFIG } from "@/config/coin-config";
 import { RewardEntry } from "@/types/leaderboards.types";
 import { useMemo, Fragment } from "react";
 
@@ -22,7 +22,6 @@ const Banner = () => {
       const rewardConfigs = [
         { value: total.reward_usdc, ...USDC_CONFIG },
         { value: total.reward_xp_shares, ...XP_CONFIG },
-        { value: total.reward_gems, ...GEMS_CONFIG },
       ];
       _prize = rewardConfigs
         .filter((r) => Number(r.value) > 0)

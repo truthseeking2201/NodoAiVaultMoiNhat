@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
-import { questService } from "@/data/quest-mocks";
-import type { DepositQuest } from "@/lib/quest-state";
+import { questMockService } from "@/data/quest-mocks";
+import type { Quest } from "@/lib/quest-types";
 
-const service = questService();
+const service = questMockService();
 
 export function useQuest() {
-  const [list, setList] = useState<DepositQuest[]>(service.list());
+  const [list, setList] = useState<Quest[]>(service.list());
 
   const sync = useCallback(() => {
     setList(service.list());
   }, []);
 
   const start = useCallback(
-    (id: DepositQuest["id"]) => {
+    (id: Quest["id"]) => {
       service.start(id);
       sync();
     },
@@ -20,38 +20,30 @@ export function useQuest() {
   );
 
   const claim = useCallback(
-    (id: DepositQuest["id"]) => {
+    (id: Quest["id"]) => {
       service.claim(id);
       sync();
     },
     [sync]
   );
 
-  useEffect(() => {
-    const handleDepositConfirmed = (event: Event) => {
-      const detail = (event as CustomEvent)?.detail;
-      const amountUsd = detail?.amountUsd;
-      if (typeof amountUsd === "number" && amountUsd > 0) {
-        service.onDepositConfirmed(amountUsd);
-        sync();
-      }
-    };
+  const markDepositConfirmed = useCallback(
+    (amountUsd: number) => {
+      service.onDepositConfirmed(amountUsd);
+      sync();
+    },
+    [sync]
+  );
 
-    window.addEventListener(
-      "deposit:confirmed",
-      handleDepositConfirmed as EventListener
-    );
-    return () => {
-      window.removeEventListener(
-        "deposit:confirmed",
-        handleDepositConfirmed as EventListener
-      );
-    };
-  }, [sync]);
+  useEffect(() => {
+    setList(service.list());
+  }, []);
 
   return {
     list,
     start,
     claim,
+    markDepositConfirmed,
+    refresh: sync,
   };
 }
