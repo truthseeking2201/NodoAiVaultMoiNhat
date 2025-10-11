@@ -4,6 +4,7 @@ import { ArrowRight, Check, Gift, PartyPopper, Share2, Users, Wallet } from "luc
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CardHeaderBar } from "@/components/ui/card-header-bar";
 import {
   Dialog,
   DialogContent,
@@ -335,85 +336,90 @@ export function MissionsXPCard({
     </ul>
   );
 
+  const headingId = "missions-xp-card-heading";
+  const headerTitle = allMissionsClaimed
+    ? "All missions cleared"
+    : "Complete missions to get more rewards";
+  const headerRight = (
+    <div className="flex items-center gap-2">
+      <Badge className="bg-white/10 px-2 py-1 text-[11px] uppercase tracking-wide text-white/75">
+        Total XP {totalXp.toLocaleString("en-US")}
+      </Badge>
+      {allMissionsClaimed && (
+        <Button
+          size="xs"
+          variant="outline"
+          className="h-8 border-white/15 text-[12px] text-white/75 hover:text-white"
+          onClick={() => setShowHistory((prev) => !prev)}
+        >
+          {showHistory ? "Hide mission log" : "View mission log"}
+        </Button>
+      )}
+    </div>
+  );
+
   return (
     <>
       <Card
         className={cn(
-          "glass-card rounded-xl border border-white/10 bg-white/5 p-5 text-white backdrop-blur-sm shadow-[0_2px_20px_rgba(0,0,0,0.25)] md:p-6",
+          "glass-card overflow-hidden rounded-xl border border-white/10 bg-white/5 text-white backdrop-blur-sm shadow-[0_2px_20px_rgba(0,0,0,0.25)]",
           className
         )}
-        aria-labelledby="missions-xp-card-heading"
+        aria-labelledby={headingId}
       >
-        <div className="flex flex-wrap items-center justify-between gap-2 gap-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <p
-              id="missions-xp-card-heading"
-              className="text-base font-bold text-white md:text-lg"
-            >
-              {allMissionsClaimed
-                ? "All missions cleared"
-                : "Complete missions to get more rewards"}
-            </p>
-            <Badge className="bg-white/10 px-2 py-1 text-[11px] uppercase tracking-wide text-white/75">
-              Total XP {totalXp.toLocaleString("en-US")}
-            </Badge>
-          </div>
-          {allMissionsClaimed && (
-            <Button
-              size="xs"
-              variant="outline"
-              className="h-8 border-white/15 text-[12px] text-white/75 hover:text-white"
-              onClick={() => setShowHistory((prev) => !prev)}
-            >
-              {showHistory ? "Hide mission log" : "View mission log"}
-            </Button>
-          )}
-        </div>
-        <p className="mt-1 text-sm text-white/60">
-          {allMissionsClaimed
-            ? `You unlocked ${totalXp.toLocaleString(
-                "en-US"
-              )} XP Shares. New missions will refresh soon.`
-            : "Every mission boosts your vault streak and XP rewards."}
-        </p>
-
-        <div className="mt-4">
-          {allMissionsClaimed && !showHistory ? (
-            <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3">
-              <div className="flex items-center gap-3 text-sm text-white/75">
-                <PartyPopper size={18} className="text-amber-200" />
-                <div>
-                  <p className="font-semibold text-white">
-                    Mission cycle complete
-                  </p>
-                  <p className="text-xs text-white/60">
-                    We will notify you when the next mission wave arrives.
-                  </p>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="text-white/80 hover:text-white"
-                onClick={() => setShowHistory(true)}
-              >
-                Review history
-              </Button>
-            </div>
-          ) : (
-            missionList
-          )}
-        </div>
-
-        <div className="mt-4 border-t border-white/10 pt-4">
-          <p className="text-xs uppercase tracking-wide text-white/45">
-            {allMissionsClaimed ? "Next steps" : "Coming soon"}
-          </p>
-          <p className="mt-1 text-xs text-white/45">
+        <CardHeaderBar
+          title={headerTitle}
+          subtitle="Prefilled deposits keep you on track without extra clicks."
+          right={headerRight}
+          titleId={headingId}
+        />
+        <div className="p-6">
+          <p className="text-sm text-white/60">
             {allMissionsClaimed
-              ? "Explore community challenges or check back tomorrow for refreshed missions."
-              : "New missions arrive weekly. Keep an eye on this space."}
+              ? `You unlocked ${totalXp.toLocaleString(
+                  "en-US"
+                )} XP Shares. New missions will refresh soon.`
+              : "Every mission boosts your vault streak and XP rewards."}
           </p>
+
+          <div className="mt-4">
+            {allMissionsClaimed && !showHistory ? (
+              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+                <div className="flex items-center gap-3 text-sm text-white/75">
+                  <PartyPopper size={18} className="text-amber-200" />
+                  <div>
+                    <p className="font-semibold text-white">
+                      Mission cycle complete
+                    </p>
+                    <p className="text-xs text-white/60">
+                      We will notify you when the next mission wave arrives.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-white/80 hover:text-white"
+                  onClick={() => setShowHistory(true)}
+                >
+                  Review history
+                </Button>
+              </div>
+            ) : (
+              missionList
+            )}
+          </div>
+
+          <div className="mt-4 border-t border-white/10 pt-4">
+            <p className="text-xs uppercase tracking-wide text-white/45">
+              {allMissionsClaimed ? "Next steps" : "Coming soon"}
+            </p>
+            <p className="mt-1 text-xs text-white/45">
+              {allMissionsClaimed
+                ? "Explore community challenges or check back tomorrow for refreshed missions."
+                : "New missions arrive weekly. Keep an eye on this space."}
+            </p>
+          </div>
         </div>
       </Card>
 

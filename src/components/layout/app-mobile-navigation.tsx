@@ -15,6 +15,11 @@ const rawPageRoutes = [
     label: "Leaderboards",
     path: PATH_ROUTER.LEADERBOARDS,
   },
+  {
+    icon: "Quest",
+    label: "Quest",
+    path: PATH_ROUTER.QUEST,
+  },
 ] as const;
 const pageRoutes = rawPageRoutes.filter((i) => i.path);
 

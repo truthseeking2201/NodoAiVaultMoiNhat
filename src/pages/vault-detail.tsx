@@ -13,6 +13,7 @@ import VaultInfo from "@/components/vault-detail/sections/vault-info";
 import UserPositionValue from "@/components/vault-detail/sections/user-position-value";
 import VaultStreak from "@/components/vault-detail/sections/vault-streak";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
+import { PATH_ROUTER } from "@/config/router";
 import { useStreak } from "@/features/streak-vault/hooks/use-streak";
 import {
   useGetDepositVaults,
@@ -24,7 +25,7 @@ import { useWallet } from "@/hooks/use-wallet";
 import { cn, formatAmount } from "@/lib/utils";
 import { BasicVaultDetailsType, VaultApr } from "@/types/vault-config.types";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import UnderlineTabs from "@/components/ui/underline-tab";
@@ -39,8 +40,6 @@ import { LpSimulatorModal } from "@/components/vault-detail/simulator/lp-simulat
 import { LpSimulatorMobileCTA } from "@/components/vault-detail/simulator/lp-simulator-mobile-cta";
 import { useLpSimulatorStore, ensureSimulatorInput } from "@/hooks/use-lp-simulator";
 import { isMockMode } from "@/config/mock";
-import { dispatchMissionDepositPrefill } from "@/lib/mission-events";
-import { QuestTab } from "@/components/quest/QuestTab";
 
 export type VaultInfo = {
   label: string;
@@ -50,9 +49,6 @@ export type VaultInfo = {
   tooltip?: any;
   tooltipClassName?: string;
 };
-
-const SAFETY_TIERS = ["SAFE", "CAUTIOUS", "WAIT", "AVOID"] as const;
-type SafetyTier = (typeof SAFETY_TIERS)[number];
 
 const VaultDetail = () => {
   const { vault_id } = useParams();
@@ -218,42 +214,6 @@ const VaultDetail = () => {
 
   const enableSimulator = import.meta.env.VITE_ENABLE_IL_SIMULATOR === "true";
 
-  const safetyTier = useMemo<SafetyTier>(() => {
-    const details = vaultDetails as Record<string, any> | null | undefined;
-    const rawCandidates = [
-      details?.safety?.tier,
-      details?.safety_tier,
-      details?.safetyTier,
-      details?.safety_status?.tier,
-    ];
-    const normalized = rawCandidates
-      .map((value) =>
-        typeof value === "string" ? value.toUpperCase() : undefined
-      )
-      .find(
-        (value): value is SafetyTier =>
-          !!value && SAFETY_TIERS.includes(value as SafetyTier)
-      );
-    return normalized ?? "SAFE";
-  }, [vaultDetails]);
-
-  const isDepositDisabledBySafety =
-    safetyTier === "WAIT" || safetyTier === "AVOID";
-
-  const safetyDisabledCopy = useMemo(() => {
-    if (safetyTier === "WAIT") {
-      return "Please wait ~6 hours. System re-checks automatically.";
-    }
-    if (safetyTier === "AVOID") {
-      return "Halted until conditions improve.";
-    }
-    return undefined;
-  }, [safetyTier]);
-
-  const handleMissionPrefill = useCallback((amountUsd: number) => {
-    dispatchMissionDepositPrefill(amountUsd);
-  }, []);
-
   return (
     <PageContainer
       backgroundImage={DetailsBackground}
@@ -283,7 +243,7 @@ const VaultDetail = () => {
         <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
           <UnderlineTabs
             activeTab={activeTab}
-            labels={["Overview", "Your Holdings", "Quest"]}
+            labels={["Overview", "Your Holdings"]}
             labelClassName="max-md:text-base max-md:px-0"
             tabClassName="max-md:space-x-4"
             onActiveTabChange={handleTabSwitch}
@@ -335,6 +295,15 @@ const VaultDetail = () => {
               vault_id={vault_id}
               isDetailLoading={isDetailLoading}
             />
+            <div className="text-right text-xs text-white/60">
+              Want rewards?{" "}
+              <Link
+                to={PATH_ROUTER.QUEST}
+                className="text-white/80 underline-offset-2 hover:text-white"
+              >
+                See quests →
+              </Link>
+            </div>
           </div>
         </div>
         {/* Right sessions - end */}
@@ -342,7 +311,7 @@ const VaultDetail = () => {
           <div className="mt-4 mb-3 flex justify-between">
             <UnderlineTabs
               activeTab={activeTab}
-              labels={["Overview", "Your Holdings", "Quest"]}
+              labels={["Overview", "Your Holdings"]}
               labelClassName="max-md:text-base max-md:px-0"
               tabClassName="max-md:space-x-4"
               onActiveTabChange={handleTabSwitch}
@@ -440,16 +409,6 @@ const VaultDetail = () => {
                 <LpSimulatorCard vaultId={vault_id} />
               </div>
             )}
-          </div>
-          {/* Quest */}
-          <div className={cn(activeTab !== 2 && "hidden")}>
-            <QuestTab
-              vaultId={vault_id}
-              vault={vaultDetails ?? undefined}
-              onDepositPrefill={handleMissionPrefill}
-              isDepositDisabled={isDepositDisabledBySafety}
-              disabledReason={safetyDisabledCopy}
-            />
           </div>
           {/* Left sessions - end */}
         </div>

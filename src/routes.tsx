@@ -15,6 +15,13 @@ const NotFound = lazy(() =>
   })
 );
 
+const QuestPage = lazy(() =>
+  import("@/pages/quest/QuestPage").catch((e) => {
+    console.error("Error loading QuestPage:", e);
+    return { default: () => <GlobalLoading /> };
+  })
+);
+
 const VaultDetail = lazy(() =>
   import("./pages/vault-detail").catch((e) => {
     console.error("Error loading VaultDetail:", e);
@@ -51,6 +58,16 @@ const AppRoutes = () => {
           element={
             <MainLayout>
               <Leaderboards />
+            </MainLayout>
+          }
+        />
+      )}
+      {PATH_ROUTER.QUEST && (
+        <Route
+          path={PATH_ROUTER.QUEST}
+          element={
+            <MainLayout>
+              <QuestPage />
             </MainLayout>
           }
         />
