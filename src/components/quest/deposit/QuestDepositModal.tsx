@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -62,16 +62,30 @@ export function QuestDepositModal({
     "deposit"
   );
   const [amountUsd, setAmountUsd] = useState<number>(defaultAmountUsd);
+  const confirmedAmountRef = useRef<number | null>(null);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      if (step === "success" && confirmedAmountRef.current != null) {
+        onDepositConfirmed(confirmedAmountRef.current);
+      }
+      confirmedAmountRef.current = null;
+      setStep("deposit");
+      setAmountUsd(defaultAmountUsd);
+    }
+    onOpenChange(nextOpen);
+  };
 
   useEffect(() => {
     if (open) {
       setStep("deposit");
       setAmountUsd(defaultAmountUsd);
+      confirmedAmountRef.current = null;
     }
   }, [open, defaultAmountUsd]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md border border-white/10 bg-[#111217] text-white">
         {step === "deposit" && (
           <>
@@ -121,7 +135,10 @@ export function QuestDepositModal({
               </Button>
               <Button
                 className="border border-white/20 bg-white/10 text-white hover:bg-white/20"
-                onClick={() => setStep("success")}
+                onClick={() => {
+                  confirmedAmountRef.current = amountUsd;
+                  setStep("success");
+                }}
               >
                 Confirm
               </Button>
@@ -149,12 +166,7 @@ export function QuestDepositModal({
             <DialogFooter>
               <Button
                 className="border border-white/20 bg-white/10 text-white hover:bg-white/20"
-                onClick={() => {
-                  onOpenChange(false);
-                  setStep("deposit");
-                  setAmountUsd(defaultAmountUsd);
-                  onDepositConfirmed(amountUsd);
-                }}
+                onClick={() => handleOpenChange(false)}
               >
                 Close
               </Button>

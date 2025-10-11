@@ -160,90 +160,95 @@ export function QuestAccordion({ items, onStart, onClaim, onGoDeposit }: Props) 
 
   return (
     <Accordion type="multiple" className="divide-y divide-white/10">
-      {items.map((quest) => (
-        <AccordionItem key={quest.id} value={quest.id} className="px-3">
-          <AccordionTrigger className="py-3 hover:no-underline">
-            <div className="flex w-full items-center justify-between gap-3">
-              <div className="min-w-0 truncate text-left text-white/90">
-                {quest.title}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[12px] px-2 py-0.5 rounded-full bg-white/10 border border-white/20">
-                  XP {quest.rewardXp.toLocaleString()}
-                </span>
-                {statusPill(quest)}
-              </div>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="pb-4 text-white/80">
-            <div className="space-y-4 text-sm">
-              <div>{quest.description}</div>
-              <div className="text-xs text-white/60">
-                {helperCopy(quest)}
-              </div>
-              <div className="space-y-3">
-                {quest.startedAt && (
-                  <div className="text-xs text-white/55">
-                    Started: {new Date(quest.startedAt).toLocaleString()}
-                  </div>
-                )}
-                {quest.endAt && (
-                  <div className="text-xs text-white/55">
-                    Ends: {new Date(quest.endAt).toLocaleString()}
-                  </div>
-                )}
-              </div>
-              {requirementContent(quest)}
+      {items.map((quest) => {
+        const requiredDeposit = quest.runtime?.requiredDepositUsd ?? quest.minDepositUsd;
+        const currentBalance = quest.runtime?.currentBalanceUsd ?? 0;
+        const missingDeposit = Math.max(0, requiredDeposit - currentBalance);
+        const suggestedDepositUsd = missingDeposit > 0 ? missingDeposit : requiredDeposit;
 
-              <div className="flex items-center justify-end gap-2">
-                {quest.state === "available" && (
-                  <Button
-                    variant="outline"
-                    className="border-white/20 bg-white/5 text-white hover:bg-white/10"
-                    onClick={() => onStart(quest.id)}
-                  >
-                    Start
-                  </Button>
-                )}
+        return (
+          <AccordionItem key={quest.id} value={quest.id} className="px-3">
+            <AccordionTrigger className="py-3 hover:no-underline">
+              <div className="flex w-full items-center justify-between gap-3">
+                <div className="min-w-0 truncate text-left text-white/90">
+                  {quest.title}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[12px] px-2 py-0.5 rounded-full bg-white/10 border border-white/20">
+                    XP {quest.rewardXp.toLocaleString()}
+                  </span>
+                  {statusPill(quest)}
+                </div>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="pb-4 text-white/80">
+              <div className="space-y-4 text-sm">
+                <div>{quest.description}</div>
+                <div className="text-xs text-white/60">
+                  {helperCopy(quest)}
+                </div>
+                <div className="space-y-3">
+                  {quest.startedAt && (
+                    <div className="text-xs text-white/55">
+                      Started: {new Date(quest.startedAt).toLocaleString()}
+                    </div>
+                  )}
+                  {quest.endAt && (
+                    <div className="text-xs text-white/55">
+                      Ends: {new Date(quest.endAt).toLocaleString()}
+                    </div>
+                  )}
+                </div>
+                {requirementContent(quest)}
 
-                {quest.kind === "deposit_and_hold" &&
-                  (quest.state === "available" || quest.state === "active") && (
+                <div className="flex items-center justify-end gap-2">
+                  {quest.state === "available" && (
                     <Button
-                      className="border border-white/20 bg-white/10 text-white hover:bg-white/20"
-                      onClick={() => {
-                        if (quest.state === "available") {
-                          onStart(quest.id);
-                        }
-                        const amount =
-                          quest.runtime?.requiredDepositUsd ?? quest.minDepositUsd;
-                        onGoDeposit(quest.id, amount);
-                      }}
+                      variant="outline"
+                      className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+                      onClick={() => onStart(quest.id)}
                     >
-                      Deposit {formatUsd(quest.runtime?.requiredDepositUsd ?? quest.minDepositUsd)}
+                      Start
                     </Button>
                   )}
 
-                {quest.state === "claimable" && (
-                  <Button
-                    className="border border-white/20 bg-white/10 text-white hover:bg-white/20"
-                    onClick={() => onClaim(quest.id)}
-                  >
-                    Claim Reward
-                  </Button>
-                )}
+                  {quest.kind === "deposit_and_hold" &&
+                    (quest.state === "available" || quest.state === "active") && (
+                      <Button
+                        className="border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                        onClick={() => {
+                          if (quest.state === "available") {
+                            onStart(quest.id);
+                          }
+                          onGoDeposit(quest.id, suggestedDepositUsd);
+                        }}
+                      >
+                        Deposit {formatUsd(suggestedDepositUsd)}
+                      </Button>
+                    )}
 
-                {quest.state === "completed" && (
-                  <span className="text-xs text-white/60">Completed ✓</span>
-                )}
+                  {quest.state === "claimable" && (
+                    <Button
+                      className="border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                      onClick={() => onClaim(quest.id)}
+                    >
+                      Claim Reward
+                    </Button>
+                  )}
 
-                {quest.state === "failed" && (
-                  <span className="text-xs text-red-400">Failed — try again</span>
-                )}
+                  {quest.state === "completed" && (
+                    <span className="text-xs text-white/60">Completed ✓</span>
+                  )}
+
+                  {quest.state === "failed" && (
+                    <span className="text-xs text-red-400">Failed — try again</span>
+                  )}
+                </div>
               </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      ))}
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
     </Accordion>
   );
 }

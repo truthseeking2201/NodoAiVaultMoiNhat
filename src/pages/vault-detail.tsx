@@ -386,7 +386,7 @@ const VaultDetail = () => {
               </>
             )}
 
-            {vault_id && (
+            {/* {vault_id && (
               <>
                 <VaultStreak
                   isDetailLoading={isDetailLoading}
@@ -395,7 +395,7 @@ const VaultDetail = () => {
                 />
                 <div className="mt-6" />
               </>
-            )}
+            )} */}
 
             <UserPositionValue
               isDetailLoading={isDetailLoading}
