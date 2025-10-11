@@ -6,6 +6,8 @@ export type QuestState =
   | "completed"
   | "failed";
 
+export type QuestKind = "deposit_and_hold" | "hold_existing";
+
 export type LockReason =
   | "tier_not_unlocked"
   | "wallet_not_connected"
@@ -13,7 +15,15 @@ export type LockReason =
   | "kyc_required"
   | "other";
 
-export type QuestKind = "deposit_once" | "hold_days" | "highroller";
+export interface QuestRuntimeMeta {
+  currentBalanceUsd?: number;
+  requiredDepositUsd?: number;
+  thresholdUsd?: number;
+  depositMet?: boolean;
+  holdRequiredMs?: number;
+  holdAccumulatedMs?: number;
+  holdRemainingMs?: number;
+}
 
 export interface BaseQuest {
   id: string;
@@ -21,26 +31,35 @@ export interface BaseQuest {
   title: string;
   description: string;
   rewardXp: number;
+  vaultIdRequired?: string | "any";
   state: QuestState;
   lockedReason?: LockReason;
   startedAt?: string;
   endAt?: string;
   claimableAt?: string;
   completedAt?: string;
-  failedAt?: string;
+  runtime?: QuestRuntimeMeta;
 }
 
-export interface DepositQuest extends BaseQuest {
-  kind: "deposit_once" | "highroller";
+export interface DepositAndHoldQuest extends BaseQuest {
+  kind: "deposit_and_hold";
   minDepositUsd: number;
-  holdDays?: number;
+  holdHours: number;
+  resetOnDrop?: boolean;
 }
 
-export interface HoldQuest extends BaseQuest {
-  kind: "hold_days";
-  holdDays: number;
+export interface HoldExistingQuest extends BaseQuest {
+  kind: "hold_existing";
   holdThresholdUsd: number;
-  progressPct?: number;
+  holdHours: number;
+  resetOnDrop?: boolean;
 }
 
-export type Quest = DepositQuest | HoldQuest;
+export type Quest = DepositAndHoldQuest | HoldExistingQuest;
+
+export type VaultTx = {
+  type: "deposit" | "withdraw";
+  vaultId: string;
+  amountUsd: number;
+  ts: string;
+};

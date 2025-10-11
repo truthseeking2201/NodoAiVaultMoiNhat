@@ -1,147 +1,305 @@
-import { Quest, QuestState } from "@/lib/quest-types";
+import {
+  Quest,
+  DepositAndHoldQuest,
+  HoldExistingQuest,
+  QuestState,
+  VaultTx,
+  QuestRuntimeMeta,
+} from "@/lib/quest-types";
 
-const QUEST_ORDER = ["welcome_5", "deposit_50", "highroller_500"] as const;
+const nowIso = () => new Date().toISOString();
 
 let QUESTS: Quest[] = [
   {
-    id: "welcome_5",
-    kind: "deposit_once",
-    title: "Deposit $5 to earn 500 XP Shares",
-    description: "Make a one-time deposit of at least $5. No hold period required.",
-    rewardXp: 500,
-    minDepositUsd: 5,
+    id: "q_deposit_200_usdc_sui_72h",
+    kind: "deposit_and_hold",
+    title: "Deposit $200 into USDC/SUI and hold for 72h",
+    description:
+      "Deposit at least $200 into the USDC/SUI vault and keep your balance ≥ $200 for 72 hours.",
+    rewardXp: 6000,
+    vaultIdRequired: "vault_usdc_sui",
+    minDepositUsd: 200,
+    holdHours: 72,
+    resetOnDrop: true,
     state: "available",
   },
   {
-    id: "deposit_50",
-    kind: "deposit_once",
-    title: "Deposit $50 to earn 2,000 XP Shares",
-    description: "Deposit at least $50 within 24 hours after starting this quest.",
-    rewardXp: 2000,
-    minDepositUsd: 50,
-    state: "locked",
-    lockedReason: "tier_not_unlocked",
-  },
-  {
-    id: "hold_7",
-    kind: "hold_days",
-    title: "Hold balance ≥ $25 for 7 days",
-    description: "Maintain a vault balance of $25 or more for 7 consecutive days.",
+    id: "q_hold_existing_7d_any",
+    kind: "hold_existing",
+    title: "Hold ≥ $50 for 7 days",
+    description:
+      "Maintain an account balance of at least $50 for 7 consecutive days across any vault.",
     rewardXp: 3500,
-    holdDays: 7,
-    holdThresholdUsd: 25,
+    vaultIdRequired: "any",
+    holdThresholdUsd: 50,
+    holdHours: 168,
+    resetOnDrop: true,
     state: "active",
-    startedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    endAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
-    progressPct: 43,
-  },
-  {
-    id: "highroller_500",
-    kind: "highroller",
-    title: "Deposit $500 and hold 14 days for 20,000 XP",
-    description: "Deposit at least $500 and keep it for 14 days to unlock a massive XP reward.",
-    rewardXp: 20000,
-    minDepositUsd: 500,
-    holdDays: 14,
-    state: "locked",
-    lockedReason: "tier_not_unlocked",
+    startedAt: new Date(Date.now() - 48 * 3600_000).toISOString(),
   },
 ];
 
-const setState = (id: Quest["id"], state: QuestState) => {
+let TXS: VaultTx[] = [];
+
+type RuntimeCache = {
+  heldSince: string | null;
+};
+
+const RUNTIME: Record<string, RuntimeCache> = {};
+
+const ensureRuntime = (quest: Quest) => {
+  if (!RUNTIME[quest.id]) {
+    RUNTIME[quest.id] = { heldSince: quest.startedAt ?? null };
+  }
+  return RUNTIME[quest.id];
+};
+
+const getVaultBalanceUsd = (vaultId: string) => {
+  const sum = TXS.filter((tx) => tx.vaultId === vaultId).reduce(
+    (acc, tx) => acc + (tx.type === "deposit" ? tx.amountUsd : -tx.amountUsd),
+    0
+  );
+  return Math.max(0, sum);
+};
+
+const getAnyBalanceUsd = () => {
+  const perVault: Record<string, number> = {};
+  TXS.forEach((tx) => {
+    perVault[tx.vaultId] =
+      (perVault[tx.vaultId] ?? 0) +
+      (tx.type === "deposit" ? tx.amountUsd : -tx.amountUsd);
+  });
+  return Object.values(perVault)
+    .map((value) => Math.max(0, value))
+    .reduce((acc, value) => acc + value, 0);
+};
+
+const cloneQuest = (quest: Quest): Quest => ({
+  ...quest,
+  runtime: quest.runtime ? { ...quest.runtime } : undefined,
+});
+
+const toRuntimeMeta = (input: Partial<QuestRuntimeMeta>): QuestRuntimeMeta => ({
+  currentBalanceUsd: input.currentBalanceUsd ?? 0,
+  requiredDepositUsd: input.requiredDepositUsd,
+  thresholdUsd: input.thresholdUsd,
+  depositMet: input.depositMet ?? false,
+  holdRequiredMs: input.holdRequiredMs ?? 0,
+  holdAccumulatedMs: input.holdAccumulatedMs ?? 0,
+  holdRemainingMs: input.holdRemainingMs ?? 0,
+});
+
+const recomputeDepositQuest = (quest: DepositAndHoldQuest): Quest => {
+  const runtime = ensureRuntime(quest);
+  const now = Date.now();
+  const result = cloneQuest(quest) as DepositAndHoldQuest;
+  const currentBalance = getVaultBalanceUsd(quest.vaultIdRequired ?? "");
+  const depositMet = currentBalance >= quest.minDepositUsd;
+  const requiredMs = quest.holdHours * 3600_000;
+
+  if (result.state === "completed") {
+    result.runtime = toRuntimeMeta({
+      currentBalanceUsd: currentBalance,
+      requiredDepositUsd: quest.minDepositUsd,
+      depositMet: true,
+      holdRequiredMs: requiredMs,
+      holdAccumulatedMs: requiredMs,
+      holdRemainingMs: 0,
+    });
+    return result;
+  }
+
+  if (result.state === "claimable") {
+    result.runtime = toRuntimeMeta({
+      currentBalanceUsd: currentBalance,
+      requiredDepositUsd: quest.minDepositUsd,
+      depositMet: depositMet,
+      holdRequiredMs: requiredMs,
+      holdAccumulatedMs: requiredMs,
+      holdRemainingMs: 0,
+    });
+    return result;
+  }
+
+  if (depositMet && runtime.heldSince === null) {
+    runtime.heldSince = nowIso();
+    result.startedAt = runtime.heldSince;
+    result.endAt = new Date(now + requiredMs).toISOString();
+  }
+
+  if (!depositMet && runtime.heldSince) {
+    if (result.resetOnDrop !== false) {
+      runtime.heldSince = null;
+      result.startedAt = undefined;
+      result.endAt = undefined;
+    } else {
+      result.state = "failed";
+    }
+  }
+
+  const heldMs = runtime.heldSince ? now - Date.parse(runtime.heldSince) : 0;
+  const remainingMs = Math.max(0, requiredMs - heldMs);
+
+  if (depositMet && heldMs >= requiredMs) {
+    result.state = "claimable";
+    result.claimableAt = nowIso();
+  } else if (result.state === "available" && depositMet) {
+    result.state = "active";
+  } else if (result.state !== "failed") {
+    result.state = depositMet ? "active" : result.state;
+  }
+
+  result.runtime = toRuntimeMeta({
+    currentBalanceUsd: currentBalance,
+    requiredDepositUsd: quest.minDepositUsd,
+    depositMet,
+    holdRequiredMs: requiredMs,
+    holdAccumulatedMs: depositMet ? heldMs : 0,
+    holdRemainingMs: depositMet ? remainingMs : requiredMs,
+  });
+
+  return result;
+};
+
+const recomputeHoldQuest = (quest: HoldExistingQuest): Quest => {
+  const runtime = ensureRuntime(quest);
+  const now = Date.now();
+  const result = cloneQuest(quest) as HoldExistingQuest;
+  const balance =
+    quest.vaultIdRequired === "any"
+      ? getAnyBalanceUsd()
+      : getVaultBalanceUsd(quest.vaultIdRequired ?? "");
+  const thresholdMet = balance >= quest.holdThresholdUsd;
+  const requiredMs = quest.holdHours * 3600_000;
+
+  if (result.state === "completed") {
+    result.runtime = toRuntimeMeta({
+      currentBalanceUsd: balance,
+      thresholdUsd: quest.holdThresholdUsd,
+      depositMet: true,
+      holdRequiredMs: requiredMs,
+      holdAccumulatedMs: requiredMs,
+      holdRemainingMs: 0,
+    });
+    return result;
+  }
+
+  if (result.state === "claimable") {
+    result.runtime = toRuntimeMeta({
+      currentBalanceUsd: balance,
+      thresholdUsd: quest.holdThresholdUsd,
+      depositMet: true,
+      holdRequiredMs: requiredMs,
+      holdAccumulatedMs: requiredMs,
+      holdRemainingMs: 0,
+    });
+    return result;
+  }
+
+  if (thresholdMet && runtime.heldSince === null) {
+    runtime.heldSince = nowIso();
+    result.startedAt = runtime.heldSince;
+    result.endAt = new Date(now + requiredMs).toISOString();
+  }
+
+  if (!thresholdMet && runtime.heldSince) {
+    if (result.resetOnDrop !== false) {
+      runtime.heldSince = null;
+      result.startedAt = undefined;
+      result.endAt = undefined;
+      if (result.state !== "available") {
+        result.state = "active";
+      }
+    } else {
+      result.state = "failed";
+    }
+  }
+
+  const heldMs = runtime.heldSince ? now - Date.parse(runtime.heldSince) : 0;
+  const remainingMs = Math.max(0, requiredMs - heldMs);
+
+  if (thresholdMet && heldMs >= requiredMs) {
+    result.state = "claimable";
+    result.claimableAt = nowIso();
+  } else if (result.state === "available" && thresholdMet) {
+    result.state = "active";
+  }
+
+  result.runtime = toRuntimeMeta({
+    currentBalanceUsd: balance,
+    thresholdUsd: quest.holdThresholdUsd,
+    depositMet: thresholdMet,
+    holdRequiredMs: requiredMs,
+    holdAccumulatedMs: thresholdMet ? heldMs : 0,
+    holdRemainingMs: thresholdMet ? remainingMs : requiredMs,
+  });
+
+  return result;
+};
+
+const recomputeQuest = (quest: Quest): Quest => {
+  if (quest.state === "failed" || quest.state === "completed") {
+    // still compute runtime for display but avoid state changes
+    if (quest.kind === "deposit_and_hold") {
+      return recomputeDepositQuest(quest as DepositAndHoldQuest);
+    }
+    return recomputeHoldQuest(quest as HoldExistingQuest);
+  }
+
+  if (quest.kind === "deposit_and_hold") {
+    return recomputeDepositQuest(quest as DepositAndHoldQuest);
+  }
+  return recomputeHoldQuest(quest as HoldExistingQuest);
+};
+
+const updateQuestState = (id: string, updater: (quest: Quest) => Quest) => {
   QUESTS = QUESTS.map((quest) =>
-    quest.id === id
-      ? {
-          ...quest,
-          state,
-        }
-      : quest
+    quest.id === id ? updater(cloneQuest(quest)) : quest
   );
 };
 
-const updateQuest = (id: Quest["id"], updater: (quest: Quest) => Quest) => {
-  QUESTS = QUESTS.map((quest) =>
-    quest.id === id ? updater({ ...quest }) : quest
-  );
-};
-
-export function questMockService() {
+export function questMockServiceV2() {
   return {
     list(): Quest[] {
-      return QUESTS.map((quest) => ({ ...quest }));
+      QUESTS = QUESTS.map((quest) => recomputeQuest(quest));
+      return QUESTS.map((quest) => cloneQuest(quest));
     },
-    setAvailable(id: Quest["id"]) {
-      updateQuest(id, (quest) =>
-        quest.state === "locked"
-          ? { ...quest, state: "available", lockedReason: undefined }
-          : quest
-      );
-    },
-    start(id: Quest["id"]) {
-      updateQuest(id, (quest) => {
-        if (quest.state !== "available") {
-          return quest;
+    start(id: string) {
+      updateQuestState(id, (quest) => {
+        if (quest.state === "available") {
+          quest.state = "active";
         }
-        const endAt =
-          quest.kind === "deposit_once"
-            ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-            : quest.kind === "highroller"
-              ? new Date(
-                  Date.now() +
-                    (quest.holdDays ?? 14) * 24 * 60 * 60 * 1000
-                ).toISOString()
-              : quest.endAt;
-        return {
-          ...quest,
-          state: "active",
-          startedAt: new Date().toISOString(),
-          endAt,
-          lockedReason: undefined,
-        };
+        return quest;
       });
+      QUESTS = QUESTS.map((quest) => recomputeQuest(quest));
     },
-    markClaimable(id: Quest["id"]) {
-      updateQuest(id, (quest) => ({
-        ...quest,
-        state: "claimable",
-        claimableAt: new Date().toISOString(),
-        progressPct: 100,
-      }));
-    },
-    claim(id: Quest["id"]) {
-      updateQuest(id, (quest) => {
-        if (quest.state !== "claimable") {
-          return quest;
+    claim(id: string) {
+      updateQuestState(id, (quest) => {
+        if (quest.state === "claimable") {
+          quest.state = "completed";
+          quest.completedAt = nowIso();
         }
-        return {
-          ...quest,
-          state: "completed",
-          completedAt: new Date().toISOString(),
-        };
+        return quest;
       });
+      QUESTS = QUESTS.map((quest) => recomputeQuest(quest));
     },
-    fail(id: Quest["id"]) {
-      setState(id, "failed");
+    onDepositConfirmed(vaultId: string, amountUsd: number) {
+      TXS.push({
+        type: "deposit",
+        vaultId,
+        amountUsd,
+        ts: nowIso(),
+      });
+      QUESTS = QUESTS.map((quest) => recomputeQuest(quest));
     },
-    onDepositConfirmed(amountUsd: number) {
-      const activeDepositQuest = QUESTS.find(
-        (quest) =>
-          quest.state === "active" &&
-          (quest.kind === "deposit_once" || quest.kind === "highroller") &&
-          amountUsd >= (quest as any).minDepositUsd
-      );
-      if (!activeDepositQuest) {
-        return;
-      }
-
-      this.markClaimable(activeDepositQuest.id);
-
-      if (activeDepositQuest.id === "welcome_5") {
-        this.setAvailable("deposit_50");
-      }
-      if (activeDepositQuest.id === "deposit_50") {
-        this.setAvailable("highroller_500");
-      }
+    onWithdrawConfirmed(vaultId: string, amountUsd: number) {
+      TXS.push({
+        type: "withdraw",
+        vaultId,
+        amountUsd,
+        ts: nowIso(),
+      });
+      QUESTS = QUESTS.map((quest) => recomputeQuest(quest));
     },
   };
 }

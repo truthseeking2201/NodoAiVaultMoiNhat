@@ -64,16 +64,11 @@ export function QuestDepositModal({
   const [amountUsd, setAmountUsd] = useState<number>(defaultAmountUsd);
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
       setStep("deposit");
       setAmountUsd(defaultAmountUsd);
     }
   }, [open, defaultAmountUsd]);
-
-  const closeModal = () => {
-    onOpenChange(false);
-    setStep("deposit");
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -148,14 +143,16 @@ export function QuestDepositModal({
                 is confirmed.
               </p>
               <p className="text-xs text-white/60">
-                This quest is now claimable. Claim to collect your XP Shares.
+                Hold your balance above the requirement until the timer finishes to complete this quest.
               </p>
             </div>
             <DialogFooter>
               <Button
                 className="border border-white/20 bg-white/10 text-white hover:bg-white/20"
                 onClick={() => {
-                  closeModal();
+                  onOpenChange(false);
+                  setStep("deposit");
+                  setAmountUsd(defaultAmountUsd);
                   onDepositConfirmed(amountUsd);
                 }}
               >
