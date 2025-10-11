@@ -1,11 +1,3 @@
-export type QuestId =
-  | "welcome_deposit_5"
-  | "deposit_50"
-  | "streak_3d"
-  | "hold_7"
-  | "hold_30"
-  | "highroller_500";
-
 export type QuestState =
   | "locked"
   | "available"
@@ -14,33 +6,20 @@ export type QuestState =
   | "completed"
   | "failed";
 
-export type QuestKind =
-  | "deposit_once"
-  | "streak"
-  | "hold_days"
-  | "highroller";
+export type QuestId =
+  | "welcome_deposit_5"
+  | "deposit_50"
+  | "highroller_500";
 
-export interface QuestDefinition {
+export interface DepositQuest {
   id: QuestId;
-  kind: QuestKind;
   title: string;
-  description?: string;
-  minDepositUsd?: number;
-  holdDays?: number;
-  streakDays?: number;
+  minDepositUsd: number;
   rewardXp: number;
-}
-
-export interface QuestRecord {
-  id: QuestId;
   state: QuestState;
   startedAt?: string;
   claimableAt?: string;
-  failedAt?: string;
   completedAt?: string;
-  progressPct?: number;
-  holdThresholdUsd?: number;
-  cooldownUntil?: string;
+  failedAt?: string;
+  targetVaultId?: string;
 }
-
-export type QuestRuntime = QuestDefinition & QuestRecord;

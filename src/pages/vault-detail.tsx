@@ -13,7 +13,7 @@ import VaultInfo from "@/components/vault-detail/sections/vault-info";
 import UserPositionValue from "@/components/vault-detail/sections/user-position-value";
 import VaultStreak from "@/components/vault-detail/sections/vault-streak";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
-import { PATH_ROUTER } from "@/config/router";
+import { PATH_ROUTER, getPathVaultDetail } from "@/config/router";
 import { useStreak } from "@/features/streak-vault/hooks/use-streak";
 import {
   useGetDepositVaults,
@@ -40,6 +40,8 @@ import { LpSimulatorModal } from "@/components/vault-detail/simulator/lp-simulat
 import { LpSimulatorMobileCTA } from "@/components/vault-detail/simulator/lp-simulator-mobile-cta";
 import { useLpSimulatorStore, ensureSimulatorInput } from "@/hooks/use-lp-simulator";
 import { isMockMode } from "@/config/mock";
+import { consumeDepositIntent, requeueDepositIntent } from "@/lib/deposit-intent";
+import { dispatchMissionDepositPrefill } from "@/lib/mission-events";
 
 export type VaultInfo = {
   label: string;
@@ -93,6 +95,34 @@ const VaultDetail = () => {
   const isDetailLoading = isLoadingVaultDetails || !vaultDetails;
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!vault_id) {
+      return;
+    }
+
+    const intent = consumeDepositIntent();
+    if (!intent) {
+      return;
+    }
+
+    if (intent.vaultId && intent.vaultId !== vault_id) {
+      requeueDepositIntent(intent);
+      navigate(getPathVaultDetail(intent.vaultId));
+      return;
+    }
+
+    const manageCard = document.getElementById("manage-liquidity");
+    if (manageCard) {
+      manageCard.scrollIntoView({ behavior: "smooth", block: "center" });
+      manageCard.classList.add("ring-2", "ring-amber-400/40", "rounded-2xl");
+      window.setTimeout(() => {
+        manageCard.classList.remove("ring-2", "ring-amber-400/40");
+      }, 1800);
+    }
+
+    dispatchMissionDepositPrefill(intent.amountUsd);
+  }, [vault_id, navigate]);
 
   const handleBackToHome = () => {
     refetchDepositVaults();

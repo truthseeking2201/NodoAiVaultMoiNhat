@@ -9,13 +9,18 @@ const DepositWithdraw = ({
   isDetailLoading?: boolean;
 }) => {
   return (
-    <DetailWrapper
-      title="Manage Liquidity"
-      isLoading={isDetailLoading}
-      loadingStyle="h-[520px] w-full"
+    <div
+      id="manage-liquidity"
+      className="transition-shadow duration-500 rounded-2xl"
     >
-      <Form vault_id={vault_id} />
-    </DetailWrapper>
+      <DetailWrapper
+        title="Manage Liquidity"
+        isLoading={isDetailLoading}
+        loadingStyle="h-[520px] w-full"
+      >
+        <Form vault_id={vault_id} />
+      </DetailWrapper>
+    </div>
   );
 };
 

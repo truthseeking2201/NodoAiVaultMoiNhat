@@ -382,6 +382,10 @@ const DepositForm = ({
   };
 
   const handleDone = () => {
+    const confirmedUsd =
+      typeof depositAmountUsd === "number" && depositAmountUsd > 0
+        ? depositAmountUsd
+        : Number(depositAmount) || 0;
     setValue("amount", "");
     setIsDepositModalOpen(false);
     setDepositSuccessData(null);
@@ -408,6 +412,15 @@ const DepositForm = ({
       variant: "success",
       hideClose: true,
     });
+
+    window.dispatchEvent(
+      new CustomEvent("deposit:confirmed", {
+        detail: {
+          amountUsd: confirmedUsd,
+          vaultId: vault_id,
+        },
+      })
+    );
   };
 
   return (
