@@ -6,7 +6,7 @@ type QuestCardProps = {
   quest: Quest;
   onStart: (id: string) => void;
   onClaim: (id: string) => void;
-  onDeposit: (quest: Quest, amountUsd: number) => void;
+  onDeposit: (quest: Quest, amountUsd?: number) => void;
 };
 
 const xpGradient = (rewardXp: number) => {
@@ -111,6 +111,8 @@ export function QuestCard({ quest, onStart, onClaim, onDeposit }: QuestCardProps
   const requirementCopy = buildRequirement(quest);
   const durationCopy = buildDuration(quest);
   const progress = computeProgress(quest);
+  const showProgress = progress != null;
+  const progressPercent = showProgress ? Math.round(progress * 100) : 0;
 
   const showStart =
     quest.state === "available" && quest.kind === "hold_existing";
@@ -121,8 +123,6 @@ export function QuestCard({ quest, onStart, onClaim, onDeposit }: QuestCardProps
     quest.kind === "deposit_and_hold"
       ? quest.runtime?.requiredDepositUsd ?? quest.minDepositUsd
       : 0;
-
-  const progressPercent = progress != null ? Math.round(progress * 100) : null;
 
   return (
     <motion.div
@@ -231,7 +231,7 @@ export function QuestCard({ quest, onStart, onClaim, onDeposit }: QuestCardProps
         </div>
       </div>
 
-      {progress != null ? (
+      {showProgress ? (
         <div className="mt-5 space-y-1">
           <div className="flex items-center justify-between text-[11px] uppercase tracking-wide text-white/45">
             <span>Progress</span>

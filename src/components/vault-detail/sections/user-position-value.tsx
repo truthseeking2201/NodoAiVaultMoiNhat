@@ -185,7 +185,7 @@ const UserPositionValue = ({
           {/*  */}
           <SectionMultiCard data={holding} lpToken={lpToken} />
           <EstLPBreakdown data={holding} />
-          <PnlBreakdown data={holding} />
+          <PnlBreakdown data={holding} vault={vault} />
           <Cashflow data={holding} />
         </div>
     </DetailWrapper>
