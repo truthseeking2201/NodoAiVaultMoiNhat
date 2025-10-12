@@ -7,12 +7,15 @@ import BigNumber from "bignumber.js";
 import { DepositToken } from "@/types/deposit-token.types";
 import { SUI_CONFIG } from "@/config";
 import { validateDepositBalance } from "./helpers";
+import { ReactNode } from "react";
 
 type DepositInputProps = {
   paymentTokens: DepositToken[];
   currentToken: DepositToken;
   depositAmountUsd: number;
   onTokenChange: (token: string) => void;
+  readOnly?: boolean;
+  footer?: ReactNode;
 };
 
 const DepositInput = ({
@@ -20,6 +23,8 @@ const DepositInput = ({
   currentToken,
   depositAmountUsd,
   onTokenChange,
+  readOnly = false,
+  footer,
 }: DepositInputProps) => {
   const { watch, setValue, control, clearErrors } =
     useFormContext<DepositForm>();
@@ -31,7 +36,8 @@ const DepositInput = ({
     .toNumber();
 
   return (
-    <Controller
+    <>
+      <Controller
       name="amount"
       control={control}
       rules={{
@@ -54,11 +60,14 @@ const DepositInput = ({
       render={({ field: { onChange, onBlur, value } }) => (
         <FormattedNumberInput
           value={value ? `${value}` : ""}
-          amountAvailable={`${currentToken?.balance}`}
+          amountAvailable={
+            readOnly ? undefined : `${currentToken?.balance}`
+          }
           maxDecimals={currentToken?.decimals}
           label="Deposit Amount"
           onChange={onChange}
           onBlur={onBlur}
+          readOnly={readOnly}
           maxBalanceAllowed={
             isSuitToken
               ? new BigNumber(currentToken?.balance)
@@ -108,6 +117,8 @@ const DepositInput = ({
         />
       )}
     />
+      {footer && <div className="mt-3">{footer}</div>}
+    </>
   );
 };
 

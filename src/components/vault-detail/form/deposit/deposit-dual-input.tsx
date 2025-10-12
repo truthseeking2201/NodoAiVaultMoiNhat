@@ -5,7 +5,7 @@ import {
   EstimateDualDepositToken,
 } from "@/types/deposit-token.types";
 import BigNumber from "bignumber.js";
-import { useMemo } from "react";
+import { useMemo, ReactNode } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { DualDepositForm } from "./dual-deposit-form";
 import { TriangleAlert } from "lucide-react";
@@ -18,6 +18,9 @@ type DepositInputProps = {
   tokenB: DepositToken;
   estimateDualDeposit: EstimateDualDepositToken;
   onTokenChange: (token: string) => void;
+  readOnly?: boolean;
+  footer?: ReactNode;
+  onManualAmountChange?: (tokenAddress: string, amount: number) => void;
 };
 
 const TEXT_ERROR_CLASS = "text-[#FF8077]";
@@ -58,6 +61,9 @@ const DepositDualInput = ({
   tokenB,
   estimateDualDeposit,
   onTokenChange,
+  readOnly = false,
+  footer,
+  onManualAmountChange,
 }: DepositInputProps) => {
   const { watch, control, formState, setValue } =
     useFormContext<DualDepositForm>();
@@ -92,7 +98,8 @@ const DepositDualInput = ({
     .toNumber();
 
   return (
-    <div className={cn(isMd && "deposit_input_v2_wrapper rounded-t-lg")}>
+    <>
+      <div className={cn(isMd && "deposit_input_v2_wrapper rounded-t-lg")}>
       <Controller
         name="token_a.amount"
         control={control}
@@ -116,7 +123,7 @@ const DepositDualInput = ({
         render={({ field: { onChange, onBlur, value } }) => (
           <FormattedNumberInput
             value={value ? `${value}` : ""}
-            amountAvailable={`${tokenA?.balance}`}
+            amountAvailable={readOnly ? undefined : `${tokenA?.balance}`}
             maxDecimals={tokenA?.decimals}
             onChange={(...args) => {
               const [value] = args;
@@ -131,11 +138,24 @@ const DepositDualInput = ({
                 setValue("token_b.amount", targetAmount.toString(), {
                   shouldValidate: true,
                 });
+                if (!readOnly) {
+                  onManualAmountChange?.(
+                    tokenB.token_address,
+                    Number(targetAmount)
+                  );
+                }
               }
               onChange(...args);
+              if (!readOnly) {
+                onManualAmountChange?.(
+                  tokenA.token_address,
+                  Number(value || 0)
+                );
+              }
               onTokenChange(tokenA.token_address);
             }}
             onBlur={onBlur}
+            readOnly={readOnly}
             maxBalanceAllowed={
               tokenA.token_address === SUI_CONFIG.coinType
                 ? new BigNumber(tokenA?.balance)
@@ -234,7 +254,7 @@ const DepositDualInput = ({
         render={({ field: { onChange, onBlur, value } }) => (
           <FormattedNumberInput
             value={value ? `${value}` : ""}
-            amountAvailable={`${tokenB?.balance}`}
+            amountAvailable={readOnly ? undefined : `${tokenB?.balance}`}
             maxDecimals={tokenB?.decimals}
             className={cn(!isMd && "rounded-lg")}
             label={isMd ? "" : "Deposit Amount"}
@@ -251,11 +271,24 @@ const DepositDualInput = ({
                 setValue("token_a.amount", targetAmount.toString(), {
                   shouldValidate: true,
                 });
+                if (!readOnly) {
+                  onManualAmountChange?.(
+                    tokenA.token_address,
+                    Number(targetAmount)
+                  );
+                }
               }
               onChange(...args);
+              if (!readOnly) {
+                onManualAmountChange?.(
+                  tokenB.token_address,
+                  Number(value || 0)
+                );
+              }
               onTokenChange(tokenB.token_address);
             }}
             onBlur={onBlur}
+            readOnly={readOnly}
             maxBalanceAllowed={
               tokenB.token_address === SUI_CONFIG.coinType
                 ? new BigNumber(tokenB?.balance)
@@ -307,6 +340,8 @@ const DepositDualInput = ({
         )}
       />
     </div>
+      {footer && <div className="mt-3">{footer}</div>}
+    </>
   );
 };
 
