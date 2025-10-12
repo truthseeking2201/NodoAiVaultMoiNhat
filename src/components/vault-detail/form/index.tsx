@@ -10,6 +10,11 @@ import {
   addMissionDepositPrefillListener,
   MissionDepositPrefillDetail,
 } from "@/lib/mission-events";
+import {
+  addDepositPortalListener,
+  consumeDepositPortalRequest,
+  type DepositPortalPayload,
+} from "@/lib/deposit-portal";
 
 const Form = ({ vault_id }: { vault_id: string }) => {
   const [tab, setTab] = useState<string>("deposit");
@@ -43,6 +48,32 @@ const Form = ({ vault_id }: { vault_id: string }) => {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    const applyPortalRequest = (payload?: DepositPortalPayload | null) => {
+      if (!payload) return;
+      if (payload.vaultId && payload.vaultId !== vault_id) {
+        return;
+      }
+      setTab("deposit");
+      if (Number.isFinite(payload.amountUsd) && payload.amountUsd > 0) {
+        setPrefillAmountUsd(payload.amountUsd);
+      } else {
+        setPrefillAmountUsd(null);
+      }
+    };
+
+    applyPortalRequest(consumeDepositPortalRequest());
+
+    const unsubscribe = addDepositPortalListener(
+      (event: CustomEvent<DepositPortalPayload>) => {
+        applyPortalRequest(event.detail);
+      }
+    );
+    return () => {
+      unsubscribe();
+    };
+  }, [vault_id]);
 
   return (
     <div>

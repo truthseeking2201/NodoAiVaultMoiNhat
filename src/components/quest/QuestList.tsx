@@ -6,7 +6,7 @@ type QuestListProps = {
   emptyText: string;
   onStart: (id: string) => void;
   onClaim: (id: string) => void;
-  onDeposit: (id: string, amountUsd?: number) => void;
+  onDeposit: (id: string, amountUsd: number) => void;
 };
 
 export function QuestList({
@@ -29,7 +29,7 @@ export function QuestList({
       {items.map((quest) => (
         <QuestRow
           key={quest.id}
-          quest={quest}
+          q={quest}
           onStart={onStart}
           onClaim={onClaim}
           onDeposit={onDeposit}

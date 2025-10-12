@@ -12,7 +12,7 @@ type QuestTabsProps = {
   quests: Quest[];
   onStart: (id: string) => void;
   onClaim: (id: string) => void;
-  onDeposit: (id: string, amountUsd?: number) => void;
+  onDeposit: (id: string, amountUsd: number) => void;
 };
 
 const emptyCopy: Record<QuestTab, string> = {
@@ -67,13 +67,13 @@ export function QuestTabs({
 
   return (
     <Tabs value={value} onValueChange={(next) => setValue(next as QuestTab)}>
-      <div className="sticky top-[64px] z-10 rounded-xl border border-white/10 bg-black/50 p-2 backdrop-blur supports-[backdrop-filter]:bg-black/40">
+      <div className="sticky top-[64px] z-10 rounded-xl border border-white/10 bg-black/60 p-2 backdrop-blur supports-[backdrop-filter]:bg-black/45">
         <TabsList className="grid w-full grid-cols-1 gap-2 bg-transparent md:grid-cols-3 lg:grid-cols-6">
           {questTabs.map((tab) => (
             <TabsTrigger
               key={tab.value}
               value={tab.value}
-              className="rounded-lg bg-transparent px-3 py-2 text-xs font-medium text-white/70 transition data-[state=active]:bg-white/10 data-[state=active]:text-white md:text-sm"
+              className="rounded-xl border border-white/10 px-4 py-2 text-xs font-medium text-white/70 transition hover:bg-white/5 data-[state=active]:bg-white/10 data-[state=active]:text-white md:text-sm"
             >
               {tab.label} ({counts[tab.value]})
             </TabsTrigger>

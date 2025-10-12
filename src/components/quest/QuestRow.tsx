@@ -3,10 +3,10 @@ import type { Quest } from "@/lib/quest-types";
 import { Button } from "@/components/ui/button";
 
 type QuestRowProps = {
-  quest: Quest;
+  q: Quest;
   onStart: (id: string) => void;
   onClaim: (id: string) => void;
-  onDeposit: (id: string, amountUsd?: number) => void;
+  onDeposit: (id: string, amountUsd: number) => void;
 };
 
 const formatUsd = (value?: number) =>
@@ -19,45 +19,43 @@ const xpTone = (rewardXp: number) => {
   return "text-amber-300";
 };
 
-const statusMeta = (quest: Quest) => {
-  switch (quest.state) {
+const getStatusPill = (state: Quest["state"]) => {
+  switch (state) {
     case "claimable":
       return {
-        label: "Claimable",
-        className:
-          "bg-emerald-500/10 text-emerald-300 border border-emerald-400/30",
+        label: "CLAIMABLE",
+        cls: "bg-emerald-500/10 text-emerald-300 border border-emerald-400/30",
       };
     case "active":
       return {
-        label: "In Progress",
-        className:
-          "bg-cyan-500/10 text-cyan-300 border border-cyan-400/30",
+        label: "IN PROGRESS",
+        cls: "bg-cyan-500/10 text-cyan-300 border border-cyan-400/30",
       };
     case "available":
       return {
-        label: "Available",
-        className: "bg-white/10 text-white/75 border border-white/20",
+        label: "AVAILABLE",
+        cls: "bg-white/10 text-white/70 border border-white/18",
       };
     case "completed":
       return {
-        label: "Completed",
-        className: "bg-white/10 text-white/70 border border-white/20",
+        label: "COMPLETED",
+        cls: "bg-white/10 text-white/65 border border-white/18",
       };
     case "failed":
       return {
-        label: "Failed",
-        className: "bg-rose-500/10 text-rose-300 border border-rose-400/30",
+        label: "FAILED",
+        cls: "bg-rose-500/10 text-rose-300 border border-rose-400/30",
       };
     default:
       return {
-        label: "Locked",
-        className: "bg-white/10 text-white/60 border border-white/20",
+        label: "LOCKED",
+        cls: "bg-white/10 text-white/60 border border-white/18",
       };
   }
 };
 
-const holdDurationCopy = (quest: Quest) => {
-  const hours = quest.holdHours;
+const questDurationCopy = (quest: Quest) => {
+  const hours = quest.holdHours ?? 0;
   if (!hours) return null;
   if (hours % 24 === 0) {
     const days = hours / 24;
@@ -66,33 +64,20 @@ const holdDurationCopy = (quest: Quest) => {
   return `Hold for ${hours}h`;
 };
 
-const requirementCopy = (quest: Quest) => {
+const questRequirementCopy = (quest: Quest) => {
   if (quest.kind === "deposit_and_hold") {
     const required = quest.runtime?.requiredDepositUsd ?? quest.minDepositUsd;
     return `Deposit ≥ ${formatUsd(required)}`;
   }
   if (quest.kind === "hold_existing") {
-    const threshold = quest.runtime?.thresholdUsd ?? quest.holdThresholdUsd;
+    const threshold =
+      quest.runtime?.thresholdUsd ?? quest.holdThresholdUsd ?? 0;
     return `Balance ≥ ${formatUsd(threshold)}`;
   }
   return null;
 };
 
-const progressPercent = (quest: Quest) => {
-  if (quest.state !== "active") return null;
-  const required = quest.runtime?.holdRequiredMs;
-  const accumulated = quest.runtime?.holdAccumulatedMs;
-  if (
-    typeof required === "number" &&
-    required > 0 &&
-    typeof accumulated === "number"
-  ) {
-    return Math.min(100, Math.round((accumulated / required) * 100));
-  }
-  return null;
-};
-
-const vaultLabel = (quest: Quest) => {
+const questVaultCopy = (quest: Quest) => {
   if (!quest.vaultIdRequired) return null;
   if (quest.vaultIdRequired === "any") return "Vault: Any";
   if (quest.vaultIdRequired === "vault_usdc_sui") return "Vault: USDC/SUI";
@@ -101,112 +86,204 @@ const vaultLabel = (quest: Quest) => {
   return `Vault: ${quest.vaultIdRequired}`;
 };
 
-export function QuestRow({ quest, onStart, onClaim, onDeposit }: QuestRowProps) {
-  const status = statusMeta(quest);
-  const xpClass = xpTone(quest.rewardXp);
-  const duration = holdDurationCopy(quest);
-  const requirement = requirementCopy(quest);
-  const progress = progressPercent(quest);
-  const depositAmount =
-    quest.kind === "deposit_and_hold"
-      ? quest.runtime?.requiredDepositUsd ?? quest.minDepositUsd
-      : undefined;
+const computeProgressPct = (quest: Quest) => {
+  if (quest.state === "claimable") {
+    return 100;
+  }
+  const requiredMs = quest.runtime?.holdRequiredMs;
+  const accumulatedMs = quest.runtime?.holdAccumulatedMs;
+  if (
+    quest.state === "active" &&
+    typeof requiredMs === "number" &&
+    requiredMs > 0 &&
+    typeof accumulatedMs === "number"
+  ) {
+    return Math.min(
+      100,
+      Math.max(0, Math.round((accumulatedMs / requiredMs) * 100))
+    );
+  }
+  if (quest.state === "active" && quest.startedAt && quest.endAt) {
+    const start = Date.parse(quest.startedAt);
+    const end = Date.parse(quest.endAt);
+    if (Number.isFinite(start) && Number.isFinite(end) && end > start) {
+      const now = Date.now();
+      const pct = Math.round(((now - start) * 100) / (end - start));
+      return Math.min(100, Math.max(0, pct));
+    }
+  }
+  return null;
+};
 
-  const vault = vaultLabel(quest);
+const getProgressVisual = (quest: Quest) => {
+  const pct = computeProgressPct(quest);
+  if (pct == null) {
+    if (quest.state === "claimable") {
+      return {
+        pct: 100,
+        label: "Ready to claim",
+        barClass: "bg-emerald-400/80",
+      };
+    }
+    return null;
+  }
 
-  const showStart = quest.state === "available";
-  const showDepositButton =
-    quest.kind === "deposit_and_hold" &&
-    (quest.state === "available" || quest.state === "active");
+  if (quest.state === "claimable") {
+    return {
+      pct: 100,
+      label: "Ready to claim",
+      barClass: "bg-emerald-400/80",
+    };
+  }
+
+  if (quest.state !== "active") {
+    return null;
+  }
+
+  let label = "Progress";
+  let barClass = "bg-white/30";
+  if (pct <= 0) {
+    label = "Not started";
+    barClass = "bg-white/20";
+  } else if (pct < 34) {
+    label = "Warming up…";
+    barClass = "bg-cyan-400/70";
+  } else if (pct < 67) {
+    label = "Holding steady…";
+    barClass = "bg-purple-400/70";
+  } else if (pct < 100) {
+    label = "Almost there…";
+    barClass = "bg-amber-400/70";
+  } else {
+    label = "Completed";
+    barClass = "bg-emerald-400/80";
+  }
+
+  return {
+    pct,
+    label,
+    barClass,
+  };
+};
+
+const getDepositAmount = (quest: Quest) =>
+  quest.kind === "deposit_and_hold"
+    ? quest.runtime?.requiredDepositUsd ?? quest.minDepositUsd
+    : undefined;
+
+export function QuestRow({ q, onStart, onClaim, onDeposit }: QuestRowProps) {
+  const status = getStatusPill(q.state);
+  const xpClass = xpTone(q.rewardXp);
+  const vault = questVaultCopy(q);
+  const requirement = questRequirementCopy(q);
+  const duration = questDurationCopy(q);
+  const progress = getProgressVisual(q);
+  const depositAmount = getDepositAmount(q);
+
+  const handlePrimaryAction = () => {
+    if (q.state === "claimable") {
+      onClaim(q.id);
+      return;
+    }
+
+    if (q.state === "available") {
+      onStart(q.id);
+      if (depositAmount != null) {
+        onDeposit(q.id, depositAmount);
+      }
+      return;
+    }
+
+    if (q.state === "active" && depositAmount != null) {
+      onDeposit(q.id, depositAmount);
+    }
+  };
+
+  const primaryAction =
+    q.state === "claimable"
+      ? { label: "Claim XP", tone: "claim" as const }
+      : q.state === "available" && depositAmount != null
+        ? { label: "Start & Deposit", tone: "primary" as const }
+        : q.state === "available"
+          ? { label: "Start Quest", tone: "primary" as const }
+          : q.state === "active" && depositAmount != null
+            ? { label: "Manage Deposit", tone: "secondary" as const }
+            : null;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-3 transition hover:bg-white/10 md:p-4">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="min-w-0 space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className={clsx(
-                "inline-flex min-w-[90px] items-center justify-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
-                status.className
-              )}
-            >
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-5 transition hover:bg-white/10 md:p-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className={clsx("text-[12px] px-2 py-0.5 rounded-full", status.cls)}>
               {status.label}
             </span>
             <span
               className={clsx(
-                "inline-flex items-center rounded-full border border-white/15 bg-white/8 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+                "text-[12px] px-2 py-0.5 rounded-full border border-white/12 bg-white/6",
                 xpClass
               )}
             >
-              XP {quest.rewardXp.toLocaleString()}
+              XP {q.rewardXp.toLocaleString()}
             </span>
           </div>
-          <div className="truncate text-sm font-semibold text-white sm:text-base">
-            {quest.title}
+
+          <div className="mt-2 text-[18px] font-semibold leading-tight text-white">
+            {q.title}
           </div>
-          <div className="text-xs text-white/55 sm:text-[13px]">
-            {quest.description}
+          <div className="mt-1 text-[13px] text-white/65">
+            {q.description}
           </div>
-          <div className="mt-2 flex flex-wrap gap-2 text-[12px] text-white/70">
+
+          <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-white/75">
             {vault ? (
-              <span className="rounded-full border border-white/15 bg-white/8 px-2 py-0.5">
+              <span className="px-2 py-0.5 rounded-full border border-white/12 bg-white/6">
                 {vault}
               </span>
             ) : null}
             {requirement ? (
-              <span className="rounded-full border border-white/15 bg-white/8 px-2 py-0.5">
+              <span className="px-2 py-0.5 rounded-full border border-white/12 bg-white/6">
                 {requirement}
               </span>
             ) : null}
             {duration ? (
-              <span className="rounded-full border border-white/15 bg-white/8 px-2 py-0.5">
+              <span className="px-2 py-0.5 rounded-full border border-white/12 bg-white/6">
                 {duration}
               </span>
             ) : null}
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 md:justify-end">
-          {showStart ? (
+        <div className="flex items-center gap-2 md:shrink-0">
+          {primaryAction ? (
             <Button
-              variant="outline"
-              className="border-white/20 bg-white/5 text-white hover:bg-white/10"
-              onClick={() => onStart(quest.id)}
+              className={clsx(
+                primaryAction.tone === "claim" &&
+                  "border border-emerald-400/30 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25",
+                primaryAction.tone === "primary" &&
+                  "border border-white/18 bg-white/10 text-white hover:bg-white/18",
+                primaryAction.tone === "secondary" &&
+                  "border border-white/18 bg-white/8 text-white hover:bg-white/16"
+              )}
+              onClick={handlePrimaryAction}
             >
-              Start
-            </Button>
-          ) : null}
-          {showDepositButton ? (
-            <Button
-              className="border border-white/20 bg-white/10 text-white hover:bg-white/20"
-              onClick={() => onDeposit(quest.id, depositAmount)}
-            >
-              {quest.state === "available"
-                ? `Deposit ${formatUsd(depositAmount)}`
-                : "Manage Deposit"}
-            </Button>
-          ) : null}
-          {quest.state === "claimable" ? (
-            <Button
-              className="border border-emerald-400/30 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25"
-              onClick={() => onClaim(quest.id)}
-            >
-              Claim XP
+              {primaryAction.label}
             </Button>
           ) : null}
         </div>
       </div>
 
-      {progress != null ? (
-        <div className="mt-3">
-          <div className="h-[2px] w-full rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-purple-400/80 to-purple-300/60"
-              style={{ width: `${progress}%` }}
-            />
+      {progress ? (
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-[11px] text-white/55">
+            <span>{progress.label}</span>
+            <span>{progress.pct}%</span>
           </div>
-          <div className="mt-1 text-[11px] uppercase tracking-wide text-white/50">
-            {progress}% complete
+          <div className="mt-1 h-[2px] rounded-full bg-white/12">
+            <div
+              className={clsx("h-full rounded-full", progress.barClass)}
+              style={{ width: `${progress.pct}%` }}
+            />
           </div>
         </div>
       ) : null}

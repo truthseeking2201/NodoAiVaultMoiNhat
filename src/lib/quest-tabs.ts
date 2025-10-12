@@ -14,7 +14,7 @@ export const questTabs: { value: QuestTab; label: string }[] = [
   { value: "available", label: "Available Now" },
   { value: "upcoming", label: "Upcoming & Locked" },
   { value: "completed", label: "Completed" },
-  { value: "failed", label: "Needs Another Attempt" },
+  { value: "failed", label: "Try Again" },
 ];
 
 export function mapQuestToTab(state: Quest["state"]): QuestTab {

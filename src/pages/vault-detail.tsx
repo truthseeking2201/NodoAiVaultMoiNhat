@@ -40,6 +40,7 @@ import { LpSimulatorModal } from "@/components/vault-detail/simulator/lp-simulat
 import { LpSimulatorMobileCTA } from "@/components/vault-detail/simulator/lp-simulator-mobile-cta";
 import { useLpSimulatorStore, ensureSimulatorInput } from "@/hooks/use-lp-simulator";
 import { isMockMode } from "@/config/mock";
+import { VaultQuestTab } from "@/components/quest/VaultQuestTab";
 
 export type VaultInfo = {
   label: string;
@@ -243,7 +244,7 @@ const VaultDetail = () => {
         <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
           <UnderlineTabs
             activeTab={activeTab}
-            labels={["Overview", "Your Holdings"]}
+            labels={["Overview", "Your Holdings", "Quests"]}
             labelClassName="max-md:text-base max-md:px-0"
             tabClassName="max-md:space-x-4"
             onActiveTabChange={handleTabSwitch}
@@ -311,7 +312,7 @@ const VaultDetail = () => {
           <div className="mt-4 mb-3 flex justify-between">
             <UnderlineTabs
               activeTab={activeTab}
-              labels={["Overview", "Your Holdings"]}
+              labels={["Overview", "Your Holdings", "Quests"]}
               labelClassName="max-md:text-base max-md:px-0"
               tabClassName="max-md:space-x-4"
               onActiveTabChange={handleTabSwitch}
@@ -409,6 +410,10 @@ const VaultDetail = () => {
                 <LpSimulatorCard vaultId={vault_id} />
               </div>
             )}
+          </div>
+          {/* Quests */}
+          <div className={cn(activeTab !== 2 && "hidden")}>
+            <VaultQuestTab vaultId={vault_id} />
           </div>
           {/* Left sessions - end */}
         </div>
