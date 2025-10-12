@@ -6,6 +6,7 @@ import type { Quest } from "@/lib/quest-types";
 import { openDepositModal } from "@/lib/deposit-portal";
 import { useNavigate } from "react-router-dom";
 import { getPathVaultDetail } from "@/config/router";
+import { resolveQuestVaultId } from "@/lib/quest-utils";
 
 export default function QuestPage() {
   const { quests, start, claim } = useQuestV2();
@@ -44,10 +45,7 @@ export default function QuestPage() {
     if (!resolvedAmount || resolvedAmount <= 0) {
       return;
     }
-    const targetVaultId =
-      quest.vaultIdRequired && quest.vaultIdRequired !== "any"
-        ? quest.vaultIdRequired
-        : undefined;
+    const targetVaultId = resolveQuestVaultId(quest);
 
     if (targetVaultId) {
       navigate(getPathVaultDetail(targetVaultId));

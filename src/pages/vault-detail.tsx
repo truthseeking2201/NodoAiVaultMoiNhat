@@ -20,6 +20,7 @@ import {
   useGetLpToken,
   useVaultBasicDetails,
   useVaultMetricUnitStore,
+  useMarketSurveyOverview,
 } from "@/hooks";
 import { useWallet } from "@/hooks/use-wallet";
 import { cn, formatAmount } from "@/lib/utils";
@@ -40,7 +41,7 @@ import { LpSimulatorModal } from "@/components/vault-detail/simulator/lp-simulat
 import { LpSimulatorMobileCTA } from "@/components/vault-detail/simulator/lp-simulator-mobile-cta";
 import { useLpSimulatorStore, ensureSimulatorInput } from "@/hooks/use-lp-simulator";
 import { isMockMode } from "@/config/mock";
-import { VaultQuestTab } from "@/components/quest/VaultQuestTab";
+import { MarketSurveyOverview } from "@/components/vault-detail/sections/market-survey-overview";
 
 export type VaultInfo = {
   label: string;
@@ -67,6 +68,11 @@ const VaultDetail = () => {
     isFetching: isFetchingDepositVaults,
     refetch: refetchDepositVaults,
   } = useGetDepositVaults();
+  const {
+    data: marketSurvey,
+    isLoading: isLoadingMarketSurvey,
+    error: marketSurveyError,
+  } = useMarketSurveyOverview(vault_id ?? undefined);
   const lpToken = useGetLpToken(vaultDetails?.vault_lp_token, vault_id);
   const lpBalance = lpToken?.balance ?? "0";
   const hasLPBalance = new BigNumber(lpBalance).gt(0);
@@ -244,7 +250,7 @@ const VaultDetail = () => {
         <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
           <UnderlineTabs
             activeTab={activeTab}
-            labels={["Overview", "Your Holdings", "Quests"]}
+            labels={["Overview", "Your Holdings"]}
             labelClassName="max-md:text-base max-md:px-0"
             tabClassName="max-md:space-x-4"
             onActiveTabChange={handleTabSwitch}
@@ -312,7 +318,7 @@ const VaultDetail = () => {
           <div className="mt-4 mb-3 flex justify-between">
             <UnderlineTabs
               activeTab={activeTab}
-              labels={["Overview", "Your Holdings", "Quests"]}
+              labels={["Overview", "Your Holdings"]}
               labelClassName="max-md:text-base max-md:px-0"
               tabClassName="max-md:space-x-4"
               onActiveTabChange={handleTabSwitch}
@@ -356,6 +362,12 @@ const VaultDetail = () => {
               vault_id={vault_id}
               isDetailLoading={isDetailLoading}
               vault={vaultDetails}
+            />
+            <div className="mt-6" />
+            <MarketSurveyOverview
+              data={marketSurvey}
+              isLoading={isLoadingMarketSurvey}
+              error={marketSurveyError?.message}
             />
             <div className="mt-6" />
             <VaultActivities
@@ -410,10 +422,6 @@ const VaultDetail = () => {
                 <LpSimulatorCard vaultId={vault_id} />
               </div>
             )}
-          </div>
-          {/* Quests */}
-          <div className={cn(activeTab !== 2 && "hidden")}>
-            <VaultQuestTab vaultId={vault_id} />
           </div>
           {/* Left sessions - end */}
         </div>

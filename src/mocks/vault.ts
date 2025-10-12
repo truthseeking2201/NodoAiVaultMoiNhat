@@ -15,6 +15,7 @@ import { NdlpPriceChartData } from "@/types/vault";
 import { NdlpTokenPrice } from "@/hooks/use-token-price";
 import { VaultDepositToken } from "@/types/payment-token.types";
 import { TokenUsdPrice } from "@/hooks/use-token-price";
+import type { MarketSurveyOverview } from "@/types/market-survey";
 
 const baseApr: VaultApr = {
   rolling_7day_apr: "18.25",
@@ -264,6 +265,47 @@ export const mockDepositVaults: DepositVaultConfig[] = [
     ...secondApr,
   } as DepositVaultConfig & VaultApr,
 ];
+
+const MARKET_SURVEY_BASE: Record<string, MarketSurveyOverview> = {
+  "0xvault-usdc-sui": {
+    vaultName: "NODO AI - USDC/SUI",
+    safetyScore: 92.4,
+    recommendation: "SAFE_ENTRY",
+    confidence: "HIGH",
+    trend: 84,
+    volatility: 3.4,
+    rsi: 58,
+    liquidity: 78,
+    sentiment: "Optimistic",
+    tvl: 19_469_032,
+    tvlChange: 8.7,
+    updatedAt: new Date().toISOString(),
+  },
+  "0xvault-btc-eth": {
+    vaultName: "NODO AI - BTC/ETH",
+    safetyScore: 71.8,
+    recommendation: "WATCHLIST",
+    confidence: "MEDIUM",
+    trend: 62,
+    volatility: 6.1,
+    rsi: 64,
+    liquidity: 65,
+    sentiment: "Greed",
+    tvl: 32_845_210,
+    tvlChange: -3.1,
+    updatedAt: new Date().toISOString(),
+  },
+};
+
+export const mockMarketSurveyOverview = (
+  vaultId: string
+): MarketSurveyOverview => {
+  const fallback = MARKET_SURVEY_BASE["0xvault-usdc-sui"];
+  return {
+    ...(MARKET_SURVEY_BASE[vaultId] ?? fallback),
+    updatedAt: new Date().toISOString(),
+  };
+};
 
 export const mockVaultBasicDetails: Record<string, BasicVaultDetailsType> = {
   "0xvault-usdc-sui": {

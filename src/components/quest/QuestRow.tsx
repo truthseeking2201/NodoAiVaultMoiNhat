@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import type { Quest } from "@/lib/quest-types";
 import { Button } from "@/components/ui/button";
+import { questVaultLabel } from "@/lib/quest-utils";
 
 type QuestRowProps = {
   q: Quest;
@@ -75,15 +76,6 @@ const questRequirementCopy = (quest: Quest) => {
     return `Balance ≥ ${formatUsd(threshold)}`;
   }
   return null;
-};
-
-const questVaultCopy = (quest: Quest) => {
-  if (!quest.vaultIdRequired) return null;
-  if (quest.vaultIdRequired === "any") return "Vault: Any";
-  if (quest.vaultIdRequired === "vault_usdc_sui") return "Vault: USDC/SUI";
-  if (quest.vaultIdRequired === "vault_usdt_sui") return "Vault: USDT/SUI";
-  if (quest.vaultIdRequired === "vault_sui") return "Vault: SUI";
-  return `Vault: ${quest.vaultIdRequired}`;
 };
 
 const computeProgressPct = (quest: Quest) => {
@@ -174,7 +166,7 @@ const getDepositAmount = (quest: Quest) =>
 export function QuestRow({ q, onStart, onClaim, onDeposit }: QuestRowProps) {
   const status = getStatusPill(q.state);
   const xpClass = xpTone(q.rewardXp);
-  const vault = questVaultCopy(q);
+  const vault = questVaultLabel(q);
   const requirement = questRequirementCopy(q);
   const duration = questDurationCopy(q);
   const progress = getProgressVisual(q);
@@ -257,6 +249,7 @@ export function QuestRow({ q, onStart, onClaim, onDeposit }: QuestRowProps) {
         <div className="flex items-center gap-2 md:shrink-0">
           {primaryAction ? (
             <Button
+              type="button"
               className={clsx(
                 primaryAction.tone === "claim" &&
                   "border border-emerald-400/30 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25",
@@ -265,7 +258,11 @@ export function QuestRow({ q, onStart, onClaim, onDeposit }: QuestRowProps) {
                 primaryAction.tone === "secondary" &&
                   "border border-white/18 bg-white/8 text-white hover:bg-white/16"
               )}
-              onClick={handlePrimaryAction}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                handlePrimaryAction();
+              }}
             >
               {primaryAction.label}
             </Button>

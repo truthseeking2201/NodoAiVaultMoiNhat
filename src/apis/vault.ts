@@ -4,6 +4,7 @@ import {
 } from "@/types/vault-config.types";
 import http from "@/utils/http";
 import { isMockMode } from "@/config/mock";
+import type { MarketSurveyOverview } from "@/types/market-survey";
 import {
   mockDepositVaults,
   mockExecutionProfitData,
@@ -19,6 +20,7 @@ import {
   mockVaultNdlpPriceChart,
   mockVaultSwapDepositInfo,
   mockWithdrawalRequests,
+  mockMarketSurveyOverview,
 } from "@/mocks";
 
 const NODO_URL = import.meta.env.VITE_NODO_APP_URL;
@@ -89,6 +91,8 @@ const URLS = {
     `/data-management/external/user/ndlp-price-chart?vault_id=${vaultId}&range=${range}`,
   vaultNdlpPriceChart: (vaultId: string, range: string) =>
     `/data-management/external/vaults/${vaultId}/ndlp-price-chart?range=${range}`,
+  marketSurvey: (vaultId: string) =>
+    `${NODO_URL}/ai/market-survey/vaults/${vaultId}`,
 };
 
 export const getLatestWithdrawal = (sender_address: string) => {
@@ -305,4 +309,13 @@ export const getVaultNdlpPriceChart = (vaultId: string, range: string) => {
     return Promise.resolve(mockVaultNdlpPriceChart);
   }
   return http.get(URLS.vaultNdlpPriceChart(vaultId, range));
+};
+
+export const getMarketSurveyOverview = (
+  vaultId: string
+): Promise<MarketSurveyOverview> => {
+  if (isMockMode) {
+    return Promise.resolve(mockMarketSurveyOverview(vaultId));
+  }
+  return http.get(URLS.marketSurvey(vaultId)) as Promise<MarketSurveyOverview>;
 };
