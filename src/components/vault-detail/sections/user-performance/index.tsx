@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   useVaultPerformanceSummary,
   useVaultPerformanceDistribution,
@@ -143,7 +143,7 @@ const SummaryCard = ({
 
         <div className="flex flex-col items-end gap-2">
           <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-medium">
-            ★ 24h Fees/Rewards $
+            24h Fees/Rewards $
             {Math.round(Math.max(0, safeFees)).toLocaleString()}
           </span>
           <span className="px-3 py-1 rounded-full border border-white/10 text-white/70 text-xs">
@@ -300,6 +300,8 @@ const PeerTable = ({
   const currentPage = Math.min(totalPages, Math.max(1, page + 1));
   const youRank = you?.rank;
   const [pendingScroll, setPendingScroll] = useState(false);
+  const [flashYouRow, setFlashYouRow] = useState(false);
+  const flashTimeoutRef = useRef<number>();
 
   const handleFindMe = () => {
     if (!youRank) {
@@ -311,7 +313,15 @@ const PeerTable = ({
       onPageChange(targetPage);
     } else {
       const node = document.querySelector<HTMLElement>("[data-you-row='true']");
-      node?.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (node) {
+        node.scrollIntoView({ behavior: "smooth", block: "center" });
+        setFlashYouRow(true);
+        window.clearTimeout(flashTimeoutRef.current);
+        flashTimeoutRef.current = window.setTimeout(
+          () => setFlashYouRow(false),
+          1500
+        );
+      }
     }
   };
 
@@ -322,9 +332,21 @@ const PeerTable = ({
     const node = document.querySelector<HTMLElement>("[data-you-row='true']");
     if (node) {
       node.scrollIntoView({ behavior: "smooth", block: "center" });
+      setFlashYouRow(true);
+      window.clearTimeout(flashTimeoutRef.current);
+      flashTimeoutRef.current = window.setTimeout(
+        () => setFlashYouRow(false),
+        1500
+      );
       setPendingScroll(false);
     }
   }, [rows, pendingScroll]);
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(flashTimeoutRef.current);
+    };
+  }, []);
 
   return (
     <div className="rounded-2xl border border-white/10 bg-[#121317] p-5">
@@ -397,8 +419,10 @@ const PeerTable = ({
                   key={`${row.rank}-${row.alias}`}
                   data-you-row={row.isYou ? "true" : undefined}
                   className={cn(
-                    "border-white/5",
-                    row.isYou && "border-l-4 border-l-emerald-400 bg-emerald-500/10"
+                    "border-white/5 transition-shadow",
+                    row.isYou &&
+                      "border-l-4 border-l-emerald-400 bg-emerald-500/10",
+                    row.isYou && flashYouRow && "shadow-[0_0_0_2px_rgba(99,102,241,0.4)]"
                   )}
                 >
                   <TableCell className="font-mono text-sm text-white/80">
