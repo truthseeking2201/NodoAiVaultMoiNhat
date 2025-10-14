@@ -128,20 +128,11 @@ const NotEnoughPeers = () => (
 
 const SummaryCard = ({
   pnlUsd,
-  pnlPct,
   depositsUsd,
-  percentile,
 }: {
   pnlUsd: number;
-  pnlPct: number;
   depositsUsd: number;
-  percentile: number;
 }) => {
-  const normalizedPercentile = Math.max(
-    0,
-    Math.min(1, Number.isFinite(percentile) ? percentile : 0)
-  );
-  const aheadPercent = Math.round(normalizedPercentile * 100);
   const pnlUsdDisplay = formatUsd(pnlUsd);
   const depositsDisplay = formatUsd(depositsUsd);
 
@@ -157,19 +148,6 @@ const SummaryCard = ({
             )}
           >
             {pnlUsdDisplay}
-          </div>
-          <div className="mt-1 text-sm">
-            <span
-              className={cn(
-                "font-medium",
-                pnlPct >= 0 ? "text-emerald-300" : "text-red-300"
-              )}
-            >
-              Your PnL (%): {formatPercent(pnlPct)}
-            </span>
-            <span className="ml-3 text-white/60">
-              • You’re ahead of {aheadPercent}% of peers
-            </span>
           </div>
         </div>
 
@@ -618,9 +596,7 @@ const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) 
           <section className="grid grid-cols-1 gap-6">
             <SummaryCard
               pnlUsd={summary.your.pnlUsd}
-              pnlPct={summary.your.pnlPct}
               depositsUsd={summary.your.depositsUsd}
-              percentile={summary.peer.percentilePnlUsd ?? 0}
             />
             {insufficientPeers || !distribution ? (
               <NotEnoughPeers />
