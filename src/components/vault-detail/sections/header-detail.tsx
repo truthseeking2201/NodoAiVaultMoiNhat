@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -24,6 +25,7 @@ type VaultInfoProps = {
   isDetailLoading: boolean;
   vaultDetails?: BasicVaultDetailsType;
   vaultId?: string;
+  onOpenSimulator: () => void;
 };
 
 const PairIcons = ({ tokens }: { tokens: string[] }) => {
@@ -122,6 +124,7 @@ const HeaderDetail = ({
   isDetailLoading,
   vaultDetails,
   vaultId,
+  onOpenSimulator,
 }: VaultInfoProps) => {
   const { isMd } = useBreakpoint();
   const isMobile = !isMd;
@@ -152,11 +155,16 @@ const HeaderDetail = ({
         <div className="w-full flex items-center justify-between">
           <div>
             <PairIcons tokens={tokens} />
-            <ShinyText
-              text={vault.vault_name}
-              className="text-base font-bold mt-3"
-              textColor="text-white/50"
-            />
+            <div className="flex items-center gap-2 mt-3">
+              <ShinyText
+                text={vault?.vault_name ?? "--"}
+                className="text-base font-bold"
+                textColor="text-white/50"
+              />
+              <Button variant="outline" size="sm" onClick={onOpenSimulator} className="border-white/20 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white">
+                LP Simulator
+              </Button>
+            </div>
             <div className="flex items-center gap-1 mt-1">
               <img
                 src={exchange.image}
@@ -205,11 +213,16 @@ const HeaderDetail = ({
             <PairIcons tokens={tokens} />
           </div>
           <div>
-            <ShinyText
-              text={vault.vault_name}
+            <div className="flex items-center gap-2">
+              <ShinyText
+              text={vault?.vault_name ?? "--"}
               className="text-2xl font-bold"
               textColor="text-white/50"
             />
+            <Button variant="outline" size="sm" onClick={onOpenSimulator} className="border-white/20 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white">
+              LP Simulator
+            </Button>
+          </div>
             <div className="flex items-center gap-1">
               <div className="text-white/50"> Powered by </div>
               <img

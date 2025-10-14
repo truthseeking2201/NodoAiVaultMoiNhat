@@ -243,8 +243,15 @@ const VaultDetail = () => {
         tokens={tokens}
         vaultInfo={vaultInfo}
         vaultDetails={vaultDetails}
-        isDetailLoading={isDetailLoading}
         vaultId={vault_id}
+        onOpenSimulator={() => {
+          if (vault_id) {
+            ensureSimulatorInput(vault_id);
+            markSimulatorOpen(vault_id);
+            dismissSimulatorMobileCTA(vault_id);
+          }
+          setSimulatorDrawerOpen(true);
+        }}
       />
       <ConditionRenderer when={!isBreakMobile}>
         <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
@@ -260,22 +267,7 @@ const VaultDetail = () => {
               collateralToken={vaultDetails?.collateral_token}
               vault_id={vault_id}
             />
-            {enableSimulator && (
-              <Button
-                variant="outline"
-                className="border-white/20 text-white/80 hover:text-white hover:bg-white/10"
-                onClick={() => {
-                  if (vault_id) {
-                    ensureSimulatorInput(vault_id);
-                    markSimulatorOpen(vault_id);
-                    dismissSimulatorMobileCTA(vault_id);
-                  }
-                  setSimulatorDrawerOpen(true);
-                }}
-              >
-                Simulate IL
-              </Button>
-            )}
+            
           </div>
         </div>
       </ConditionRenderer>
@@ -329,23 +321,7 @@ const VaultDetail = () => {
                 collateralToken={vaultDetails?.collateral_token}
                 vault_id={vault_id}
               />
-              {enableSimulator && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-white/20 text-white/80 hover:text-white hover:bg-white/10"
-                  onClick={() => {
-                    if (vault_id) {
-                      ensureSimulatorInput(vault_id);
-                      markSimulatorOpen(vault_id);
-                      dismissSimulatorMobileCTA(vault_id);
-                    }
-                    setSimulatorDrawerOpen(true);
-                  }}
-                >
-                  Simulate IL
-                </Button>
-              )}
+              
             </div>
           </div>
         </ConditionRenderer>
@@ -417,11 +393,7 @@ const VaultDetail = () => {
               activeTab={activeTab}
             />
 
-            {vault_id && (
-              <div className="mt-6">
-                <LpSimulatorCard vaultId={vault_id} />
-              </div>
-            )}
+            
           </div>
           {/* Left sessions - end */}
         </div>

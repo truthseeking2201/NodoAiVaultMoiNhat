@@ -21,7 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useTokenPrices } from "@/hooks/use-token-price";
 import { getBalanceAmountForInput } from "@/lib/number";
 import { cn, formatAmount } from "@/lib/utils";
-import BigNumber from "bignumber.js";
+import { ChevronDown } from "lucide-react";
 import debounce from "lodash-es/debounce";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -51,8 +51,6 @@ export type DualDepositForm = {
   };
 };
 
-const QUICK_USD_VALUES = [5, 20, 50, 200];
-
 const DepositForm = ({ vault_id }: { vault_id: string }) => {
   const { openConnectWalletDialog, isConnected } = useWallet();
   const { refreshAllBalance } = useRefreshAssetsBalance();
@@ -80,6 +78,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
 
   const { visibleDisclaimer, setVisibleDisclaimer } = useRiskDisclosure();
   const [isOpenRiskDisclosure, setIsOpenRiskDisclosure] = useState(false);
+  const [showBreakdownDetails, setShowBreakdownDetails] = useState(false);
 
   const paymentTokens = useMemo(() => {
     return [pool?.token_a, pool?.token_b]?.filter(Boolean)?.map((token) => {
@@ -177,169 +176,111 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     ];
   }, [splitWeights, tokenA, tokenB]);
 
-  const {
-    mode: depositMode,
-    setMode: setDepositMode,
-    targetUsd,
-    setTargetUsd,
-    autoBalance,
-    setAutoBalance,
-    computedTokens: controllerComputedTokens,
-    tokenAmounts: controllerTokenAmounts,
-    totalUsdTarget: controllerTotalUsdTarget,
-    maxUsdFromBalances,
-    hasEnoughOverall: hasEnoughUsdBalance,
-    usdModeBlocked,
-    usdShortfall,
-    handleManualAmountChange,
-    syncManualFromComputed,
-    syncTargetFromManual,
-  } = useUsdDepositController({
-    tokens: controllerTokens,
-    initialMode: "USD",
-  });
-
-  const handleDepositModeChange = (nextMode: "USD" | "Token") => {
-    if (nextMode === depositMode) {
-      return;
-    }
-    if (nextMode === "USD") {
-      syncTargetFromManual();
-    } else {
-      syncManualFromComputed();
-    }
-    setDepositMode(nextMode);
-  };
-
-  const handleTargetUsdInput = (value: string) => {
-    if (value === "") {
-      setTargetUsd(0);
-      return;
-    }
-    const parsed = Number(value);
-    if (Number.isNaN(parsed)) {
-      return;
-    }
-    setTargetUsd(Math.max(parsed, 0));
-  };
+  const { computedTokens: controllerComputedTokens, handleManualAmountChange } =
+    useUsdDepositController({
+      tokens: controllerTokens,
+      initialMode: "Token",
+    });
 
   const handleManualAmountUpdate = (tokenAddress: string, amount: number) => {
-    if (depositMode !== "Token") {
-      return;
-    }
     handleManualAmountChange(tokenAddress, amount);
   };
 
-  const depositAmountUsd = useMemo(
-    () => controllerTotalUsdTarget || 0,
-    [controllerTotalUsdTarget]
-  );
-
-  const maxUsdLabel = useMemo(() => {
-    return formatAmount({
-      amount: maxUsdFromBalances || 0,
-      precision: 2,
-      stripZero: false,
-      sign: "$",
-    });
-  }, [maxUsdFromBalances]);
-
-  const shortfallLabel = useMemo(() => {
-    if (usdShortfall <= 0) {
-      return "";
-    }
-    return formatAmount({
-      amount: usdShortfall,
-      precision: 2,
-      stripZero: false,
-      sign: "$",
-    });
-  }, [usdShortfall]);
-
-  const showUsdShortage =
-    depositMode === "USD" &&
-    controllerTotalUsdTarget > 0 &&
-    !hasEnoughUsdBalance;
-
-  const anyTokenDelta = useMemo(
-    () => controllerComputedTokens.some((token) => token.delta > 0),
-    [controllerComputedTokens]
-  );
-
-  const deltaSummary = useMemo(() => {
-    return controllerComputedTokens
-      .filter((token) => token.delta > 0)
-      .map((token) =>
-        `${formatAmount({
-          amount: token.delta,
-          precision: token.decimals,
-          stripZero: true,
-        })} ${token.symbol}`
-      );
+  const depositAmountUsd = useMemo(() => {
+    return controllerComputedTokens.reduce(
+      (acc, token) => acc + (token.usdValue || 0),
+      0
+    );
   }, [controllerComputedTokens]);
 
-  const dualRequirementFooter = useMemo(() => {
-    if (depositMode !== "USD" || !controllerComputedTokens.length) {
-      return null;
+  const breakdownTokens = useMemo(() => {
+    if (!controllerComputedTokens.length) {
+      return [];
     }
-    return (
-      <div className="space-y-2 text-xs text-white/60">
-        {controllerComputedTokens.map((token) => {
-          const requiredDisplay = formatAmount({
-            amount: token.amount,
-            precision: token.decimals,
-            stripZero: true,
-          });
-          const balanceDisplay = formatAmount({
-            amount: token.balance,
-            precision: token.decimals,
-            stripZero: true,
-          });
-          const deltaDisplay =
-            token.delta > 0
-              ? `+${formatAmount({
-                  amount: token.delta,
-                  precision: token.decimals,
-                  stripZero: true,
-                })}`
-              : "0";
-          const deltaClass =
-            token.delta > 0 ? "text-red-400" : "text-emerald-300";
 
-          return (
-            <div
-              key={token.address}
-              className="flex items-center justify-between rounded-xl border border-white/10 bg-black/20 px-3 py-2"
-            >
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase tracking-wide text-white/40">
-                  {token.symbol}
-                </span>
-                <span className="font-mono text-sm text-white">
-                  {requiredDisplay} {token.symbol}
-                </span>
-              </div>
-              <div className="text-right">
-                <p className="text-[11px] text-white/50">You have</p>
-                <p className="font-mono text-sm text-white">
-                  {balanceDisplay} {token.symbol}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-[11px] text-white/50">Delta</p>
-                <p className={cn("font-mono text-sm", deltaClass)}>
-                  {deltaDisplay} {token.symbol}
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+    return controllerComputedTokens.map((token) => {
+      const isStableCoin = token.symbol?.toUpperCase() === "USDC";
+      const requiredDisplay = formatAmount({
+        amount: token.amount,
+        precision: token.decimals,
+        stripZero: true,
+      });
+      const usdDisplay = formatAmount({
+        amount: token.usdValue,
+        precision: 2,
+        stripZero: true,
+        sign: "$",
+      });
+      const balanceDisplay = formatAmount({
+        amount: token.balance,
+        precision: token.decimals,
+        stripZero: true,
+      });
+      const deltaDisplay =
+        token.delta > 0
+          ? formatAmount({
+              amount: token.delta,
+              precision: token.decimals,
+              stripZero: true,
+            })
+          : "";
+      const pillValue = isStableCoin
+        ? usdDisplay
+        : `${requiredDisplay} ${token.symbol}`;
+      const pillDelta =
+        token.delta > 0
+          ? isStableCoin
+            ? formatAmount({
+                amount: token.delta,
+                precision: 2,
+                stripZero: true,
+                sign: "$",
+              })
+            : `${formatAmount({
+                amount: token.delta,
+                precision: token.decimals,
+                stripZero: true,
+              })} ${token.symbol}`
+          : "";
+      const detailDeltaDisplay =
+        token.delta > 0
+          ? isStableCoin
+            ? `+${formatAmount({
+                amount: token.delta,
+                precision: 2,
+                stripZero: true,
+                sign: "$",
+              })}`
+            : `+${formatAmount({
+                amount: token.delta,
+                precision: token.decimals,
+                stripZero: true,
+              })} ${token.symbol}`
+          : "—";
+
+      return {
+        ...token,
+        requiredDisplay,
+        usdDisplay,
+        balanceDisplay,
+        deltaDisplay,
+        hasShortfall: token.delta > 0,
+        rawAmount: token.amount,
+        pillValue,
+        pillDelta,
+        detailDeltaDisplay,
+      };
+    });
+  }, [controllerComputedTokens]);
+
+  const shouldShowBreakdown = useMemo(() => {
+    return breakdownTokens.some(
+      (token) => token.rawAmount > 0 || token.hasShortfall
     );
-  }, [controllerComputedTokens, depositMode]);
+  }, [breakdownTokens]);
 
   const depositCtaLabel = useMemo(() => {
-    if (depositMode === "USD" && depositAmountUsd > 0) {
+    if (depositAmountUsd > 0) {
       return `Deposit ${formatAmount({
         amount: depositAmountUsd,
         precision: 2,
@@ -348,7 +289,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
       })}`;
     }
     return "Deposit";
-  }, [depositAmountUsd, depositMode]);
+  }, [depositAmountUsd]);
 
   const defaultValues = useMemo(() => {
     return {
@@ -385,23 +326,11 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     if (hasFormErrors) {
       return true;
     }
-    if (usdModeBlocked) {
-      return true;
-    }
     if (isZeroDeposit) {
       return true;
     }
-    if (depositMode === "USD" && controllerTotalUsdTarget <= 0) {
-      return true;
-    }
     return false;
-  }, [
-    controllerTotalUsdTarget,
-    depositMode,
-    hasFormErrors,
-    isZeroDeposit,
-    usdModeBlocked,
-  ]);
+  }, [hasFormErrors, isZeroDeposit]);
 
   // Debounced effect for estimate deposit API call
   useEffect(() => {
@@ -414,75 +343,16 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
   }, [watch, tokenA?.token_address, tokenB?.token_address]);
 
   useEffect(() => {
-    if (depositMode !== "USD") {
-      return;
+    if (!shouldShowBreakdown) {
+      setShowBreakdownDetails(false);
     }
-    if (!tokenA?.token_address || !tokenB?.token_address) {
-      return;
-    }
-    const amountA =
-      controllerTokenAmounts[tokenA.token_address] !== undefined
-        ? controllerTokenAmounts[tokenA.token_address]
-        : 0;
-    const amountB =
-      controllerTokenAmounts[tokenB.token_address] !== undefined
-        ? controllerTokenAmounts[tokenB.token_address]
-        : 0;
-    const formattedA =
-      amountA > 0
-        ? new BigNumber(amountA)
-            .decimalPlaces(tokenA.decimals, BigNumber.ROUND_DOWN)
-            .toString()
-        : "";
-    const formattedB =
-      amountB > 0
-        ? new BigNumber(amountB)
-            .decimalPlaces(tokenB.decimals, BigNumber.ROUND_DOWN)
-            .toString()
-        : "";
-
-    const currentA = getValues("token_a.amount");
-    if (currentA !== formattedA) {
-      setValue("token_a.amount", formattedA, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: amountA > 0,
-      });
-      if (amountA <= 0) {
-        clearErrors("token_a.amount");
-      }
-    }
-
-    const currentB = getValues("token_b.amount");
-    if (currentB !== formattedB) {
-      setValue("token_b.amount", formattedB, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: amountB > 0,
-      });
-      if (amountB <= 0) {
-        clearErrors("token_b.amount");
-      }
-    }
-    inputtingToken.current = tokenA.token_address;
-  }, [
-    clearErrors,
-    controllerTokenAmounts,
-    depositMode,
-    getValues,
-    setValue,
-    tokenA,
-    tokenB,
-  ]);
+  }, [shouldShowBreakdown]);
 
   useEffect(() => {
     if (isAuthenticated) {
       resetField("token_a.amount");
       resetField("token_b.amount");
-      if (depositMode === "USD") {
-        setTargetUsd(0);
-        clearErrors(["token_a.amount", "token_b.amount"]);
-      }
+      clearErrors(["token_a.amount", "token_b.amount"]);
       if (tokenA?.token_address) {
         handleManualAmountChange(tokenA.token_address, 0);
       }
@@ -492,11 +362,9 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     }
   }, [
     clearErrors,
-    depositMode,
     handleManualAmountChange,
     isAuthenticated,
     resetField,
-    setTargetUsd,
     tokenA?.token_address,
     tokenB?.token_address,
   ]);
@@ -524,10 +392,6 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
           amount_b
         : 0;
 
-    if (depositMode === "USD") {
-      return fromTokenA || fromTokenB || 0;
-    }
-
     if (inputtingToken.current === tokenA.token_address) {
       return fromTokenA;
     }
@@ -536,7 +400,6 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     }
     return fromTokenA || fromTokenB || 0;
   }, [
-    depositMode,
     estimateDualDeposit,
     debounceAmountTokenA,
     debounceAmountTokenB,
@@ -665,10 +528,7 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
     setDepositStep(1);
     setDebounceAmountTokenA("0");
     setDebounceAmountTokenB("0");
-    if (depositMode === "USD") {
-      setTargetUsd(0);
-      clearErrors(["token_a.amount", "token_b.amount"]);
-    }
+    clearErrors(["token_a.amount", "token_b.amount"]);
     refetchVaultBasicDetails();
     refetchVaultConfig();
     toast({
@@ -692,131 +552,95 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
         fallback={<DualDepositSkeleton />}
       >
         <form onSubmit={methods.handleSubmit(onSubmit)}>
-          <div className="mb-4 flex w-full items-center gap-2 rounded-full bg-white/10 p-1 text-xs md:text-sm">
-            {(["USD", "Token"] as const).map((modeOption) => {
-              const isActive = depositMode === modeOption;
-              return (
-                <button
-                  key={modeOption}
-                  type="button"
-                  onClick={() => handleDepositModeChange(modeOption)}
-                  className={cn(
-                    "flex-1 rounded-full px-4 py-2 font-medium transition-all",
-                    isActive
-                      ? "bg-white text-black"
-                      : "text-white/60 hover:text-white"
-                  )}
-                >
-                  {modeOption}
-                </button>
-              );
-            })}
-          </div>
-
-          {depositMode === "USD" && (
-            <div className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium uppercase tracking-wide text-white/60">
-                  Target value (USD)
+          {shouldShowBreakdown && (
+            <div className="mb-4 space-y-2">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-white/70">
+                <span className="uppercase tracking-wide text-white/40">
+                  Needs:
                 </span>
-                <span className="text-[11px] text-white/40">
-                  Max available {maxUsdLabel}
-                </span>
-              </div>
-              <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-center">
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min="0"
-                  step="0.01"
-                  value={
-                    depositMode === "USD" && Number.isFinite(targetUsd)
-                      ? targetUsd.toString()
-                      : ""
-                  }
-                  onChange={(event) => handleTargetUsdInput(event.target.value)}
-                  className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3 font-mono text-base text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 md:text-lg"
-                  placeholder="0.00"
-                />
-                <span className="text-xs text-white/60 md:w-auto md:text-sm">
-                  We'll split into {tokenA?.symbol} / {tokenB?.symbol} for you.
-                </span>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {QUICK_USD_VALUES.map((value) => {
-                  const isActive = Math.abs(targetUsd - value) < 0.001;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setTargetUsd(value)}
-                      className={cn(
-                        "rounded-full border border-white/15 px-3 py-1 text-xs font-medium uppercase tracking-wide transition-all",
-                        isActive
-                          ? "bg-white text-black"
-                          : "bg-white/5 text-white/70 hover:bg-white/10"
-                      )}
-                    >
-                      ${value}
-                    </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  onClick={() => setTargetUsd(maxUsdFromBalances)}
-                  className="rounded-full border border-white/20 px-3 py-1 text-xs font-medium uppercase tracking-wide text-white transition-all hover:bg-white/10 disabled:opacity-30"
-                  disabled={maxUsdFromBalances <= 0}
-                >
-                  Max
-                </button>
-              </div>
-              <button
-                type="button"
-                onClick={() => setAutoBalance(!autoBalance)}
-                className="mt-4 flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-xs text-white/70 transition-all hover:border-white/20"
-              >
-                <span className="font-medium">
-                  Auto-balance small deltas (swap ≤0.5%)
-                </span>
-                <span
-                  className={cn(
-                    "relative inline-flex h-5 w-10 items-center rounded-full transition-colors",
-                    autoBalance ? "bg-emerald-400/70" : "bg-white/15"
-                  )}
-                >
-                  <span
+                {breakdownTokens.map((token) => (
+                  <div
+                    key={token.address}
                     className={cn(
-                      "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
-                      autoBalance ? "translate-x-5" : "translate-x-1"
+                      "flex items-center gap-1 rounded-full border px-3 py-1 font-mono",
+                      token.hasShortfall
+                        ? "border-amber-300/40 bg-amber-400/10 text-amber-100"
+                        : "border-white/15 bg-white/10 text-white"
+                    )}
+                  >
+                    <span>{token.symbol}</span>
+                    <span>{token.pillValue}</span>
+                    {token.hasShortfall ? (
+                      <span className="text-amber-200">
+                        +{token.pillDelta}
+                      </span>
+                    ) : (
+                      <span className="text-emerald-300">✓</span>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowBreakdownDetails((prev) => !prev)
+                  }
+                  className="ml-auto flex items-center gap-1 rounded-full border border-white/10 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-white/70 transition-colors hover:border-white/20 hover:text-white"
+                >
+                  Details
+                  <ChevronDown
+                    size={14}
+                    className={cn(
+                      "transition-transform",
+                      showBreakdownDetails ? "rotate-180" : "rotate-0"
                     )}
                   />
-                </span>
-              </button>
-              {autoBalance && anyTokenDelta && deltaSummary.length > 0 && (
-                <p className="mt-2 text-xs text-emerald-300">
-                  We'll rebalance {deltaSummary.join(" + ")} during deposit.
-                </p>
+                </button>
+              </div>
+              {showBreakdownDetails && (
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-3 text-xs text-white/70">
+                  <table className="w-full border-separate border-spacing-y-1">
+                    <thead>
+                      <tr className="text-[11px] uppercase tracking-wide text-white/40">
+                        <th className="pb-1 text-left font-medium">Token</th>
+                        <th className="pb-1 text-right font-medium">
+                          Required
+                        </th>
+                        <th className="pb-1 text-right font-medium">
+                          You have
+                        </th>
+                        <th className="pb-1 text-right font-medium">Delta</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {breakdownTokens.map((token) => (
+                        <tr key={token.address}>
+                          <td className="py-1 font-medium text-white">
+                            {token.symbol}
+                          </td>
+                          <td className="py-1 text-right font-mono text-white">
+                            {token.requiredDisplay} {token.symbol}
+                          </td>
+                          <td className="py-1 text-right font-mono text-white/70">
+                            {token.balanceDisplay} {token.symbol}
+                          </td>
+                          <td
+                            className={cn(
+                              "py-1 text-right font-mono",
+                              token.hasShortfall
+                                ? "text-amber-200"
+                                : "text-emerald-300"
+                            )}
+                          >
+                            {token.hasShortfall
+                              ? token.detailDeltaDisplay
+                              : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
-              {!autoBalance && anyTokenDelta && deltaSummary.length > 0 && (
-                <p className="mt-2 text-xs text-amber-200">
-                  Add funds for {deltaSummary.join(", ")} or turn on auto-balance.
-                </p>
-              )}
-            </div>
-          )}
-
-          {showUsdShortage && (
-            <div className="mb-4 flex flex-col items-start justify-between gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-200 md:flex-row md:items-center md:text-sm">
-              <span>
-                You're short by <span className="font-semibold">{shortfallLabel || "$0.00"}</span> — you can deposit up to <span className="font-semibold">{maxUsdLabel}</span> with current balances.
-              </span>
-              <button
-                type="button"
-                onClick={() => setTargetUsd(maxUsdFromBalances)}
-                className="rounded-full border border-amber-400/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-100 transition-all hover:bg-amber-400/20"
-              >
-                Use {maxUsdLabel}
-              </button>
             </div>
           )}
 
@@ -824,8 +648,6 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
             tokenA={tokenA}
             tokenB={tokenB}
             estimateDualDeposit={estimateDualDeposit}
-            readOnly={depositMode === "USD"}
-            footer={dualRequirementFooter}
             onManualAmountChange={handleManualAmountUpdate}
             onTokenChange={(token) => {
               inputtingToken.current = token;
@@ -911,11 +733,6 @@ const DepositForm = ({ vault_id }: { vault_id: string }) => {
           >
             {depositCtaLabel}
           </Web3Button>
-          {usdModeBlocked && (
-            <p className="mt-2 text-center text-xs text-amber-200">
-              Turn on auto-balance or lower the USD target to match your wallet balances.
-            </p>
-          )}
         </form>
       </ConditionRenderer>
 

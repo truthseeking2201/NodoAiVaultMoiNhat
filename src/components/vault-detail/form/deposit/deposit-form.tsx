@@ -34,7 +34,6 @@ import DepositModal from "./deposit-modal";
 import SlippageSetting from "./slippage-setting";
 import { useRiskDisclosure } from "@/hooks/use-risk-disclosure";
 import RiskDisclosuresPopup from "./risk-disclosure-popup.tsx";
-import { useUsdDepositController } from "./hooks/use-usd-deposit-controller";
 
 export type DepositSuccessData = {
   digest: string;
@@ -46,8 +45,6 @@ export type DepositForm = {
   amount: string;
   token: string;
 };
-
-const QUICK_USD_VALUES = [5, 20, 50, 200];
 
 const DEFAULT_DEPOSIT_TOKEN = {
   symbol: USDC_CONFIG.symbol,
@@ -168,179 +165,19 @@ const DepositForm = ({
     return foundToken;
   }, [paymentTokens, paymentToken]);
 
-  const controllerTokens = useMemo(() => {
-    if (!collateralToken?.token_address) {
-      return [];
-    }
-    const tokenId =
-      typeof collateralToken?.token_id === "number"
-        ? collateralToken.token_id
-        : null;
-    const price = tokenId !== null ? tokenPrices?.[tokenId] ?? 0 : 0;
-    return [
-      {
-        address: collateralToken.token_address,
-        symbol: collateralToken.symbol,
-        decimals: collateralToken?.decimals ?? 6,
-        balance: Number(collateralToken?.balance || 0),
-        price: Number(price || 0),
-        weight: 1,
-      },
-    ];
-  }, [collateralToken, tokenPrices]);
-
-  const {
-    mode: depositMode,
-    setMode: setDepositMode,
-    targetUsd,
-    setTargetUsd,
-    computedTokens: controllerComputedTokens,
-    tokenAmounts: controllerTokenAmounts,
-    totalUsdTarget: controllerTotalUsdTarget,
-    maxUsdFromBalances,
-    hasEnoughOverall: hasEnoughUsdBalance,
-    usdModeBlocked,
-    usdShortfall,
-    syncManualFromComputed,
-    syncTargetFromManual,
-  } = useUsdDepositController({
-    tokens: controllerTokens,
-    initialMode: "USD",
-    initialTargetUsd: prefillAmountUsd ?? 0,
-  });
-
-  const handleDepositModeChange = (nextMode: "USD" | "Token") => {
-    if (nextMode === depositMode) {
-      return;
-    }
-    if (nextMode === "USD") {
-      syncTargetFromManual();
-    } else {
-      syncManualFromComputed();
-    }
-    setDepositMode(nextMode);
-  };
-
-  const handleTargetUsdInput = (value: string) => {
-    if (value === "") {
-      setTargetUsd(0);
-      return;
-    }
-    const parsed = Number(value);
-    if (Number.isNaN(parsed)) {
-      return;
-    }
-    setTargetUsd(Math.max(parsed, 0));
-  };
-
-  const singleControllerToken = controllerComputedTokens?.[0];
 
   const depositAmountUsd = useMemo(() => {
-    if (depositMode === "USD") {
-      return controllerTotalUsdTarget || 0;
-    }
-    const usd_price = tokenPrices?.[collateralToken?.token_id] || 0;
+    const usd_price =
+      collateralToken?.token_id !== undefined
+        ? tokenPrices?.[collateralToken.token_id] || 0
+        : 0;
     return new BigNumber(depositAmount || "0")
       .multipliedBy(usd_price)
       .toNumber();
-  }, [
-    controllerTotalUsdTarget,
-    depositAmount,
-    depositMode,
-    collateralToken,
-    tokenPrices,
-  ]);
-
-  const requirementFooter = useMemo(() => {
-    if (
-      depositMode !== "USD" ||
-      !singleControllerToken ||
-      !collateralToken?.symbol
-    ) {
-      return null;
-    }
-    const requiredDisplay = formatAmount({
-      amount: singleControllerToken.amount,
-      precision: collateralToken.decimals,
-      stripZero: true,
-    });
-    const availableAmount = Number(collateralToken.balance || 0);
-    const availableDisplay = formatAmount({
-      amount: availableAmount,
-      precision: collateralToken.decimals,
-      stripZero: true,
-    });
-    const deltaDisplay =
-      singleControllerToken.delta > 0
-        ? `+${formatAmount({
-            amount: singleControllerToken.delta,
-            precision: collateralToken.decimals,
-            stripZero: true,
-          })}`
-        : "0";
-    const deltaClass =
-      singleControllerToken.delta > 0
-        ? "text-red-400"
-        : "text-emerald-300";
-
-    return (
-      <div className="grid grid-cols-3 gap-3 text-xs text-white/60">
-        <div>
-          <p className="uppercase tracking-wide text-[10px] text-white/40">
-            Required
-          </p>
-          <p className="mt-1 font-mono text-sm text-white">
-            {requiredDisplay} {collateralToken.symbol}
-          </p>
-        </div>
-        <div>
-          <p className="uppercase tracking-wide text-[10px] text-white/40">
-            You Have
-          </p>
-          <p className="mt-1 font-mono text-sm text-white">
-            {availableDisplay} {collateralToken.symbol}
-          </p>
-        </div>
-        <div>
-          <p className="uppercase tracking-wide text-[10px] text-white/40">
-            Delta
-          </p>
-          <p className={cn("mt-1 font-mono text-sm", deltaClass)}>
-            {deltaDisplay} {collateralToken.symbol}
-          </p>
-        </div>
-      </div>
-    );
-  }, [collateralToken, depositMode, singleControllerToken]);
-
-  const maxUsdLabel = useMemo(() => {
-    return formatAmount({
-      amount: maxUsdFromBalances || 0,
-      precision: 2,
-      stripZero: false,
-      sign: "$",
-    });
-  }, [maxUsdFromBalances]);
-
-  const shortfallLabel = useMemo(() => {
-    if (usdShortfall <= 0) {
-      return "";
-    }
-    return formatAmount({
-      amount: usdShortfall,
-      precision: 2,
-      stripZero: false,
-      sign: "$",
-    });
-  }, [usdShortfall]);
-
-  const showUsdShortage =
-    depositMode === "USD" &&
-    controllerTotalUsdTarget > 0 &&
-    !hasEnoughUsdBalance;
+  }, [depositAmount, collateralToken, tokenPrices]);
 
   const depositCtaLabel = useMemo(() => {
-    if (depositMode === "USD" && depositAmountUsd > 0) {
+    if (depositAmountUsd > 0) {
       return `Deposit ${formatAmount({
         amount: depositAmountUsd,
         precision: 2,
@@ -349,7 +186,7 @@ const DepositForm = ({
       })}`;
     }
     return "Deposit";
-  }, [depositAmountUsd, depositMode]);
+  }, [depositAmountUsd]);
 
   const { data: swapDepositInfo, isLoading: isLoadingSwapDepositInfo } =
     useSwapDepositInfo(
@@ -399,7 +236,6 @@ const DepositForm = ({
         shouldTouch: true,
       });
     }
-    setTargetUsd(prefillAmountUsd);
     setValue("amount", amount, {
       shouldDirty: true,
       shouldTouch: true,
@@ -413,7 +249,6 @@ const DepositForm = ({
     prefillAmountUsd,
     setValue,
     tokenPrices,
-    setTargetUsd,
   ]);
 
   const estimatedDepositAmount = useMemo(() => {
@@ -422,42 +257,6 @@ const DepositForm = ({
       collateralToken?.decimals
     ).toString();
   }, [debounceAmount, collateralToken]);
-
-  useEffect(() => {
-    if (depositMode !== "USD") {
-      return;
-    }
-    if (!collateralToken?.token_address) {
-      return;
-    }
-    const nextAmount =
-      controllerTokenAmounts[collateralToken.token_address] ?? 0;
-    const decimals = collateralToken?.decimals ?? 6;
-    const formatted =
-      nextAmount > 0
-        ? new BigNumber(nextAmount)
-            .decimalPlaces(decimals, BigNumber.ROUND_DOWN)
-            .toString()
-        : "";
-    const currentValue = getValues("amount");
-    if (currentValue !== formatted) {
-      setValue("amount", formatted, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: nextAmount > 0,
-      });
-      if (nextAmount <= 0) {
-        clearErrors("amount");
-      }
-    }
-  }, [
-    depositMode,
-    collateralToken,
-    controllerTokenAmounts,
-    clearErrors,
-    getValues,
-    setValue,
-  ]);
 
   const {
     data: dataEstDeposit,
@@ -609,10 +408,7 @@ const DepositForm = ({
     setDepositSuccessData(null);
     setDepositStep(1);
     setDebounceAmount("0");
-    if (depositMode === "USD") {
-      setTargetUsd(0);
-      clearErrors("amount");
-    }
+    clearErrors("amount");
     refetchVaultBasicDetails();
     refetchVaultConfig();
 
@@ -648,120 +444,13 @@ const DepositForm = ({
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)}>
-        <div className="mb-4 flex w-full items-center gap-2 rounded-full bg-white/10 p-1 text-xs md:text-sm">
-          {(["USD", "Token"] as const).map((modeOption) => {
-            const isActive = depositMode === modeOption;
-            return (
-              <button
-                key={modeOption}
-                type="button"
-                onClick={() => handleDepositModeChange(modeOption)}
-                className={cn(
-                  "flex-1 rounded-full px-4 py-2 font-medium transition-all",
-                  isActive
-                    ? "bg-white text-black"
-                    : "text-white/60 hover:text-white"
-                )}
-              >
-                {modeOption}
-              </button>
-            );
-          })}
-        </div>
-
-        {depositMode === "USD" && (
-          <div className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium uppercase tracking-wide text-white/60">
-                Target value (USD)
-              </span>
-              <span className="text-[11px] text-white/40">
-                Max available {maxUsdLabel}
-              </span>
-            </div>
-            <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-center">
-              <input
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="0.01"
-                value={
-                  depositMode === "USD" && Number.isFinite(targetUsd)
-                    ? targetUsd.toString()
-                    : ""
-                }
-                onChange={(event) => handleTargetUsdInput(event.target.value)}
-                className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3 font-mono text-base text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 md:text-lg"
-                placeholder="0.00"
-              />
-              <span className="text-xs text-white/60 md:w-auto md:text-sm">
-                We'll convert to {collateralToken?.symbol || "--"} for you.
-              </span>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {QUICK_USD_VALUES.map((value) => {
-                const isActive = Math.abs(targetUsd - value) < 0.001;
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setTargetUsd(value)}
-                    className={cn(
-                      "rounded-full border border-white/15 px-3 py-1 text-xs font-medium uppercase tracking-wide transition-all",
-                      isActive
-                        ? "bg-white text-black"
-                        : "bg-white/5 text-white/70 hover:bg-white/10"
-                    )}
-                  >
-                    ${value}
-                  </button>
-                );
-              })}
-              <button
-                type="button"
-                onClick={() => setTargetUsd(maxUsdFromBalances)}
-                className="rounded-full border border-white/20 px-3 py-1 text-xs font-medium uppercase tracking-wide text-white transition-all hover:bg-white/10 disabled:opacity-30"
-                disabled={maxUsdFromBalances <= 0}
-              >
-                Max
-              </button>
-            </div>
-          </div>
-        )}
-
-        {showUsdShortage && (
-          <div className="mb-4 flex flex-col items-start justify-between gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-xs text-amber-200 md:flex-row md:items-center md:text-sm">
-            <span>
-              You're short by{" "}
-              <span className="font-semibold">
-                {shortfallLabel || "$0.00"}
-              </span>{" "}
-              — you can deposit up to{" "}
-              <span className="font-semibold">{maxUsdLabel}</span> with your
-              current balances.
-            </span>
-            <button
-              type="button"
-              onClick={() => setTargetUsd(maxUsdFromBalances)}
-              className="rounded-full border border-amber-400/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-100 transition-all hover:bg-amber-400/20"
-            >
-              Use {maxUsdLabel}
-            </button>
-          </div>
-        )}
-
         <DepositInput
           paymentTokens={paymentTokens}
           currentToken={collateralToken}
           depositAmountUsd={depositAmountUsd}
-          readOnly={depositMode === "USD"}
-          footer={requirementFooter}
           onTokenChange={() => {
             setDebounceAmount("0");
-            if (depositMode === "USD") {
-              setTargetUsd(0);
-              clearErrors("amount");
-            }
+            clearErrors("amount");
           }}
         />
         {errors?.amount && (
@@ -853,7 +542,6 @@ const DepositForm = ({
             isCalculating ||
             isLoadingSwapDepositInfo ||
             ["checking", "cannot"].includes(canDepositStatus) ||
-            usdModeBlocked ||
             Number(depositAmount) <= 0 ||
             Boolean(errors?.amount)
           }
