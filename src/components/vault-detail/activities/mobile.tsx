@@ -5,9 +5,7 @@ import {
   ArrowUpRight,
   PauseCircle,
   Minus,
-  ChevronDown,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SwapIcon from "@/assets/icons/swap.svg";
@@ -64,6 +62,19 @@ const badgeForType = (type: string) => {
   };
 };
 
+const MobileReasoning = ({
+  reasoning,
+}: {
+  reasoning: NonNullable<VaultActivityTransaction["reasoning"]>;
+}) => (
+  <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 pl-5">
+    <div className="absolute left-0 top-0 h-full w-1 bg-indigo-400/60" />
+    <p className="text-white font-medium leading-6">{reasoning.what}</p>
+    <p className="mt-1 text-white/80 leading-6">{reasoning.why}</p>
+    <p className="mt-1 text-sm text-white/60">Next: {reasoning.next}</p>
+  </div>
+);
+
 const MobileActivityRow = ({
   tx,
   onSelect,
@@ -79,6 +90,7 @@ const MobileActivityRow = ({
   const badge = badgeForType(tx.type);
   const explorerHash = tx.reasoning?.proof?.tx ?? tx.txhash;
   const explorerLabel = tx.reasoning?.proof?.label ?? "Explorer";
+  const hasExplorer = Boolean(explorerHash);
 
   return (
     <div className="space-y-2">
@@ -111,23 +123,28 @@ const MobileActivityRow = ({
         }
       />
       <RowTime timestamp={tx.time} />
-      <RowAction label="Details">
-        {explorerHash ? (
-          <button
-            type="button"
-            className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 text-white/70 hover:text-white"
-            aria-label="Open in explorer"
-            title={explorerLabel}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelect({ ...tx, txhash: explorerHash });
-            }}
-          >
-            <ExternalLink size={14} />
-          </button>
-        ) : (
-          <span className="text-xs text-white/50">—</span>
-        )}
+      <RowAction label="Explorer">
+        <button
+          type="button"
+          aria-label="Open in explorer"
+          disabled={!hasExplorer}
+          title={explorerLabel}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!hasExplorer) {
+              return;
+            }
+            onSelect({ ...tx, txhash: explorerHash });
+          }}
+          className={cn(
+            "inline-grid h-8 w-8 place-items-center rounded-md border border-white/10 transition-colors",
+            hasExplorer
+              ? "text-white/80 hover:bg-white/10"
+              : "cursor-not-allowed text-white/30"
+          )}
+        >
+          <ExternalLink className="w-4 h-4" />
+        </button>
       </RowAction>
       {tx.reasoning && (
         <RowAction label="Reason">
@@ -138,25 +155,18 @@ const MobileActivityRow = ({
             }}
             className="inline-flex items-center gap-1 text-xs text-white/80 hover:text-white"
           >
-            {open ? (
-              <ChevronDown size={12} />
-            ) : (
-              <ChevronRight size={12} />
-            )}
             See why
+            <ChevronRight
+              className={cn(
+                "w-3 h-3 transition-transform",
+                open && "rotate-90"
+              )}
+            />
           </button>
         </RowAction>
       )}
       {open && tx.reasoning && (
-        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 pl-5">
-          <div className="absolute left-0 top-0 h-full w-1 bg-indigo-400/60" />
-          <p className="flex items-center gap-2 text-white font-medium">
-            <Sparkles size={14} className="text-indigo-200" />
-            {tx.reasoning.what}
-          </p>
-          <p className="mt-2 text-white/80 leading-6">{tx.reasoning.why}</p>
-          <p className="mt-3 text-sm text-white/60">{tx.reasoning.next}</p>
-        </div>
+        <MobileReasoning reasoning={tx.reasoning} />
       )}
       <hr className="bg-white/20 my-4" />
     </div>

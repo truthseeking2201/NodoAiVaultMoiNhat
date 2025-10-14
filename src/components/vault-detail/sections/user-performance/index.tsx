@@ -74,7 +74,7 @@ const extractCohortSize = (
 };
 
 const NotEnoughPeers = () => (
-  <div className="flex h-full min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/20 bg-[#121317] px-4 text-center">
+  <div className="flex h-full min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/20 bg-[#121317] p-5 text-center">
     <p className="text-base font-semibold text-white">Not enough peers yet</p>
     <p className="mt-1 text-sm text-white/60 max-w-md">
       We will surface distribution and peer metrics once at least{" "}
@@ -87,28 +87,20 @@ const SummaryCard = ({
   pnlUsd,
   pnlPct,
   depositsUsd,
-  utilization,
-  feesRewards24hUsd,
   percentile,
 }: {
   pnlUsd: number;
   pnlPct: number;
   depositsUsd: number;
-  utilization: number;
-  feesRewards24hUsd: number;
   percentile: number;
 }) => {
-  const safeUtilization = Number.isFinite(utilization) ? utilization : 0;
-  const safeFees = Number.isFinite(feesRewards24hUsd)
-    ? feesRewards24hUsd
-    : 0;
   const aheadPercent = Math.round(percentile * 100);
   const pnlUsdDisplay = formatUsd(pnlUsd);
   const depositsDisplay = formatUsd(depositsUsd);
 
   return (
     <div className="rounded-2xl border border-white/10 bg-[#121317] p-5">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-6">
         <div>
           <div className="text-white/90 font-semibold">Your PnL (USD)</div>
           <div
@@ -132,23 +124,13 @@ const SummaryCard = ({
               • You’re ahead of {aheadPercent}% of peers
             </span>
           </div>
-
-          <div className="mt-4">
-            <div className="text-white/50 text-xs">Total deposits</div>
-            <div className="text-white text-lg font-semibold">
-              {depositsDisplay}
-            </div>
-          </div>
         </div>
 
-        <div className="flex flex-col items-end gap-2">
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-medium">
-            24h Fees/Rewards $
-            {Math.round(Math.max(0, safeFees)).toLocaleString()}
-          </span>
-          <span className="px-3 py-1 rounded-full border border-white/10 text-white/70 text-xs">
-            Utilization {(safeUtilization * 100).toFixed(0)}%
-          </span>
+        <div className="text-right">
+          <div className="text-white/60 text-xs">Total deposits</div>
+          <div className="text-white text-xl font-semibold">
+            {depositsDisplay}
+          </div>
         </div>
       </div>
     </div>
@@ -188,8 +170,8 @@ const DistributionCard = ({
           <p className="text-base font-semibold text-white">
             Peers by PnL% (last 90 days)
           </p>
-          <p className="text-sm text-white/60">
-            30 buckets; each bar shows how many users fall into that return range.
+          <p className="text-xs text-white/60 mt-1">
+            Each bar shows how many users fall into that return range.
           </p>
         </div>
         <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/80">
@@ -303,6 +285,23 @@ const PeerTable = ({
   const [flashYouRow, setFlashYouRow] = useState(false);
   const flashTimeoutRef = useRef<number>();
 
+  const scrollToYouRow = () => {
+    const node = document.querySelector<HTMLElement>("[data-you-row='true']");
+    if (!node) {
+      return false;
+    }
+    requestAnimationFrame(() => {
+      node.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    setFlashYouRow(true);
+    window.clearTimeout(flashTimeoutRef.current);
+    flashTimeoutRef.current = window.setTimeout(
+      () => setFlashYouRow(false),
+      1500
+    );
+    return true;
+  };
+
   const handleFindMe = () => {
     if (!youRank) {
       return;
@@ -312,15 +311,9 @@ const PeerTable = ({
       setPendingScroll(true);
       onPageChange(targetPage);
     } else {
-      const node = document.querySelector<HTMLElement>("[data-you-row='true']");
-      if (node) {
-        node.scrollIntoView({ behavior: "smooth", block: "center" });
-        setFlashYouRow(true);
-        window.clearTimeout(flashTimeoutRef.current);
-        flashTimeoutRef.current = window.setTimeout(
-          () => setFlashYouRow(false),
-          1500
-        );
+      const scrolled = scrollToYouRow();
+      if (!scrolled) {
+        setPendingScroll(true);
       }
     }
   };
@@ -329,15 +322,11 @@ const PeerTable = ({
     if (!pendingScroll) {
       return;
     }
-    const node = document.querySelector<HTMLElement>("[data-you-row='true']");
-    if (node) {
-      node.scrollIntoView({ behavior: "smooth", block: "center" });
-      setFlashYouRow(true);
-      window.clearTimeout(flashTimeoutRef.current);
-      flashTimeoutRef.current = window.setTimeout(
-        () => setFlashYouRow(false),
-        1500
-      );
+    const hasYouRow = rows.some((row) => row.isYou);
+    if (!hasYouRow) {
+      return;
+    }
+    if (scrollToYouRow()) {
       setPendingScroll(false);
     }
   }, [rows, pendingScroll]);
@@ -350,20 +339,16 @@ const PeerTable = ({
 
   return (
     <div className="rounded-2xl border border-white/10 bg-[#121317] p-5">
-      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <div>
-          <p className="text-base font-semibold text-white">Peer Comparison</p>
-          <p className="text-sm text-white/60">
-            Cohort size: {cohortSize}. Showing {PAGE_SIZE} per page.
-          </p>
-        </div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-white font-semibold">Peer Comparison</div>
         <button
           onClick={handleFindMe}
-          className="self-start rounded-md border border-white/10 px-3 py-1 text-xs text-white/80 hover:bg-white/10 transition-colors"
+          className="rounded-md border border-white/10 px-3 py-1 text-xs text-white/80 hover:bg-white/10 transition-colors"
         >
           Find me
         </button>
       </div>
+      <div className="text-white/60 text-xs mb-3">{total} peers</div>
       {you && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-white">
           <div>
@@ -453,7 +438,10 @@ const PeerTable = ({
           </TableBody>
         </Table>
       </div>
-      <div className="mt-4 flex justify-end">
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <div className="text-white/60 text-xs">
+          {PAGE_SIZE} per page
+        </div>
         <CustomPagination
           itemsPerPage={PAGE_SIZE}
           totalItems={total}
@@ -530,8 +518,6 @@ const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) 
               pnlUsd={summary.your.pnlUsd}
               pnlPct={summary.your.pnlPct}
               depositsUsd={summary.your.depositsUsd}
-              utilization={summary.context.utilization}
-              feesRewards24hUsd={summary.context.feesRewards24hUsd}
               percentile={summary.peer.percentilePnLPct ?? 0}
             />
             {insufficientPeers || !distribution ? (

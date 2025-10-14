@@ -13,9 +13,7 @@ import {
   ArrowUpRight,
   PauseCircle,
   Minus,
-  ChevronDown,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 import SwapIcon from "@/assets/icons/swap.svg";
 import { cn } from "@/lib/utils";
@@ -29,6 +27,21 @@ import FormatUsdCollateralAmount from "../sections/format-usd-collateral-amount"
 import { useVaultMetricUnitStore } from "@/hooks";
 import { VaultActivityTransaction } from "@/types/vault";
 import { formatCollateralUsdNumber } from "../helpers";
+
+const ReasoningPanel = ({
+  reasoning,
+}: {
+  reasoning: NonNullable<VaultActivityTransaction["reasoning"]>;
+}) => (
+  <div className="ml-8 mr-5 mb-4">
+    <div className="relative rounded-xl border border-white/10 bg-white/5 p-4 pl-5">
+      <div className="absolute left-0 top-0 h-full w-1 rounded-l-xl bg-indigo-400/60" />
+      <p className="text-white font-medium leading-6">{reasoning.what}</p>
+      <p className="mt-1 text-white/80 leading-6">{reasoning.why}</p>
+      <p className="mt-1 text-sm text-white/60">Next: {reasoning.next}</p>
+    </div>
+  </div>
+);
 
 const badgeForType = (type: string) => {
   if (["ADD", "ADD_LIQUIDITY", "OPEN", "COMPOUND"].includes(type)) {
@@ -99,19 +112,22 @@ const DesktopTable = ({
     <Table className="w-full border-0">
       <TableHeader className="border-b border-white/20">
         <TableRow className="border-b-0 border-white/10 hover:bg-transparent">
-          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[160px] !px-0">
+          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[160px] px-5">
             Type
           </TableHead>
-          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[110px] px-2">
+          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[110px] px-5">
             Time
           </TableHead>
-          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[160px] px-2">
+          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[160px] px-5">
             Tokens
           </TableHead>
-          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[120px] px-2">
+          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[120px] px-5">
             Value
           </TableHead>
-          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[140px] !px-0 text-right">
+          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[90px] px-5 text-center">
+            Link
+          </TableHead>
+          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[140px] px-5 text-right">
             Details
           </TableHead>
         </TableRow>
@@ -124,8 +140,8 @@ const DesktopTable = ({
               key={`skeleton-${i}`}
               className={cn("hover:bg-white/5 w-full h-[70px] border-0")}
             >
-              {Array.from({ length: 5 }).map((__, col) => (
-                <TableCell key={col} className={cn("pr-0 pl-4 pt-3 border-0")}>
+              {Array.from({ length: 6 }).map((__, col) => (
+                <TableCell key={col} className={cn("px-5 pt-3 border-0")}>
                   <div className="h-5 bg-white/10 animate-pulse rounded mt-3" />
                 </TableCell>
               ))}
@@ -138,6 +154,7 @@ const DesktopTable = ({
             const primaryToken = tx.tokens?.[0];
             const secondaryToken = tx.tokens?.[1];
             const explorerHash = tx.reasoning?.proof?.tx ?? tx.txhash;
+            const hasExplorer = Boolean(explorerHash);
 
             return (
               <Fragment key={`transaction-${index}`}>
@@ -147,7 +164,7 @@ const DesktopTable = ({
                     isExpanded && "bg-[#FFFFFF0D]"
                   )}
                 >
-                  <TableCell className={cn("pr-0 pl-4 pt-3 border-0")}> 
+                  <TableCell className="px-5 pt-3 border-0">
                     <span
                       className={cn(
                         "inline-flex items-center text-xs font-medium px-2 py-1 rounded-md",
@@ -160,13 +177,13 @@ const DesktopTable = ({
                   </TableCell>
                   <TableCell
                     className={cn(
-                      "font-mono text-xs text-white/70 px-2 pt-2 border-0"
+                      "font-mono text-xs text-white/70 px-5 pt-2 border-0"
                     )}
                   >
                     {formatTime(tx.time)}
                   </TableCell>
 
-                  <TableCell className={cn("p-2 border-0")}> 
+                  <TableCell className="px-5 border-0">
                     {primaryToken ? (
                       <div className="flex items-center justify-start gap-1">
                         <img
@@ -212,7 +229,7 @@ const DesktopTable = ({
                   </TableCell>
                   <TableCell
                     className={cn(
-                      "font-mono font-medium text-white px-2 flex pt-3.5 border-0"
+                      "font-mono font-medium text-white px-5 flex pt-3.5 border-0"
                     )}
                   >
                     <FormatUsdCollateralAmount
@@ -226,60 +243,57 @@ const DesktopTable = ({
                       })}
                     />
                   </TableCell>
-                  <TableCell className={cn("text-right pr-4 pt-3 border-0")}>
-                    <div className="flex items-center justify-end gap-2">
-                      {explorerHash && (
-                        <button
-                          type="button"
-                          className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 text-white/70 hover:text-white"
-                          title={tx.reasoning?.proof?.label ?? "Explorer"}
-                          aria-label="Open in explorer"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelectTransaction({
-                              ...tx,
-                              txhash: explorerHash,
-                            });
-                          }}
-                        >
-                          <ExternalLink size={14} />
-                        </button>
-                      )}
-                      {tx.reasoning && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggle(tx.id);
-                          }}
-                          className="inline-flex items-center gap-1 text-xs text-white/80 hover:text-white"
-                        >
-                          {isExpanded ? (
-                            <ChevronDown size={12} />
-                          ) : (
-                            <ChevronRight size={12} />
-                          )}
-                          See why
-                        </button>
-                      )}
+                  <TableCell className="px-5 border-0 pt-3">
+                    <div className="flex justify-center">
+                      <button
+                        type="button"
+                        aria-label="Open in explorer"
+                        disabled={!hasExplorer}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          if (!hasExplorer) {
+                            return;
+                          }
+                          handleSelectTransaction({
+                            ...tx,
+                            txhash: explorerHash,
+                          });
+                        }}
+                        className={cn(
+                          "inline-grid h-8 w-8 place-items-center rounded-md border border-white/10 transition-colors",
+                          hasExplorer
+                            ? "text-white/80 hover:bg-white/10"
+                            : "cursor-not-allowed text-white/30"
+                        )}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </button>
                     </div>
+                  </TableCell>
+                  <TableCell className="px-5 pt-3 border-0 text-right">
+                    {tx.reasoning && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggle(tx.id);
+                        }}
+                        className="inline-flex items-center gap-1 text-xs text-white/80 hover:text-white"
+                      >
+                        See why
+                        <ChevronRight
+                          className={cn(
+                            "w-3 h-3 transition-transform",
+                            isExpanded && "rotate-90"
+                          )}
+                        />
+                      </button>
+                    )}
                   </TableCell>
                 </TableRow>
                 {isExpanded && tx.reasoning && (
                   <TableRow className="border-0 bg-[#0F1115]">
-                    <TableCell colSpan={5} className="border-0 px-6 pb-5">
-                      <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-5 pl-6">
-                        <div className="absolute left-0 top-0 h-full w-1 bg-indigo-400/60" />
-                        <div className="flex items-center gap-2 text-white font-medium">
-                          <Sparkles size={14} className="text-indigo-200" />
-                          {tx.reasoning.what}
-                        </div>
-                        <p className="mt-2 text-white/80 leading-6">
-                          {tx.reasoning.why}
-                        </p>
-                        <p className="mt-3 text-sm text-white/60">
-                          {tx.reasoning.next}
-                        </p>
-                      </div>
+                    <TableCell colSpan={6} className="border-0 px-5 pb-5">
+                      <ReasoningPanel reasoning={tx.reasoning} />
                     </TableCell>
                   </TableRow>
                 )}
@@ -289,7 +303,7 @@ const DesktopTable = ({
         ) : (
           <TableRow className="border-0">
             <TableCell
-              colSpan={5}
+              colSpan={6}
               className="text-center py-8 text-white/60 border-0"
             >
               No transactions found

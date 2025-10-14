@@ -110,7 +110,6 @@ export default function VaultList() {
   const [holdingShowMode, setHoldingShowMode] = useState<string>(
     HOLDING_TYPE[0].value
   );
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const showUsd = (num, emty = "--") => {
     return num ? showFormatNumber(num, 2, 2, "$") : emty;
   };
@@ -240,29 +239,6 @@ export default function VaultList() {
     ];
   }, [dexOptions]);
 
-  useEffect(() => {
-    const hasClaim = mapData.find((i) => i?.withdrawing?.is_ready === false);
-
-    if (hasClaim) {
-      intervalRef.current = setInterval(() => {
-        refetchVaultsWithdrawal();
-      }, 30000); // 30s
-    }
-
-    if (!hasClaim && intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapData]);
-
   return (
     <>
       <div className="w-full mx-auto max-md:p-4 max-md:rounded-lg max-md:pt-6 max-md:bg-[#121212]">
@@ -274,32 +250,29 @@ export default function VaultList() {
           Live Vaults
         </div>
       )}
-      <div
-        className={cn(
-          "flex flex-col md:flex-row md:items-center md:justify-between rounded-t-md",
-          isMd ? "gap-4 bg-[#292929] px-6 py-4" : "gap-4"
-        )}
-      >
-        <div className="w-full md:w-80 md:max-w-1/2">
+      <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="w-full md:max-w-[460px]">
           <InputSearch
-            className="bg-black text-white placeholder:text-white/60 w-full rounded-lg px-4 py-2 border border-white/20 pl-9 focus-visible:ring-1 focus-visible:ring-white/70"
+            className="h-10 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder:text-white/60 focus-visible:ring-0"
             placeholder="Search AI vaults..."
             onChange={(value) => setSearch(value)}
             debounceTime={300}
           />
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-2">
           <GradientSelect
             options={OPTIONS_CHAINS}
             placeholder="All Chains"
             value={chains}
             onChange={setChains}
+            buttonClassName="h-10 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
           />
           <GradientSelect
             options={optionDexs}
             placeholder="All DEXs"
             value={dex}
             onChange={setDex}
+            buttonClassName="h-10 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
           />
         </div>
       </div>
@@ -345,7 +318,7 @@ export default function VaultList() {
           </div>
         }
       >
-        <div className="rounded-2xl border border-white/10 bg-[#121317] overflow-hidden">
+        <div className="mt-4 rounded-2xl border border-white/10 bg-[#121317] overflow-hidden">
           <div className="overflow-x-auto">
             <div className="min-w-[1180px]">
               <div
