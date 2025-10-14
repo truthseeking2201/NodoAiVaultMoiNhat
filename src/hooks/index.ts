@@ -10,3 +10,4 @@ export * from "./use-ribbon";
 export * from "./use-split-coin";
 export * from "./useQuestV2";
 export * from "./use-market-survey";
+export * from "./use-vault-performance";

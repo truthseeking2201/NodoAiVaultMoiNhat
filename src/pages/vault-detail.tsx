@@ -12,6 +12,7 @@ import VaultAnalytics from "@/components/vault-detail/sections/vault-analytics";
 import VaultInfo from "@/components/vault-detail/sections/vault-info";
 import UserPositionValue from "@/components/vault-detail/sections/user-position-value";
 import VaultStreak from "@/components/vault-detail/sections/vault-streak";
+import UserPerformanceComparison from "@/components/vault-detail/sections/user-performance";
 import { EXCHANGE_CODES_MAP } from "@/config/vault-config";
 import { PATH_ROUTER } from "@/config/router";
 import { useStreak } from "@/features/streak-vault/hooks/use-streak";
@@ -257,7 +258,7 @@ const VaultDetail = () => {
         <div className="md:p-3 max-md:mb-3 mb-4 flex justify-between">
           <UnderlineTabs
             activeTab={activeTab}
-            labels={["Overview", "Your Holdings"]}
+            labels={["Overview", "Your Holdings", "Your Performance"]}
             labelClassName="max-md:text-base max-md:px-0"
             tabClassName="max-md:space-x-4"
             onActiveTabChange={handleTabSwitch}
@@ -310,7 +311,7 @@ const VaultDetail = () => {
           <div className="mt-4 mb-3 flex justify-between">
             <UnderlineTabs
               activeTab={activeTab}
-              labels={["Overview", "Your Holdings"]}
+              labels={["Overview", "Your Holdings", "Your Performance"]}
               labelClassName="max-md:text-base max-md:px-0"
               tabClassName="max-md:space-x-4"
               onActiveTabChange={handleTabSwitch}
@@ -394,6 +395,10 @@ const VaultDetail = () => {
             />
 
             
+          </div>
+          {/* Your Performance */}
+          <div className={cn(activeTab !== 2 && "hidden")}>
+            <UserPerformanceComparison vaultId={vault_id} />
           </div>
           {/* Left sessions - end */}
         </div>
