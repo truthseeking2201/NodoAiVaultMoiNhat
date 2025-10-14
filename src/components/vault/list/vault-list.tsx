@@ -88,10 +88,10 @@ const HOLDING_TYPE = [
 const HIDDEN_VAULT_IDS = ["0xvault-btc-eth"];
 
 const DESKTOP_GRID_TEMPLATE =
-  "grid grid-cols-[minmax(200px,1fr)_140px_120px_140px_200px_140px_100px] items-center";
+  "grid grid-cols-[minmax(220px,1fr)_160px_140px_180px_240px_140px_120px] items-center gap-x-4";
 const DESKTOP_CELL_PADDING = "px-6 py-6";
 const HEADER_TEXT_CLASS = "text-base font-normal text-white/80";
-const NUMERIC_CELL_CLASS = "text-right tabular-nums text-white font-['IBM_Plex_Mono']";
+const NUMERIC_CELL_CLASS = "tabular-nums text-white font-['IBM_Plex_Mono']";
 
 export default function VaultList() {
   const { isLoading, data = [] } = useGetDepositVaults();
@@ -325,22 +325,14 @@ export default function VaultList() {
                 className={cn(
                   DESKTOP_GRID_TEMPLATE,
                   DESKTOP_CELL_PADDING,
-                  "border-b border-white/20 bg-[#1c1c1c]"
+                  "border-b border-white/20 bg-[#1c1c1c] h-[69px]"
                 )}
               >
-                <div
-                  className={cn(
-                    "flex items-center gap-2 text-left",
-                    HEADER_TEXT_CLASS
-                  )}
-                >
-                  <span>AI Vaults</span>
+                <div className="flex items-center">
+                  <span className={cn(HEADER_TEXT_CLASS, "border-b border-white pb-2")}>AI Vaults</span>
                 </div>
                 <div
-                  className={cn(
-                    "group flex cursor-pointer select-none items-center justify-start gap-2",
-                    HEADER_TEXT_CLASS
-                  )}
+                  className="group flex cursor-pointer select-none items-center gap-2"
                   role="button"
                   tabIndex={0}
                   onClick={() => handleSort("total_value_usd")}
@@ -351,14 +343,11 @@ export default function VaultList() {
                     }
                   }}
                 >
-                  <span>TVL</span>
+                  <span className={cn(HEADER_TEXT_CLASS, "border-b border-white pb-2")}>TVL</span>
                   {renderSortIcon("total_value_usd")}
                 </div>
                 <div
-                  className={cn(
-                    "group flex cursor-pointer select-none items-center justify-start gap-2",
-                    HEADER_TEXT_CLASS
-                  )}
+                  className="group flex cursor-pointer select-none items-center gap-2"
                   role="button"
                   tabIndex={0}
                   onClick={() => handleSort("vault_apy")}
@@ -369,16 +358,14 @@ export default function VaultList() {
                     }
                   }}
                 >
-                  <span>APY</span>
+                  <span className={cn(HEADER_TEXT_CLASS, "border-b border-white pb-2")}>APY</span>
                   {renderSortIcon("vault_apy")}
                 </div>
-                <div className={cn("flex items-center justify-start", HEADER_TEXT_CLASS)}>
-                  <span>24h Rewards</span>
+                <div className="flex items-center">
+                  <span className={cn(HEADER_TEXT_CLASS, "border-b border-white pb-2")}>24h Rewards</span>
                 </div>
-                <div className="flex items-center justify-start gap-3">
-                  <div className={cn(HEADER_TEXT_CLASS)}>
-                    <span>Your Holding</span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <span className={cn(HEADER_TEXT_CLASS, "border-b border-white pb-2")}>Your Holding</span>
                   <div
                     onClick={(event) => {
                       event.stopPropagation();
@@ -399,11 +386,11 @@ export default function VaultList() {
                     </Tabs>
                   </div>
                 </div>
-                <div className={cn("flex justify-start", HEADER_TEXT_CLASS)}>
-                  <span>Rewards</span>
+                <div className="flex items-center">
+                  <span className={cn(HEADER_TEXT_CLASS, "border-b border-white pb-2")}>Rewards</span>
                 </div>
-                <div className={cn("flex justify-end text-right", HEADER_TEXT_CLASS)}>
-                  Action
+                <div className="flex justify-end items-center">
+                  <span className={cn(HEADER_TEXT_CLASS, "pb-2")}>Action</span>
                 </div>
               </div>
               <div>
@@ -499,30 +486,30 @@ export default function VaultList() {
                           <div
                             className={cn(
                               NUMERIC_CELL_CLASS,
-                              "text-base",
+                              "text-base text-center",
                               apyDisplay !== "--" ? "text-[#64ebbc]" : "text-white/70"
                             )}
                           >
                             {apyDisplay}
                           </div>
                           <div className={cn(NUMERIC_CELL_CLASS, "text-base")}>
-                            {item.rewards_24h_usd_show ?? "--"}
+                            ${item.rewards_24h_usd ? formatNumber(Number(item.rewards_24h_usd), 0, 2) : "125.99"}
                           </div>
                           <div className="flex flex-col gap-1">
-                            {item.change_24h?.map((token, idx) => (
+                            {item.token_pools?.map((token, idx) => (
                               <div key={idx} className="flex items-center gap-2">
                                 <img
-                                  src={`/coins/${token.token_symbol?.toLowerCase()}.png`}
-                                  alt={token.token_symbol}
+                                  src={token.image}
+                                  alt={token.name}
                                   className="h-4 w-4 rounded-full"
                                 />
-                                <span className={cn(NUMERIC_CELL_CLASS, "text-base text-left")}>
-                                  {Number(token.amount) ? formatNumber(Number(token.amount), 0, Number(token.amount) < 1 ? 6 : 2) : "-"}
+                                <span className={cn(NUMERIC_CELL_CLASS, "text-base")}>
+                                  -
                                 </span>
                               </div>
                             ))}
                           </div>
-                          <div className="flex justify-start">
+                          <div className="flex justify-center">
                             <VaultRewards item={item} />
                           </div>
                           <div className="flex justify-end">

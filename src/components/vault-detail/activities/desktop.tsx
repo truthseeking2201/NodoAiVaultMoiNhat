@@ -125,10 +125,10 @@ const DesktopTable = ({
             Value
           </TableHead>
           <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[90px] px-5 text-center">
-            Link
+            TXID
           </TableHead>
           <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[140px] px-5 text-right">
-            Details
+            Reason
           </TableHead>
         </TableRow>
       </TableHeader>

@@ -123,7 +123,7 @@ const MobileActivityRow = ({
         }
       />
       <RowTime timestamp={tx.time} />
-      <RowAction label="Explorer">
+      <RowAction label="TXID">
         <button
           type="button"
           aria-label="Open in explorer"

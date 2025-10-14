@@ -68,12 +68,12 @@ export function VaultSwitcher({
           variant="outline"
           aria-label="Change vault"
           className={clsx(
-            "h-8 w-8 rounded-full border-white/10 bg-white/5 hover:bg-white/10",
+            "h-8 w-8 rounded-full border-white/20 bg-white/5 hover:bg-white/10",
             "p-0 grid place-items-center text-white/90",
             className
           )}
         >
-          <ChevronDown className="w-5 h-5 opacity-80" />
+          <ChevronDown className="w-5 h-5 opacity-100" />
           <span className="sr-only">Switch vault</span>
         </Button>
       </PopoverTrigger>
