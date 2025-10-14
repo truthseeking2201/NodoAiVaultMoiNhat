@@ -65,8 +65,8 @@ export const SectionMultiCard = ({
   const collateralClass = "w-4 h-4";
 
   return (
-    <section className="grid md:grid-cols-3 grid-cols-1 gap-4">
-      <Card
+    <section className="grid md:grid-cols-2 grid-cols-1 gap-4">
+      {/* <Card
         title="24h rewards"
         rightMobile={
           <p className="text-xs text-white/60 m-0">Updates every 1h</p>
@@ -93,7 +93,7 @@ export const SectionMultiCard = ({
             </span>
           </span>
         )}
-      </Card>
+      </Card> */}
       <Card
         title="Break-even"
         rightMobile={

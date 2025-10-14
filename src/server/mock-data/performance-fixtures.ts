@@ -1,5 +1,3 @@
-import { PerformanceDistributionBin } from "@/types/vault-performance";
-
 type PeerMetrics = {
   depositsUsd: number;
   withdrawalsUsd: number;
@@ -8,14 +6,22 @@ type PeerMetrics = {
   pnlPct: number;
 };
 
+type PeerHistory = {
+  pnlUsd: {
+    now: number;
+    d1?: number;
+    d7?: number;
+  };
+};
+
 type RawPerformancePeer = {
   wallet: string;
   metrics: PeerMetrics;
+  history: PeerHistory;
 };
 
 type PerformanceDataset = {
   peers: RawPerformancePeer[];
-  bins: PerformanceDistributionBin[];
   cohortSize: number;
   yourWallet: string;
   context: {
@@ -52,26 +58,6 @@ const getBinIndex = (value: number) => {
   return Math.max(0, Math.min(BIN_COUNT - 1, index));
 };
 
-const buildBins = (peers: RawPerformancePeer[]): PerformanceDistributionBin[] => {
-  return Array.from({ length: BIN_COUNT }, (_, index) => {
-    const x0 = BIN_MIN + BIN_WIDTH * index;
-    const x1 = x0 + BIN_WIDTH;
-    const count = peers.filter((peer) => {
-      const { pnlPct } = peer.metrics;
-      if (index === BIN_COUNT - 1) {
-        return pnlPct >= x0 && pnlPct <= x1;
-      }
-      return pnlPct >= x0 && pnlPct < x1;
-    }).length;
-
-    return {
-      x0: roundTo(x0, 4),
-      x1: roundTo(x1, 4),
-      count,
-    };
-  });
-};
-
 const MANUAL_PEERS: RawPerformancePeer[] = [
   {
     wallet: "0xvault-peer-top1",
@@ -81,6 +67,13 @@ const MANUAL_PEERS: RawPerformancePeer[] = [
       currentValueUsd: 28221,
       pnlUsd: 8221,
       pnlPct: roundTo(8221 / 20000, 4),
+    },
+    history: {
+      pnlUsd: {
+        now: 8221,
+        d1: 7821,
+        d7: 7200,
+      },
     },
   },
   {
@@ -92,6 +85,13 @@ const MANUAL_PEERS: RawPerformancePeer[] = [
       pnlUsd: 5102,
       pnlPct: roundTo(5102 / 14500, 4),
     },
+    history: {
+      pnlUsd: {
+        now: 5102,
+        d1: 4952,
+        d7: 4700,
+      },
+    },
   },
   {
     wallet: "0xvault-peer-you",
@@ -101,6 +101,13 @@ const MANUAL_PEERS: RawPerformancePeer[] = [
       currentValueUsd: 5412.5,
       pnlUsd: 412.5,
       pnlPct: 0.0825,
+    },
+    history: {
+      pnlUsd: {
+        now: 412.5,
+        d1: 380.2,
+        d7: 295.4,
+      },
     },
   },
   {
@@ -112,6 +119,13 @@ const MANUAL_PEERS: RawPerformancePeer[] = [
       pnlUsd: -1780,
       pnlPct: roundTo(-1780 / 9200, 4),
     },
+    history: {
+      pnlUsd: {
+        now: -1780,
+        d1: -1650,
+        d7: -1500,
+      },
+    },
   },
   {
     wallet: "0xvault-peer-bottom2",
@@ -121,6 +135,13 @@ const MANUAL_PEERS: RawPerformancePeer[] = [
       currentValueUsd: 10200,
       pnlUsd: -1200,
       pnlPct: roundTo(-1200 / 12500, 4),
+    },
+    history: {
+      pnlUsd: {
+        now: -1200,
+        d1: -1185,
+        d7: -950,
+      },
     },
   },
 ];
@@ -146,6 +167,8 @@ const createRandomPeer = (
       ? roundTo(gross * random() * 0.3, 2)
       : 0;
   const currentValueUsd = roundTo(gross - withdrawalsUsd, 2);
+  const change1d = roundTo((random() - 0.5) * 800, 2);
+  const change7d = roundTo((random() - 0.5) * 2000, 2);
 
   return {
     wallet,
@@ -155,6 +178,13 @@ const createRandomPeer = (
       currentValueUsd,
       pnlUsd,
       pnlPct,
+    },
+    history: {
+      pnlUsd: {
+        now: pnlUsd,
+        d1: pnlUsd - change1d,
+        d7: pnlUsd - change7d,
+      },
     },
   };
 };
@@ -179,12 +209,10 @@ const buildDataset = (): PerformanceDataset => {
     }
   }
 
-  const bins = buildBins(peers);
   const cohortSize = peers.length;
 
   return {
     peers,
-    bins,
     cohortSize,
     yourWallet: "0xvault-peer-you",
     context: {

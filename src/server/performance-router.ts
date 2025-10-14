@@ -26,56 +26,127 @@ const createAlias = (vaultId: string, wallet: string) => {
   return `0x${prefix}...${suffix}`;
 };
 
-const calculatePercentile = (
-  value: number,
-  peers: Array<{ metrics: { pnlPct: number } }>
-) => {
-  if (!peers.length) {
-    return 0;
-  }
-
-  const belowOrEqual = peers.filter(
-    (peer) => peer.metrics.pnlPct <= value
-  ).length;
-
-  return belowOrEqual / peers.length;
-};
-
-const computePercentile = (
-  value: number,
-  bins: VaultPerformanceDistributionResponse["bins"]
-) => {
-  const total = bins.reduce((sum, bin) => sum + bin.count, 0);
-  if (!total) {
-    return 0;
-  }
-
-  let cumulative = 0;
-  for (const bin of bins) {
-    if (value >= bin.x1) {
-      cumulative += bin.count;
-      continue;
-    }
-
-    if (value < bin.x0) {
-      break;
-    }
-
-    const span = bin.x1 - bin.x0 || 1;
-    const fraction = Math.max(
-      0,
-      Math.min(1, (value - bin.x0) / span)
-    );
-    cumulative += bin.count * fraction;
-    break;
-  }
-
-  return Math.min(100, Math.max(0, Math.round((cumulative / total) * 100)));
-};
-
 const allowedSortFields = new Set<
   VaultPerformancePeersResponse["sort"]
 >(["pnlPct", "pnlUsd", "depositsUsd"]);
+const allowedWindows = new Set<VaultPerformanceDistributionResponse["window"]>([
+  "all",
+  "1d",
+  "1w",
+]);
+
+type DatasetPeer = ReturnType<typeof getPerformanceDataset>["peers"][number];
+
+const percentileFromValues = (
+  value: number | null | undefined,
+  values: number[]
+) => {
+  if (value == null || !Number.isFinite(value) || values.length === 0) {
+    return null;
+  }
+  const belowOrEqual = values.filter((item) => item <= value).length;
+  return belowOrEqual / values.length;
+};
+
+const formatBinEdge = (value: number) =>
+  Number.isFinite(value) ? Number(value.toFixed(2)) : value;
+
+const createHistogram = (
+  values: number[],
+  binCount: number
+): VaultPerformanceDistributionResponse["bins"] => {
+  if (!values.length || binCount <= 0) {
+    return [];
+  }
+
+  const finiteValues = values.filter((value) =>
+    Number.isFinite(value)
+  );
+  if (!finiteValues.length) {
+    return [];
+  }
+
+  const min = Math.min(...finiteValues);
+  const max = Math.max(...finiteValues);
+  const span = max - min;
+
+  if (span === 0) {
+    const width = Math.max(1, Math.abs(min) * 0.1 || 1);
+    const start = min - (width * binCount) / 2;
+    return Array.from({ length: binCount }, (_, index) => {
+      const x0 = start + width * index;
+      const x1 = x0 + width;
+      const count = finiteValues.filter((value) => {
+        if (index === binCount - 1) {
+          return value >= x0 && value <= x1;
+        }
+        return value >= x0 && value < x1;
+      }).length;
+      return {
+        x0: formatBinEdge(x0),
+        x1: formatBinEdge(x1),
+        count,
+      };
+    });
+  }
+
+  const padding = span * 0.05;
+  const minEdge = min - padding;
+  const maxEdge = max + padding;
+  const width = (maxEdge - minEdge) / binCount;
+
+  const bins = Array.from({ length: binCount }, (_, index) => ({
+    x0: minEdge + width * index,
+    x1: minEdge + width * (index + 1),
+    count: 0,
+  }));
+
+  for (const value of finiteValues) {
+    const relative = value - minEdge;
+    const index = Math.min(
+      binCount - 1,
+      Math.max(0, Math.floor(relative / width))
+    );
+    bins[index].count += 1;
+  }
+
+  return bins.map((bin) => ({
+    x0: formatBinEdge(bin.x0),
+    x1: formatBinEdge(bin.x1),
+    count: bin.count,
+  }));
+};
+
+const getWindowValue = (
+  peer: DatasetPeer,
+  window: VaultPerformanceDistributionResponse["window"]
+) => {
+  const history = peer.history?.pnlUsd;
+  if (!history) {
+    return null;
+  }
+
+  const now = history.now ?? peer.metrics.pnlUsd;
+  if (!Number.isFinite(now)) {
+    return null;
+  }
+
+  if (window === "all") {
+    return now;
+  }
+
+  if (window === "1d") {
+    if (history.d1 == null) {
+      return null;
+    }
+    return now - history.d1;
+  }
+
+  if (history.d7 == null) {
+    return null;
+  }
+  return now - history.d7;
+};
 
 export const createPerformanceRouter = () => {
   const router = Router();
@@ -102,10 +173,13 @@ export const createPerformanceRouter = () => {
         return;
       }
 
-      const percentile = calculatePercentile(
-        peer.metrics.pnlPct,
-        dataset.peers
-      );
+      const percentileAllTime =
+        percentileFromValues(
+          peer.metrics.pnlUsd,
+          dataset.peers
+            .map((entry) => entry.metrics.pnlUsd)
+            .filter((value) => Number.isFinite(value))
+        ) ?? 0;
 
       const summary: VaultPerformanceSummaryResponse = {
         your: {
@@ -118,7 +192,7 @@ export const createPerformanceRouter = () => {
           feesRewards24hUsd: dataset.context.feesRewards24hUsd,
         },
         peer: {
-          percentilePnLPct: percentile,
+          percentilePnlUsd: percentileAllTime,
         },
       };
 
@@ -130,17 +204,37 @@ export const createPerformanceRouter = () => {
     "/api/v1/vaults/:vaultId/perf/distribution",
     (request, response) => {
       const { vaultId } = request.params;
-      const metric = (request.query.metric as string) ?? "pnlPct";
+      const metric = (request.query.metric as string) ?? "pnlUsd";
       const wallet =
         (request.query.wallet as string | undefined) ??
         DEFAULT_PERFORMANCE_WALLET;
+      const windowParam =
+        (request.query.window as string | undefined) ?? "all";
+      const binsParam = Number.parseInt(
+        (request.query.bins as string) ?? "30",
+        10
+      );
 
-      if (metric !== "pnlPct") {
+      if (metric !== "pnlUsd") {
         response.status(400).json({
-          message: "Only pnlPct distribution is supported in phase 1.",
+          message: "Only pnlUsd distribution is supported.",
         });
         return;
       }
+
+      if (!allowedWindows.has(windowParam as typeof windowParam)) {
+        response.status(400).json({
+          message: `Unsupported window "${windowParam}".`,
+        });
+        return;
+      }
+
+      const binCount = Number.isFinite(binsParam)
+        ? Math.max(5, Math.min(120, binsParam))
+        : 30;
+
+      const windowKey =
+        windowParam as VaultPerformanceDistributionResponse["window"];
 
       const dataset = getPerformanceDataset(vaultId);
       const peer =
@@ -156,14 +250,24 @@ export const createPerformanceRouter = () => {
         return;
       }
 
-      const percentile = computePercentile(peer.metrics.pnlPct, dataset.bins);
+      const values = dataset.peers
+        .map((entry) => getWindowValue(entry, windowKey))
+        .filter((value): value is number => value != null && Number.isFinite(value));
+      const yourValue = getWindowValue(peer, windowKey);
+      const percentile = percentileFromValues(yourValue, values);
+
       const distribution: VaultPerformanceDistributionResponse = {
-        bins: dataset.bins,
+        metric: "pnlUsd",
+        window: windowKey,
+        bins: createHistogram(values, binCount),
         your: {
-          value: peer.metrics.pnlPct,
+          value: yourValue ?? null,
           percentile,
         },
         cohortSize: dataset.cohortSize,
+        peers: {
+          size: values.length,
+        },
       };
 
       response.json(distribution);

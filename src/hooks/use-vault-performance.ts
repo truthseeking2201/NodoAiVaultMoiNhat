@@ -40,15 +40,29 @@ export const useVaultPerformanceSummary = (
 };
 
 export const useVaultPerformanceDistribution = (
-  vaultId?: string
+  vaultId?: string,
+  options?: {
+    window?: VaultPerformanceDistributionResponse["window"];
+    bins?: number;
+  }
 ): UseQueryResult<VaultPerformanceDistributionResponse, Error> => {
   const { address, isAuthenticated } = useWallet();
   const walletAddress = getWalletAddressForPerformance(address);
 
   return useQuery({
-    queryKey: ["vault-performance-distribution", vaultId, walletAddress],
+    queryKey: [
+      "vault-performance-distribution",
+      vaultId,
+      walletAddress,
+      options?.window ?? "all",
+      options?.bins ?? 30,
+    ],
     queryFn: () =>
-      getVaultPerformanceDistribution(vaultId as string, walletAddress),
+      getVaultPerformanceDistribution(vaultId as string, {
+        wallet: walletAddress,
+        window: options?.window,
+        bins: options?.bins,
+      }),
     enabled:
       !!vaultId &&
       (!!walletAddress || !!address) &&

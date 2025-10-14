@@ -6,6 +6,7 @@ import {
 } from "@/hooks";
 import {
   MIN_PERFORMANCE_COHORT,
+  VaultPerformanceDistributionResponse,
   VaultPerformanceLeaderboardRow,
 } from "@/types/vault-performance";
 import { DetailWrapper } from "@/components/vault-detail/detail-wrapper";
@@ -47,6 +48,21 @@ const histogramConfig = {
   },
 };
 
+const DISTRIBUTION_WINDOWS: VaultPerformanceDistributionResponse["window"][] = [
+  "all",
+  "1d",
+  "1w",
+];
+
+const WINDOW_LABELS: Record<
+  VaultPerformanceDistributionResponse["window"],
+  string
+> = {
+  all: "All",
+  "1d": "1D",
+  "1w": "1W",
+};
+
 const formatUsd = (value: number, fractionDigits = 2) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -56,15 +72,42 @@ const formatUsd = (value: number, fractionDigits = 2) => {
   }).format(value);
 };
 
+const formatUsdShort = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return "$0";
+  }
+  const abs = Math.abs(value);
+  const sign = value < 0 ? "-" : "";
+  if (abs >= 1_000_000_000) {
+    return `${sign}$${(abs / 1_000_000_000).toFixed(1)}B`;
+  }
+  if (abs >= 1_000_000) {
+    return `${sign}$${(abs / 1_000_000).toFixed(1)}M`;
+  }
+  if (abs >= 1_000) {
+    return `${sign}$${(abs / 1_000).toFixed(1)}k`;
+  }
+  if (abs >= 1) {
+    return `${sign}$${abs.toFixed(0)}`;
+  }
+  return `${sign}$${abs.toFixed(2)}`;
+};
+
+const formatUsdRangeLabel = (x0: number, x1: number) => {
+  const precisionStart = Math.abs(x0) < 1 ? 2 : 0;
+  const precisionEnd = Math.abs(x1) < 1 ? 2 : 0;
+  return `${formatUsd(x0, precisionStart)} to ${formatUsd(
+    x1,
+    precisionEnd
+  )}`;
+};
+
 const formatPercent = (value: number, precision = 2) =>
   `${formatAmount({
     amount: value * 100,
     precision,
     stripZero: false,
   })}%`;
-
-const formatShortPercent = (value: number) =>
-  `${(value * 100).toFixed(1)}%`;
 
 const extractCohortSize = (
   distribution?: { cohortSize: number },
@@ -94,7 +137,11 @@ const SummaryCard = ({
   depositsUsd: number;
   percentile: number;
 }) => {
-  const aheadPercent = Math.round(percentile * 100);
+  const normalizedPercentile = Math.max(
+    0,
+    Math.min(1, Number.isFinite(percentile) ? percentile : 0)
+  );
+  const aheadPercent = Math.round(normalizedPercentile * 100);
   const pnlUsdDisplay = formatUsd(pnlUsd);
   const depositsDisplay = formatUsd(depositsUsd);
 
@@ -128,7 +175,7 @@ const SummaryCard = ({
 
         <div className="text-right">
           <div className="text-white/60 text-xs">Total deposits</div>
-          <div className="text-white text-xl font-semibold">
+          <div className="mt-1 text-4xl font-bold text-white">
             {depositsDisplay}
           </div>
         </div>
@@ -141,48 +188,92 @@ const DistributionCard = ({
   bins,
   yourValue,
   percentile,
+  window,
+  onWindowChange,
+  peersSize,
 }: {
   bins: { x0: number; x1: number; count: number }[];
-  yourValue: number;
-  percentile: number;
+  yourValue: number | null | undefined;
+  percentile: number | null | undefined;
+  window: VaultPerformanceDistributionResponse["window"];
+  onWindowChange: (
+    value: VaultPerformanceDistributionResponse["window"]
+  ) => void;
+  peersSize: number;
 }) => {
   const chartData = useMemo(
     () =>
-      bins.map((bin, index) => ({
-        bucket: index,
-        midpoint: ((bin.x0 + bin.x1) / 2) * 100,
+      bins.map((bin) => ({
+        midpoint: (bin.x0 + bin.x1) / 2,
         count: bin.count,
-        label: `${formatShortPercent(bin.x0)} to ${formatShortPercent(bin.x1)}`,
+        label: formatUsdRangeLabel(bin.x0, bin.x1),
       })),
     [bins]
   );
-  const normalizedPercentile = Number.isFinite(percentile) ? percentile : 0;
-  const aheadPercent =
-    normalizedPercentile > 1
-      ? Math.round(normalizedPercentile)
-      : Math.round(normalizedPercentile * 100);
-  const userMarker = (yourValue ?? 0) * 100;
+
+  const hasValues = chartData.length > 0;
+  const xValues = chartData.map((item) => item.midpoint);
+  const xMin = hasValues ? Math.min(...xValues) : 0;
+  const xMax = hasValues ? Math.max(...xValues) : 0;
+  const pad = hasValues ? Math.max(1, (xMax - xMin) * 0.08) : 1;
+  const domain: [number, number] = [xMin - pad, xMax + pad];
+
+  const normalizedPercentile = Math.max(
+    0,
+    Math.min(1, Number.isFinite(percentile) ? (percentile as number) : 0)
+  );
+  const aheadPercent = Number.isFinite(percentile)
+    ? Math.round(normalizedPercentile * 100)
+    : null;
+  const youMarker =
+    yourValue != null && Number.isFinite(yourValue)
+      ? (yourValue as number)
+      : null;
 
   return (
     <div className="rounded-2xl border border-white/10 bg-[#121317] p-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-base font-semibold text-white">
-            Peers by PnL% (last 90 days)
+            Peers by PnL ($)
           </p>
-          <p className="text-xs text-white/60 mt-1">
-            Each bar shows how many users fall into that return range.
+          <p className="mt-1 text-xs text-white/60">
+            Each bar shows how many users fall into that gain/loss range.
           </p>
         </div>
-        <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/80">
-          You’re ahead of {aheadPercent}% of peers
-        </span>
+        <div className="flex items-center gap-3">
+          <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 p-1">
+            {DISTRIBUTION_WINDOWS.map((value) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => onWindowChange(value)}
+                className={cn(
+                  "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                  window === value
+                    ? "bg-white/15 text-white"
+                    : "text-white/70 hover:bg-white/10"
+                )}
+              >
+                {WINDOW_LABELS[value]}
+              </button>
+            ))}
+          </div>
+          <span className="text-xs text-white/50">
+            {peersSize.toLocaleString("en-US")} peers
+          </span>
+        </div>
       </div>
-      <div className="mt-3 w-full h-[360px]">
+      {aheadPercent != null && (
+        <p className="mt-3 text-xs text-white/60">
+          You’re ahead of {aheadPercent}% of peers for this window.
+        </p>
+      )}
+      <div className="mt-3 h-[360px] w-full">
         <ChartContainer config={histogramConfig} className="h-full w-full">
           <BarChart
             data={chartData}
-            margin={{ top: 12, right: 32, bottom: 28, left: 48 }}
+            margin={{ top: 12, right: 24, bottom: 28, left: 54 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -192,11 +283,12 @@ const DistributionCard = ({
             <XAxis
               dataKey="midpoint"
               type="number"
-              tickFormatter={(value) => `${value.toFixed(0)}%`}
+              domain={hasValues ? domain : undefined}
+              tickFormatter={(value) => formatUsdShort(value)}
               stroke="rgba(255,255,255,0.4)"
               tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 12 }}
               label={{
-                value: "PnL %",
+                value: "PnL ($)",
                 position: "insideBottomRight",
                 offset: -8,
                 fill: "rgba(255,255,255,0.6)",
@@ -204,14 +296,14 @@ const DistributionCard = ({
             />
             <YAxis
               allowDecimals={false}
-              width={40}
+              width={42}
               stroke="rgba(255,255,255,0.4)"
               tick={{ fill: "rgba(255,255,255,0.6)", fontSize: 12 }}
               label={{
                 value: "Users",
                 angle: -90,
                 position: "insideLeft",
-                offset: 10,
+                offset: 12,
                 fill: "rgba(255,255,255,0.6)",
               }}
             />
@@ -237,17 +329,19 @@ const DistributionCard = ({
               fill="rgba(80, 156, 255, 0.9)"
               radius={[4, 4, 0, 0]}
             />
-            <ReferenceLine
-              x={userMarker}
-              stroke="#60A5FA"
-              strokeWidth={2}
-              label={{
-                value: "You",
-                position: "top",
-                fill: "#93c5fd",
-                fontSize: 12,
-              }}
-            />
+            {youMarker != null && (
+              <ReferenceLine
+                x={youMarker}
+                stroke="#60A5FA"
+                strokeWidth={2}
+                label={{
+                  value: "You",
+                  position: "top",
+                  fill: "#93c5fd",
+                  fontSize: 12,
+                }}
+              />
+            )}
           </BarChart>
         </ChartContainer>
       </div>
@@ -367,7 +461,7 @@ const PeerTable = ({
           </div>
         </div>
       )}
-      <div className="mt-4">
+      <div className="mt-4 overflow-x-auto">
         <Table className="min-w-full text-sm">
           <TableHeader className="sticky top-0 z-10 backdrop-blur">
             <TableRow className="border-white/10">
@@ -461,6 +555,8 @@ const PeerTable = ({
 
 const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) => {
   const [page, setPage] = useState(0);
+  const [distributionWindow, setDistributionWindow] =
+    useState<VaultPerformanceDistributionResponse["window"]>("all");
 
   const {
     data: summary,
@@ -470,7 +566,9 @@ const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) 
   } = useVaultPerformanceSummary(vaultId);
   const {
     data: distribution,
-  } = useVaultPerformanceDistribution(vaultId);
+  } = useVaultPerformanceDistribution(vaultId, {
+    window: distributionWindow,
+  });
   const {
     data: peersData,
     isLoading: peersLoading,
@@ -479,6 +577,10 @@ const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) 
     limit: PAGE_SIZE,
     offset: page * PAGE_SIZE,
   });
+
+  useEffect(() => {
+    setDistributionWindow("all");
+  }, [vaultId]);
 
   useEffect(() => {
     if (page === 0 || !peersData) {
@@ -518,7 +620,7 @@ const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) 
               pnlUsd={summary.your.pnlUsd}
               pnlPct={summary.your.pnlPct}
               depositsUsd={summary.your.depositsUsd}
-              percentile={summary.peer.percentilePnLPct ?? 0}
+              percentile={summary.peer.percentilePnlUsd ?? 0}
             />
             {insufficientPeers || !distribution ? (
               <NotEnoughPeers />
@@ -527,6 +629,9 @@ const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) 
                 bins={distribution.bins}
                 yourValue={distribution.your.value}
                 percentile={distribution.your.percentile}
+                window={distributionWindow}
+                onWindowChange={setDistributionWindow}
+                peersSize={distribution.peers.size}
               />
             )}
           </section>

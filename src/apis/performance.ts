@@ -34,16 +34,22 @@ export const getVaultPerformanceSummary = async (
 
 export const getVaultPerformanceDistribution = async (
   vaultId: string,
-  wallet?: string
+  options?: {
+    wallet?: string;
+    window?: VaultPerformanceDistributionResponse["window"];
+    bins?: number;
+  }
 ): Promise<VaultPerformanceDistributionResponse> => {
   if (isMockMode) {
-    return mockPerformanceDistribution(vaultId, wallet);
+    return mockPerformanceDistribution(vaultId, options);
   }
 
   return http.get(URLS.distribution(vaultId), {
     params: {
-      metric: "pnlPct",
-      ...(wallet ? { wallet } : {}),
+      metric: "pnlUsd",
+      window: options?.window ?? "all",
+      bins: options?.bins ?? 30,
+      ...(options?.wallet ? { wallet: options.wallet } : {}),
     },
   }) as Promise<VaultPerformanceDistributionResponse>;
 };

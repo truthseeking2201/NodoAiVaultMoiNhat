@@ -4,7 +4,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { Wrench, ExternalLink } from "lucide-react";
+import { Calculator, ExternalLink } from "lucide-react";
 import clsx from "clsx";
 
 type VaultHeaderToolsProps = {
@@ -36,7 +36,7 @@ export function VaultHeaderTools({
             className
           )}
         >
-          <Wrench className="w-4 h-4 text-white/80" />
+          <Calculator className="w-4 h-4 text-white/80" />
         </Button>
       </PopoverTrigger>
       <PopoverContent

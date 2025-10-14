@@ -12,37 +12,119 @@ import {
 const allowedSortFields = new Set<
   VaultPerformancePeersResponse["sort"]
 >(["pnlPct", "pnlUsd", "depositsUsd"]);
+const allowedWindows = new Set<VaultPerformanceDistributionResponse["window"]>([
+  "all",
+  "1d",
+  "1w",
+]);
 
-const computePercentile = (
-  value: number,
-  bins: VaultPerformanceDistributionResponse["bins"]
+const percentileFromValues = (
+  value: number | null | undefined,
+  values: number[]
 ) => {
-  const total = bins.reduce((sum, bin) => sum + bin.count, 0);
-  if (!total) {
-    return 0;
+  if (value == null || !Number.isFinite(value) || values.length === 0) {
+    return null;
+  }
+  const belowOrEqual = values.filter((item) => item <= value).length;
+  return belowOrEqual / values.length;
+};
+
+const formatEdge = (value: number) =>
+  Number.isFinite(value) ? Number(value.toFixed(2)) : value;
+
+const createHistogram = (
+  values: number[],
+  binCount: number
+): VaultPerformanceDistributionResponse["bins"] => {
+  if (!values.length || binCount <= 0) {
+    return [];
   }
 
-  let cumulative = 0;
-  for (const bin of bins) {
-    if (value >= bin.x1) {
-      cumulative += bin.count;
-      continue;
-    }
+  const finiteValues = values.filter((value) =>
+    Number.isFinite(value)
+  );
+  if (!finiteValues.length) {
+    return [];
+  }
 
-    if (value < bin.x0) {
-      break;
-    }
+  const min = Math.min(...finiteValues);
+  const max = Math.max(...finiteValues);
+  const span = max - min;
 
-    const span = bin.x1 - bin.x0 || 1;
-    const fraction = Math.max(
-      0,
-      Math.min(1, (value - bin.x0) / span)
+  if (span === 0) {
+    const width = Math.max(1, Math.abs(min) * 0.1 || 1);
+    const start = min - (width * binCount) / 2;
+    return Array.from({ length: binCount }, (_, index) => {
+      const x0 = start + width * index;
+      const x1 = x0 + width;
+      const count = finiteValues.filter((value) => {
+        if (index === binCount - 1) {
+          return value >= x0 && value <= x1;
+        }
+        return value >= x0 && value < x1;
+      }).length;
+      return {
+        x0: formatEdge(x0),
+        x1: formatEdge(x1),
+        count,
+      };
+    });
+  }
+
+  const padding = span * 0.05;
+  const minEdge = min - padding;
+  const maxEdge = max + padding;
+  const width = (maxEdge - minEdge) / binCount;
+
+  const bins = Array.from({ length: binCount }, (_, index) => ({
+    x0: minEdge + width * index,
+    x1: minEdge + width * (index + 1),
+    count: 0,
+  }));
+
+  for (const value of finiteValues) {
+    const relative = value - minEdge;
+    const index = Math.min(
+      binCount - 1,
+      Math.max(0, Math.floor(relative / width))
     );
-    cumulative += bin.count * fraction;
-    break;
+    bins[index].count += 1;
   }
 
-  return Math.min(100, Math.max(0, Math.round((cumulative / total) * 100)));
+  return bins.map((bin) => ({
+    x0: formatEdge(bin.x0),
+    x1: formatEdge(bin.x1),
+    count: bin.count,
+  }));
+};
+
+type DatasetPeer = ReturnType<typeof getPerformanceDataset>["peers"][number];
+
+const getWindowValue = (
+  peer: DatasetPeer,
+  window: VaultPerformanceDistributionResponse["window"]
+) => {
+  const history = peer.history?.pnlUsd;
+  if (!history) {
+    return null;
+  }
+  const now = history.now ?? peer.metrics.pnlUsd;
+  if (!Number.isFinite(now)) {
+    return null;
+  }
+  if (window === "all") {
+    return now;
+  }
+  if (window === "1d") {
+    if (history.d1 == null) {
+      return null;
+    }
+    return now - history.d1;
+  }
+  if (history.d7 == null) {
+    return null;
+  }
+  return now - history.d7;
 };
 
 const createAlias = (vaultId: string, wallet: string) => {
@@ -56,16 +138,6 @@ const createAlias = (vaultId: string, wallet: string) => {
   const prefix = normalized.slice(0, 4);
   const suffix = normalized.slice(-4);
   return `0x${prefix}...${suffix}`;
-};
-
-const calculatePercentile = (value: number, dataset: ReturnType<typeof getPerformanceDataset>) => {
-  if (!dataset.peers.length) {
-    return 0;
-  }
-  const belowOrEqual = dataset.peers.filter(
-    (entry) => entry.metrics.pnlPct <= value
-  ).length;
-  return belowOrEqual / dataset.peers.length;
 };
 
 const getPeerMetrics = (vaultId: string, wallet?: string) => {
@@ -87,6 +159,13 @@ export const mockPerformanceSummary = (
   wallet?: string
 ): VaultPerformanceSummaryResponse => {
   const { dataset, peer } = getPeerMetrics(vaultId, wallet);
+  const percentileUsd =
+    percentileFromValues(
+      peer.metrics.pnlUsd,
+      dataset.peers
+        .map((entry) => entry.metrics.pnlUsd)
+        .filter((value) => Number.isFinite(value))
+    ) ?? 0;
   return {
     your: {
       pnlUsd: peer.metrics.pnlUsd,
@@ -98,23 +177,41 @@ export const mockPerformanceSummary = (
       feesRewards24hUsd: dataset.context.feesRewards24hUsd,
     },
     peer: {
-      percentilePnLPct: calculatePercentile(peer.metrics.pnlPct, dataset),
+      percentilePnlUsd: percentileUsd,
     },
   };
 };
 
 export const mockPerformanceDistribution = (
   vaultId: string,
-  wallet?: string
+  options?: {
+    wallet?: string;
+    window?: VaultPerformanceDistributionResponse["window"];
+    bins?: number;
+  }
 ): VaultPerformanceDistributionResponse => {
-  const { dataset, peer } = getPeerMetrics(vaultId, wallet);
+  const windowKey =
+    options?.window && allowedWindows.has(options.window)
+      ? options.window
+      : "all";
+  const { dataset, peer } = getPeerMetrics(vaultId, options?.wallet);
+  const peerValues = dataset.peers
+    .map((entry) => getWindowValue(entry, windowKey))
+    .filter((value): value is number => value != null && Number.isFinite(value));
+  const yourValue = getWindowValue(peer, windowKey);
+  const bins = createHistogram(peerValues, options?.bins ?? 30);
   return {
-    bins: dataset.bins,
+    metric: "pnlUsd",
+    window: windowKey,
+    bins,
     your: {
-      value: peer.metrics.pnlPct,
-      percentile: computePercentile(peer.metrics.pnlPct, dataset.bins),
+      value: yourValue ?? null,
+      percentile: percentileFromValues(yourValue, peerValues),
     },
     cohortSize: dataset.cohortSize,
+    peers: {
+      size: peerValues.length,
+    },
   };
 };
 

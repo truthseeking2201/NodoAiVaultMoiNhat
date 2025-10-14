@@ -9,7 +9,7 @@ export type VaultPerformanceSummaryResponse = {
     feesRewards24hUsd: number;
   };
   peer: {
-    percentilePnLPct: number;
+    percentilePnlUsd: number;
   };
 };
 
@@ -20,12 +20,17 @@ export type PerformanceDistributionBin = {
 };
 
 export type VaultPerformanceDistributionResponse = {
+  metric: "pnlUsd";
+  window: "all" | "1d" | "1w";
   bins: PerformanceDistributionBin[];
   your: {
-    value: number;
-    percentile: number;
+    value: number | null;
+    percentile: number | null;
   };
   cohortSize: number;
+  peers: {
+    size: number;
+  };
 };
 
 export type VaultPerformanceLeaderboardRow = {

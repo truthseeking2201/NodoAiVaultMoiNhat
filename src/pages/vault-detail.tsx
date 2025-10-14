@@ -328,11 +328,11 @@ const VaultDetail = () => {
               isDetailLoading={isDetailLoading}
             />
             <div className="mt-6" />
-            <VaultAnalytics
+            {/* <VaultAnalytics
               vault_id={vault_id}
               isDetailLoading={isDetailLoading}
               vault={vaultDetails}
-            />
+            /> */}
             <div className="mt-6" />
             <VaultActivities
               isDetailLoading={isDetailLoading}
