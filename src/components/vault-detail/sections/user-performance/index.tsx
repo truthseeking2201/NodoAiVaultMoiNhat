@@ -74,7 +74,7 @@ const extractCohortSize = (
 };
 
 const NotEnoughPeers = () => (
-  <div className="flex h-full min-h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-white/30 bg-white/5 px-4 text-center">
+  <div className="flex h-full min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/20 bg-[#121317] px-4 text-center">
     <p className="text-base font-semibold text-white">Not enough peers yet</p>
     <p className="mt-1 text-sm text-white/60 max-w-md">
       We will surface distribution and peer metrics once at least{" "}
@@ -90,6 +90,7 @@ const SummaryCard = ({
   utilization,
   feesRewards24hUsd,
   percentile,
+  className,
 }: {
   pnlUsd: number;
   pnlPct: number;
@@ -97,6 +98,7 @@ const SummaryCard = ({
   utilization: number;
   feesRewards24hUsd: number;
   percentile: number;
+  className?: string;
 }) => {
   const safeUtilization = Number.isFinite(utilization) ? utilization : 0;
   const safeFees = Number.isFinite(feesRewards24hUsd)
@@ -104,7 +106,12 @@ const SummaryCard = ({
     : 0;
   const aheadPercent = Math.round(percentile * 100);
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-4 md:p-5">
+    <div
+      className={cn(
+        "rounded-2xl border border-white/10 bg-[#121317] p-4 md:p-6",
+        className
+      )}
+    >
       <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="text-sm font-semibold text-white/80">Your PnL (USD)</p>
@@ -166,10 +173,12 @@ const DistributionCard = ({
   bins,
   yourValue,
   percentile,
+  className,
 }: {
   bins: { x0: number; x1: number; count: number }[];
   yourValue: number;
   percentile: number;
+  className?: string;
 }) => {
   const chartData = useMemo(
     () =>
@@ -189,7 +198,12 @@ const DistributionCard = ({
   const userMarker = (yourValue ?? 0) * 100;
 
   return (
-    <div className="flex h-full flex-col rounded-lg border border-white/10 bg-white/5 p-4 md:p-6">
+    <div
+      className={cn(
+        "flex h-full flex-col rounded-2xl border border-white/10 bg-[#121317] p-4 md:p-6",
+        className
+      )}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-base font-semibold text-white">
@@ -485,27 +499,34 @@ const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) 
       isLoading={summaryLoading && !summary}
     >
       {summary ? (
-        <div className="space-y-5">
-          <SummaryCard
-            pnlUsd={summary.your.pnlUsd}
-            pnlPct={summary.your.pnlPct}
-            depositsUsd={summary.your.depositsUsd}
-            utilization={summary.context.utilization}
-            feesRewards24hUsd={summary.context.feesRewards24hUsd}
-            percentile={summary.peer.percentilePnLPct ?? 0}
-          />
-
-          <div className="grid gap-4 lg:grid-cols-2">
-            {insufficientPeers || !distribution ? (
-              <NotEnoughPeers />
-            ) : (
-              <DistributionCard
-                bins={distribution.bins}
-                yourValue={distribution.your.value}
-                percentile={distribution.your.percentile}
+        <div className="space-y-6">
+          <section className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-stretch">
+            <div className="lg:col-span-7">
+              <SummaryCard
+                pnlUsd={summary.your.pnlUsd}
+                pnlPct={summary.your.pnlPct}
+                depositsUsd={summary.your.depositsUsd}
+                utilization={summary.context.utilization}
+                feesRewards24hUsd={summary.context.feesRewards24hUsd}
+                percentile={summary.peer.percentilePnLPct ?? 0}
+                className="h-full"
               />
-            )}
-          </div>
+            </div>
+            <div className="lg:col-span-5">
+              {insufficientPeers || !distribution ? (
+                <div className="h-full">
+                  <NotEnoughPeers />
+                </div>
+              ) : (
+                <DistributionCard
+                  bins={distribution.bins}
+                  yourValue={distribution.your.value}
+                  percentile={distribution.your.percentile}
+                  className="h-full"
+                />
+              )}
+            </div>
+          </section>
 
           {insufficientPeers || !peersData ? (
             <NotEnoughPeers />

@@ -12,6 +12,8 @@ import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { VaultInfo } from "@/pages/vault-detail";
+import { VaultSwitcher, VaultOption } from "@/components/vault/VaultSwitcher";
+import { VAULTS } from "@/mocks/vault";
 
 type VaultInfoProps = {
   vault: any;
@@ -164,6 +166,7 @@ const HeaderDetail = ({
               <Button variant="outline" size="sm" onClick={onOpenSimulator} className="border-white/20 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white">
                 LP Simulator
               </Button>
+              <VaultSwitcher currentVaultId={vaultId ?? ''} vaults={VAULTS} />
             </div>
             <div className="flex items-center gap-1 mt-1">
               <img
@@ -222,6 +225,7 @@ const HeaderDetail = ({
             <Button variant="outline" size="sm" onClick={onOpenSimulator} className="border-white/20 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white">
               LP Simulator
             </Button>
+            <VaultSwitcher currentVaultId={vaultId ?? ''} vaults={VAULTS} />
           </div>
             <div className="flex items-center gap-1">
               <div className="text-white/50"> Powered by </div>

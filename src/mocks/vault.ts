@@ -17,6 +17,13 @@ import { VaultDepositToken } from "@/types/payment-token.types";
 import { TokenUsdPrice } from "@/hooks/use-token-price";
 import type { MarketSurveyOverview } from "@/types/market-survey";
 import { toPlainCopy } from "@/server/ai/copy";
+import { VaultOption } from "@/components/vault/VaultSwitcher";
+
+export const VAULTS: VaultOption[] = [
+  { id:"sui-usdc-cetus", pair:"USDC/SUI", name:"NODO AI — USDC/SUI", dex:"Cetus", chain:"SUI", utilization:0.67 },
+  { id:"sui-usdt-cetus", pair:"USDT/SUI", name:"NODO AI — USDT/SUI", dex:"Cetus", chain:"SUI", utilization:0.51 },
+  { id:"deep-sui-cetus", pair:"DEEP/SUI", name:"NODO AI — DEEP/SUI", dex:"Cetus", chain:"SUI", utilization:0.83 },
+];
 
 const baseApr: VaultApr = {
   rolling_7day_apr: "18.25",
