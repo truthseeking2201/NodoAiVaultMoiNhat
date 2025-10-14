@@ -374,6 +374,10 @@ const LeaderboardCard = ({
   cohortSize: number;
 }) => {
   const dataset = usePinnedRows(rows, searchTerm);
+  const yourRow = useMemo(
+    () => rows.find((row) => row.isYou),
+    [rows]
+  );
 
   return (
     <div className="rounded-lg border border-white/10 bg-white/5 p-4 md:p-5">
@@ -395,6 +399,24 @@ const LeaderboardCard = ({
           />
         </div>
       </div>
+      {yourRow && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-white">
+          <div>
+            <span className="text-white/70">Your alias:</span>{" "}
+            <span className="font-mono font-semibold text-white">
+              {yourRow.alias}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="emerald" className="bg-emerald-500/20 text-emerald-100">
+              Rank {yourRow.rank}
+            </Badge>
+            <span className="text-white/70">
+              PnL {formatPercent(yourRow.pnlPct)}
+            </span>
+          </div>
+        </div>
+      )}
       <div className="mt-4">
         <Table className="min-w-full text-sm">
           <TableHeader className="sticky top-0 z-10 backdrop-blur">
@@ -433,7 +455,7 @@ const LeaderboardCard = ({
                   key={`${row.rank}-${row.alias}`}
                   className={cn(
                     "border-white/5",
-                    row.isYou && "bg-white/10"
+                    row.isYou && "border-l-4 border-l-emerald-400 bg-emerald-500/10"
                   )}
                 >
                   <TableCell className="font-mono text-sm text-white/80">

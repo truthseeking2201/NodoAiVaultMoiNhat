@@ -17,38 +17,13 @@ import {
 const PERFORMANCE_ALIAS_PEPPER =
   process.env.PERFORMANCE_ALIAS_PEPPER ?? "nodo-demo-pepper";
 
-const BASE58_ALPHABET =
-  "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-
-const base58Encode = (buffer: Buffer): string => {
-  let value = BigInt(`0x${buffer.toString("hex")}`);
-  if (value === 0n) {
-    return BASE58_ALPHABET[0];
-  }
-
-  let output = "";
-  while (value > 0n) {
-    const remainder = Number(value % 58n);
-    output = BASE58_ALPHABET[remainder] + output;
-    value = value / 58n;
-  }
-
-  let leadingZeros = 0;
-  for (const byte of buffer) {
-    if (byte === 0) {
-      leadingZeros += 1;
-    } else {
-      break;
-    }
-  }
-
-  return BASE58_ALPHABET[0].repeat(leadingZeros) + output;
-};
-
 const createAlias = (vaultId: string, wallet: string) => {
   const hmac = crypto.createHmac("sha256", PERFORMANCE_ALIAS_PEPPER);
   hmac.update(`${vaultId}:${wallet}`);
-  return base58Encode(hmac.digest()).slice(0, 8);
+  const digest = hmac.digest("hex");
+  const prefix = digest.slice(0, 4);
+  const suffix = digest.slice(-4);
+  return `0x${prefix}...${suffix}`;
 };
 
 const computePercentile = (
@@ -206,9 +181,7 @@ export const createPerformanceRouter = () => {
       const leaderboard: VaultPerformanceLeaderboardRow[] = rows.map(
         (entry, index) => {
           const isYou = entry.wallet === wallet;
-          const alias = isYou
-            ? "You"
-            : createAlias(vaultId, entry.wallet);
+          const alias = createAlias(vaultId, entry.wallet);
 
           return {
             rank: index + 1,

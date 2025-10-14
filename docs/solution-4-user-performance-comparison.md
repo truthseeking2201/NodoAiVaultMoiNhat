@@ -51,7 +51,7 @@
 
 ## Privacy & fairness
 
-- **Alias per vault (stable & anonymous):** `alias = base58(HMAC_SHA256(vaultId:wallet, PEPPER))[:8]` (server-side secret pepper).
+- **Alias per vault (stable & anonymous):** `alias = "0x" + first4(HMAC_SHA256(vaultId:wallet, PEPPER)) + "..." + last4(...)` (server-side secret pepper).
 - **k-anonymity guard:** hide distribution/leaderboard if < 10 users in the vault; show "Not enough peers yet."
 - **No wallet addresses, no exact timestamps in public tables.**
 
@@ -107,7 +107,7 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
      "rows": [
        {
          "rank": 1,
-         "alias": "Xb91aKq4",
+        "alias": "0x4a91...d3fe",
          "pnlPct": 0.41,
          "pnlUsd": 8221,
          "depositsUsd": 20000,
@@ -116,7 +116,7 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
        },
        {
          "rank": 2,
-         "alias": "t7Q2K1eZ",
+        "alias": "0xf27c...1ba0",
          "pnlPct": 0.35,
          "pnlUsd": 5102,
          "depositsUsd": 14500,
@@ -125,7 +125,7 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
        },
        {
          "rank": 12,
-         "alias": "You",
+        "alias": "0x2ac1...7d95",
          "pnlPct": 0.0825,
          "pnlUsd": 412,
          "depositsUsd": 5000,
@@ -146,7 +146,7 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
 
 ## UI details (polish)
 
-- **Leaderboard:** sticky header, 4-digit grouping, color PnL green/red, "You" pinned; search box filters by alias.
+- **Leaderboard:** sticky header, 4-digit grouping, color PnL green/red, your alias highlighted; search box filters by alias.
 - **Histogram:** 30 bins, "You" reference line; bin tooltips show range & count.
 - **Accessibility:** ≥4.5:1 contrast; all numerics show units (%, USD).
 - **Empty states:** explain why (e.g., "Not enough peers yet" / "No PnL yet").
@@ -180,7 +180,7 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
   "leaderboard": [
     {
       "rank": 1,
-      "alias": "Xb91aKq4",
+      "alias": "0x4a91...d3fe",
       "pnlPct": 0.41,
       "pnlUsd": 8221,
       "depositsUsd": 20000,
@@ -189,7 +189,7 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
     },
     {
       "rank": 2,
-      "alias": "t7Q2K1eZ",
+      "alias": "0xf27c...1ba0",
       "pnlPct": 0.35,
       "pnlUsd": 5102,
       "depositsUsd": 14500,
@@ -198,7 +198,7 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
     },
     {
       "rank": 12,
-      "alias": "You",
+      "alias": "0x2ac1...7d95",
       "pnlPct": 0.0825,
       "pnlUsd": 412,
       "depositsUsd": 5000,

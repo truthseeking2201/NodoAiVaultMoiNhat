@@ -45,6 +45,19 @@ const computePercentile = (
   return Math.min(100, Math.max(0, Math.round((cumulative / total) * 100)));
 };
 
+const createAlias = (vaultId: string, wallet: string) => {
+  const input = `${vaultId}:${wallet}`;
+  let hash = 0;
+  for (let index = 0; index < input.length; index++) {
+    hash = (hash << 5) - hash + input.charCodeAt(index);
+    hash |= 0;
+  }
+  const normalized = (hash >>> 0).toString(16).padStart(8, "0");
+  const prefix = normalized.slice(0, 4);
+  const suffix = normalized.slice(-4);
+  return `0x${prefix}...${suffix}`;
+};
+
 const getPeerMetrics = (vaultId: string, wallet?: string) => {
   const dataset = getPerformanceDataset(vaultId);
   const selectedWallet = wallet ?? DEFAULT_PERFORMANCE_WALLET;
@@ -113,9 +126,7 @@ export const mockPerformanceLeaderboard = (
     .map((entry, index) => ({
       rank: index + 1,
       alias:
-        entry.wallet === (options?.wallet ?? DEFAULT_PERFORMANCE_WALLET)
-          ? "You"
-          : `Mock${index.toString().padStart(4, "0")}`,
+        createAlias(vaultId, entry.wallet),
       pnlPct: entry.metrics.pnlPct,
       pnlUsd: entry.metrics.pnlUsd,
       depositsUsd: entry.metrics.depositsUsd,
@@ -133,6 +144,10 @@ export const mockPerformanceLeaderboard = (
         entry.wallet === (options?.wallet ?? DEFAULT_PERFORMANCE_WALLET)
     );
     if (fallback) {
+      const alias = createAlias(
+        vaultId,
+        options?.wallet ?? DEFAULT_PERFORMANCE_WALLET
+      );
       rows.push({
         rank:
           sorted.findIndex(
@@ -140,7 +155,7 @@ export const mockPerformanceLeaderboard = (
               entry.wallet ===
               (options?.wallet ?? DEFAULT_PERFORMANCE_WALLET)
           ) + 1,
-        alias: "You",
+        alias,
         pnlPct: fallback.metrics.pnlPct,
         pnlUsd: fallback.metrics.pnlUsd,
         depositsUsd: fallback.metrics.depositsUsd,
