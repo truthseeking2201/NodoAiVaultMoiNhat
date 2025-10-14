@@ -68,21 +68,21 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
    ```json
    {
      "your": {
-       "depositsUsd": 5000,
-       "withdrawalsUsd": 0,
-       "currentValueUsd": 5412.5,
        "pnlUsd": 412.5,
-       "pnlPct": 0.0825
+       "pnlPct": 0.0825,
+       "depositsUsd": 5000
      },
      "context": {
-       "apr24h": 0.124,
-       "apr7d": 0.138,
-       "apy7d": 0.148
+       "utilization": 0.67,
+       "feesRewards24hUsd": 15892
+     },
+     "peer": {
+       "percentilePnLPct": 0.66
      }
    }
    ```
 
-   (Deposits/withdrawals/current value/PnL come from the user PnL pipeline; APR/APY use your 24h/7d definitions.)
+   (All fields originate from the existing vault user PnL dataset. `percentilePnLPct` is the fraction of peers whose PnL % is less than or equal to the requesting wallet.)
 
 2. **GET** `/api/v1/vaults/{vaultId}/perf/distribution?metric=pnlPct`
 
@@ -98,41 +98,36 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
    }
    ```
 
-3. **GET** `/api/v1/vaults/{vaultId}/perf/leaderboard?sort=pnlPct&limit=100`
+3. **GET** `/api/v1/vaults/{vaultId}/perf/peers?sort=pnlPct&limit=20&offset=0`
 
-   Returns anonymized rows using **only**: alias, pnlPct, pnlUsd, depositsUsd, withdrawalsUsd, currentValueUsd.
+   Returns anonymized rows using **only**: rank, alias, depositsUsd, pnlPct, pnlUsd.
 
    ```json
    {
+     "total": 386,
      "rows": [
        {
          "rank": 1,
-        "alias": "0x4a91...d3fe",
-         "pnlPct": 0.41,
-         "pnlUsd": 8221,
+         "alias": "0x4a91...d3fe",
          "depositsUsd": 20000,
-         "withdrawalsUsd": 0,
-         "currentValueUsd": 28221
+         "pnlPct": 0.41,
+         "pnlUsd": 8221
        },
        {
          "rank": 2,
-        "alias": "0xf27c...1ba0",
-         "pnlPct": 0.35,
-         "pnlUsd": 5102,
+         "alias": "0xf27c...1ba0",
          "depositsUsd": 14500,
-         "withdrawalsUsd": 0,
-         "currentValueUsd": 19602
-       },
-       {
-         "rank": 12,
-        "alias": "0x2ac1...7d95",
-         "pnlPct": 0.0825,
-         "pnlUsd": 412,
-         "depositsUsd": 5000,
-         "withdrawalsUsd": 0,
-         "currentValueUsd": 5412.5
+         "pnlPct": 0.35,
+         "pnlUsd": 5102
        }
-     ]
+     ],
+     "you": {
+       "rank": 12,
+       "alias": "0x2ac1...7d95",
+       "depositsUsd": 5000,
+       "pnlPct": 0.0825,
+       "pnlUsd": 412
+     }
    }
    ```
 
@@ -140,16 +135,16 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
 
 - **Sources of truth**
   - User PnL fields come from the **Vault User Tracking** system (sheet/DB) that already tracks per-user deposits, withdrawals, and current value for each vault.
-  - Vault APR/APY context from your **24h rolling** and **7-day** calculations.
+  - Vault utilization and 24h fees/rewards pulled from the existing vault metrics endpoint.
 - **PnL %** = `pnlUsd / max(total_deposits_usd, ε)` (no new math).
-- **Performance/tooltips:** Add a "Methodology" drawer to remind users IL is realized on rebalancing and can affect APR (quote your AI/PRD notes in plain language).
 
 ## UI details (polish)
 
-- **Leaderboard:** sticky header, 4-digit grouping, color PnL green/red, your alias highlighted; search box filters by alias.
+- **Peer table:** titled "Peer Comparison (Anonymous)", paginated (20 rows per page), columns `# | Alias | Deposits (USD) | PnL % | PnL (USD)`, highlight your row.
 - **Histogram:** 30 bins, "You" reference line; bin tooltips show range & count.
 - **Accessibility:** ≥4.5:1 contrast; all numerics show units (%, USD).
 - **Empty states:** explain why (e.g., "Not enough peers yet" / "No PnL yet").
+- **Summary card:** surface PnL USD (large), PnL %, total deposits, utilization chip, 24h fees/rewards chip, and "You’re ahead of N% of peers" copy.
 
 ## Mock data (dev fixtures)
 
@@ -157,16 +152,16 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
 {
   "summary": {
     "your": {
-      "depositsUsd": 5000,
-      "withdrawalsUsd": 0,
-      "currentValueUsd": 5412.5,
       "pnlUsd": 412.5,
-      "pnlPct": 0.0825
+      "pnlPct": 0.0825,
+      "depositsUsd": 5000
     },
     "context": {
-      "apr24h": 0.124,
-      "apr7d": 0.138,
-      "apy7d": 0.148
+      "utilization": 0.67,
+      "feesRewards24hUsd": 15892
+    },
+    "peer": {
+      "percentilePnLPct": 0.66
     }
   },
   "distribution": {
@@ -177,35 +172,32 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
     ],
     "your": { "value": 0.0825 }
   },
-  "leaderboard": [
-    {
-      "rank": 1,
-      "alias": "0x4a91...d3fe",
-      "pnlPct": 0.41,
-      "pnlUsd": 8221,
-      "depositsUsd": 20000,
-      "withdrawalsUsd": 0,
-      "currentValueUsd": 28221
-    },
-    {
-      "rank": 2,
-      "alias": "0xf27c...1ba0",
-      "pnlPct": 0.35,
-      "pnlUsd": 5102,
-      "depositsUsd": 14500,
-      "withdrawalsUsd": 0,
-      "currentValueUsd": 19602
-    },
-    {
+  "peers": {
+    "total": 386,
+    "rows": [
+      {
+        "rank": 1,
+        "alias": "0x4a91...d3fe",
+        "depositsUsd": 20000,
+        "pnlPct": 0.41,
+        "pnlUsd": 8221
+      },
+      {
+        "rank": 2,
+        "alias": "0xf27c...1ba0",
+        "depositsUsd": 14500,
+        "pnlPct": 0.35,
+        "pnlUsd": 5102
+      }
+    ],
+    "you": {
       "rank": 12,
       "alias": "0x2ac1...7d95",
-      "pnlPct": 0.0825,
-      "pnlUsd": 412,
       "depositsUsd": 5000,
-      "withdrawalsUsd": 0,
-      "currentValueUsd": 5412.5
+      "pnlPct": 0.0825,
+      "pnlUsd": 412
     }
-  ]
+  }
 }
 ```
 
@@ -214,7 +206,7 @@ All endpoints are **per vault** and return only fields your PRD already tracks.
 - **Metric integrity:** every surfaced field must exist in the current user/vault data model (deposits, withdrawals, current value, PnL, PnL%).
 - **APR/APY correctness:** only show vault-level APR/7d APY computed by the formulas already documented.
 - **Privacy:** no raw addresses; aliases are stable per vault; do not render tables if **cohort < 10**.
-- **Copy:** add methodology tooltip: "PnL reflects realized/unrealized effects; rebalancing can realize IL" (from your docs).
+- **Copy:** percentile copy reads "You’re ahead of N% of peers" and reflects the PnL% percentile returned by the API.
 
 ## Phase 2 (optional later - do not ship now)
 

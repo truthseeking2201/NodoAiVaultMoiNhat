@@ -1,11 +1,16 @@
-import {
-  PerformanceDistributionBin,
-  PerformanceMetricBreakdown,
-} from "@/types/vault-performance";
+import { PerformanceDistributionBin } from "@/types/vault-performance";
+
+type PeerMetrics = {
+  depositsUsd: number;
+  withdrawalsUsd: number;
+  currentValueUsd: number;
+  pnlUsd: number;
+  pnlPct: number;
+};
 
 type RawPerformancePeer = {
   wallet: string;
-  metrics: PerformanceMetricBreakdown;
+  metrics: PeerMetrics;
 };
 
 type PerformanceDataset = {
@@ -14,11 +19,8 @@ type PerformanceDataset = {
   cohortSize: number;
   yourWallet: string;
   context: {
-    apr24h: number;
-    apr7d: number;
-    apy7d: number;
-    utilizationRate: number;
-    feesRewards24h: number;
+    utilization: number;
+    feesRewards24hUsd: number;
   };
 };
 
@@ -186,11 +188,8 @@ const buildDataset = (): PerformanceDataset => {
     cohortSize,
     yourWallet: "0xvault-peer-you",
     context: {
-      apr24h: 0.124,
-      apr7d: 0.138,
-      apy7d: 0.148,
-      utilizationRate: 0.67,
-      feesRewards24h: 15892.12,
+      utilization: 0.67,
+      feesRewards24hUsd: 15892.12,
     },
   };
 };

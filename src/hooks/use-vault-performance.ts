@@ -1,13 +1,13 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import {
   VaultPerformanceDistributionResponse,
-  VaultPerformanceLeaderboardResponse,
+  VaultPerformancePeersResponse,
   VaultPerformanceSummaryResponse,
 } from "@/types/vault-performance";
 import {
   getVaultPerformanceSummary,
   getVaultPerformanceDistribution,
-  getVaultPerformanceLeaderboard,
+  getVaultPerformancePeers,
 } from "@/apis";
 import { useWallet } from "./use-wallet";
 import { isMockMode } from "@/config/mock";
@@ -58,29 +58,32 @@ export const useVaultPerformanceDistribution = (
   }) as UseQueryResult<VaultPerformanceDistributionResponse, Error>;
 };
 
-export const useVaultPerformanceLeaderboard = (
+export const useVaultPerformancePeers = (
   vaultId?: string,
   options?: {
-    sort?: VaultPerformanceLeaderboardResponse["sort"];
+    sort?: VaultPerformancePeersResponse["sort"];
     limit?: number;
+    offset?: number;
   }
-): UseQueryResult<VaultPerformanceLeaderboardResponse, Error> => {
+): UseQueryResult<VaultPerformancePeersResponse, Error> => {
   const { address, isAuthenticated } = useWallet();
   const walletAddress = getWalletAddressForPerformance(address);
 
   return useQuery({
     queryKey: [
-      "vault-performance-leaderboard",
+      "vault-performance-peers",
       vaultId,
       walletAddress,
       options?.sort ?? "pnlPct",
-      options?.limit ?? 100,
+      options?.limit ?? 20,
+      options?.offset ?? 0,
     ],
     queryFn: () =>
-      getVaultPerformanceLeaderboard(vaultId as string, {
+      getVaultPerformancePeers(vaultId as string, {
         wallet: walletAddress,
         sort: options?.sort ?? "pnlPct",
-        limit: options?.limit ?? 100,
+        limit: options?.limit ?? 20,
+        offset: options?.offset ?? 0,
       }),
     enabled:
       !!vaultId &&
@@ -88,5 +91,5 @@ export const useVaultPerformanceLeaderboard = (
       (isMockMode || isAuthenticated),
     staleTime: 60000,
     refetchInterval: 120000,
-  }) as UseQueryResult<VaultPerformanceLeaderboardResponse, Error>;
+  }) as UseQueryResult<VaultPerformancePeersResponse, Error>;
 };

@@ -5,7 +5,7 @@ import crypto from "node:crypto";
 import {
   MIN_PERFORMANCE_COHORT,
   VaultPerformanceDistributionResponse,
-  VaultPerformanceLeaderboardResponse,
+  VaultPerformancePeersResponse,
   VaultPerformanceLeaderboardRow,
   VaultPerformanceSummaryResponse,
 } from "@/types/vault-performance";
@@ -24,6 +24,21 @@ const createAlias = (vaultId: string, wallet: string) => {
   const prefix = digest.slice(0, 4);
   const suffix = digest.slice(-4);
   return `0x${prefix}...${suffix}`;
+};
+
+const calculatePercentile = (
+  value: number,
+  peers: Array<{ metrics: { pnlPct: number } }>
+) => {
+  if (!peers.length) {
+    return 0;
+  }
+
+  const belowOrEqual = peers.filter(
+    (peer) => peer.metrics.pnlPct <= value
+  ).length;
+
+  return belowOrEqual / peers.length;
 };
 
 const computePercentile = (
@@ -59,8 +74,8 @@ const computePercentile = (
 };
 
 const allowedSortFields = new Set<
-  VaultPerformanceLeaderboardResponse["sort"]
->(["pnlPct", "pnlUsd", "depositsUsd", "withdrawalsUsd", "currentValueUsd"]);
+  VaultPerformancePeersResponse["sort"]
+>(["pnlPct", "pnlUsd", "depositsUsd"]);
 
 export const createPerformanceRouter = () => {
   const router = Router();
@@ -87,10 +102,24 @@ export const createPerformanceRouter = () => {
         return;
       }
 
+      const percentile = calculatePercentile(
+        peer.metrics.pnlPct,
+        dataset.peers
+      );
+
       const summary: VaultPerformanceSummaryResponse = {
-        your: peer.metrics,
-        context: dataset.context,
-        cohortSize: dataset.cohortSize,
+        your: {
+          pnlUsd: peer.metrics.pnlUsd,
+          pnlPct: peer.metrics.pnlPct,
+          depositsUsd: peer.metrics.depositsUsd,
+        },
+        context: {
+          utilization: dataset.context.utilization,
+          feesRewards24hUsd: dataset.context.feesRewards24hUsd,
+        },
+        peer: {
+          percentilePnLPct: percentile,
+        },
       };
 
       response.json(summary);
@@ -142,18 +171,22 @@ export const createPerformanceRouter = () => {
   );
 
   router.get(
-    "/api/v1/vaults/:vaultId/perf/leaderboard",
+    "/api/v1/vaults/:vaultId/perf/peers",
     (request, response) => {
       const { vaultId } = request.params;
       const sort =
         ((request.query.sort as string) ??
-          "pnlPct") as VaultPerformanceLeaderboardResponse["sort"];
+          "pnlPct") as VaultPerformancePeersResponse["sort"];
       const limit = Math.max(
         1,
         Math.min(
-          500,
-          Number.parseInt((request.query.limit as string) ?? "100", 10)
+          100,
+          Number.parseInt((request.query.limit as string) ?? "20", 10)
         )
+      );
+      const offset = Math.max(
+        0,
+        Number.parseInt((request.query.offset as string) ?? "0", 10)
       );
       const wallet =
         (request.query.wallet as string | undefined) ??
@@ -178,38 +211,36 @@ export const createPerformanceRouter = () => {
           return right - left;
         });
 
-      const leaderboard: VaultPerformanceLeaderboardRow[] = rows.map(
-        (entry, index) => {
-          const isYou = entry.wallet === wallet;
-          const alias = createAlias(vaultId, entry.wallet);
-
-          return {
-            rank: index + 1,
-            alias,
-            pnlPct: entry.metrics.pnlPct,
-            pnlUsd: entry.metrics.pnlUsd,
-            depositsUsd: entry.metrics.depositsUsd,
-            withdrawalsUsd: entry.metrics.withdrawalsUsd,
-            currentValueUsd: entry.metrics.currentValueUsd,
-            isYou,
-          };
-        }
+      const mappedRows: VaultPerformanceLeaderboardRow[] = rows.map(
+        (entry, index) => ({
+          rank: index + 1,
+          alias: createAlias(vaultId, entry.wallet),
+          pnlPct: entry.metrics.pnlPct,
+          pnlUsd: entry.metrics.pnlUsd,
+          depositsUsd: entry.metrics.depositsUsd,
+          isYou: entry.wallet === wallet,
+        })
       );
 
-      let visibleRows = leaderboard.slice(0, limit);
-      const yourRow = leaderboard.find((row) => row.isYou);
+      const paginatedRows = mappedRows.slice(offset, offset + limit);
+      const yourRow = mappedRows.find((row) => row.isYou);
 
-      if (
-        yourRow &&
-        !visibleRows.some((row) => row.isYou)
-      ) {
-        visibleRows = [...visibleRows, yourRow];
-      }
-
-      const payload: VaultPerformanceLeaderboardResponse = {
-        rows: visibleRows,
-        sort,
+      const payload: VaultPerformancePeersResponse = {
+        total: dataset.cohortSize,
         cohortSize: dataset.cohortSize,
+        rows: paginatedRows,
+        sort,
+        limit,
+        offset,
+        you: yourRow
+          ? {
+              rank: yourRow.rank,
+              alias: yourRow.alias,
+              pnlPct: yourRow.pnlPct,
+              pnlUsd: yourRow.pnlUsd,
+              depositsUsd: yourRow.depositsUsd,
+            }
+          : undefined,
       };
 
       response.json(payload);

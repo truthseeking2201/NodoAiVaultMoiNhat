@@ -3,20 +3,20 @@ import { isMockMode } from "@/config/mock";
 import {
   VaultPerformanceSummaryResponse,
   VaultPerformanceDistributionResponse,
-  VaultPerformanceLeaderboardResponse,
+  VaultPerformancePeersResponse,
 } from "@/types/vault-performance";
 import {
   mockPerformanceSummary,
   mockPerformanceDistribution,
-  mockPerformanceLeaderboard,
+  mockPerformancePeers,
 } from "@/mocks";
 
 const URLS = {
   summary: (vaultId: string) => `/api/v1/vaults/${vaultId}/perf/summary`,
   distribution: (vaultId: string) =>
     `/api/v1/vaults/${vaultId}/perf/distribution`,
-  leaderboard: (vaultId: string) =>
-    `/api/v1/vaults/${vaultId}/perf/leaderboard`,
+  peers: (vaultId: string) =>
+    `/api/v1/vaults/${vaultId}/perf/peers`,
 };
 
 export const getVaultPerformanceSummary = async (
@@ -48,23 +48,25 @@ export const getVaultPerformanceDistribution = async (
   }) as Promise<VaultPerformanceDistributionResponse>;
 };
 
-export const getVaultPerformanceLeaderboard = async (
+export const getVaultPerformancePeers = async (
   vaultId: string,
   options?: {
     wallet?: string;
-    sort?: VaultPerformanceLeaderboardResponse["sort"];
+    sort?: VaultPerformancePeersResponse["sort"];
     limit?: number;
+    offset?: number;
   }
-): Promise<VaultPerformanceLeaderboardResponse> => {
+): Promise<VaultPerformancePeersResponse> => {
   if (isMockMode) {
-    return mockPerformanceLeaderboard(vaultId, options);
+    return mockPerformancePeers(vaultId, options);
   }
 
-  return http.get(URLS.leaderboard(vaultId), {
+  return http.get(URLS.peers(vaultId), {
     params: {
       sort: options?.sort ?? "pnlPct",
-      limit: options?.limit ?? 100,
+      limit: options?.limit ?? 20,
+      offset: options?.offset ?? 0,
       ...(options?.wallet ? { wallet: options.wallet } : {}),
     },
-  }) as Promise<VaultPerformanceLeaderboardResponse>;
+  }) as Promise<VaultPerformancePeersResponse>;
 };

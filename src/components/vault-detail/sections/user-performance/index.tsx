@@ -1,7 +1,8 @@
+import { useEffect, useMemo, useState } from "react";
 import {
   useVaultPerformanceSummary,
   useVaultPerformanceDistribution,
-  useVaultPerformanceLeaderboard,
+  useVaultPerformancePeers,
 } from "@/hooks";
 import {
   MIN_PERFORMANCE_COHORT,
@@ -23,15 +24,6 @@ import {
   YAxis,
 } from "recharts";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
-import { Info } from "lucide-react";
-import { useMemo, useState } from "react";
-import { Input } from "@/components/ui/input";
-import {
   Table,
   TableBody,
   TableCell,
@@ -45,30 +37,7 @@ type UserPerformanceComparisonProps = {
   vaultId?: string;
 };
 
-const formatUsd = (value: number, minimumFractionDigits = 2) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits,
-    maximumFractionDigits: minimumFractionDigits,
-  }).format(value);
-};
-
-const formatPercent = (value: number, precision = 2) => {
-  return `${formatAmount({
-    amount: value * 100,
-    precision,
-    stripZero: false,
-  })}%`;
-};
-
-const formatShortPercent = (value: number) => {
-  return `${(value * 100).toFixed(1)}%`;
-};
-
-const PERFORMANCE_TOOLTIP = `
-PnL reflects both realized and unrealized outcomes. Rebalancing events can realize impermanent loss, which will show up in your PnL.
-`;
+const PAGE_SIZE = 20;
 
 const histogramConfig = {
   count: {
@@ -77,172 +46,106 @@ const histogramConfig = {
   },
 };
 
-const extractCohortSize = (
-  summary?: { cohortSize: number },
-  distribution?: { cohortSize: number },
-  leaderboard?: { cohortSize: number }
-) => {
-  return (
-    summary?.cohortSize ||
-    distribution?.cohortSize ||
-    leaderboard?.cohortSize ||
-    0
-  );
+const formatUsd = (value: number, fractionDigits = 2) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }).format(value);
 };
 
-const usePinnedRows = (rows: VaultPerformanceLeaderboardRow[], search: string) => {
-  return useMemo(() => {
-    const term = search.trim().toLowerCase();
-    const filtered = term
-      ? rows.filter((row) =>
-          row.alias.toLowerCase().includes(term)
-        )
-      : rows;
+const formatPercent = (value: number, precision = 2) =>
+  `${formatAmount({
+    amount: value * 100,
+    precision,
+    stripZero: false,
+  })}%`;
 
-    const yourRow = filtered.find((row) => row.isYou);
-    const others = filtered.filter((row) => !row.isYou);
+const formatShortPercent = (value: number) =>
+  `${(value * 100).toFixed(1)}%`;
 
-    return yourRow ? [yourRow, ...others] : filtered;
-  }, [rows, search]);
+const extractCohortSize = (
+  distribution?: { cohortSize: number },
+  peers?: { cohortSize: number }
+) => {
+  return peers?.cohortSize || distribution?.cohortSize || 0;
 };
 
 const NotEnoughPeers = () => (
   <div className="flex h-full min-h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-white/30 bg-white/5 px-4 text-center">
-    <p className="text-base font-semibold text-white">
-      Not enough peers yet
-    </p>
+    <p className="text-base font-semibold text-white">Not enough peers yet</p>
     <p className="mt-1 text-sm text-white/60 max-w-md">
-      We will surface distribution and leaderboard insights once at least{" "}
+      We will surface distribution and peer metrics once at least{" "}
       {MIN_PERFORMANCE_COHORT} vault users are active in this cohort.
     </p>
   </div>
 );
 
-const LoadingPlaceholder = ({
-  lines = 4,
-}: {
-  lines?: number;
-}) => (
-  <div className="flex h-full min-h-[220px] flex-col justify-between rounded-lg border border-white/10 bg-white/5 p-4 md:p-5">
-    <div className="space-y-3">
-      <div className="h-5 w-1/3 animate-pulse rounded bg-white/10" />
-      <div className="h-4 w-2/5 animate-pulse rounded bg-white/10" />
-    </div>
-    <div className="mt-6 space-y-2">
-      {Array.from({ length: lines }).map((_, index) => (
-        <div
-          key={index}
-          className="h-4 w-full animate-pulse rounded bg-white/10"
-        />
-      ))}
-    </div>
-  </div>
-);
-
-const SummaryMetric = ({
-  label,
-  value,
-  sublabel,
-  emphasize,
-}: {
-  label: string;
-  value: string;
-  sublabel?: string;
-  emphasize?: boolean;
-}) => (
-  <div>
-    <p className="text-xs uppercase tracking-wide text-white/60">{label}</p>
-    <p
-      className={cn(
-        "mt-1 text-lg font-semibold text-white",
-        emphasize && "text-2xl md:text-3xl"
-      )}
-    >
-      {value}
-    </p>
-    {sublabel && (
-      <p className="text-sm text-white/60">{sublabel}</p>
-    )}
-  </div>
-);
-
-const SummaryStrip = ({
+const SummaryCard = ({
   pnlUsd,
   pnlPct,
   depositsUsd,
-  withdrawalsUsd,
-  currentValueUsd,
-  context,
+  utilization,
+  feesRewards24hUsd,
+  percentile,
 }: {
   pnlUsd: number;
   pnlPct: number;
   depositsUsd: number;
-  withdrawalsUsd: number;
-  currentValueUsd: number;
-  context?: {
-    utilizationRate?: number;
-    feesRewards24h?: number;
-  };
+  utilization: number;
+  feesRewards24hUsd: number;
+  percentile: number;
 }) => {
-  const pnlPositive = pnlUsd >= 0;
+  const safeUtilization = Number.isFinite(utilization) ? utilization : 0;
+  const safeFees = Number.isFinite(feesRewards24hUsd)
+    ? feesRewards24hUsd
+    : 0;
+  const aheadPercent = Math.round(percentile * 100);
   return (
-    <div className="flex h-full flex-col justify-between rounded-lg border border-white/10 bg-white/5 p-4 md:p-5">
-      <div className="grid gap-4">
-        <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-white/60">
-              Your PnL
-            </p>
-            <p
-              className={cn(
-                "mt-1 text-3xl font-semibold",
-                pnlPositive ? "text-emerald-400" : "text-red-400"
-              )}
-            >
-              {formatUsd(pnlUsd)}
-            </p>
-            <p
-              className={cn(
-                "text-sm font-medium",
-                pnlPositive ? "text-emerald-300" : "text-red-300"
-              )}
-            >
-              {formatPercent(pnlPct)}
-            </p>
-          </div>
-          {context && (
-            <div className="flex flex-col items-end gap-2 text-right">
-              {typeof context.utilizationRate === "number" && (
-                <Badge variant="emerald" className="bg-emerald/20">
-                  Utilization {formatShortPercent(context.utilizationRate)}
-                </Badge>
-              )}
-              {typeof context.feesRewards24h === "number" && (
-                <Badge variant="nova" className="bg-nova/20">
-                  24h Fees/Rewards {formatUsd(context.feesRewards24h, 0)}
-                </Badge>
-              )}
-            </div>
-          )}
+    <div className="rounded-lg border border-white/10 bg-white/5 p-4 md:p-5">
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-white/60">
+            Your performance
+          </p>
+          <p
+            className={cn(
+              "mt-2 text-4xl font-semibold",
+              pnlUsd >= 0 ? "text-emerald-300" : "text-red-300"
+            )}
+          >
+            {formatUsd(pnlUsd)}
+          </p>
+          <p
+            className={cn(
+              "text-sm font-semibold",
+              pnlPct >= 0 ? "text-emerald-300" : "text-red-300"
+            )}
+          >
+            {formatPercent(pnlPct)}
+          </p>
+          <p className="mt-3 text-sm text-white/70">
+            You’re ahead of {aheadPercent}% of peers
+          </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <SummaryMetric
-            label="Total deposits"
-            value={formatUsd(depositsUsd)}
-          />
-          <SummaryMetric
-            label="Current value"
-            value={formatUsd(currentValueUsd)}
-          />
-          <SummaryMetric
-            label="Total withdrawals"
-            value={formatUsd(withdrawalsUsd)}
-          />
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/80">
+            Utilization {(safeUtilization * 100).toFixed(0)}%
+          </span>
+          <span className="rounded-full border border-amber-500/30 bg-amber-500/15 px-3 py-1 text-xs text-amber-300">
+            24h Fees/Rewards {formatUsd(safeFees, 0)}
+          </span>
         </div>
       </div>
-      <p className="mt-4 text-xs text-white/60">
-        PnL computed from deposits/withdrawals + current NDLP value.
-      </p>
+      <div className="mt-6">
+        <p className="text-xs uppercase tracking-wide text-white/60">
+          Total deposits
+        </p>
+        <p className="mt-1 text-xl font-semibold text-white">
+          {formatUsd(depositsUsd)}
+        </p>
+      </div>
     </div>
   );
 };
@@ -272,14 +175,14 @@ const DistributionCard = ({
       <div className="flex items-center justify-between gap-2">
         <div>
           <p className="text-base font-semibold text-white">
-            Vault PnL% distribution
+            Peer PnL% distribution
           </p>
           <p className="text-sm text-white/60">
             {bins.length} bins across cohort PnL%
           </p>
         </div>
         <Badge variant="secondary" className="bg-white/10 text-white">
-          You are at the {percentile} percentile
+          You’re ahead of {Math.round(percentile)}% of peers
         </Badge>
       </div>
       <div className="mt-4 flex-1">
@@ -360,59 +263,57 @@ const DistributionCard = ({
   );
 };
 
-const LeaderboardCard = ({
+const PeerTable = ({
   rows,
-  loading,
-  searchTerm,
-  onSearch,
+  total,
   cohortSize,
+  you,
+  page,
+  onPageChange,
+  isLoading,
 }: {
   rows: VaultPerformanceLeaderboardRow[];
-  loading: boolean;
-  searchTerm: string;
-  onSearch: (value: string) => void;
+  total: number;
   cohortSize: number;
+  you?: {
+    rank: number;
+    alias: string;
+    pnlPct: number;
+    pnlUsd: number;
+    depositsUsd: number;
+  };
+  page: number;
+  onPageChange: (page: number) => void;
+  isLoading: boolean;
 }) => {
-  const dataset = usePinnedRows(rows, searchTerm);
-  const yourRow = useMemo(
-    () => rows.find((row) => row.isYou),
-    [rows]
-  );
+  const totalPages = Math.max(1, Math.ceil((total || 0) / PAGE_SIZE));
 
   return (
     <div className="rounded-lg border border-white/10 bg-white/5 p-4 md:p-5">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-base font-semibold text-white">
-            Anonymous leaderboard
+            Peer Comparison (Anonymous)
           </p>
           <p className="text-sm text-white/60">
-            Ranked by PnL%. Cohort size: {cohortSize}
+            Cohort size: {cohortSize}. Showing {PAGE_SIZE} per page.
           </p>
         </div>
-        <div className="w-full md:w-[240px]">
-          <Input
-            value={searchTerm}
-            onChange={(event) => onSearch(event.target.value)}
-            placeholder="Search alias"
-            className="h-10 rounded-md border border-white/20 bg-black/60 text-sm text-white placeholder:text-white/50 focus-visible:ring-1 focus-visible:ring-white/70"
-          />
-        </div>
       </div>
-      {yourRow && (
+      {you && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-white">
           <div>
             <span className="text-white/70">Your alias:</span>{" "}
             <span className="font-mono font-semibold text-white">
-              {yourRow.alias}
+              {you.alias}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="emerald" className="bg-emerald-500/20 text-emerald-100">
-              Rank {yourRow.rank}
+              Rank {you.rank}
             </Badge>
             <span className="text-white/70">
-              PnL {formatPercent(yourRow.pnlPct)}
+              PnL {formatPercent(you.pnlPct)}
             </span>
           </div>
         </div>
@@ -421,36 +322,34 @@ const LeaderboardCard = ({
         <Table className="min-w-full text-sm">
           <TableHeader className="sticky top-0 z-10 backdrop-blur">
             <TableRow className="border-white/10">
-              <TableHead className="w-14 text-white/70">Rank</TableHead>
+              <TableHead className="w-14 text-white/70">#</TableHead>
               <TableHead className="text-white/70">Alias</TableHead>
-              <TableHead className="text-white/70">PnL %</TableHead>
-              <TableHead className="text-white/70">PnL USD</TableHead>
-              <TableHead className="text-white/70">Deposits</TableHead>
-              <TableHead className="text-white/70">Withdrawals</TableHead>
-              <TableHead className="text-white/70">Current value</TableHead>
+              <TableHead className="text-right text-white/70">
+                Deposits (USD)
+              </TableHead>
+              <TableHead className="text-right text-white/70">PnL %</TableHead>
+              <TableHead className="text-right text-white/70">PnL (USD)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-              Array.from({ length: 6 }).map((_, index) => (
+            {isLoading ? (
+              Array.from({ length: PAGE_SIZE }).map((_, index) => (
                 <TableRow key={index} className="animate-pulse border-white/5">
-                  {Array.from({ length: 7 }).map((__, cellIndex) => (
+                  {Array.from({ length: 5 }).map((__, cellIndex) => (
                     <TableCell key={cellIndex}>
                       <div className="h-4 w-full rounded bg-white/10" />
                     </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : dataset.length === 0 ? (
+            ) : rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-8 text-center text-white/60">
-                  {searchTerm
-                    ? "No peers match that alias yet."
-                    : "Leaderboard data will appear as soon as peers have activity."}
+                <TableCell colSpan={5} className="py-8 text-center text-white/60">
+                  No peer data available yet.
                 </TableCell>
               </TableRow>
             ) : (
-              dataset.map((row) => (
+              rows.map((row) => (
                 <TableRow
                   key={`${row.rank}-${row.alias}`}
                   className={cn(
@@ -469,27 +368,24 @@ const LeaderboardCard = ({
                       </span>
                     )}
                   </TableCell>
+                  <TableCell className="font-mono text-right text-white/80">
+                    {formatUsd(row.depositsUsd, 0)}
+                  </TableCell>
                   <TableCell
                     className={cn(
-                      "font-mono",
-                      row.pnlPct >= 0
-                        ? "text-emerald-300"
-                        : "text-red-300"
+                      "font-mono text-right",
+                      row.pnlPct >= 0 ? "text-emerald-300" : "text-red-300"
                     )}
                   >
                     {formatPercent(row.pnlPct)}
                   </TableCell>
-                  <TableCell className="font-mono text-white/80">
-                    {formatUsd(row.pnlUsd)}
-                  </TableCell>
-                  <TableCell className="font-mono text-white/80">
-                    {formatUsd(row.depositsUsd)}
-                  </TableCell>
-                  <TableCell className="font-mono text-white/80">
-                    {formatUsd(row.withdrawalsUsd)}
-                  </TableCell>
-                  <TableCell className="font-mono text-white/80">
-                    {formatUsd(row.currentValueUsd)}
+                  <TableCell
+                    className={cn(
+                      "font-mono text-right",
+                      row.pnlUsd >= 0 ? "text-emerald-300" : "text-red-300"
+                    )}
+                  >
+                    {formatUsd(row.pnlUsd, 0)}
                   </TableCell>
                 </TableRow>
               ))
@@ -497,48 +393,32 @@ const LeaderboardCard = ({
           </TableBody>
         </Table>
       </div>
+      <div className="mt-4 flex items-center justify-end gap-2">
+        <button
+          className="rounded-md border border-white/10 px-3 py-1 text-xs text-white/80 disabled:opacity-40"
+          onClick={() => onPageChange(Math.max(0, page - 1))}
+          disabled={page <= 0 || isLoading}
+        >
+          Prev
+        </button>
+        <div className="text-xs text-white/60">
+          Page {total === 0 ? 0 : page + 1} / {totalPages}
+        </div>
+        <button
+          className="rounded-md border border-white/10 px-3 py-1 text-xs text-white/80 disabled:opacity-40"
+          onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}
+          disabled={page >= totalPages - 1 || isLoading}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };
 
-const ContextFooter = ({
-  apr24h,
-  apr7d,
-  apy7d,
-}: {
-  apr24h: number;
-  apr7d: number;
-  apy7d: number;
-}) => (
-  <div className="flex flex-wrap items-center gap-4 rounded-lg border border-white/10 bg-black/60 p-4 text-sm">
-    <div>
-      <p className="text-xs uppercase tracking-wide text-white/50">
-        24h rolling APR
-      </p>
-      <p className="text-base font-semibold text-white">
-        {formatPercent(apr24h)}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs uppercase tracking-wide text-white/50">
-        7-day average APR
-      </p>
-      <p className="text-base font-semibold text-white">
-        {formatPercent(apr7d)}
-      </p>
-    </div>
-    <div>
-      <p className="text-xs uppercase tracking-wide text-white/50">
-        7-day APY
-      </p>
-      <p className="text-base font-semibold text-white">
-        {formatPercent(apy7d)}
-      </p>
-    </div>
-  </div>
-);
-
 const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) => {
+  const [page, setPage] = useState(0);
+
   const {
     data: summary,
     isLoading: summaryLoading,
@@ -549,21 +429,30 @@ const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) 
     data: distribution,
   } = useVaultPerformanceDistribution(vaultId);
   const {
-    data: leaderboard,
-    isLoading: leaderboardLoading,
-  } = useVaultPerformanceLeaderboard(vaultId, { sort: "pnlPct", limit: 100 });
+    data: peersData,
+    isLoading: peersLoading,
+  } = useVaultPerformancePeers(vaultId, {
+    sort: "pnlPct",
+    limit: PAGE_SIZE,
+    offset: page * PAGE_SIZE,
+  });
 
-  const cohortSize = extractCohortSize(summary, distribution, leaderboard);
+  useEffect(() => {
+    if (page === 0 || !peersData) {
+      return;
+    }
+    if (page * PAGE_SIZE >= (peersData.total || 0)) {
+      setPage(0);
+    }
+  }, [page, peersData]);
+
+  const cohortSize = extractCohortSize(distribution, peersData);
   const insufficientPeers =
     cohortSize > 0 && cohortSize < MIN_PERFORMANCE_COHORT;
-  const [searchTerm, setSearchTerm] = useState("");
 
   if (summaryError) {
     return (
-      <DetailWrapper
-        title="Your performance"
-        isLoading={false}
-      >
+      <DetailWrapper title="Your performance" isLoading={false}>
         <div className="flex min-h-[220px] flex-col items-center justify-center text-center text-sm text-white/70">
           <p>
             We could not load your performance.{" "}
@@ -578,59 +467,43 @@ const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) 
     <DetailWrapper
       title="Your performance"
       isLoading={summaryLoading && !summary}
-      titleComponent={
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger className="flex items-center gap-2 rounded-md border border-white/20 bg-black/40 px-3 py-1 text-sm text-white/80 hover:bg-black/60">
-              <Info className="h-4 w-4" />
-              Methodology
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs bg-black/90 text-white">
-              {PERFORMANCE_TOOLTIP.trim()}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      }
     >
       {summary ? (
         <div className="space-y-5">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
-            <SummaryStrip
-              pnlUsd={summary.your.pnlUsd}
-              pnlPct={summary.your.pnlPct}
-              depositsUsd={summary.your.depositsUsd}
-              withdrawalsUsd={summary.your.withdrawalsUsd}
-              currentValueUsd={summary.your.currentValueUsd}
-              context={summary.context}
-            />
-            {insufficientPeers ? (
+          <SummaryCard
+            pnlUsd={summary.your.pnlUsd}
+            pnlPct={summary.your.pnlPct}
+            depositsUsd={summary.your.depositsUsd}
+            utilization={summary.context.utilization}
+            feesRewards24hUsd={summary.context.feesRewards24hUsd}
+            percentile={summary.peer.percentilePnLPct ?? 0}
+          />
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            {insufficientPeers || !distribution ? (
               <NotEnoughPeers />
-            ) : distribution ? (
+            ) : (
               <DistributionCard
                 bins={distribution.bins}
                 yourValue={distribution.your.value}
                 percentile={distribution.your.percentile}
               />
-            ) : (
-              <LoadingPlaceholder />
             )}
           </div>
-          {insufficientPeers ? (
+
+          {insufficientPeers || !peersData ? (
             <NotEnoughPeers />
           ) : (
-            <LeaderboardCard
-              rows={leaderboard?.rows ?? []}
-              loading={leaderboardLoading && !leaderboard}
-              searchTerm={searchTerm}
-              onSearch={setSearchTerm}
-              cohortSize={cohortSize}
+            <PeerTable
+              rows={peersData.rows}
+              total={peersData.total}
+              cohortSize={peersData.cohortSize}
+              you={peersData.you}
+              page={page}
+              onPageChange={setPage}
+              isLoading={peersLoading}
             />
           )}
-          <ContextFooter
-            apr24h={summary.context.apr24h}
-            apr7d={summary.context.apr7d}
-            apy7d={summary.context.apy7d}
-          />
         </div>
       ) : (
         <div className="min-h-[220px]" />

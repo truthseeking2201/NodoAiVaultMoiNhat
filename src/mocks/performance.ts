@@ -1,7 +1,7 @@
 import {
   VaultPerformanceSummaryResponse,
   VaultPerformanceDistributionResponse,
-  VaultPerformanceLeaderboardResponse,
+  VaultPerformancePeersResponse,
   VaultPerformanceLeaderboardRow,
 } from "@/types/vault-performance";
 import {
@@ -10,8 +10,8 @@ import {
 } from "@/server/mock-data/performance-fixtures";
 
 const allowedSortFields = new Set<
-  VaultPerformanceLeaderboardResponse["sort"]
->(["pnlPct", "pnlUsd", "depositsUsd", "withdrawalsUsd", "currentValueUsd"]);
+  VaultPerformancePeersResponse["sort"]
+>(["pnlPct", "pnlUsd", "depositsUsd"]);
 
 const computePercentile = (
   value: number,
@@ -58,6 +58,16 @@ const createAlias = (vaultId: string, wallet: string) => {
   return `0x${prefix}...${suffix}`;
 };
 
+const calculatePercentile = (value: number, dataset: ReturnType<typeof getPerformanceDataset>) => {
+  if (!dataset.peers.length) {
+    return 0;
+  }
+  const belowOrEqual = dataset.peers.filter(
+    (entry) => entry.metrics.pnlPct <= value
+  ).length;
+  return belowOrEqual / dataset.peers.length;
+};
+
 const getPeerMetrics = (vaultId: string, wallet?: string) => {
   const dataset = getPerformanceDataset(vaultId);
   const selectedWallet = wallet ?? DEFAULT_PERFORMANCE_WALLET;
@@ -78,9 +88,18 @@ export const mockPerformanceSummary = (
 ): VaultPerformanceSummaryResponse => {
   const { dataset, peer } = getPeerMetrics(vaultId, wallet);
   return {
-    your: peer.metrics,
-    context: dataset.context,
-    cohortSize: dataset.cohortSize,
+    your: {
+      pnlUsd: peer.metrics.pnlUsd,
+      pnlPct: peer.metrics.pnlPct,
+      depositsUsd: peer.metrics.depositsUsd,
+    },
+    context: {
+      utilization: dataset.context.utilization,
+      feesRewards24hUsd: dataset.context.feesRewards24hUsd,
+    },
+    peer: {
+      percentilePnLPct: calculatePercentile(peer.metrics.pnlPct, dataset),
+    },
   };
 };
 
@@ -99,17 +118,19 @@ export const mockPerformanceDistribution = (
   };
 };
 
-export const mockPerformanceLeaderboard = (
+export const mockPerformancePeers = (
   vaultId: string,
   options?: {
     wallet?: string;
-    sort?: VaultPerformanceLeaderboardResponse["sort"];
+    sort?: VaultPerformancePeersResponse["sort"];
     limit?: number;
+    offset?: number;
   }
-): VaultPerformanceLeaderboardResponse => {
+): VaultPerformancePeersResponse => {
   const { dataset } = getPeerMetrics(vaultId, options?.wallet);
   const sort = options?.sort ?? "pnlPct";
-  const limit = options?.limit ?? 100;
+  const limit = options?.limit ?? 20;
+  const offset = options?.offset ?? 0;
 
   if (!allowedSortFields.has(sort)) {
     throw new Error(`Unsupported sort field "${sort}" in mock data`);
@@ -125,50 +146,33 @@ export const mockPerformanceLeaderboard = (
   const rows: VaultPerformanceLeaderboardRow[] = sorted
     .map((entry, index) => ({
       rank: index + 1,
-      alias:
-        createAlias(vaultId, entry.wallet),
+      alias: createAlias(vaultId, entry.wallet),
       pnlPct: entry.metrics.pnlPct,
       pnlUsd: entry.metrics.pnlUsd,
       depositsUsd: entry.metrics.depositsUsd,
-      withdrawalsUsd: entry.metrics.withdrawalsUsd,
-      currentValueUsd: entry.metrics.currentValueUsd,
       isYou:
         entry.wallet === (options?.wallet ?? DEFAULT_PERFORMANCE_WALLET),
-    }))
-    .slice(0, limit);
+    }));
 
   const yourRow = rows.find((row) => row.isYou);
-  if (!yourRow) {
-    const fallback = sorted.find(
-      (entry) =>
-        entry.wallet === (options?.wallet ?? DEFAULT_PERFORMANCE_WALLET)
-    );
-    if (fallback) {
-      const alias = createAlias(
-        vaultId,
-        options?.wallet ?? DEFAULT_PERFORMANCE_WALLET
-      );
-      rows.push({
-        rank:
-          sorted.findIndex(
-            (entry) =>
-              entry.wallet ===
-              (options?.wallet ?? DEFAULT_PERFORMANCE_WALLET)
-          ) + 1,
-        alias,
-        pnlPct: fallback.metrics.pnlPct,
-        pnlUsd: fallback.metrics.pnlUsd,
-        depositsUsd: fallback.metrics.depositsUsd,
-        withdrawalsUsd: fallback.metrics.withdrawalsUsd,
-        currentValueUsd: fallback.metrics.currentValueUsd,
-        isYou: true,
-      });
-    }
-  }
+
+  const paginatedRows = rows.slice(offset, offset + limit);
 
   return {
-    rows,
-    sort,
+    total: dataset.cohortSize,
     cohortSize: dataset.cohortSize,
+    rows: paginatedRows,
+    sort,
+    limit,
+    offset,
+    you: yourRow
+      ? {
+          rank: yourRow.rank,
+          alias: yourRow.alias,
+          pnlPct: yourRow.pnlPct,
+          pnlUsd: yourRow.pnlUsd,
+          depositsUsd: yourRow.depositsUsd,
+        }
+      : undefined,
   };
 };

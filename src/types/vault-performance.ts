@@ -1,21 +1,16 @@
-export type PerformanceMetricBreakdown = {
-  depositsUsd: number;
-  withdrawalsUsd: number;
-  currentValueUsd: number;
-  pnlUsd: number;
-  pnlPct: number;
-};
-
 export type VaultPerformanceSummaryResponse = {
-  your: PerformanceMetricBreakdown;
-  context: {
-    apr24h: number;
-    apr7d: number;
-    apy7d: number;
-    utilizationRate?: number;
-    feesRewards24h?: number;
+  your: {
+    pnlUsd: number;
+    pnlPct: number;
+    depositsUsd: number;
   };
-  cohortSize: number;
+  context: {
+    utilization: number;
+    feesRewards24hUsd: number;
+  };
+  peer: {
+    percentilePnLPct: number;
+  };
 };
 
 export type PerformanceDistributionBin = {
@@ -39,14 +34,22 @@ export type VaultPerformanceLeaderboardRow = {
   pnlPct: number;
   pnlUsd: number;
   depositsUsd: number;
-  withdrawalsUsd: number;
-  currentValueUsd: number;
   isYou?: boolean;
 };
 
-export type VaultPerformanceLeaderboardResponse = {
+export type VaultPerformancePeersResponse = {
+  total: number;
   rows: VaultPerformanceLeaderboardRow[];
-  sort: "pnlPct" | "pnlUsd" | "depositsUsd" | "withdrawalsUsd" | "currentValueUsd";
+  sort: "pnlPct" | "pnlUsd" | "depositsUsd";
+  limit: number;
+  offset: number;
+  you?: {
+    rank: number;
+    alias: string;
+    pnlPct: number;
+    pnlUsd: number;
+    depositsUsd: number;
+  };
   cohortSize: number;
 };
 
