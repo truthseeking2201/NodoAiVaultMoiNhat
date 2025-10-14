@@ -88,10 +88,10 @@ const HOLDING_TYPE = [
 const HIDDEN_VAULT_IDS = ["0xvault-btc-eth"];
 
 const DESKTOP_GRID_TEMPLATE =
-  "grid grid-cols-[minmax(320px,1fr)_160px_140px_180px_120px_140px] items-center";
-const DESKTOP_CELL_PADDING = "px-4 py-3";
-const HEADER_TEXT_CLASS = "text-sm font-semibold text-white/70";
-const NUMERIC_CELL_CLASS = "text-right tabular-nums text-white/90";
+  "grid grid-cols-[minmax(200px,1fr)_140px_120px_140px_200px_140px_100px] items-center";
+const DESKTOP_CELL_PADDING = "px-6 py-6";
+const HEADER_TEXT_CLASS = "text-base font-normal text-white/80";
+const NUMERIC_CELL_CLASS = "text-right tabular-nums text-white font-['IBM_Plex_Mono']";
 
 export default function VaultList() {
   const { isLoading, data = [] } = useGetDepositVaults();
@@ -250,29 +250,29 @@ export default function VaultList() {
           Live Vaults
         </div>
       )}
-      <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="w-full md:max-w-[460px]">
+      <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between bg-[#1c1c1c] px-6 py-4 rounded-t-2xl border-x border-t border-white/20">
+        <div className="w-full md:max-w-[232px]">
           <InputSearch
-            className="h-10 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-white placeholder:text-white/60 focus-visible:ring-0"
+            className="h-10 w-full rounded-xl border border-white/20 bg-black px-[13px] text-white placeholder:text-white/60 focus-visible:ring-0"
             placeholder="Search AI vaults..."
             onChange={(value) => setSearch(value)}
             debounceTime={300}
           />
         </div>
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-2">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-3">
           <GradientSelect
             options={OPTIONS_CHAINS}
             placeholder="All Chains"
             value={chains}
             onChange={setChains}
-            buttonClassName="h-10 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
+            buttonClassName="h-10 w-[140px] rounded-xl border border-white/20 bg-black text-gray-200 hover:bg-white/10"
           />
           <GradientSelect
             options={optionDexs}
             placeholder="All DEXs"
             value={dex}
             onChange={setDex}
-            buttonClassName="h-10 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
+            buttonClassName="h-10 w-[140px] rounded-xl border border-white/20 bg-black text-gray-200 hover:bg-white/10"
           />
         </div>
       </div>
@@ -318,32 +318,27 @@ export default function VaultList() {
           </div>
         }
       >
-        <div className="mt-4 rounded-2xl border border-white/10 bg-[#121317] overflow-hidden">
+        <div className="rounded-b-2xl border-x border-b border-white/20 bg-transparent overflow-hidden">
           <div className="overflow-x-auto">
             <div className="min-w-[1180px]">
               <div
                 className={cn(
                   DESKTOP_GRID_TEMPLATE,
                   DESKTOP_CELL_PADDING,
-                  "border-y border-white/10 bg-[#181818]"
+                  "border-b border-white/20 bg-[#1c1c1c]"
                 )}
               >
                 <div
                   className={cn(
-                    "flex items-center gap-2 pl-2 text-left",
+                    "flex items-center gap-2 text-left",
                     HEADER_TEXT_CLASS
                   )}
                 >
-                  <LabelWithTooltip
-                    hasIcon={false}
-                    label="AI Vaults"
-                    labelClassName="text-white/80 text-left text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
-                    tooltipContent="Trading pair and DEX name"
-                  />
+                  <span>AI Vaults</span>
                 </div>
                 <div
                   className={cn(
-                    "group flex cursor-pointer select-none items-center justify-end gap-2",
+                    "group flex cursor-pointer select-none items-center justify-start gap-2",
                     HEADER_TEXT_CLASS
                   )}
                   role="button"
@@ -356,24 +351,12 @@ export default function VaultList() {
                     }
                   }}
                 >
-                  <LabelWithTooltip
-                    hasIcon={false}
-                    label="TVL"
-                    labelClassName="text-white/80 text-right text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
-                    tooltipContent={
-                      <div className="text-xs">
-                        Total USD value of all vault assets. Updates live.{" "}
-                        <span className="text-[#FFBD24] text-xs font-bold">
-                          (USD equivalent)
-                        </span>
-                      </div>
-                    }
-                  />
+                  <span>TVL</span>
                   {renderSortIcon("total_value_usd")}
                 </div>
                 <div
                   className={cn(
-                    "group flex cursor-pointer select-none items-center justify-end gap-2",
+                    "group flex cursor-pointer select-none items-center justify-start gap-2",
                     HEADER_TEXT_CLASS
                   )}
                   role="button"
@@ -386,37 +369,15 @@ export default function VaultList() {
                     }
                   }}
                 >
-                  <LabelWithTooltip
-                    hasIcon={false}
-                    label="APY"
-                    labelClassName="text-white/80 text-right text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
-                    tooltipContent={
-                      <div className="text-xs">
-                        Annual percentage yield after compounding based on the
-                        latest performance snapshot.
-                      </div>
-                    }
-                  />
+                  <span>APY</span>
                   {renderSortIcon("vault_apy")}
                 </div>
-                <div className="flex items-center justify-end gap-3">
-                  <div className={cn(HEADER_TEXT_CLASS, "text-right")}>
-                    <LabelWithTooltip
-                      hasIcon={false}
-                      label="Your Holdings"
-                      labelClassName="text-white/80 text-right text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
-                      tooltipContent={
-                        <div className="text-xs">
-                          The total value of your position in the vault,
-                          including both principal and accrued rewards
-                          <span className="text-[#FFBD24] text-xs font-bold">
-                            {" "}
-                            (USD equivalent)
-                          </span>
-                          . Updates every 1 hour.
-                        </div>
-                      }
-                    />
+                <div className={cn("flex items-center justify-start", HEADER_TEXT_CLASS)}>
+                  <span>24h Rewards</span>
+                </div>
+                <div className="flex items-center justify-start gap-3">
+                  <div className={cn(HEADER_TEXT_CLASS)}>
+                    <span>Your Holding</span>
                   </div>
                   <div
                     onClick={(event) => {
@@ -438,13 +399,8 @@ export default function VaultList() {
                     </Tabs>
                   </div>
                 </div>
-                <div className={cn("flex justify-center", HEADER_TEXT_CLASS)}>
-                  <LabelWithTooltip
-                    hasIcon={false}
-                    label="Rewards"
-                    labelClassName="text-white/80 text-center text-[16px] underline underline-offset-8 decoration-dotted decoration-gray-600"
-                    tooltipContent="Total rewards earned in this vault are automatically compounded into your liquidity and updated every hour."
-                  />
+                <div className={cn("flex justify-start", HEADER_TEXT_CLASS)}>
+                  <span>Rewards</span>
                 </div>
                 <div className={cn("flex justify-end text-right", HEADER_TEXT_CLASS)}>
                   Action
@@ -529,35 +485,44 @@ export default function VaultList() {
                           className={cn(
                             DESKTOP_GRID_TEMPLATE,
                             DESKTOP_CELL_PADDING,
-                            index === 0 ? "" : "border-t border-white/10",
+                            "border-b border-white/30",
                             "cursor-pointer transition-colors hover:bg-white/5"
                           )}
                           onClick={() => handleRowClick(item)}
                         >
-                          <div className="min-w-0 pr-2">
+                          <div className="min-w-0">
                             <VaultItem item={item} />
                           </div>
-                          <div className={cn(NUMERIC_CELL_CLASS, "font-mono text-base")}>
+                          <div className={cn(NUMERIC_CELL_CLASS, "text-base")}>
                             {item.total_value_usd_show ?? "--"}
                           </div>
                           <div
                             className={cn(
                               NUMERIC_CELL_CLASS,
-                              apyDisplay !== "--" ? "text-emerald-400 font-medium" : "text-white/70"
+                              "text-base",
+                              apyDisplay !== "--" ? "text-[#64ebbc]" : "text-white/70"
                             )}
                           >
                             {apyDisplay}
                           </div>
-                          <div
-                            className={cn(
-                              NUMERIC_CELL_CLASS,
-                              "truncate text-sm text-white/90"
-                            )}
-                            title={typeof holdingsDisplay === "string" ? holdingsDisplay : undefined}
-                          >
-                            {holdingsDisplay}
+                          <div className={cn(NUMERIC_CELL_CLASS, "text-base")}>
+                            {item.rewards_24h_usd_show ?? "--"}
                           </div>
-                          <div className="flex justify-center">
+                          <div className="flex flex-col gap-1">
+                            {item.change_24h?.map((token, idx) => (
+                              <div key={idx} className="flex items-center gap-2">
+                                <img
+                                  src={`/coins/${token.token_symbol?.toLowerCase()}.png`}
+                                  alt={token.token_symbol}
+                                  className="h-4 w-4 rounded-full"
+                                />
+                                <span className={cn(NUMERIC_CELL_CLASS, "text-base text-left")}>
+                                  {Number(token.amount) ? formatNumber(Number(token.amount), 0, Number(token.amount) < 1 ? 6 : 2) : "-"}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex justify-start">
                             <VaultRewards item={item} />
                           </div>
                           <div className="flex justify-end">
@@ -566,7 +531,7 @@ export default function VaultList() {
                                 event.stopPropagation();
                                 handleRowClick(item);
                               }}
-                              className="inline-flex h-9 items-center justify-center rounded-full border border-white/10 bg-white/10 px-4 text-sm font-medium text-white/90 transition-colors hover:bg-white/15"
+                              className="inline-flex h-8 items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-black transition-colors hover:bg-white/90"
                             >
                               Deposit
                             </button>

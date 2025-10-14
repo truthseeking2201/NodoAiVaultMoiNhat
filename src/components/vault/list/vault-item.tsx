@@ -9,27 +9,36 @@ export const VaultItem = ({ item }: { item: VaultItemData }) => {
     item.exchange_code === "mmt" ? "Momentum" : item.exchange_name;
   const chipToneClass =
     item.exchange_code === "mmt"
-      ? "bg-white/5 border-white/10 text-white/70"
-      : "bg-white/5 border-white/10 text-white/60";
+      ? "bg-transparent border-transparent text-white"
+      : "bg-transparent border-transparent text-white/60";
 
   return (
-    <div className="flex min-w-0 items-center gap-3">
-      <div className="flex -space-x-3">
+    <div className="flex min-w-0 items-center gap-4">
+      <div className="flex -space-x-2">
         {item.token_pools?.map((token, index) => (
           <img
             key={`${item.vault_id}-${token.name}-${index}`}
             src={token.image}
             alt={token.name}
-            className="h-10 w-10 rounded-full border border-[#121317] bg-[#121317]"
+            className="h-8 w-8 rounded-full border-2 border-black bg-white"
           />
         ))}
       </div>
       <div className="min-w-0">
-        <div className="truncate text-[15px] font-medium leading-[22px] text-white/90">
+        <div className="truncate text-base font-bold leading-normal text-white font-['DM_Sans']">
           {item.vault_name}
         </div>
-        <div className="mt-1 flex items-center gap-2">
-          <span className={cn(CHIP_BASE, chipToneClass)}>{chipLabel}</span>
+        <div className="mt-1 flex items-center gap-1.5">
+          {item.exchange_code === "mmt" && (
+            <img 
+              src="/dexs/mmt.png" 
+              alt="Momentum" 
+              className="h-3.5 w-5" 
+            />
+          )}
+          <span className={cn(CHIP_BASE, chipToneClass, "text-[11.5px] font-bold tracking-tight")}>
+            {chipLabel}
+          </span>
         </div>
       </div>
     </div>
