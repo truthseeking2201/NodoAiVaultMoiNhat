@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
@@ -12,8 +11,9 @@ import { BasicVaultDetailsType } from "@/types/vault-config.types";
 import ConditionRenderer from "@/components/shared/condition-renderer";
 import useBreakpoint from "@/hooks/use-breakpoint";
 import { VaultInfo } from "@/pages/vault-detail";
-import { VaultSwitcher, VaultOption } from "@/components/vault/VaultSwitcher";
+import { VaultSwitcher } from "@/components/vault/VaultSwitcher";
 import { VAULTS } from "@/mocks/vault";
+import { VaultHeaderTools } from "@/components/vault/VaultHeaderTools";
 
 type VaultInfoProps = {
   vault: any;
@@ -157,16 +157,16 @@ const HeaderDetail = ({
         <div className="w-full flex items-center justify-between">
           <div>
             <PairIcons tokens={tokens} />
-            <div className="flex items-center gap-2 mt-3">
+            <div className="mt-3 flex items-center gap-2">
               <ShinyText
                 text={vault?.vault_name ?? "--"}
                 className="text-base font-bold"
                 textColor="text-white/50"
               />
-              <Button variant="outline" size="sm" onClick={onOpenSimulator} className="border-white/20 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white">
-                LP Simulator
-              </Button>
-              <VaultSwitcher currentVaultId={vaultId ?? ''} vaults={VAULTS} />
+              <div className="ml-auto flex items-center gap-2">
+                <VaultHeaderTools onOpenSimulator={onOpenSimulator} />
+                <VaultSwitcher currentVaultId={vaultId ?? ""} vaults={VAULTS} />
+              </div>
             </div>
             <div className="flex items-center gap-1 mt-1">
               <img
@@ -218,15 +218,15 @@ const HeaderDetail = ({
           <div>
             <div className="flex items-center gap-2">
               <ShinyText
-              text={vault?.vault_name ?? "--"}
-              className="text-2xl font-bold"
-              textColor="text-white/50"
-            />
-            <Button variant="outline" size="sm" onClick={onOpenSimulator} className="border-white/20 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white">
-              LP Simulator
-            </Button>
-            <VaultSwitcher currentVaultId={vaultId ?? ''} vaults={VAULTS} />
-          </div>
+                text={vault?.vault_name ?? "--"}
+                className="text-2xl font-bold"
+                textColor="text-white/50"
+              />
+              <div className="flex items-center gap-2 ml-auto">
+                <VaultHeaderTools onOpenSimulator={onOpenSimulator} />
+                <VaultSwitcher currentVaultId={vaultId ?? ""} vaults={VAULTS} />
+              </div>
+            </div>
             <div className="flex items-center gap-1">
               <div className="text-white/50"> Powered by </div>
               <img

@@ -90,7 +90,6 @@ const SummaryCard = ({
   utilization,
   feesRewards24hUsd,
   percentile,
-  className,
 }: {
   pnlUsd: number;
   pnlPct: number;
@@ -98,72 +97,59 @@ const SummaryCard = ({
   utilization: number;
   feesRewards24hUsd: number;
   percentile: number;
-  className?: string;
 }) => {
   const safeUtilization = Number.isFinite(utilization) ? utilization : 0;
   const safeFees = Number.isFinite(feesRewards24hUsd)
     ? feesRewards24hUsd
     : 0;
   const aheadPercent = Math.round(percentile * 100);
+  const pnlUsdDisplay = formatUsd(pnlUsd);
+  const depositsDisplay = formatUsd(depositsUsd);
+
   return (
-    <div
-      className={cn(
-        "rounded-2xl border border-white/10 bg-[#121317] p-4 md:p-6",
-        className
-      )}
-    >
-      <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+    <div className="rounded-2xl border border-white/10 bg-[#121317] p-5">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-white/80">Your PnL (USD)</p>
-          <p
+          <div className="text-white/90 font-semibold">Your PnL (USD)</div>
+          <div
             className={cn(
-              "mt-1 text-4xl font-semibold",
+              "mt-1 text-4xl font-bold",
               pnlUsd >= 0 ? "text-emerald-300" : "text-red-300"
             )}
           >
-            {formatUsd(pnlUsd)}
-          </p>
-          <p
-            className={cn(
-              "mt-2 text-sm font-semibold",
-              pnlPct >= 0 ? "text-emerald-300" : "text-red-300"
-            )}
-          >
-            Your PnL (%): {formatPercent(pnlPct)}
-          </p>
-          <p className="mt-3 text-sm text-white/70">
-            You’re ahead of {aheadPercent}% of peers
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/15 px-3 py-1.5 text-xs font-medium text-amber-300">
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="-mt-[2px]"
+            {pnlUsdDisplay}
+          </div>
+          <div className="mt-1 text-sm">
+            <span
+              className={cn(
+                "font-medium",
+                pnlPct >= 0 ? "text-emerald-300" : "text-red-300"
+              )}
             >
-              <path
-                d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"
-                fill="currentColor"
-              />
-            </svg>
-            24h Fees/Rewards {formatUsd(safeFees, 0)}
+              Your PnL (%): {formatPercent(pnlPct)}
+            </span>
+            <span className="ml-3 text-white/60">
+              • You’re ahead of {aheadPercent}% of peers
+            </span>
+          </div>
+
+          <div className="mt-4">
+            <div className="text-white/50 text-xs">Total deposits</div>
+            <div className="text-white text-lg font-semibold">
+              {depositsDisplay}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-end gap-2">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-medium">
+            ★ 24h Fees/Rewards $
+            {Math.round(Math.max(0, safeFees)).toLocaleString()}
           </span>
-          <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/70">
+          <span className="px-3 py-1 rounded-full border border-white/10 text-white/70 text-xs">
             Utilization {(safeUtilization * 100).toFixed(0)}%
           </span>
         </div>
-      </div>
-      <div className="mt-6">
-        <p className="text-xs uppercase tracking-wide text-white/60">
-          Total deposits
-        </p>
-        <p className="mt-1 text-xl font-semibold text-white">
-          {formatUsd(depositsUsd)}
-        </p>
       </div>
     </div>
   );
@@ -173,12 +159,10 @@ const DistributionCard = ({
   bins,
   yourValue,
   percentile,
-  className,
 }: {
   bins: { x0: number; x1: number; count: number }[];
   yourValue: number;
   percentile: number;
-  className?: string;
 }) => {
   const chartData = useMemo(
     () =>
@@ -198,12 +182,7 @@ const DistributionCard = ({
   const userMarker = (yourValue ?? 0) * 100;
 
   return (
-    <div
-      className={cn(
-        "flex h-full flex-col rounded-2xl border border-white/10 bg-[#121317] p-4 md:p-6",
-        className
-      )}
-    >
+    <div className="rounded-2xl border border-white/10 bg-[#121317] p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-base font-semibold text-white">
@@ -217,14 +196,11 @@ const DistributionCard = ({
           You’re ahead of {aheadPercent}% of peers
         </span>
       </div>
-      <div className="mt-6 flex-1">
-        <ChartContainer
-          config={histogramConfig}
-          className="h-[320px] w-full"
-        >
+      <div className="mt-3 w-full h-[360px]">
+        <ChartContainer config={histogramConfig} className="h-full w-full">
           <BarChart
             data={chartData}
-            margin={{ top: 12, right: 32, bottom: 20, left: 48 }}
+            margin={{ top: 12, right: 32, bottom: 28, left: 48 }}
           >
             <CartesianGrid
               strokeDasharray="3 3"
@@ -322,18 +298,49 @@ const PeerTable = ({
 }) => {
   const totalPages = Math.max(1, Math.ceil((total || 0) / PAGE_SIZE));
   const currentPage = Math.min(totalPages, Math.max(1, page + 1));
+  const youRank = you?.rank;
+  const [pendingScroll, setPendingScroll] = useState(false);
+
+  const handleFindMe = () => {
+    if (!youRank) {
+      return;
+    }
+    const targetPage = Math.max(0, Math.floor((youRank - 1) / PAGE_SIZE));
+    if (targetPage !== page) {
+      setPendingScroll(true);
+      onPageChange(targetPage);
+    } else {
+      const node = document.querySelector<HTMLElement>("[data-you-row='true']");
+      node?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
+  useEffect(() => {
+    if (!pendingScroll) {
+      return;
+    }
+    const node = document.querySelector<HTMLElement>("[data-you-row='true']");
+    if (node) {
+      node.scrollIntoView({ behavior: "smooth", block: "center" });
+      setPendingScroll(false);
+    }
+  }, [rows, pendingScroll]);
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-4 md:p-5">
+    <div className="rounded-2xl border border-white/10 bg-[#121317] p-5">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-base font-semibold text-white">
-            Peer Comparison (Anonymous)
-          </p>
+          <p className="text-base font-semibold text-white">Peer Comparison</p>
           <p className="text-sm text-white/60">
             Cohort size: {cohortSize}. Showing {PAGE_SIZE} per page.
           </p>
         </div>
+        <button
+          onClick={handleFindMe}
+          className="self-start rounded-md border border-white/10 px-3 py-1 text-xs text-white/80 hover:bg-white/10 transition-colors"
+        >
+          Find me
+        </button>
       </div>
       {you && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-emerald-400/40 bg-emerald-500/10 px-3 py-2 text-sm text-white">
@@ -362,15 +369,16 @@ const PeerTable = ({
               <TableHead className="text-right text-white/70">
                 Deposits (USD)
               </TableHead>
-              <TableHead className="text-right text-white/70">PnL %</TableHead>
-              <TableHead className="text-right text-white/70">PnL (USD)</TableHead>
+              <TableHead className="text-right text-white/70">
+                PnL (USD)
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               Array.from({ length: PAGE_SIZE }).map((_, index) => (
                 <TableRow key={index} className="animate-pulse border-white/5">
-                  {Array.from({ length: 5 }).map((__, cellIndex) => (
+                  {Array.from({ length: 4 }).map((__, cellIndex) => (
                     <TableCell key={cellIndex}>
                       <div className="h-4 w-full rounded bg-white/10" />
                     </TableCell>
@@ -379,7 +387,7 @@ const PeerTable = ({
               ))
             ) : rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-white/60">
+                <TableCell colSpan={4} className="py-8 text-center text-white/60">
                   No peer data available yet.
                 </TableCell>
               </TableRow>
@@ -387,6 +395,7 @@ const PeerTable = ({
               rows.map((row) => (
                 <TableRow
                   key={`${row.rank}-${row.alias}`}
+                  data-you-row={row.isYou ? "true" : undefined}
                   className={cn(
                     "border-white/5",
                     row.isYou && "border-l-4 border-l-emerald-400 bg-emerald-500/10"
@@ -405,14 +414,6 @@ const PeerTable = ({
                   </TableCell>
                   <TableCell className="font-mono text-right text-white/80">
                     {formatUsd(row.depositsUsd, 0)}
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "font-mono text-right",
-                      row.pnlPct >= 0 ? "text-emerald-300" : "text-red-300"
-                    )}
-                  >
-                    {formatPercent(row.pnlPct)}
                   </TableCell>
                   <TableCell
                     className={cn(
@@ -500,32 +501,24 @@ const UserPerformanceComparison = ({ vaultId }: UserPerformanceComparisonProps) 
     >
       {summary ? (
         <div className="space-y-6">
-          <section className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-stretch">
-            <div className="lg:col-span-7">
-              <SummaryCard
-                pnlUsd={summary.your.pnlUsd}
-                pnlPct={summary.your.pnlPct}
-                depositsUsd={summary.your.depositsUsd}
-                utilization={summary.context.utilization}
-                feesRewards24hUsd={summary.context.feesRewards24hUsd}
-                percentile={summary.peer.percentilePnLPct ?? 0}
-                className="h-full"
+          <section className="grid grid-cols-1 gap-6">
+            <SummaryCard
+              pnlUsd={summary.your.pnlUsd}
+              pnlPct={summary.your.pnlPct}
+              depositsUsd={summary.your.depositsUsd}
+              utilization={summary.context.utilization}
+              feesRewards24hUsd={summary.context.feesRewards24hUsd}
+              percentile={summary.peer.percentilePnLPct ?? 0}
+            />
+            {insufficientPeers || !distribution ? (
+              <NotEnoughPeers />
+            ) : (
+              <DistributionCard
+                bins={distribution.bins}
+                yourValue={distribution.your.value}
+                percentile={distribution.your.percentile}
               />
-            </div>
-            <div className="lg:col-span-5">
-              {insufficientPeers || !distribution ? (
-                <div className="h-full">
-                  <NotEnoughPeers />
-                </div>
-              ) : (
-                <DistributionCard
-                  bins={distribution.bins}
-                  yourValue={distribution.your.value}
-                  percentile={distribution.your.percentile}
-                  className="h-full"
-                />
-              )}
-            </div>
+            )}
           </section>
 
           {insufficientPeers || !peersData ? (

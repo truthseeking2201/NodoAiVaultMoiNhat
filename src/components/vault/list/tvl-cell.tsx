@@ -23,6 +23,7 @@ type TVLCellProps = {
   tokenIconUrl?: string;
   tokenSymbol?: string;
   className?: string;
+  align?: "start" | "end";
 };
 
 export function TVLCell({
@@ -31,6 +32,7 @@ export function TVLCell({
   tokenIconUrl,
   tokenSymbol,
   className,
+  align = "start",
 }: TVLCellProps) {
   const hasCap = typeof capUsd === "number" && capUsd > 0;
   const utilisation = hasCap ? Math.min(1, Math.max(0, tvlUsd / capUsd)) : null;
@@ -40,9 +42,25 @@ export function TVLCell({
   else if (utilisation !== null && utilisation >= 0.9) status = "almost";
 
   return (
-    <div className={clsx("flex items-start justify-between gap-3", className)}>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
+    <div
+      className={clsx(
+        "flex items-start gap-3",
+        align === "end" ? "justify-end text-right" : "justify-between",
+        className
+      )}
+    >
+      <div
+        className={clsx(
+          "min-w-0 flex-1",
+          align === "end" && "max-w-[220px]"
+        )}
+      >
+        <div
+          className={clsx(
+            "flex items-center gap-2",
+            align === "end" && "justify-end"
+          )}
+        >
           {tokenIconUrl ? (
             <img
               src={tokenIconUrl}
@@ -56,7 +74,12 @@ export function TVLCell({
               {tokenSymbol}
             </span>
           ) : null}
-          <div className="flex min-w-0 items-baseline gap-2">
+          <div
+            className={clsx(
+              "flex min-w-0 items-baseline gap-2",
+              align === "end" && "justify-end"
+            )}
+          >
             <span className="truncate text-sm font-medium text-white/90 tabular-nums md:text-[15px]">
               {formatUSDShort(tvlUsd)}
             </span>
@@ -68,7 +91,12 @@ export function TVLCell({
           </div>
         </div>
         {hasCap ? (
-          <div className="mt-1 h-2 rounded-full border border-white/10 bg-white/8">
+          <div
+            className={clsx(
+              "mt-1 h-2 rounded-full border border-white/10 bg-white/8",
+              align === "end" && "ml-auto"
+            )}
+          >
             <div
               className={clsx(
                 "h-full rounded-full transition-all",
@@ -107,4 +135,3 @@ export function TVLCell({
     </div>
   );
 }
-
