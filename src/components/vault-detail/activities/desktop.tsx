@@ -7,13 +7,15 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import {
   ExternalLink,
   Plus,
   ArrowUpRight,
   PauseCircle,
   Minus,
+  ChevronDown,
+  ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import SwapIcon from "@/assets/icons/swap.svg";
 import { cn } from "@/lib/utils";
@@ -110,7 +112,7 @@ const DesktopTable = ({
             Value
           </TableHead>
           <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[140px] !px-0 text-right">
-            Actions
+            Details
           </TableHead>
         </TableRow>
       </TableHeader>
@@ -136,7 +138,6 @@ const DesktopTable = ({
             const primaryToken = tx.tokens?.[0];
             const secondaryToken = tx.tokens?.[1];
             const explorerHash = tx.reasoning?.proof?.tx ?? tx.txhash;
-            const explorerLabel = tx.reasoning?.proof?.label ?? "View transaction";
 
             return (
               <Fragment key={`transaction-${index}`}>
@@ -228,10 +229,11 @@ const DesktopTable = ({
                   <TableCell className={cn("text-right pr-4 pt-3 border-0")}>
                     <div className="flex items-center justify-end gap-2">
                       {explorerHash && (
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="h-6 text-xs text-white/70"
+                        <button
+                          type="button"
+                          className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 text-white/70 hover:text-white"
+                          title={tx.reasoning?.proof?.label ?? "Explorer"}
+                          aria-label="Open in explorer"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSelectTransaction({
@@ -240,9 +242,8 @@ const DesktopTable = ({
                             });
                           }}
                         >
-                          <ExternalLink size={14} className="mr-1" />
-                          {explorerLabel}
-                        </Button>
+                          <ExternalLink size={14} />
+                        </button>
                       )}
                       {tx.reasoning && (
                         <button
@@ -250,9 +251,14 @@ const DesktopTable = ({
                             e.stopPropagation();
                             toggle(tx.id);
                           }}
-                          className="px-2 py-1 rounded-md border border-white/10 text-white/80 text-xs"
+                          className="inline-flex items-center gap-1 text-xs text-white/80 hover:text-white"
                         >
-                          {isExpanded ? "Hide reason" : "See why"}
+                          {isExpanded ? (
+                            <ChevronDown size={12} />
+                          ) : (
+                            <ChevronRight size={12} />
+                          )}
+                          See why
                         </button>
                       )}
                     </div>
@@ -261,14 +267,16 @@ const DesktopTable = ({
                 {isExpanded && tx.reasoning && (
                   <TableRow className="border-0 bg-[#0F1115]">
                     <TableCell colSpan={5} className="border-0 px-6 pb-5">
-                      <div className="rounded-xl bg-white/5 p-4">
-                        <p className="text-white font-medium">
+                      <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-5 pl-6">
+                        <div className="absolute left-0 top-0 h-full w-1 bg-indigo-400/60" />
+                        <div className="flex items-center gap-2 text-white font-medium">
+                          <Sparkles size={14} className="text-indigo-200" />
                           {tx.reasoning.what}
-                        </p>
-                        <p className="text-white/80 mt-2">
+                        </div>
+                        <p className="mt-2 text-white/80 leading-6">
                           {tx.reasoning.why}
                         </p>
-                        <p className="text-white/60 mt-3 text-sm">
+                        <p className="mt-3 text-sm text-white/60">
                           {tx.reasoning.next}
                         </p>
                       </div>

@@ -32,6 +32,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn, formatAmount } from "@/lib/utils";
+import { CustomPagination } from "@/components/ui/custom-pagination";
 
 type UserPerformanceComparisonProps = {
   vaultId?: string;
@@ -104,14 +105,12 @@ const SummaryCard = ({
   const aheadPercent = Math.round(percentile * 100);
   return (
     <div className="rounded-lg border border-white/10 bg-white/5 p-4 md:p-5">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-wide text-white/60">
-            Your performance
-          </p>
+          <p className="text-sm font-semibold text-white/80">Your PnL (USD)</p>
           <p
             className={cn(
-              "mt-2 text-4xl font-semibold",
+              "mt-1 text-4xl font-semibold",
               pnlUsd >= 0 ? "text-emerald-300" : "text-red-300"
             )}
           >
@@ -119,22 +118,35 @@ const SummaryCard = ({
           </p>
           <p
             className={cn(
-              "text-sm font-semibold",
+              "mt-2 text-sm font-semibold",
               pnlPct >= 0 ? "text-emerald-300" : "text-red-300"
             )}
           >
-            {formatPercent(pnlPct)}
+            Your PnL (%): {formatPercent(pnlPct)}
           </p>
           <p className="mt-3 text-sm text-white/70">
             You’re ahead of {aheadPercent}% of peers
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/80">
-            Utilization {(safeUtilization * 100).toFixed(0)}%
-          </span>
-          <span className="rounded-full border border-amber-500/30 bg-amber-500/15 px-3 py-1 text-xs text-amber-300">
+        <div className="flex flex-col items-end gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/15 px-3 py-1.5 text-xs font-medium text-amber-300">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="-mt-[2px]"
+            >
+              <path
+                d="M12 17.27L18.18 21L16.54 13.97L22 9.24L14.81 8.63L12 2L9.19 8.63L2 9.24L7.46 13.97L5.82 21L12 17.27Z"
+                fill="currentColor"
+              />
+            </svg>
             24h Fees/Rewards {formatUsd(safeFees, 0)}
+          </span>
+          <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/70">
+            Utilization {(safeUtilization * 100).toFixed(0)}%
           </span>
         </div>
       </div>
@@ -169,28 +181,37 @@ const DistributionCard = ({
       })),
     [bins]
   );
+  const normalizedPercentile = Number.isFinite(percentile) ? percentile : 0;
+  const aheadPercent =
+    normalizedPercentile > 1
+      ? Math.round(normalizedPercentile)
+      : Math.round(normalizedPercentile * 100);
+  const userMarker = (yourValue ?? 0) * 100;
 
   return (
-    <div className="flex h-full flex-col rounded-lg border border-white/10 bg-white/5 p-4 md:p-5">
-      <div className="flex items-center justify-between gap-2">
+    <div className="flex h-full flex-col rounded-lg border border-white/10 bg-white/5 p-4 md:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-base font-semibold text-white">
-            Peer PnL% distribution
+            Peers by PnL% (last 90 days)
           </p>
           <p className="text-sm text-white/60">
-            {bins.length} bins across cohort PnL%
+            30 buckets; each bar shows how many users fall into that return range.
           </p>
         </div>
-        <Badge variant="secondary" className="bg-white/10 text-white">
-          You’re ahead of {Math.round(percentile)}% of peers
-        </Badge>
+        <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/80">
+          You’re ahead of {aheadPercent}% of peers
+        </span>
       </div>
-      <div className="mt-4 flex-1">
+      <div className="mt-6 flex-1">
         <ChartContainer
           config={histogramConfig}
-          className="h-[220px] w-full"
+          className="h-[320px] w-full"
         >
-          <BarChart data={chartData}>
+          <BarChart
+            data={chartData}
+            margin={{ top: 12, right: 32, bottom: 20, left: 48 }}
+          >
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
@@ -245,14 +266,13 @@ const DistributionCard = ({
               radius={[4, 4, 0, 0]}
             />
             <ReferenceLine
-              x={yourValue * 100}
-              stroke="#f97316"
+              x={userMarker}
+              stroke="#60A5FA"
               strokeWidth={2}
-              strokeDasharray="6 2"
               label={{
                 value: "You",
-                position: "insideTop",
-                fill: "#f3f4f6",
+                position: "top",
+                fill: "#93c5fd",
                 fontSize: 12,
               }}
             />
@@ -287,6 +307,7 @@ const PeerTable = ({
   isLoading: boolean;
 }) => {
   const totalPages = Math.max(1, Math.ceil((total || 0) / PAGE_SIZE));
+  const currentPage = Math.min(totalPages, Math.max(1, page + 1));
 
   return (
     <div className="rounded-lg border border-white/10 bg-white/5 p-4 md:p-5">
@@ -393,24 +414,19 @@ const PeerTable = ({
           </TableBody>
         </Table>
       </div>
-      <div className="mt-4 flex items-center justify-end gap-2">
-        <button
-          className="rounded-md border border-white/10 px-3 py-1 text-xs text-white/80 disabled:opacity-40"
-          onClick={() => onPageChange(Math.max(0, page - 1))}
-          disabled={page <= 0 || isLoading}
-        >
-          Prev
-        </button>
-        <div className="text-xs text-white/60">
-          Page {total === 0 ? 0 : page + 1} / {totalPages}
-        </div>
-        <button
-          className="rounded-md border border-white/10 px-3 py-1 text-xs text-white/80 disabled:opacity-40"
-          onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}
-          disabled={page >= totalPages - 1 || isLoading}
-        >
-          Next
-        </button>
+      <div className="mt-4 flex justify-end">
+        <CustomPagination
+          itemsPerPage={PAGE_SIZE}
+          totalItems={total}
+          currentPage={currentPage}
+          handlePageChange={(nextPage) => {
+            if (!isLoading) {
+              onPageChange(Math.max(0, nextPage - 1));
+            }
+          }}
+          displayTotalPages={totalPages}
+          isShowingTotalPages={false}
+        />
       </div>
     </div>
   );

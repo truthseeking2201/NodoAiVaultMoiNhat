@@ -1,11 +1,13 @@
 import { Fragment, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   ExternalLink,
   Plus,
   ArrowUpRight,
   PauseCircle,
   Minus,
+  ChevronDown,
+  ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SwapIcon from "@/assets/icons/swap.svg";
@@ -76,7 +78,7 @@ const MobileActivityRow = ({
   const [open, setOpen] = useState(false);
   const badge = badgeForType(tx.type);
   const explorerHash = tx.reasoning?.proof?.tx ?? tx.txhash;
-  const explorerLabel = tx.reasoning?.proof?.label ?? "View transaction";
+  const explorerLabel = tx.reasoning?.proof?.label ?? "Explorer";
 
   return (
     <div className="space-y-2">
@@ -109,20 +111,20 @@ const MobileActivityRow = ({
         }
       />
       <RowTime timestamp={tx.time} />
-      <RowAction label="Transaction">
+      <RowAction label="Details">
         {explorerHash ? (
-          <Button
-            variant="link"
-            size="sm"
-            className="h-6 text-xs text-white/70"
+          <button
+            type="button"
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-white/10 text-white/70 hover:text-white"
+            aria-label="Open in explorer"
+            title={explorerLabel}
             onClick={(e) => {
               e.stopPropagation();
               onSelect({ ...tx, txhash: explorerHash });
             }}
           >
-            <ExternalLink size={14} className="mr-1" />
-            {explorerLabel}
-          </Button>
+            <ExternalLink size={14} />
+          </button>
         ) : (
           <span className="text-xs text-white/50">—</span>
         )}
@@ -134,17 +136,26 @@ const MobileActivityRow = ({
               e.stopPropagation();
               setOpen((prev) => !prev);
             }}
-            className="px-2 py-1 rounded-md border border-white/10 text-white/80 text-xs"
+            className="inline-flex items-center gap-1 text-xs text-white/80 hover:text-white"
           >
-            {open ? "Hide reason" : "See why"}
+            {open ? (
+              <ChevronDown size={12} />
+            ) : (
+              <ChevronRight size={12} />
+            )}
+            See why
           </button>
         </RowAction>
       )}
       {open && tx.reasoning && (
-        <div className="rounded-xl bg-white/5 p-3">
-          <p className="text-white font-medium">{tx.reasoning.what}</p>
-          <p className="text-white/80 mt-2">{tx.reasoning.why}</p>
-          <p className="text-white/60 mt-3 text-sm">{tx.reasoning.next}</p>
+        <div className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-4 pl-5">
+          <div className="absolute left-0 top-0 h-full w-1 bg-indigo-400/60" />
+          <p className="flex items-center gap-2 text-white font-medium">
+            <Sparkles size={14} className="text-indigo-200" />
+            {tx.reasoning.what}
+          </p>
+          <p className="mt-2 text-white/80 leading-6">{tx.reasoning.why}</p>
+          <p className="mt-3 text-sm text-white/60">{tx.reasoning.next}</p>
         </div>
       )}
       <hr className="bg-white/20 my-4" />
