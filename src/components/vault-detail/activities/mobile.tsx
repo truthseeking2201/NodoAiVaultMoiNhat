@@ -1,9 +1,14 @@
-import { Fragment } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Plus, ArrowUpRight } from "lucide-react";
-import SwapIcon from "@/assets/icons/swap.svg";
+import {
+  ExternalLink,
+  Plus,
+  ArrowUpRight,
+  PauseCircle,
+  Minus,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/utils/currency";
+import SwapIcon from "@/assets/icons/swap.svg";
 import TableMobile, {
   RowTokens,
   RowType,
@@ -12,18 +17,140 @@ import TableMobile, {
   RowAction,
   RowSkeleton,
 } from "@/components/ui/table-mobile";
-import {
-  ADD_LIQUIDITY_TYPES,
-  REMOVE_LIQUIDITY_TYPES,
-} from "@/components/vault-detail/constant";
 import { renamingType } from "@/components/vault-detail/activities/utils";
-import ConditionRenderer from "@/components/shared/condition-renderer";
-import ExternalIcon from "@/assets/icons/external-gradient.svg?react";
 import { VaultActivityTransaction } from "@/types/vault";
 import { useVaultMetricUnitStore } from "@/hooks";
-import { formatNumber } from "@/lib/number";
 import FormatUsdCollateralAmount from "../sections/format-usd-collateral-amount";
 import { formatCollateralUsdNumber } from "../helpers";
+
+const badgeForType = (type: string) => {
+  if (["ADD", "ADD_LIQUIDITY", "OPEN", "COMPOUND"].includes(type)) {
+    return {
+      className: "bg-[#22C55E]/20 text-[#22C55E]",
+      icon: <Plus size={16} className="inline-block mr-1" />,
+    };
+  }
+  if (["WITHDRAW", "REMOVE_LIQUIDITY", "CLOSE_REOPEN"].includes(type)) {
+    return {
+      className: "bg-[#F97316]/30 text-[#F97316]",
+      icon: <ArrowUpRight size={16} className="inline-block mr-1" />,
+    };
+  }
+  if (type === "PAUSE") {
+    return {
+      className: "bg-[#3B82F6]/20 text-[#3B82F6]",
+      icon: <PauseCircle size={16} className="inline-block mr-1" />,
+    };
+  }
+  if (type === "HOLD") {
+    return {
+      className: "bg-white/10 text-white/80",
+      icon: <Minus size={16} className="inline-block mr-1" />,
+    };
+  }
+  if (type === "SWAP") {
+    return {
+      className: "bg-[#3B82F6]/30 text-[#3B82F6]",
+      icon: (
+        <img src={SwapIcon} alt="Swap" className="inline-block mr-1" />
+      ),
+    };
+  }
+  return {
+    className: "bg-white/10 text-white/80",
+    icon: null,
+  };
+};
+
+const MobileActivityRow = ({
+  tx,
+  onSelect,
+  isUsd,
+  unit,
+}: {
+  tx: VaultActivityTransaction;
+  onSelect: (tx: VaultActivityTransaction) => void;
+  isUsd: boolean;
+  unit: string | undefined;
+}) => {
+  const [open, setOpen] = useState(false);
+  const badge = badgeForType(tx.type);
+  const explorerHash = tx.reasoning?.proof?.tx ?? tx.txhash;
+  const explorerLabel = tx.reasoning?.proof?.label ?? "View transaction";
+
+  return (
+    <div className="space-y-2">
+      <RowType
+        type={renamingType(tx.type)}
+        icon={badge.icon}
+        className={cn(
+          "inline-block text-xs font-medium px-2 py-1 rounded-md",
+          badge.className
+        )}
+      />
+      {tx.tokens && tx.tokens.length > 0 ? (
+        <RowTokens tokens={tx.tokens} />
+      ) : (
+        <RowValue label="Tokens" value="—" />
+      )}
+      <RowValue
+        label="Value"
+        value={
+          <FormatUsdCollateralAmount
+            collateralIcon={unit}
+            collateralClassName="w-4 h-4"
+            text={formatCollateralUsdNumber({
+              value_usd: tx.value_usd,
+              value_collateral: tx.value_collateral,
+              isUsd,
+              unit,
+            })}
+          />
+        }
+      />
+      <RowTime timestamp={tx.time} />
+      <RowAction label="Transaction">
+        {explorerHash ? (
+          <Button
+            variant="link"
+            size="sm"
+            className="h-6 text-xs text-white/70"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect({ ...tx, txhash: explorerHash });
+            }}
+          >
+            <ExternalLink size={14} className="mr-1" />
+            {explorerLabel}
+          </Button>
+        ) : (
+          <span className="text-xs text-white/50">—</span>
+        )}
+      </RowAction>
+      {tx.reasoning && (
+        <RowAction label="Reason">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen((prev) => !prev);
+            }}
+            className="px-2 py-1 rounded-md border border-white/10 text-white/80 text-xs"
+          >
+            {open ? "Hide reason" : "See why"}
+          </button>
+        </RowAction>
+      )}
+      {open && tx.reasoning && (
+        <div className="rounded-xl bg-white/5 p-3">
+          <p className="text-white font-medium">{tx.reasoning.what}</p>
+          <p className="text-white/80 mt-2">{tx.reasoning.why}</p>
+          <p className="text-white/60 mt-3 text-sm">{tx.reasoning.next}</p>
+        </div>
+      )}
+      <hr className="bg-white/20 my-4" />
+    </div>
+  );
+};
 
 const MobileList = ({
   paginatedTransactions,
@@ -34,92 +161,40 @@ const MobileList = ({
   paginatedTransactions: VaultActivityTransaction[];
   isFetched: boolean;
   vault_id: string;
-  handleSelectTransaction: (transaction: any) => void;
+  handleSelectTransaction: (transaction: VaultActivityTransaction) => void;
 }) => {
   const { isUsd, unit } = useVaultMetricUnitStore(vault_id);
+  const loadingRows = useMemo(() => Array.from({ length: 5 }), []);
 
-  return (
-    <ConditionRenderer
-      when={isFetched}
-      fallback={
-        <TableMobile>
-          {Array(5)
-            .fill(0)
-            .map((_, i) => (
-              <Fragment key={i}>
-                <RowSkeleton />
-                <RowSkeleton />
-                <RowSkeleton />
-                <RowSkeleton />
-                <RowSkeleton />
-                <hr className="bg-white/80 my-4" />
-              </Fragment>
-            ))}
-        </TableMobile>
-      }
-    >
+  if (!isFetched) {
+    return (
       <TableMobile>
-        {paginatedTransactions.map((tx, index) => (
-          <Fragment key={`transaction-${index}`}>
-            <RowType
-              type={renamingType(tx.type)}
-              icon={
-                ADD_LIQUIDITY_TYPES.includes(tx.type) ? (
-                  <Plus size={16} className="inline-block mr-1" />
-                ) : REMOVE_LIQUIDITY_TYPES.includes(tx.type) ? (
-                  <ArrowUpRight size={16} className="inline-block mr-1" />
-                ) : tx.type === "SWAP" ? (
-                  <img
-                    src={SwapIcon}
-                    alt="Swap"
-                    className="inline-block mr-1"
-                  />
-                ) : null
-              }
-              className={cn(
-                "inline-block text-xs font-medium px-2 py-1 rounded-md",
-                REMOVE_LIQUIDITY_TYPES.includes(tx.type) &&
-                  "bg-[#F97316]/30 text-[#F97316]",
-                ADD_LIQUIDITY_TYPES.includes(tx.type) &&
-                  "bg-[#22C55E]/20 text-[#22C55E]",
-                tx.type === "SWAP" && "bg-[#3B82F6]/30 text-[#3B82F6]"
-              )}
-            />
-            <RowTokens tokens={tx.tokens} />
-            <RowValue
-              label="Value"
-              value={
-                <FormatUsdCollateralAmount
-                  collateralIcon={unit}
-                  collateralClassName="w-4 h-4"
-                  text={formatCollateralUsdNumber({
-                    value_usd: tx.value_usd,
-                    value_collateral: tx.value_collateral,
-                    isUsd,
-                    unit,
-                  })}
-                />
-              }
-            />
-            <RowTime timestamp={tx.time} />
-            <RowAction label="Tx Hash">
-              <Button
-                variant="link"
-                size="sm"
-                className="h-6 w-6"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleSelectTransaction(tx);
-                }}
-              >
-                <ExternalIcon />
-              </Button>
-            </RowAction>
-            <hr className="bg-white/80 my-4" />
+        {loadingRows.map((_, i) => (
+          <Fragment key={i}>
+            <RowSkeleton />
+            <RowSkeleton />
+            <RowSkeleton />
+            <RowSkeleton />
+            <RowSkeleton />
+            <hr className="bg-white/20 my-4" />
           </Fragment>
         ))}
       </TableMobile>
-    </ConditionRenderer>
+    );
+  }
+
+  return (
+    <TableMobile>
+      {paginatedTransactions.map((tx, index) => (
+        <MobileActivityRow
+          key={`transaction-${index}`}
+          tx={tx}
+          onSelect={handleSelectTransaction}
+          isUsd={isUsd}
+          unit={unit}
+        />
+      ))}
+    </TableMobile>
   );
 };
 

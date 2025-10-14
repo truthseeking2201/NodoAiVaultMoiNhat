@@ -74,38 +74,49 @@ export const RowTokens = ({
   <div className="flex justify-between items-start">
     <div className="text-xs text-white/80">Tokens</div>
     <div className="flex flex-col gap-1">
-      <div className="flex items-center justify-start gap-1">
-        <img
-          src={`/coins/${tokens?.[0]?.token_symbol?.toLowerCase()}.png`}
-          alt={tokens?.[0]?.token_name}
-          className="w-[18px] h-[18px] inline-flex items-center"
-        />
-        <span className="font-mono text-xs text-white">
-          {formatCurrency(tokens?.[0]?.amount || 0, tokens?.[0]?.decimal, 0, 4)}{" "}
-          <span className="font-mono text-[10px] text-white/70">
-            {tokens?.[0]?.token_symbol}
-          </span>
-        </span>
-      </div>
-      {tokens?.[1] && tokens?.[1]?.token_name && (
-        <div className="flex items-center justify-start gap-1 mt-1">
-          <img
-            src={`/coins/${tokens?.[1]?.token_symbol?.toLowerCase()}.png`}
-            alt={tokens?.[1]?.token_name}
-            className="w-[18px] h-[18px] inline-flex items-center"
-          />
-          <span className="font-mono text-xs text-white">
-            {formatCurrency(
-              tokens?.[1]?.amount || 0,
-              tokens?.[1]?.decimal,
-              0,
-              4
-            )}{" "}
-            <span className="font-mono text-[10px] text-white/70">
-              {tokens?.[1]?.token_symbol}
+      {tokens?.[0] ? (
+        <>
+          <div className="flex items-center justify-start gap-1">
+            <img
+              src={`/coins/${tokens?.[0]?.token_symbol?.toLowerCase()}.png`}
+              alt={tokens?.[0]?.token_name}
+              className="w-[18px] h-[18px] inline-flex items-center"
+            />
+            <span className="font-mono text-xs text-white">
+              {formatCurrency(
+                tokens?.[0]?.amount || 0,
+                tokens?.[0]?.decimal,
+                0,
+                4
+              )}{" "}
+              <span className="font-mono text-[10px] text-white/70">
+                {tokens?.[0]?.token_symbol}
+              </span>
             </span>
-          </span>
-        </div>
+          </div>
+          {tokens?.[1] && tokens?.[1]?.token_name && (
+            <div className="flex items-center justify-start gap-1 mt-1">
+              <img
+                src={`/coins/${tokens?.[1]?.token_symbol?.toLowerCase()}.png`}
+                alt={tokens?.[1]?.token_name}
+                className="w-[18px] h-[18px] inline-flex items-center"
+              />
+              <span className="font-mono text-xs text-white">
+                {formatCurrency(
+                  tokens?.[1]?.amount || 0,
+                  tokens?.[1]?.decimal,
+                  0,
+                  4
+                )}{" "}
+                <span className="font-mono text-[10px] text-white/70">
+                  {tokens?.[1]?.token_symbol}
+                </span>
+              </span>
+            </div>
+          )}
+        </>
+      ) : (
+        <span className="font-mono text-xs text-white/60">—</span>
       )}
     </div>
   </div>

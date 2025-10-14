@@ -1,3 +1,4 @@
+import { Fragment, useMemo, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -7,24 +8,68 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Plus, ArrowUpRight } from "lucide-react";
+import {
+  ExternalLink,
+  Plus,
+  ArrowUpRight,
+  PauseCircle,
+  Minus,
+} from "lucide-react";
 import SwapIcon from "@/assets/icons/swap.svg";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/currency";
-import {
-  ITEMS_PER_PAGE,
-  ADD_LIQUIDITY_TYPES,
-  REMOVE_LIQUIDITY_TYPES,
-} from "@/components/vault-detail/constant";
+import { ITEMS_PER_PAGE } from "@/components/vault-detail/constant";
 import {
   formatTime,
   renamingType,
 } from "@/components/vault-detail/activities/utils";
 import FormatUsdCollateralAmount from "../sections/format-usd-collateral-amount";
 import { useVaultMetricUnitStore } from "@/hooks";
-import { formatNumber } from "@/lib/number";
 import { VaultActivityTransaction } from "@/types/vault";
 import { formatCollateralUsdNumber } from "../helpers";
+
+const badgeForType = (type: string) => {
+  if (["ADD", "ADD_LIQUIDITY", "OPEN", "COMPOUND"].includes(type)) {
+    return {
+      className: "bg-[#22C55E]/20 text-[#22C55E]",
+      icon: <Plus size={16} className="inline-block mr-1" />,
+    };
+  }
+  if (["WITHDRAW", "REMOVE_LIQUIDITY", "CLOSE_REOPEN"].includes(type)) {
+    return {
+      className: "bg-[#F97316]/30 text-[#F97316]",
+      icon: <ArrowUpRight size={16} className="inline-block mr-1" />,
+    };
+  }
+  if (type === "PAUSE") {
+    return {
+      className: "bg-[#3B82F6]/20 text-[#3B82F6]",
+      icon: <PauseCircle size={16} className="inline-block mr-1" />,
+    };
+  }
+  if (type === "HOLD") {
+    return {
+      className: "bg-white/10 text-white/80",
+      icon: <Minus size={16} className="inline-block mr-1" />,
+    };
+  }
+  if (type === "SWAP") {
+    return {
+      className: "bg-[#3B82F6]/30 text-[#3B82F6]",
+      icon: (
+        <img
+          src={SwapIcon}
+          alt="Swap"
+          className="inline-block mr-1"
+        />
+      ),
+    };
+  }
+  return {
+    className: "bg-white/10 text-white/80",
+    icon: null,
+  };
+};
 
 const DesktopTable = ({
   paginatedTransactions,
@@ -40,172 +85,203 @@ const DesktopTable = ({
   vault_id: string;
 }) => {
   const { isUsd, unit } = useVaultMetricUnitStore(vault_id);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  const toggle = (id: string) => {
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const loadingRows = useMemo(() => Array.from({ length: ITEMS_PER_PAGE }), []);
+
   return (
     <Table className="w-full border-0">
       <TableHeader className="border-b border-white/20">
         <TableRow className="border-b-0 border-white/10 hover:bg-transparent">
-          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[140px] !px-0">
+          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[160px] !px-0">
             Type
           </TableHead>
-          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[100px] px-2">
+          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[110px] px-2">
             Time
           </TableHead>
-
-          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[140px] px-2">
+          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[160px] px-2">
             Tokens
           </TableHead>
-          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[100px] px-2">
+          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[120px] px-2">
             Value
           </TableHead>
-          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[60px] !px-0 text-right">
-            Tx Hash
+          <TableHead className="text-xs uppercase tracking-wide text-white/70 w-[140px] !px-0 text-right">
+            Actions
           </TableHead>
         </TableRow>
       </TableHeader>
       <div className="mt-4" />
       <TableBody>
         {isFetching ? (
-          Array(ITEMS_PER_PAGE)
-            .fill(0)
-            .map((_, i) => (
-              <TableRow
-                key={i}
-                className={cn("hover:bg-white/5 w-full h-[70px] border-0")}
-              >
-                {Array.from({ length: 5 }).map((_, col) => (
-                  <TableCell
-                    key={col}
-                    className={cn("pr-0 pl-4 pt-3 border-0")}
-                  >
-                    <div className="h-5 bg-white/10 animate-pulse rounded mt-3"></div>
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-        ) : isFetched && paginatedTransactions.length > 0 ? (
-          paginatedTransactions.map((tx, index) => (
+          loadingRows.map((_, i) => (
             <TableRow
-              key={`transaction-${index}`}
-              className={
-                "hover:bg-[#FFFFFF14] cursor-pointer h-[70px] border-0"
-              }
-              onClick={() => handleSelectTransaction(tx)}
+              key={`skeleton-${i}`}
+              className={cn("hover:bg-white/5 w-full h-[70px] border-0")}
             >
-              <TableCell className={cn("pr-0 pl-4 pt-3 border-0")}>
-                <span
-                  className={cn(
-                    "inline-block text-xs font-medium px-2 py-1 rounded-md",
-                    REMOVE_LIQUIDITY_TYPES.includes(tx.type) &&
-                      "bg-[#F97316]/30 text-[#F97316]",
-                    ADD_LIQUIDITY_TYPES.includes(tx.type) &&
-                      "bg-[#22C55E]/20 text-[#22C55E]",
-                    tx.type === "SWAP" && "bg-[#3B82F6]/30 text-[#3B82F6]"
-                  )}
-                >
-                  {ADD_LIQUIDITY_TYPES.includes(tx.type) && (
-                    <Plus size={16} className="inline-block mr-1" />
-                  )}
-                  {REMOVE_LIQUIDITY_TYPES.includes(tx.type) && (
-                    <ArrowUpRight size={16} className="inline-block mr-1" />
-                  )}
-                  {tx.type === "SWAP" && (
-                    <img
-                      src={SwapIcon}
-                      alt="Swap"
-                      className="inline-block mr-1"
-                    />
-                  )}
-
-                  {renamingType(tx.type)}
-                </span>
-              </TableCell>
-              <TableCell
-                className={cn(
-                  "font-mono text-xs text-white/70 px-2 pt-2 border-0"
-                )}
-              >
-                {formatTime(tx.time)}
-              </TableCell>
-
-              <TableCell className={cn("p-2 border-0")}>
-                <div className="flex items-center justify-start gap-1">
-                  <img
-                    src={`/coins/${tx.tokens?.[0]?.token_symbol?.toLowerCase()}.png`}
-                    alt={tx.tokens?.[0]?.token_name}
-                    className="w-[18px] h-[18px] inline-flex items-center"
-                  />
-                  <span className="font-mono text-sm text-white">
-                    {formatCurrency(
-                      tx.tokens?.[0]?.amount || 0,
-                      tx.tokens?.[0]?.decimal,
-                      0,
-                      4
-                    )}{" "}
-                    <span className="font-mono text-xs text-white/70">
-                      {tx.tokens?.[0]?.token_symbol}
-                    </span>
-                  </span>
-                </div>
-                {tx.tokens?.[1] && tx.tokens?.[1]?.token_name && (
-                  <div className="flex items-center justify-start gap-1 mt-1">
-                    <img
-                      src={`/coins/${tx.tokens?.[1]?.token_symbol?.toLowerCase()}.png`}
-                      alt={tx.tokens?.[1]?.token_name}
-                      className="w-[18px] h-[18px] inline-flex items-center"
-                    />
-                    <span className="font-mono text-sm text-white">
-                      {formatCurrency(
-                        tx.tokens?.[1]?.amount || 0,
-                        tx.tokens?.[1]?.decimal,
-                        0,
-                        4
-                      )}{" "}
-                      <span className="font-mono text-xs text-white/70">
-                        {tx.tokens?.[1]?.token_symbol}
-                      </span>
-                    </span>
-                  </div>
-                )}
-              </TableCell>
-              <TableCell
-                className={cn(
-                  "font-mono font-medium text-white px-2 flex pt-3.5 border-0"
-                )}
-              >
-                <FormatUsdCollateralAmount
-                  collateralIcon={unit}
-                  collateralClassName="w-4 h-4"
-                  text={formatCollateralUsdNumber({
-                    value_usd: tx.value_usd,
-                    value_collateral: tx.value_collateral,
-                    isUsd,
-                    unit,
-                  })}
-                />
-              </TableCell>
-              <TableCell
-                className={cn(
-                  "text-right font-mono font-medium pr-4 pt-4 border-0"
-                )}
-              >
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="h-6 w-6"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectTransaction(tx);
-                  }}
-                >
-                  <ExternalLink size={16} className="text-white/60" />
-                </Button>
-              </TableCell>
+              {Array.from({ length: 5 }).map((__, col) => (
+                <TableCell key={col} className={cn("pr-0 pl-4 pt-3 border-0")}>
+                  <div className="h-5 bg-white/10 animate-pulse rounded mt-3" />
+                </TableCell>
+              ))}
             </TableRow>
           ))
+        ) : isFetched && paginatedTransactions.length > 0 ? (
+          paginatedTransactions.map((tx, index) => {
+            const isExpanded = !!expanded[tx.id];
+            const badge = badgeForType(tx.type);
+            const primaryToken = tx.tokens?.[0];
+            const secondaryToken = tx.tokens?.[1];
+            const explorerHash = tx.reasoning?.proof?.tx ?? tx.txhash;
+            const explorerLabel = tx.reasoning?.proof?.label ?? "View transaction";
+
+            return (
+              <Fragment key={`transaction-${index}`}>
+                <TableRow
+                  className={cn(
+                    "hover:bg-[#FFFFFF14] h-[70px] border-0",
+                    isExpanded && "bg-[#FFFFFF0D]"
+                  )}
+                >
+                  <TableCell className={cn("pr-0 pl-4 pt-3 border-0")}> 
+                    <span
+                      className={cn(
+                        "inline-flex items-center text-xs font-medium px-2 py-1 rounded-md",
+                        badge.className
+                      )}
+                    >
+                      {badge.icon}
+                      {renamingType(tx.type)}
+                    </span>
+                  </TableCell>
+                  <TableCell
+                    className={cn(
+                      "font-mono text-xs text-white/70 px-2 pt-2 border-0"
+                    )}
+                  >
+                    {formatTime(tx.time)}
+                  </TableCell>
+
+                  <TableCell className={cn("p-2 border-0")}> 
+                    {primaryToken ? (
+                      <div className="flex items-center justify-start gap-1">
+                        <img
+                          src={`/coins/${primaryToken.token_symbol?.toLowerCase()}.png`}
+                          alt={primaryToken.token_name}
+                          className="w-[18px] h-[18px] inline-flex items-center"
+                        />
+                        <span className="font-mono text-sm text-white">
+                          {formatCurrency(
+                            primaryToken.amount || 0,
+                            primaryToken.decimal ?? 0,
+                            0,
+                            4
+                          )}{" "}
+                          <span className="font-mono text-xs text-white/70">
+                            {primaryToken.token_symbol}
+                          </span>
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="font-mono text-xs text-white/60">—</span>
+                    )}
+                    {primaryToken && secondaryToken?.token_name && (
+                      <div className="flex items-center justify-start gap-1 mt-1">
+                        <img
+                          src={`/coins/${secondaryToken.token_symbol?.toLowerCase()}.png`}
+                          alt={secondaryToken.token_name}
+                          className="w-[18px] h-[18px] inline-flex items-center"
+                        />
+                        <span className="font-mono text-sm text-white">
+                          {formatCurrency(
+                            secondaryToken.amount || 0,
+                            secondaryToken.decimal ?? 0,
+                            0,
+                            4
+                          )}{" "}
+                          <span className="font-mono text-xs text-white/70">
+                            {secondaryToken.token_symbol}
+                          </span>
+                        </span>
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell
+                    className={cn(
+                      "font-mono font-medium text-white px-2 flex pt-3.5 border-0"
+                    )}
+                  >
+                    <FormatUsdCollateralAmount
+                      collateralIcon={unit}
+                      collateralClassName="w-4 h-4"
+                      text={formatCollateralUsdNumber({
+                        value_usd: tx.value_usd,
+                        value_collateral: tx.value_collateral,
+                        isUsd,
+                        unit,
+                      })}
+                    />
+                  </TableCell>
+                  <TableCell className={cn("text-right pr-4 pt-3 border-0")}>
+                    <div className="flex items-center justify-end gap-2">
+                      {explorerHash && (
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="h-6 text-xs text-white/70"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectTransaction({
+                              ...tx,
+                              txhash: explorerHash,
+                            });
+                          }}
+                        >
+                          <ExternalLink size={14} className="mr-1" />
+                          {explorerLabel}
+                        </Button>
+                      )}
+                      {tx.reasoning && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggle(tx.id);
+                          }}
+                          className="px-2 py-1 rounded-md border border-white/10 text-white/80 text-xs"
+                        >
+                          {isExpanded ? "Hide reason" : "See why"}
+                        </button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+                {isExpanded && tx.reasoning && (
+                  <TableRow className="border-0 bg-[#0F1115]">
+                    <TableCell colSpan={5} className="border-0 px-6 pb-5">
+                      <div className="rounded-xl bg-white/5 p-4">
+                        <p className="text-white font-medium">
+                          {tx.reasoning.what}
+                        </p>
+                        <p className="text-white/80 mt-2">
+                          {tx.reasoning.why}
+                        </p>
+                        <p className="text-white/60 mt-3 text-sm">
+                          {tx.reasoning.next}
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </Fragment>
+            );
+          })
         ) : (
           <TableRow className="border-0">
             <TableCell
-              colSpan={6}
+              colSpan={5}
               className="text-center py-8 text-white/60 border-0"
             >
               No transactions found

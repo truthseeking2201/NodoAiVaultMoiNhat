@@ -38,12 +38,17 @@ const URLS = {
     page: number,
     limit: number,
     action_type?: string,
-    vault_id?: string
+    vault_id?: string,
+    include_reasoning?: boolean
   ) => {
-    const baseUrl = `/data-management/external/position-requests?page=${page}&limit=${limit}&vault_id=${vault_id}`;
-    return action_type && action_type !== ""
-      ? `${baseUrl}&action_type=${action_type}`
-      : baseUrl;
+    let url = `/data-management/external/position-requests?page=${page}&limit=${limit}&vault_id=${vault_id}`;
+    if (action_type && action_type !== "") {
+      url += `&action_type=${action_type}`;
+    }
+    if (include_reasoning) {
+      url += `&include_reasoning=true`;
+    }
+    return url;
   },
   depositVaults: (accountAddress?: string) => {
     let url = `/data-management/external/vaults/list`;
@@ -129,24 +134,60 @@ export const getWithdrawalRequestsMultiTokens = (params: any) => {
 };
 
 export const getVaultsActivities = (payload: any) => {
-  const { page, limit, action_type, vault_id } = payload;
+  const { page, limit, action_type, vault_id, include_reasoning } = payload;
   if (isMockMode) {
+    const matchesActionType = (type: string) => {
+      if (!action_type || action_type === "") {
+        return true;
+      }
+      if (action_type === "SWAP") {
+        return type === "SWAP";
+      }
+      if (action_type === "ADD_LIQUIDITY") {
+        return [
+          "ADD",
+          "ADD_LIQUIDITY",
+          "OPEN",
+          "COMPOUND",
+        ].includes(type);
+      }
+      if (action_type === "REMOVE_LIQUIDITY") {
+        return [
+          "REMOVE_LIQUIDITY",
+          "WITHDRAW",
+          "CLOSE_REOPEN",
+          "PAUSE",
+        ].includes(type);
+      }
+      return true;
+    };
+
+    const filteredList = (mockVaultActivities.list ?? []).filter((item) =>
+      matchesActionType(item.type)
+    );
+
     return Promise.resolve({
       ...mockVaultActivities,
-      list: mockVaultActivities.list?.map((item) => ({
+      list: filteredList.map((item) => ({
         ...item,
         vault_address:
           vault_id && vault_id !== "default" ? vault_id : item.vault_address,
-        type:
-          action_type && action_type !== ""
-            ? (action_type as typeof item.type)
-            : item.type,
+        reasoning: include_reasoning ? item.reasoning : undefined,
       })),
+      total: filteredList.length,
       page,
       limit,
     });
   }
-  return http.get(URLS.positionRequests(page, limit, action_type, vault_id));
+  return http.get(
+    URLS.positionRequests(
+      page,
+      limit,
+      action_type,
+      vault_id,
+      include_reasoning
+    )
+  );
 };
 
 export const getDepositVaults = (accountAddress?: string) => {

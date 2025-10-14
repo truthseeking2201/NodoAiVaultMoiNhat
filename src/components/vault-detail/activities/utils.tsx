@@ -14,6 +14,18 @@ export const renamingType = (type: string) => {
       return "Add Profit";
     case "OPEN":
       return "Open Position";
+    case "HOLD":
+      return "Hold Position";
+    case "ADD":
+      return "Add to Position";
+    case "CLOSE_REOPEN":
+      return "Close & Reopen";
+    case "COMPOUND":
+      return "Compound";
+    case "WITHDRAW":
+      return "Withdraw";
+    case "PAUSE":
+      return "Pause";
     case "CLOSE":
       return "Close Position";
     default:

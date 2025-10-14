@@ -1,4 +1,4 @@
-import { TransactionHistory } from "@/types/vault";
+import { TransactionHistory, VaultActivityTransaction } from "@/types/vault";
 import {
   BasicVaultDetailsType,
   DepositVaultConfig,
@@ -16,6 +16,7 @@ import { NdlpTokenPrice } from "@/hooks/use-token-price";
 import { VaultDepositToken } from "@/types/payment-token.types";
 import { TokenUsdPrice } from "@/hooks/use-token-price";
 import type { MarketSurveyOverview } from "@/types/market-survey";
+import { toPlainCopy } from "@/server/ai/copy";
 
 const baseApr: VaultApr = {
   rolling_7day_apr: "18.25",
@@ -1022,33 +1023,198 @@ export const mockVaultAnalytics = (
   list: analyticsPoints,
 });
 
+const buildActivity = (activity: VaultActivityTransaction) => activity;
+
+const reasoningSamples = () => {
+  const now = Date.now();
+
+  const openTxHash = "0x8f0a12c3d4e5f6789012abcdeffedcbabca123450002c1";
+  const openReasoning = toPlainCopy({
+    type: "OPEN",
+    startedSmall: true,
+    hasTx: openTxHash,
+  });
+  if (openReasoning.proof) {
+    openReasoning.proof.label = "View transaction";
+  }
+
+  const addReasoning = toPlainCopy({
+    type: "ADD",
+  });
+
+  const compoundReasoning = toPlainCopy({
+    type: "COMPOUND",
+    benefitPct: 24,
+  });
+
+  const holdReasoning = toPlainCopy({
+    type: "HOLD",
+  });
+
+  const pauseReasoning = toPlainCopy({
+    type: "PAUSE",
+    fastMove: true,
+  });
+
+  const closeReopenTxHash = "0xb3d913ac7812ff9081c7d4ea8f1199a2c3de459191ff";
+  const closeReopenReasoning = toPlainCopy({
+    type: "CLOSE_REOPEN",
+    outOfWindowMinutes: 140,
+    hasTx: closeReopenTxHash,
+  });
+  if (closeReopenReasoning.proof) {
+    closeReopenReasoning.proof.label = "View transaction";
+  }
+
+  return [
+    buildActivity({
+      id: "activity-open",
+      type: "OPEN",
+      time: new Date(now - 15 * 60 * 1000).toISOString(),
+      vault_address: "0xvaultaddressusdc",
+      tokens: [
+        {
+          token_id: 1,
+          token_name: "USDC",
+          token_symbol: "USDC",
+          token_address:
+            "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+          decimal: 6,
+          amount: 5000,
+          price: "1",
+          url: "",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+      txhash: openTxHash,
+      status: "SUCCESS",
+      value_usd: "5000",
+      value_collateral: 5000,
+      reasoning: openReasoning,
+    }),
+    buildActivity({
+      id: "activity-add",
+      type: "ADD",
+      time: new Date(now - 35 * 60 * 1000).toISOString(),
+      vault_address: "0xvaultaddressusdc",
+      tokens: [
+        {
+          token_id: 2,
+          token_name: "USDC",
+          token_symbol: "USDC",
+          token_address:
+            "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+          decimal: 6,
+          amount: 2500,
+          price: "1",
+          url: "",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+      txhash: "",
+      status: "SUCCESS",
+      value_usd: "2500",
+      value_collateral: 2500,
+      reasoning: addReasoning,
+    }),
+    buildActivity({
+      id: "activity-compound",
+      type: "COMPOUND",
+      time: new Date(now - 2 * 60 * 60 * 1000).toISOString(),
+      vault_address: "0xvaultaddressusdc",
+      tokens: [
+        {
+          token_id: 3,
+          token_name: "USDC",
+          token_symbol: "USDC",
+          token_address:
+            "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+          decimal: 6,
+          amount: 420,
+          price: "1",
+          url: "",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+      txhash: "",
+      status: "SUCCESS",
+      value_usd: "420",
+      value_collateral: 420,
+      reasoning: compoundReasoning,
+    }),
+    buildActivity({
+      id: "activity-hold",
+      type: "HOLD",
+      time: new Date(now - 3 * 60 * 60 * 1000).toISOString(),
+      vault_address: "0xvaultaddressusdc",
+      tokens: [
+        {
+          token_id: 4,
+          token_name: "SUI",
+          token_symbol: "SUI",
+          token_address:
+            "0x0000000000000000000000000000000000000000000000000000000000000002::sui::SUI",
+          decimal: 9,
+          amount: 150,
+          price: "1.12",
+          url: "",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+      txhash: "",
+      status: "SUCCESS",
+      value_usd: "168",
+      value_collateral: 150,
+      reasoning: holdReasoning,
+    }),
+    buildActivity({
+      id: "activity-pause",
+      type: "PAUSE",
+      time: new Date(now - 4.5 * 60 * 60 * 1000).toISOString(),
+      vault_address: "0xvaultaddressusdc",
+      tokens: [],
+      txhash: "",
+      status: "SUCCESS",
+      value_usd: "0",
+      value_collateral: 0,
+      reasoning: pauseReasoning,
+    }),
+    buildActivity({
+      id: "activity-close-reopen",
+      type: "CLOSE_REOPEN",
+      time: new Date(now - 6 * 60 * 60 * 1000).toISOString(),
+      vault_address: "0xvaultaddressusdc",
+      tokens: [
+        {
+          token_id: 5,
+          token_name: "USDC",
+          token_symbol: "USDC",
+          token_address:
+            "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+          decimal: 6,
+          amount: 6200,
+          price: "1",
+          url: "",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ],
+      txhash: closeReopenTxHash,
+      status: "SUCCESS",
+      value_usd: "6200",
+      value_collateral: 6200,
+      reasoning: closeReopenReasoning,
+    }),
+  ];
+};
+
 export const mockVaultActivities: TransactionHistory = {
-  list: Array.from({ length: 12 }).map((_, index) => ({
-    id: `activity-${index}`,
-    type: index % 3 === 0 ? "ADD_LIQUIDITY" : index % 3 === 1 ? "SWAP" : "REMOVE_LIQUIDITY",
-    time: new Date(Date.now() - index * 3600 * 1000).toISOString(),
-    vault_address: index % 2 === 0 ? "0xvaultaddressusdc" : "0xvaultaddressbtc",
-    tokens: [
-      {
-        token_id: 1,
-        token_name: "USDC",
-        token_symbol: "USDC",
-        token_address:
-          "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
-        decimal: 6,
-        amount: 15000 + index * 100,
-        price: "1",
-        url: "",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ],
-    txhash: `0xmocktx${index}`,
-    status: index % 2 === 0 ? "SUCCESS" : "PENDING",
-    value_usd: (15000 + index * 100).toString(),
-    value_collateral: 15000 + index * 100,
-  })),
-  total: 12,
+  list: reasoningSamples(),
+  total: 6,
   page: 1,
   limit: 5,
 };

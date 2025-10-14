@@ -40,11 +40,13 @@ const VaultActivities = ({
       limit = 5,
       action_type = "",
       vault_id = "",
+      include_reasoning = false,
     }: {
       page?: number;
       limit?: number;
       action_type?: string;
       vault_id?: string;
+      include_reasoning?: boolean;
     }): Promise<TransactionHistory> => {
       try {
         const response = await getVaultsActivities({
@@ -52,6 +54,7 @@ const VaultActivities = ({
           limit,
           action_type,
           vault_id,
+          include_reasoning,
         });
 
         if (response) {
@@ -74,6 +77,7 @@ const VaultActivities = ({
         limit: ITEMS_PER_PAGE,
         action_type: handleFormatFilter(filter),
         vault_id,
+        include_reasoning: true,
       }),
     staleTime: 30000,
   });
@@ -119,6 +123,7 @@ const VaultActivities = ({
           page: 1,
           limit: ITEMS_PER_PAGE,
           action_type: handleFormatFilter(newFilter),
+          include_reasoning: true,
         });
       }
     },

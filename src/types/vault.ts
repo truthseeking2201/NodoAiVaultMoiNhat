@@ -51,6 +51,12 @@ export interface VaultActivityTransaction {
     | "SWAP"
     | "ADD_PROFIT_UPDATE_RATE"
     | "OPEN"
+    | "HOLD"
+    | "ADD"
+    | "CLOSE_REOPEN"
+    | "COMPOUND"
+    | "WITHDRAW"
+    | "PAUSE"
     | "CLOSE"
     | "ALL";
   time: string;
@@ -61,6 +67,15 @@ export interface VaultActivityTransaction {
   id: string;
   value_usd: string;
   value_collateral: number;
+  reasoning?: {
+    what: string;
+    why: string;
+    next: string;
+    proof?: {
+      tx?: string;
+      label?: string;
+    };
+  };
 }
 
 export interface Token {
@@ -84,6 +99,12 @@ export type Types = {
     | "SWAP"
     | "ADD_PROFIT_UPDATE_RATE"
     | "OPEN"
+    | "HOLD"
+    | "ADD"
+    | "CLOSE_REOPEN"
+    | "COMPOUND"
+    | "WITHDRAW"
+    | "PAUSE"
     | "CLOSE"
     | "ALL";
 };
